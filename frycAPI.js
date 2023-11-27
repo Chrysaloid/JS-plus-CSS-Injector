@@ -5924,7 +5924,10 @@ if (frycAPI.host == "template") {
 	]);
 }
 
-loguj("frycAPI loaded!");
-loguj(document.currentScript);
+if (document.currentScript.getAttribute("src").includes("chrome-extension")) {
+	loguj("frycAPI loaded! (from chrome-extension)");
+} else {
+	loguj("frycAPI loaded! (from cdn.jsdelivr.net)");
+}
 // const t1 = performance.now();
 // loguj(`Czas: ${frycAPI.zaokrl(t1 - t0,2)} ms`);
