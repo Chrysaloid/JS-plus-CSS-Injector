@@ -5924,7 +5924,7 @@ if (frycAPI.host == "template") {
 	]);
 }
 
-// mega test
+// mega test 2
 loguj("frycAPI loaded!"); // Test
 // const t1 = performance.now();
 // loguj(`Czas: ${frycAPI.zaokrl(t1 - t0,2)} ms`);
