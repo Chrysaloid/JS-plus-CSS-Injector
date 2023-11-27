@@ -4365,15 +4365,9 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 		[role="text"] * {
 		  color: #92ffaa;
 		}
-<<<<<<< HEAD
 		/* canvas.MyME0d.widget-scene-canvas, img.k48Abe, span.ita-kd-img.ita-kd-icon.ita-kd-icon-span.ita-icon-0,span.ita-kd-img.ita-kd-arrow.ita-kd-icon-span,img.bDDiq, .RGzwUc.pFz1xc,.pKQ3pb,.oGZkwf,.fd5il,.Eq03vc,.fd5il {
 			filter: invert(1) hue-rotate(180deg);
 		} */
-=======
-		canvas.MyME0d.widget-scene-canvas, img.k48Abe, span.ita-kd-img.ita-kd-icon.ita-kd-icon-span.ita-icon-0,span.ita-kd-img.ita-kd-arrow.ita-kd-icon-span,img.bDDiq, .RGzwUc.pFz1xc,.pKQ3pb,.oGZkwf,.fd5il,.Eq03vc,.fd5il {
-			filter: invert(1) hue-rotate(180deg);
-		}
->>>>>>> ce722d8 (Test)
 		.app-imagery-mode canvas.MyME0d.widget-scene-canvas {
 		  filter: none;
 		}
@@ -5824,7 +5818,6 @@ if (frycAPI.host == "docs.oracle.com") {
 		.contentContainer {
 			margin: 0 15px;
 		}
-<<<<<<< HEAD
 
 		li.blockList:has(>h4) {
 			border: 1px solid #ededed !important;
@@ -5833,8 +5826,6 @@ if (frycAPI.host == "docs.oracle.com") {
 			border-width: 0px !important;
 			border-bottom-width: 1px !important;
 		}
-=======
->>>>>>> ce722d8 (Test)
 	`);
 
 	frycAPI.onLoadSetter(() => {
