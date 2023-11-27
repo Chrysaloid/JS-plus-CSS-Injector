@@ -40,7 +40,11 @@ frycAPI.injectStyleNormal = function (style, docBody) {
 	}
 }
 frycAPI.minifyCSS = function (style) {
+<<<<<<< HEAD
 	return style.replaceAll(/^\s+|[\t\f ]+$/gm, "").replaceAll(/\/\*.*?\*\//gm, ""); // /(^\s+|$\s+)/gm
+=======
+	return style.replaceAll(/(^\s+|$\s+)/gm, "").replaceAll(/\/\*.*?\*\//gm, "");
+>>>>>>> ce722d8 (Test)
 	// return style
 }
 frycAPI.manualFunctionsCreator = function (nazwaFunkcji, funcArr) {
@@ -109,7 +113,11 @@ frycAPI.hostList = function (list) {
 frycAPI.hostListIncludes = function (list) {
 	return frycAPI.host.frycAPI_includesAny(list)
 }
+<<<<<<< HEAD
 frycAPI.clean = function (node) { // do usuwania komentarzy
+=======
+frycAPI.clean = function (node) {
+>>>>>>> ce722d8 (Test)
 	for (var n = 0; n < node.childNodes.length; n++) {
 		var child = node.childNodes[n];
 		if (child.nodeType === 8) {
@@ -4365,9 +4373,15 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 		[role="text"] * {
 		  color: #92ffaa;
 		}
+<<<<<<< HEAD
 		/* canvas.MyME0d.widget-scene-canvas, img.k48Abe, span.ita-kd-img.ita-kd-icon.ita-kd-icon-span.ita-icon-0,span.ita-kd-img.ita-kd-arrow.ita-kd-icon-span,img.bDDiq, .RGzwUc.pFz1xc,.pKQ3pb,.oGZkwf,.fd5il,.Eq03vc,.fd5il {
 			filter: invert(1) hue-rotate(180deg);
 		} */
+=======
+		canvas.MyME0d.widget-scene-canvas, img.k48Abe, span.ita-kd-img.ita-kd-icon.ita-kd-icon-span.ita-icon-0,span.ita-kd-img.ita-kd-arrow.ita-kd-icon-span,img.bDDiq, .RGzwUc.pFz1xc,.pKQ3pb,.oGZkwf,.fd5il,.Eq03vc,.fd5il {
+			filter: invert(1) hue-rotate(180deg);
+		}
+>>>>>>> ce722d8 (Test)
 		.app-imagery-mode canvas.MyME0d.widget-scene-canvas {
 		  filter: none;
 		}
@@ -5818,6 +5832,7 @@ if (frycAPI.host == "docs.oracle.com") {
 		.contentContainer {
 			margin: 0 15px;
 		}
+<<<<<<< HEAD
 
 		li.blockList:has(>h4) {
 			border: 1px solid #ededed !important;
@@ -5826,6 +5841,8 @@ if (frycAPI.host == "docs.oracle.com") {
 			border-width: 0px !important;
 			border-bottom-width: 1px !important;
 		}
+=======
+>>>>>>> ce722d8 (Test)
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -5924,6 +5941,10 @@ if (frycAPI.host == "template") {
 	]);
 }
 
+<<<<<<< HEAD
 loguj("frycAPI loaded!"); // Test
+=======
+loguj("frycAPI loaded!");
+>>>>>>> ce722d8 (Test)
 // const t1 = performance.now();
 // loguj(`Czas: ${frycAPI.zaokrl(t1 - t0,2)} ms`);
