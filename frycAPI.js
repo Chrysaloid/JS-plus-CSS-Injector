@@ -40,11 +40,7 @@ frycAPI.injectStyleNormal = function (style, docBody) {
 	}
 }
 frycAPI.minifyCSS = function (style) {
-<<<<<<< HEAD
 	return style.replaceAll(/^\s+|[\t\f ]+$/gm, "").replaceAll(/\/\*.*?\*\//gm, ""); // /(^\s+|$\s+)/gm
-=======
-	return style.replaceAll(/(^\s+|$\s+)/gm, "").replaceAll(/\/\*.*?\*\//gm, "");
->>>>>>> ce722d8 (Test)
 	// return style
 }
 frycAPI.manualFunctionsCreator = function (nazwaFunkcji, funcArr) {
@@ -113,11 +109,7 @@ frycAPI.hostList = function (list) {
 frycAPI.hostListIncludes = function (list) {
 	return frycAPI.host.frycAPI_includesAny(list)
 }
-<<<<<<< HEAD
 frycAPI.clean = function (node) { // do usuwania komentarzy
-=======
-frycAPI.clean = function (node) {
->>>>>>> ce722d8 (Test)
 	for (var n = 0; n < node.childNodes.length; n++) {
 		var child = node.childNodes[n];
 		if (child.nodeType === 8) {
@@ -5941,10 +5933,6 @@ if (frycAPI.host == "template") {
 	]);
 }
 
-<<<<<<< HEAD
 loguj("frycAPI loaded!"); // Test
-=======
-loguj("frycAPI loaded!");
->>>>>>> ce722d8 (Test)
 // const t1 = performance.now();
 // loguj(`Czas: ${frycAPI.zaokrl(t1 - t0,2)} ms`);
