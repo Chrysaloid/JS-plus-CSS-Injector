@@ -1,0 +1,85 @@
+{
+	"name": "JS + CSS Injector",
+	"version": "0.1.0",
+	"description": "Injects JS and CSS",
+	"manifest_version": 3,
+	"author": "Fryderyk Kukowski",
+	"minimum_chrome_version": "103.0",
+	"icons": {
+		"16": "icon 16.png",
+		"32": "icon 32.png",
+		"48": "icon 48.png",
+		"128": "icon 128.png"
+	},
+	"action": {
+		"default_popup": "Popup.html",
+		"default_title": "Injector"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"<all_urls>"
+			],
+			"js": [
+				"frycAPI-inject.js"
+			],
+			"run_at": "document_start"
+		},
+		{
+			"matches": [
+				"*://*.usos.pw.edu.pl/*"
+			],
+			"js": [
+				"inject.js"
+			],
+			"run_at": "document_start"
+		},
+		{
+			"matches": [
+				"*://*.usos.pw.edu.pl/*"
+			],
+			"css": [
+				"start.css"
+			],
+			"run_at": "document_start"
+		},
+		{
+			"matches": [
+				"*://*.usos.pw.edu.pl/*"
+			],
+			"js": [
+				"end.js"
+			],
+			"run_at": "document_end"
+		},
+		{
+			"matches": [
+				"*://*.usos.pw.edu.pl/*"
+			],
+			"js": [
+				"idle.js"
+			],
+			"run_at": "document_idle"
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"matches": [
+				"<all_urls>"
+			],
+			"resources": [
+				"injected.js",
+				"frycAPI.js",
+				"One Pixel Gif.gif"
+			]
+		}
+	],
+	"permissions": [
+		"nativeMessaging",
+		"scripting",
+		"activeTab"
+	],
+	"content_security_policy": {
+		"extension_pages": "default-src 'self' 'wasm-unsafe-eval'; script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+	}
+}

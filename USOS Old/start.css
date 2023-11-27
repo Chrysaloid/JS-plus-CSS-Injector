@@ -1,0 +1,14 @@
+@property --var1 {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #0000;
+}
+
+body {
+	display: none;
+	transition: --var1 .35s 0.1s ease-in-out;
+}
+
+body::-webkit-scrollbar-thumb {
+	background: var(--var1);
+}

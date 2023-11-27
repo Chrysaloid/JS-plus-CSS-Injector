@@ -1,0 +1,61 @@
+* {
+	font-family: IBM Plex Sans Condensed;
+	color: white;
+}
+body {
+	box-sizing: border-box;
+	width: fit-content;
+	height: fit-content;
+	margin: 0;
+	padding: 8px;
+	background-color: #3C4043;
+	user-select: none;
+}
+#buttCont {
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	white-space: nowrap;
+}
+#buttCont * {
+	text-align: left;
+}
+#buttCont div {
+	display: flex;
+	flex-direction: column;
+	padding: 3px;
+	/* border: 1px solid white; */
+	box-shadow: 0px 0px 7px black;
+	border-radius: 3px;
+	margin-bottom: 8px;
+	background-color: black;
+}
+#buttCont div:last-child {
+	margin-bottom: 0px;
+}
+#buttCont span {
+	padding: 0 3px 3px 3px;
+	font-size: 13px;
+}
+#buttCont button {
+	border: 1px solid #b9b9b9;
+	border-radius: 3px;
+	margin-bottom: 3px;
+	font-size: 16px;
+	background-color: #2f2f2f;
+	cursor: pointer;
+	filter: brightness(1);
+	transition: all 0.15s 0s ease-in-out;
+}
+#buttCont button:hover {
+	filter: brightness(1.3);
+}
+#buttCont button:active {
+	filter: brightness(1.6);
+}
+#buttCont button:last-child {
+	margin-bottom: 0px;
+}
+.Off {
+	color: rgba(255, 255, 255, 0.2);
+}
