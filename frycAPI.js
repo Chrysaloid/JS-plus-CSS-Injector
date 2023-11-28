@@ -1,4 +1,4 @@
-﻿// const t0 = performance.now();
+﻿// let t0 = performance.now();
 const frycAPI = {};
 function loguj(tekst) {
 	console.log(tekst);
@@ -180,6 +180,25 @@ frycAPI.onLoadSetter = function (callBack) {
 frycAPI.forEach = function (selector, callback) {
 	document.querySelectorAll(selector).forEach(callback);
 }
+frycAPI.sortElements = function (parent, elems, sortCallback) {
+	let elemArr = Array.from(elems);
+	elemArr.sort((a, b) => {
+		let a1 = sortCallback(a);
+		let b1 = sortCallback(b);
+		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
+	});
+	elemArr.forEach(function (daElem) {
+		parent.appendChild(daElem);
+	});
+}
+frycAPI.randDouble = function (min, max) {
+	return Math.random() * (max - min) + min;
+}
+frycAPI.randInt = function (min, max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 frycAPI.template = function () {
 }
 
@@ -213,6 +232,22 @@ String.prototype.frycAPI_includesAny = function (list) {
 			return true
 		}
 	}
+}
+Array.prototype.frycAPI_shuffle = function () {
+	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+	let currentIndex = this.length, randomIndex;
+	while (currentIndex > 0) {
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+		[this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]];
+	}
+	return this;
+}
+Element.prototype.frycAPI_shuffleChildren = function () {
+	Array.from(this.children).frycAPI_shuffle().forEach(function (daElem) {
+		this.appendChild(daElem);
+	});
+	return this
 }
 
 frycAPI.funcArr = [];
@@ -3131,7 +3166,7 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 						if (achievObj.hasOwnProperty(missionStr)) {
 							h3.innerHTML = `A1 Speedrun | ${achievObj[missionStr].camp} | ${achievObj[missionStr].num.toString().padStart(2, "0")} | <b>${missionStr}</b>`;
 						} else {
-							h3.innerHTML = `A1 Speedrun | ZZ | <b>${missionStr}</b>`;
+							h3.innerHTML = `A1 Speedrun | ~ | <b>${missionStr}</b>`;
 						}
 						// daElem.classList.add("Speedrun");
 					} else if (h3Str.includes("Campaign")) {
@@ -3162,16 +3197,7 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 			}
 			// END: Część specjalna
 
-			let achievArr = Array.prototype.slice.call(achiev, 0);
-			achievArr.sort((a, b) => {
-				let a1 = a.querySelector("h3").innerHTML;
-				let b1 = b.querySelector("h3").innerHTML;
-				return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
-			});
-			let main = document.querySelector("#mainContents");
-			achievArr.forEach(function (daElem, daI, daArr) {
-				main.appendChild(daElem);
-			});
+			frycAPI.sortElements(document.querySelector("#mainContents"), achiev, (a) => a.querySelector("h3").innerHTML);
 
 			let butt = document.createElement("button");
 			butt.setAttribute("onclick", "this.toggleAttribute('aktywny')")
@@ -5929,5 +5955,5 @@ if (document.currentScript.getAttribute("src").includes("chrome-extension")) {
 } else {
 	loguj("frycAPI loaded! (from cdn.jsdelivr.net)");
 }
-// const t1 = performance.now();
+// let t1 = performance.now();
 // loguj(`Czas: ${frycAPI.zaokrl(t1 - t0,2)} ms`);
