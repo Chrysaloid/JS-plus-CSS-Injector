@@ -13,19 +13,16 @@ frycAPI.injectStyle = function (style) {
 			// 	// document.head.insertAdjacentElement("afterbegin", document.createElement("meta").frycAPI_setAttribute("http-equiv","Content-Security-Policy").frycAPI_setAttribute("content","script-src 'self';"));
 			// 	// document.head.insertAdjacentElement("afterbegin", document.createElement("meta").frycAPI_setAttribute("http-equiv","Content-Security-Policy").frycAPI_setAttribute("content","require-trusted-types-for 'script';"));
 			// }
-			if (document.body) {
-				// const t0 = performance.now();
+			if (document.body !== null) {
 				//`<style id="frycAPI_myStyle">${style}</style>` insertAdjacentHTML
 				document.body.insertAdjacentElement("afterend",
 					document.createElement("style")
 						.frycAPI_setAttribute("id", "frycAPI_myStyle")
 						.frycAPI_setInnerHTML(frycAPI.minifyCSS(style))
 				); // .replaceAll(/\s+/gm," ")
-				// const t1 = performance.now();
-				// loguj(`Czas: ${t1 - t0} ms`);
 				docObs.disconnect();
 			}
-		}).observe(document.documentElement, { childList: true });
+		}).observe(document.documentElement, { childList: true, subtree: true });
 		// window.addEventListener("load", () => {
 		// 	document.body.appendChild(document.createElement("style")).innerHTML = style;
 		// });
@@ -67,7 +64,6 @@ frycAPI.ctrlC = function (text) {
 	let textArea = document.createElement("textarea");
 	textArea.value = text;
 
-	// Avoid scrolling to bottom
 	textArea.style.top = "0";
 	textArea.style.left = "0";
 	textArea.style.position = "fixed";
@@ -83,7 +79,6 @@ frycAPI.ctrlC = function (text) {
 	} catch (err) {
 		console.error("Fallback: Oops, unable to copy", err);
 	}
-
 	document.body.removeChild(textArea);
 }
 frycAPI.download = function (text, fileName) {
@@ -119,7 +114,7 @@ frycAPI.clean = function (node) { // do usuwania komentarzy
 			frycAPI.clean(child);
 		}
 	}
-}
+} // frycAPI.clean(document.body);
 frycAPI.makeTableSortable = function (tabElem, trSel, tdSel, thSel) { // Podal referencję do tablicy
 	if (arguments.length == 1) {
 		trSel = "tr";
@@ -199,8 +194,22 @@ frycAPI.randInt = function (min, max) {
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-frycAPI.template = function () {
+frycAPI.factorial = function (num) {
+	let rval = 1;
+	for (let i = 2; i <= num; i++) {
+		rval = rval * i;
+	}
+	return rval;
 }
+frycAPI.getWorkerURL = function (myWorkerFun) { // podaj funkcję do tej funkcji
+	let str = myWorkerFun.toString()
+	return URL.createObjectURL(new Blob([str.substring(
+		str.indexOf("{") + 1,
+		str.lastIndexOf("}")
+	)]));
+}
+frycAPI.template = function () {
+} // let myWorker = new Worker(frycAPI.getWorkerURL(myWorkerFun));
 
 Element.prototype.frycAPI_addClass = function (newClass) {
 	this.classList.add(newClass);
@@ -212,6 +221,10 @@ Element.prototype.frycAPI_removeClass = function (remClass) {
 }
 Element.prototype.frycAPI_setAttribute = function (attName, attValue) {
 	this.setAttribute(attName, attValue);
+	return this
+}
+Element.prototype.frycAPI_setObjKey = function (keyName, keyValue) {
+	this[keyName] = keyValue;
 	return this
 }
 Element.prototype.frycAPI_setInnerHTML = function (newInnerHTML) {
@@ -248,6 +261,26 @@ Element.prototype.frycAPI_shuffleChildren = function () {
 		this.appendChild(daElem);
 	});
 	return this
+}
+Element.prototype.frycAPI_sortChildren = function (sortCallback) {
+	let me = this;
+	let elemArr = Array.from(me.children);
+	elemArr.sort((a, b) => {
+		let a1 = sortCallback(a);
+		let b1 = sortCallback(b);
+		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
+	});
+	elemArr.forEach(function (daElem) {
+		me.appendChild(daElem);
+	});
+}
+Array.prototype.frycAPI_pushElem = function (elem) {
+	this.push(elem);
+	return elem;
+}
+Array.prototype.frycAPI_pushArr = function (elem) {
+	this.push(elem);
+	return this;
 }
 
 frycAPI.funcArr = [];
@@ -4123,19 +4156,18 @@ if (1 && frycAPI.host == "web.whatsapp.com") {
 			filter: invert(1) hue-rotate(191deg) saturate(2) brightness(0.88);
 		}
 		*/
-		[data-icon="tail-in"] svg {
+		/* [data-icon="tail-in"] svg {
 			filter: brightness(0) invert(13%) sepia(4%) saturate(3640%) hue-rotate(158deg) brightness(100%) contrast(91%);
 		}
 		[data-icon="tail-out"] svg {
 			filter: brightness(0) invert(22%) sepia(97%) saturate(617%) hue-rotate(127deg) brightness(99%) contrast(101%);
-		}
-		
+		} */
 		html[dir] [data-icon*="tail-"]+div {
 			box-shadow: none;
 		}
-		canvas[aria-label="Scan me!"] {
-		  filter: invert(1);
-		}
+		/* canvas[aria-label="Scan me!"] {
+			filter: invert(1);
+		} */
 	`);
 }
 if (1 && frycAPI.host == "worldedit.enginehub.org") {
@@ -4432,7 +4464,81 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 		/* .s6JM6d, .g, .KIy09e, div[jscontroller="SC7lYd"] {
 		  width: var(--szer) !important;
 		} */
+
+		body.google-3-column {
+			& div#rcnt {
+				width: 100%;
+				max-width: calc(100vw - 40px);
+			}
+			& div#center_col {
+				width: 100%;
+				margin: 0px;
+			}
+			& div#rso, .WtZO4e>div>div[decode-data-ved] {
+				display: flex;
+				flex-direction: row;
+				flex-wrap: wrap;
+				/* gap: 30px; */
+				padding-left: 10px;
+			}
+			& div:not(.hlcw0c):not(.ULSxyf):not(div#bres)>.MjjYud, .hlcw0c, .ULSxyf {
+				width: calc((100vw - 50px)/3) !important;
+				box-sizing: border-box;
+				padding: 10px;
+	
+				/* border: 1px solid #3c4043;
+				margin-left: -1px;
+				margin-bottom: -1px; */
+	
+				--shad-col: #3c4043ab;
+				box-shadow: inset 0px 0px 5px 0px var(--shad-col), 0px 0px 5px 0px var(--shad-col);
+			}
+			& div#bres>.ULSxyf {
+				border: 0px;
+			}
+			& div#bres {
+				width: 100%;
+				margin-left: 10px;
+			}
+			.e2BEnf.U7izfe.hWIMdd.EQdXxd.ckLDrd {
+				max-width: 600px;
+			}
+			.hlcw0c, .ULSxyf {
+				margin-bottom: 0px;
+			}
+			.tF2Cxc.asEBEc, .g.PmEWq, .MjjYud>.g {
+				margin-bottom: 0px;
+				width: 100% !important;
+			}
+			.WtZO4e .card-section.KDCVqf {
+				display: none;
+			}
+			.vt6azd {
+				margin: 0px;
+			}
+			.ClPXac.Pqkn2e {
+				width: 100%;
+			}
+			.eA0Zlc.WghbWd.FnEtTd.mkpRId.RLdvSe.ivg-i.PZPZlf.GMCzAd {
+				width: calc((100% - 20px) / 3) !important;
+				box-sizing: border-box;
+				margin: 0;
+				padding: 10px;
+			}
+			& div#appbar {
+				padding-left: 20px;
+			}
+			.gqLncc {
+				margin: 0px 10px 10px 20px;
+			}
+		}
 	`);
+
+	(frycAPI.beforeLoad = function () {
+		if (document.querySelector('#APjFqb') && document.getElementById("searchform")) {
+			// document.body.frycAPI_addClass("google-3-column");
+		}
+	})();
 
 	frycAPI.onLoadSetter(() => {
 		if (document.querySelector('#APjFqb') && document.getElementById("searchform")) {
@@ -4456,6 +4562,13 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 			}).observe(document.getElementById("searchform"), { attributeFilter: ["class"] });
 		}
 	});
+
+	frycAPI.nazwaBlokuIf = "Google";
+	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
+		{name: "Toggle 3 column view", callBack: () => {
+			document.body.classList.toggle("google-3-column");
+		}},
+	]);
 }
 if (1 && frycAPI.host == "www.headspin.io") {
 	frycAPI.injectStyle(/*css*/`
@@ -5930,6 +6043,23 @@ if (frycAPI.host == "npskills.github.io") {
 		frycAPI.forEach("legend", (daElem, daI, daArr) => {
 			daElem.previousElementSibling.insertAdjacentElement("afterbegin", daElem);
 		});
+	});
+}
+if (1 && frycAPI.host == "www.konesso.pl") {
+	frycAPI.injectStyleNormal(/*css*/`
+		div#preloader {
+			display: none;
+		}
+		svg#loader {
+			display: none;
+		}
+	`,document.documentElement);
+
+	(frycAPI.beforeLoad = function () {
+		// frycAPI.colorSchemeDark = 1;
+	})();
+
+	frycAPI.onLoadSetter(() => {
 	});
 }
 if (frycAPI.host == "template") {
