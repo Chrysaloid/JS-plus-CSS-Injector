@@ -211,6 +211,32 @@ frycAPI.getWorkerURL = function (myWorkerFun) { // podaj funkcję do tej funkcji
 frycAPI.template = function () {
 } // let myWorker = new Worker(frycAPI.getWorkerURL(myWorkerFun));
 
+frycAPI.funcArr = [];
+frycAPI.host = window.location.hostname;
+frycAPI.colorSchemeDark = false;
+frycAPI.czasNumer = 1;
+
+if (frycAPI.host != "docs.google.com") {
+	Array.prototype.frycAPI_shuffle = function () {
+		// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+		let currentIndex = this.length, randomIndex;
+		while (currentIndex > 0) {
+			randomIndex = Math.floor(Math.random() * currentIndex);
+			currentIndex--;
+			[this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]];
+		}
+		return this;
+	}
+	Array.prototype.frycAPI_pushElem = function (elem) {
+		this.push(elem);
+		return elem;
+	}
+	Array.prototype.frycAPI_pushArr = function (elem) {
+		this.push(elem);
+		return this;
+	}
+}
+
 Element.prototype.frycAPI_addClass = function (newClass) {
 	this.classList.add(newClass);
 	return this
@@ -246,16 +272,6 @@ String.prototype.frycAPI_includesAny = function (list) {
 		}
 	}
 }
-Array.prototype.frycAPI_shuffle = function () {
-	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-	let currentIndex = this.length, randomIndex;
-	while (currentIndex > 0) {
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex--;
-		[this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]];
-	}
-	return this;
-}
 Element.prototype.frycAPI_shuffleChildren = function () {
 	Array.from(this.children).frycAPI_shuffle().forEach(function (daElem) {
 		this.appendChild(daElem);
@@ -274,19 +290,6 @@ Element.prototype.frycAPI_sortChildren = function (sortCallback) {
 		me.appendChild(daElem);
 	});
 }
-Array.prototype.frycAPI_pushElem = function (elem) {
-	this.push(elem);
-	return elem;
-}
-Array.prototype.frycAPI_pushArr = function (elem) {
-	this.push(elem);
-	return this;
-}
-
-frycAPI.funcArr = [];
-frycAPI.host = window.location.hostname;
-frycAPI.colorSchemeDark = false;
-frycAPI.czasNumer = 1;
 
 if (frycAPI.host == "demo") {
 	frycAPI.nazwaBlokuIf = "Demo";
@@ -2260,7 +2263,7 @@ if (1 && frycAPI.host == "dinopoloclub.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "docs.google.com") {
+if (0 && frycAPI.host == "docs.google.com") {
 	frycAPI.injectStyle(/*css*/`
 		body #docs-editor-container .grid-table-container+canvas, .docos-icon-img:before { /* .goog-palette-cell .docs-preview-palette-item */
 		  filter: invert(1) !important;
@@ -4755,52 +4758,49 @@ if (1 && frycAPI.host == "www.messenger.com") {
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
 		*:not([class*="hljs"]):not(code) {
-		    font-family: IBM Plex Sans Condensed !important;
+			font-family: IBM Plex Sans Condensed !important;
 		}
 		._7kpk {
-		    background-color: rgba(0, 0, 0, 0.05);
-		    border: 1px solid rgba(195, 195, 195, 0.6);
+			background-color: rgba(0, 0, 0, 0.05);
+			border: 1px solid rgba(195, 195, 195, 0.6);
 		}
 		._1li- {
-		    border-top: 1px solid rgba(195, 195, 195, 0.6);
+			border-top: 1px solid rgba(195, 195, 195, 0.6);
 		}
 		._4_j5 {
-		    border-left-color: rgba(195, 195, 195, 0.6);
+			border-left-color: rgba(195, 195, 195, 0.6);
 		}
 		._673w {
-		    border-bottom: 1px solid rgba(195, 195, 195, 0.6);
+			border-bottom: 1px solid rgba(195, 195, 195, 0.6);
 		}
 		._7sli {
-		    border-left-color: rgba(195, 195, 195, 0.6);
+			border-left-color: rgba(195, 195, 195, 0.6);
 		}
 		._5iwm._6-_b ._58al {
-		    border: 1px solid rgba(195, 195, 195, 0.6);
+			border: 1px solid rgba(195, 195, 195, 0.6);
 		}
 		.uiScrollableAreaGripper {
-		    border-color: rgba(195, 195, 195, 1);
+			border-color: rgba(195, 195, 195, 1);
 		}
 		span._3oh-._58nk {
-		      /*text-shadow: 0 0 3px black;*/
+			/*text-shadow: 0 0 3px black;*/
 		}
 		._1t_q ._1t_r, ._1t_q ._4ldz, ._1t_q ._4ld-, ._1t_q ._4ld- img {
-		    max-height: 33px;
-		    max-width: 31px;
+			max-height: 33px;
+			max-width: 31px;
 		}
 		._41ud {
-		    margin-left: 39px;
+			margin-left: 39px;
 		}
-		
-		.gvxzyvdx.om3e55n1.b0ur3jhr >.q46jt4gp.aesu6q9g.r5g9zsuq.e4ay1f3w.om3e55n1.lq84ybu9.hf30pyar.rt34pxt2.jao8r537.pdqhzjwd.l4uc2m3f.t7p7dqev.qsbzbi57.subw1o1z.b0ur3jhr.gffp4m6x {
+		.gvxzyvdx.om3e55n1.b0ur3jhr > .q46jt4gp.aesu6q9g.r5g9zsuq.e4ay1f3w.om3e55n1.lq84ybu9.hf30pyar.rt34pxt2.jao8r537.pdqhzjwd.l4uc2m3f.t7p7dqev.qsbzbi57.subw1o1z.b0ur3jhr.gffp4m6x {
 			border: 1px solid #b1b1b1;
 		}
-		
 		.i85zmo3j.homhzfsx.alzwoclg.jl2a5g8c {
 			background: black;
 			padding-right: 5px;
 			border-radius: 5px;
 		}
-		
-		.gvxzyvdx.om3e55n1.b0ur3jhr>.q46jt4gp.aesu6q9g.r5g9zsuq.e4ay1f3w.om3e55n1.lq84ybu9.hf30pyar.rt34pxt2.jao8r537.dtqh1a21.l4uc2m3f.t7p7dqev.qsbzbi57.subw1o1z.b0ur3jhr.j8nb7h05 {
+		.gvxzyvdx.om3e55n1.b0ur3jhr > .q46jt4gp.aesu6q9g.r5g9zsuq.e4ay1f3w.om3e55n1.lq84ybu9.hf30pyar.rt34pxt2.jao8r537.dtqh1a21.l4uc2m3f.t7p7dqev.qsbzbi57.subw1o1z.b0ur3jhr.j8nb7h05 {
 			border: 1px solid #b1b1b1;
 		}
 	`);
