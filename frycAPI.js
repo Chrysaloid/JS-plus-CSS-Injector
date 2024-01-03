@@ -208,6 +208,9 @@ frycAPI.getWorkerURL = function (myWorkerFun) { // podaj funkcję do tej funkcji
 		str.lastIndexOf("}")
 	)]));
 }
+frycAPI.removeNlast = function (str, N) {
+	return str.slice(0,-N);
+} // str = frycAPI.removeNlast(str, N);
 frycAPI.template = function () {
 } // let myWorker = new Worker(frycAPI.getWorkerURL(myWorkerFun));
 
@@ -216,7 +219,7 @@ frycAPI.host = window.location.hostname;
 frycAPI.colorSchemeDark = false;
 frycAPI.czasNumer = 1;
 
-if (frycAPI.host != "docs.google.com") {
+if (1 && !frycAPI.hostList(["docs.google.com", "www.desmos.com"])) {
 	Array.prototype.frycAPI_shuffle = function () {
 		// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 		let currentIndex = this.length, randomIndex;
@@ -3058,6 +3061,18 @@ if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com"])) {
 		footer#footer {
 			filter: invert(1) hue-rotate(180deg);
 		}
+
+		html:has(meta[property="og:site_name"][content="Signal Processing Stack Exchange"]) {
+			.badge1 {
+				background-position-x: -100px;
+			}
+			.badge2 {
+				background-position-x: -80px;
+			}
+			.badge3 {
+				background-position-x: -60px;
+			}
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -4461,9 +4476,9 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 		.minidiv .logo {
 			padding: 0 32px;
 		}
-		.minidiv [jsname="RNNXgb"] {
+		/* .minidiv [jsname="RNNXgb"] {
 			margin-top: 13px !important;
-		}
+		} */
 		/* .s6JM6d, .g, .KIy09e, div[jscontroller="SC7lYd"] {
 		  width: var(--szer) !important;
 		} */
@@ -4535,6 +4550,9 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 				margin: 0px 10px 10px 20px;
 			}
 		}
+		.google-translate-buttons .nlNnsd {
+			display: none;
+		}
 	`);
 
 	(frycAPI.beforeLoad = function () {
@@ -4544,7 +4562,7 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 	})();
 
 	frycAPI.onLoadSetter(() => {
-		if (document.querySelector('#APjFqb') && document.getElementById("searchform")) {
+		if (document.querySelector("#APjFqb") && document.getElementById("searchform")) {
 			let hide01 = document.createElement("span");
 			hide01.setAttribute("class", "hide01");
 			document.body.appendChild(hide01);
@@ -4564,12 +4582,20 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 				// console.log("Observer");
 			}).observe(document.getElementById("searchform"), { attributeFilter: ["class"] });
 		}
+		frycAPI.forEach(".nlNnsd.ApHyTb .TaA4cd:nth-child(2) .i2L09e.WHcndc", (daElem, daI, daArr) => {
+			daElem.click();
+		});
+		window.scrollTo(0, 0);
+		document.body.classList.toggle("google-translate-buttons");
 	});
 
 	frycAPI.nazwaBlokuIf = "Google";
 	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
 		{name: "Toggle 3 column view", callBack: () => {
 			document.body.classList.toggle("google-3-column");
+		}},
+		{name: "Toggle translate buttons", callBack: () => {
+			document.body.classList.toggle("google-translate-buttons");
 		}},
 	]);
 }
