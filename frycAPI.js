@@ -207,12 +207,35 @@ frycAPI.getWorkerURL = function (myWorkerFun) { // podaj funkcję do tej funkcji
 		str.indexOf("{") + 1,
 		str.lastIndexOf("}")
 	)]));
-}
-frycAPI.removeNlast = function (str, N) {
-	return str.slice(0,-N);
-} // str = frycAPI.removeNlast(str, N);
-frycAPI.template = function () {
 } // let myWorker = new Worker(frycAPI.getWorkerURL(myWorkerFun));
+frycAPI.removeNlast = function (str, N) {
+	return str.slice(0, -N);
+} // str = frycAPI.removeNlast(str, N);
+frycAPI.czytelnyCzas = function (epoch_ms,lang,compact,space,ago) {
+	let czas = (Date.now() - epoch_ms) / 1000, czytCzas = "", timeNames, agoStr;
+	//@ts-format-ignore-region
+	       if (lang == "pol") {
+		agoStr = " temu";
+		if (compact == 2) { timeNames = ["s","m","g","d","M","l"];                          } else
+		if (compact == 1) { timeNames = ["sek","min","godz","dni","mies","lat"];            } else
+		if (compact == 0) { timeNames = ["sekund","minut","godzin","dni","miesięcy","lat"]; }
+	} else if (lang == "ang") {
+		agoStr = " ago";
+		if (compact == 2) { timeNames = ["s","m","h","d","M","y"];                             } else
+		if (compact == 1) { timeNames = ["sec","min","hour","days","mon","year"];              } else
+		if (compact == 0) { timeNames = ["seconds","minutes","hours","days","months","years"]; }
+	}
+	if (czas <       60) { czytCzas =                                                    (czas           ).toFixed(0 ) + (space ? " " : "") + timeNames[0]; } else
+	if (czas <     3600) { czytCzas = (czas <       600 ? (czas /       60).toFixed(1) : (czas /       60).toFixed(0)) + (space ? " " : "") + timeNames[1]; } else
+	if (czas <    86400) { czytCzas = (czas <     36000 ? (czas /     3600).toFixed(1) : (czas /     3600).toFixed(0)) + (space ? " " : "") + timeNames[2]; } else
+	if (czas <  2592000) { czytCzas = (czas <    864000 ? (czas /    86400).toFixed(1) : (czas /    86400).toFixed(0)) + (space ? " " : "") + timeNames[3]; } else
+	if (czas < 31536000) { czytCzas = (czas <  25920000 ? (czas /  2592000).toFixed(1) : (czas /  2592000).toFixed(0)) + (space ? " " : "") + timeNames[4]; } else
+	                     { czytCzas = (czas < 315360000 ? (czas / 31536000).toFixed(1) : (czas / 31536000).toFixed(0)) + (space ? " " : "") + timeNames[5]; }
+	//@ts-format-ignore-endregion
+	return czytCzas + (ago ? agoStr : "");
+} // frycAPI.czytelnyCzas(1704888173885,"pol",2,1,1);
+frycAPI.template = function () {
+}
 
 frycAPI.funcArr = [];
 frycAPI.host = window.location.hostname;
@@ -1237,7 +1260,7 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 	let transTime = 0.25; // 0.25
 	if (frycAPI.host == "boards.4chan.org") {
 		// bodyBack = "#ffe"; rediSpan = "#00e";
-		bodyBack = "#ffe"; rediSpan = "#00e";
+		bodyBack = "#0F131E"; rediSpan = "#A3A3C6";
 	} else {
 		// bodyBack = "#eef2ff"; rediSpan = "#34345c";
 		bodyBack = "#21252E"; rediSpan = "#D9D5FF";
@@ -1335,11 +1358,14 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 		div.boardBanner {
 			color: #FF7D5D;
 		}
+		body.yotsuba_b_new div.post.reply {
+			
+		}
 		.postMessage :is(.quoteLink, .quotelink), 
 		.deadlink,
-		a:hover,
+		body[class][class][class][class] a:hover,
 		.yotsuba_b_new .backlink a:hover {
-			color: #FF4D25!important;
+			color: #FF4D25 !important;
 		}
 		div.post div.postInfo span.subject {
 			color: #FFEFFF;
@@ -3128,10 +3154,32 @@ if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com"])) {
 }
 if (1 && frycAPI.host == "steamcommunity.com") {
 	let funkcje = "Steam Achievments Alphabetical Sort";
+	// Dawid Sadowski: 232603985
+	// Michał Roman: 96866084
+	// Michał Łasica: 71831352
+	let friendsProfileID = "96866084";
+	
 	frycAPI.injectStyle(/*css*/`
 		.qrcode_Bit_2Yuvr.qrcode_Active_274P1 {
 			filter: invert(1) contrast(1);
 		}
+
+		/** specific-friend */
+		.specific-friend {
+			.blotter_daily_rollup_line {
+				display: none;
+				&:has(.blotter_rollup_avatar [data-miniprofile="${friendsProfileID}"]) {
+					display: block;
+				}
+			}
+			.blotter_block:not(:has(.blotter_daily_rollup)) {
+				display: none;
+				&:has(.blotter_author_block [data-miniprofile="${friendsProfileID}"]) {
+					display: block;
+				}
+			}
+		}
+		
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -3257,7 +3305,15 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 			butt.setAttribute("aktywny", "");
 			document.getElementById("mainContents").insertAdjacentElement("afterbegin", butt);
 		}
+		// document.body.classList.toggle("specific-friend");
 	});
+
+	frycAPI.nazwaBlokuIf = "Friend Activity";
+	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
+		{name: "Show only specific friend's activity", callBack: () => {
+			document.body.classList.toggle("specific-friend");
+		}},
+	]);
 }
 if (1 && frycAPI.host == "support.discord.com") {
 	frycAPI.injectStyle(/*css*/`
@@ -4591,12 +4647,16 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 
 	frycAPI.nazwaBlokuIf = "Google";
 	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
-		{name: "Toggle 3 column view", callBack: () => {
-			document.body.classList.toggle("google-3-column");
-		}},
-		{name: "Toggle translate buttons", callBack: () => {
-			document.body.classList.toggle("google-translate-buttons");
-		}},
+		{
+			name: "Toggle 3 column view", callBack: () => {
+				document.body.classList.toggle("google-3-column");
+			}
+		},
+		{
+			name: "Toggle translate buttons", callBack: () => {
+				document.body.classList.toggle("google-translate-buttons");
+			}
+		},
 	]);
 }
 if (1 && frycAPI.host == "www.headspin.io") {
@@ -6079,7 +6139,7 @@ if (1 && frycAPI.host == "www.konesso.pl") {
 		svg#loader {
 			display: none;
 		}
-	`,document.documentElement);
+	`, document.documentElement);
 
 	(frycAPI.beforeLoad = function () {
 		// frycAPI.colorSchemeDark = 1;
@@ -6087,6 +6147,40 @@ if (1 && frycAPI.host == "www.konesso.pl") {
 
 	frycAPI.onLoadSetter(() => {
 	});
+}
+if (frycAPI.host == "barotraumagame.com") {
+	frycAPI.injectStyle(/*css*/`
+		div[style="text-align:center;inline-size:min-content;white-space: nowrap;"] {
+			display: flex;
+			gap: 5px;
+			& div:not([style="display:flex;align-items:center;text-align:left;white-space:nowrap"]) {
+				display: flex;
+				align-items: center;
+			}
+			& div[style="display:flex;align-items:center;text-align:left;white-space:nowrap"]
+			/* ,div[style="float:left;line-height:100%"] */
+			{
+				display: flex;
+				align-items: flex-start !important;
+				flex-direction: column;
+			}
+		}
+
+	`);
+}
+if (frycAPI.host == "www.tribologia.eu") {
+	frycAPI.injectStyle(/*css*/`
+		html {
+			filter: invert(1) hue-rotate(180deg);
+		}
+	`);
+}
+if (frycAPI.host == "steamspy.com") {
+	frycAPI.injectStyle(/*css*/`
+		img[alt="logo"] {
+			filter: invert(1) hue-rotate(180deg);
+		}
+	`);
 }
 if (frycAPI.host == "template") {
 	frycAPI.injectStyle(/*css*/`
