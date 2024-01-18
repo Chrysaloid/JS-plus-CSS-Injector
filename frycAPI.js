@@ -208,9 +208,9 @@ frycAPI.getWorkerURL = function (myWorkerFun) { // podaj funkcję do tej funkcji
 		str.lastIndexOf("}")
 	)]));
 } // let myWorker = new Worker(frycAPI.getWorkerURL(myWorkerFun));
-frycAPI.removeNlast = function (str, N) {
+frycAPI.removeLast = function (str, N) {
 	return str.slice(0, -N);
-} // str = frycAPI.removeNlast(str, N);
+} // str = frycAPI.removeLast(str, N);
 frycAPI.czytelnyCzas = function (epoch_ms,lang,compact,space,ago) {
 	let czas = (Date.now() - epoch_ms) / 1000, czytCzas = "", timeNames, agoStr;
 	//@ts-format-ignore-region
@@ -242,69 +242,60 @@ frycAPI.host = window.location.hostname;
 frycAPI.colorSchemeDark = false;
 frycAPI.czasNumer = 1;
 
-if (1 && !frycAPI.hostList(["docs.google.com", "www.desmos.com"])) {
-	Array.prototype.frycAPI_shuffle = function () {
-		// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-		let currentIndex = this.length, randomIndex;
-		while (currentIndex > 0) {
-			randomIndex = Math.floor(Math.random() * currentIndex);
-			currentIndex--;
-			[this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]];
-		}
-		return this;
+Object.defineProperty(Array.prototype, "frycAPI_shuffle", { value: function () {
+	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+	let currentIndex = this.length, randomIndex;
+	while (currentIndex > 0) {
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+		[this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]];
 	}
-	Array.prototype.frycAPI_pushElem = function (elem) {
-		this.push(elem);
-		return elem;
-	}
-	Array.prototype.frycAPI_pushArr = function (elem) {
-		this.push(elem);
-		return this;
-	}
-}
-
-Element.prototype.frycAPI_addClass = function (newClass) {
+	return this;
+}});
+Object.defineProperty(Array.prototype, "frycAPI_pushElem", { value: function (elem) {
+	this.push(elem);
+	return elem;
+}});
+Object.defineProperty(Array.prototype, "frycAPI_pushArr", { value: function (elem) {
+	this.push(elem);
+	return this;
+}});
+Object.defineProperty(Element.prototype, "frycAPI_addClass", { value: function (newClass) {
 	this.classList.add(newClass);
 	return this
-}
-Element.prototype.frycAPI_removeClass = function (remClass) {
+}});
+Object.defineProperty(Element.prototype, "frycAPI_removeClass", { value: function (remClass) {
 	this.classList.remove(remClass);
 	return this
-}
-Element.prototype.frycAPI_setAttribute = function (attName, attValue) {
+}});
+Object.defineProperty(Element.prototype, "frycAPI_setAttribute", { value: function (attName, attValue) {
 	this.setAttribute(attName, attValue);
 	return this
-}
-Element.prototype.frycAPI_setObjKey = function (keyName, keyValue) {
+}});
+Object.defineProperty(Element.prototype, "frycAPI_setObjKey", { value: function (keyName, keyValue) {
 	this[keyName] = keyValue;
 	return this
-}
-Element.prototype.frycAPI_setInnerHTML = function (newInnerHTML) {
+}});
+Object.defineProperty(Element.prototype, "frycAPI_setInnerHTML", { value: function (newInnerHTML) {
 	this.innerHTML = newInnerHTML;
 	return this
-}
-Element.prototype.frycAPI_insertAdjacentElement = function (where, elem) {
+}});
+Object.defineProperty(Element.prototype, "frycAPI_insertAdjacentElement", { value: function (where, elem) {
 	this.insertAdjacentElement(where, elem);
 	return this
-}
-Element.prototype.frycAPI_addEventListener = function (listenerType, callBack) {
+}});
+Object.defineProperty(Element.prototype, "frycAPI_addEventListener", { value: function (listenerType, callBack) {
 	this.addEventListener(listenerType, callBack);
 	return this
-}
-String.prototype.frycAPI_includesAny = function (list) {
-	for (const daElem of list) {
-		if (this.includes(daElem)) {
-			return true
-		}
-	}
-}
-Element.prototype.frycAPI_shuffleChildren = function () {
-	Array.from(this.children).frycAPI_shuffle().forEach(function (daElem) {
-		this.appendChild(daElem);
+}});
+Object.defineProperty(Element.prototype, "frycAPI_shuffleChildren", { value: function () {
+	let me = this;
+	Array.from(me.children).frycAPI_shuffle().forEach(function (daElem) {
+		me.appendChild(daElem);
 	});
-	return this
-}
-Element.prototype.frycAPI_sortChildren = function (sortCallback) {
+	return me;
+}});
+Object.defineProperty(Element.prototype, "frycAPI_sortChildren", { value: function (sortCallback) {
 	let me = this;
 	let elemArr = Array.from(me.children);
 	elemArr.sort((a, b) => {
@@ -315,7 +306,14 @@ Element.prototype.frycAPI_sortChildren = function (sortCallback) {
 	elemArr.forEach(function (daElem) {
 		me.appendChild(daElem);
 	});
-}
+}});
+Object.defineProperty(String.prototype, "frycAPI_includesAny", { value: function (list) {
+	for (const daElem of list) {
+		if (this.includes(daElem)) {
+			return true
+		}
+	}
+}});
 
 if (frycAPI.host == "demo") {
 	frycAPI.nazwaBlokuIf = "Demo";
@@ -3019,16 +3017,19 @@ if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com"])) {
 		.user-info .-flair {
 			display: flex !important;
 		}
+		.user-info>.d-flex {
+			flex-direction: column;
+		}
 		
 		/* Zaznacz każdy */
 		.-flair > span[title] { 
-		  /* display: flex !important; */
+			/* display: flex !important; */
 			border: 1px solid #797979;
 			margin: 0px;
-		  border-radius: 4px 0px 0px 4px;
-		  padding: 0px 2px;
-		  /* align-items: center; */
-		  text-wrap: nowrap;
+			border-radius: 4px 0px 0px 4px;
+			padding: 0px 2px;
+			/* align-items: center; */
+			text-wrap: nowrap;
 		}
 		
 		/* Zaznacz nie pierwszy */
@@ -3047,7 +3048,7 @@ if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com"])) {
 		
 		.myDiv {
 			display: flex;
-		  width: fit-content;
+			width: fit-content;
 		}
 		.post-signature {
 			width: fit-content;
@@ -6179,6 +6180,13 @@ if (frycAPI.host == "steamspy.com") {
 	frycAPI.injectStyle(/*css*/`
 		img[alt="logo"] {
 			filter: invert(1) hue-rotate(180deg);
+		}
+	`);
+}
+if (frycAPI.host == "www.fakrosno.pl") {
+	frycAPI.injectStyle(/*css*/`
+		.spring-middle>img {
+			filter: invert(1) hue-rotate(180deg) !important;
 		}
 	`);
 }
