@@ -6190,6 +6190,64 @@ if (frycAPI.host == "www.fakrosno.pl") {
 		}
 	`);
 }
+if (frycAPI.host == "www.arrowheadgamestudios.com") {
+	frycAPI.injectStyle(/*css*/`
+		.comment-author cite.fn {
+			font-size: 22px;
+			padding: 0;
+			color: rgb(79, 197, 147);
+		}
+		span.says {
+			display: none;
+		}
+		ol.commentlist {
+			margin-block-start: 40px;
+			list-style-type: decimal;
+		}
+		.comment-body {
+			display: flex;
+			flex-wrap: wrap;
+			.comment-meta, .comment-author {
+				width: fit-content;
+			}
+			.comment-meta {
+				/* margin-right: auto; */
+				& a {
+					color: rgb(149, 142, 131);
+				}
+				&::before {
+					content: ", ";
+				}
+			}
+			>p {
+				flex-basis: 100%;
+				color: hsl(0deg 0% 90%);
+			}
+			.reply {
+				font-size: 14px;
+				/* border: 1px solid rgb(149, 142, 131); */
+				border-radius: 5px;
+				& a {
+					color: rgb(149, 142, 131);
+					padding: 1px 3px;
+					&::after {
+						content: " ↳"; /* ↳⤷↴ */
+						font-size: 19px;
+					}
+				}
+			}
+		}
+		ul.children {
+			margin-left: 20px;
+		}
+		li.comment {
+			border-left: 1px solid;
+			padding-left: 5px;
+			margin: 6px 0px;
+			border-radius: 5px;
+		}
+`);
+}
 if (frycAPI.host == "template") {
 	frycAPI.injectStyle(/*css*/`
 	`);
