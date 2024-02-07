@@ -169,8 +169,15 @@ frycAPI.zmierzCzas = function (callBack) {
 	frycAPI.czasNumer++;
 }
 frycAPI.onLoadSetter = function (callBack) {
-	frycAPI.onLoad = callBack;
-	window.addEventListener("load", frycAPI.onLoad);
+	if (!frycAPI.hasOwnProperty("onLoadArr")) {
+		frycAPI.onLoadArr = [];
+		window.addEventListener("load", () => {
+			frycAPI.onLoadArr.forEach((daElem) => {
+				daElem();
+			});
+		});
+	}
+	frycAPI.onLoadArr.push(callBack);
 }
 frycAPI.forEach = function (selector, callback) {
 	document.querySelectorAll(selector).forEach(callback);
@@ -211,10 +218,10 @@ frycAPI.getWorkerURL = function (myWorkerFun) { // podaj funkcję do tej funkcji
 frycAPI.removeLast = function (str, N) {
 	return str.slice(0, -N);
 } // str = frycAPI.removeLast(str, N);
-frycAPI.czytelnyCzas = function (epoch_ms,lang,compact,space,ago) {
-	let czas = (Date.now() - epoch_ms) / 1000, czytCzas = "", timeNames, agoStr;
+frycAPI.czytelnyCzas = function (epoch_ms, czyDiff, lang, compact, space, ago, leftAlign) {
+	let czas = (czyDiff ? (Date.now() - epoch_ms) : epoch_ms) / 1000, czytCzas = "", timeNames, agoStr;
 	//@ts-format-ignore-region
-	       if (lang == "pol") {
+	if (lang == "pol") {
 		agoStr = " temu";
 		if (compact == 2) { timeNames = ["s","m","g","d","M","l"];                          } else
 		if (compact == 1) { timeNames = ["sek","min","godz","dni","mies","lat"];            } else
@@ -225,6 +232,10 @@ frycAPI.czytelnyCzas = function (epoch_ms,lang,compact,space,ago) {
 		if (compact == 1) { timeNames = ["sec","min","hour","days","mon","year"];              } else
 		if (compact == 0) { timeNames = ["seconds","minutes","hours","days","months","years"]; }
 	}
+	if (leftAlign) {
+		let maxLen = timeNames.reduce((max, elem) => max < elem.length ? elem.length : max, 0);
+		timeNames = timeNames.map((elem) => elem.padEnd(maxLen));
+	}
 	if (czas <       60) { czytCzas =                                                    (czas           ).toFixed(0 ) + (space ? " " : "") + timeNames[0]; } else
 	if (czas <     3600) { czytCzas = (czas <       600 ? (czas /       60).toFixed(1) : (czas /       60).toFixed(0)) + (space ? " " : "") + timeNames[1]; } else
 	if (czas <    86400) { czytCzas = (czas <     36000 ? (czas /     3600).toFixed(1) : (czas /     3600).toFixed(0)) + (space ? " " : "") + timeNames[2]; } else
@@ -233,7 +244,10 @@ frycAPI.czytelnyCzas = function (epoch_ms,lang,compact,space,ago) {
 	                     { czytCzas = (czas < 315360000 ? (czas / 31536000).toFixed(1) : (czas / 31536000).toFixed(0)) + (space ? " " : "") + timeNames[5]; }
 	//@ts-format-ignore-endregion
 	return czytCzas + (ago ? agoStr : "");
-} // frycAPI.czytelnyCzas(1704888173885,"pol",2,1,1);
+} // frycAPI.czytelnyCzas(1704888173885,"pol",2,1,1,0);
+frycAPI.logThis = function () { // helper do funkcji frycAPI_log
+	console.log(this);
+}
 frycAPI.template = function () {
 }
 
@@ -242,78 +256,108 @@ frycAPI.host = window.location.hostname;
 frycAPI.colorSchemeDark = false;
 frycAPI.czasNumer = 1;
 
-Object.defineProperty(Array.prototype, "frycAPI_shuffle", { value: function () {
-	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-	let currentIndex = this.length, randomIndex;
-	while (currentIndex > 0) {
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex--;
-		[this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]];
+Object.defineProperty(Array.prototype, "frycAPI_shuffle", {
+	value: function () {
+		// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+		let currentIndex = this.length, randomIndex;
+		while (currentIndex > 0) {
+			randomIndex = Math.floor(Math.random() * currentIndex);
+			currentIndex--;
+			[this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]];
+		}
+		return this;
 	}
-	return this;
-}});
-Object.defineProperty(Array.prototype, "frycAPI_pushElem", { value: function (elem) {
-	this.push(elem);
-	return elem;
-}});
-Object.defineProperty(Array.prototype, "frycAPI_pushArr", { value: function (elem) {
-	this.push(elem);
-	return this;
-}});
-Object.defineProperty(Element.prototype, "frycAPI_addClass", { value: function (newClass) {
-	this.classList.add(newClass);
-	return this
-}});
-Object.defineProperty(Element.prototype, "frycAPI_removeClass", { value: function (remClass) {
-	this.classList.remove(remClass);
-	return this
-}});
-Object.defineProperty(Element.prototype, "frycAPI_setAttribute", { value: function (attName, attValue) {
-	this.setAttribute(attName, attValue);
-	return this
-}});
-Object.defineProperty(Element.prototype, "frycAPI_setObjKey", { value: function (keyName, keyValue) {
-	this[keyName] = keyValue;
-	return this
-}});
-Object.defineProperty(Element.prototype, "frycAPI_setInnerHTML", { value: function (newInnerHTML) {
-	this.innerHTML = newInnerHTML;
-	return this
-}});
-Object.defineProperty(Element.prototype, "frycAPI_insertAdjacentElement", { value: function (where, elem) {
-	this.insertAdjacentElement(where, elem);
-	return this
-}});
-Object.defineProperty(Element.prototype, "frycAPI_addEventListener", { value: function (listenerType, callBack) {
-	this.addEventListener(listenerType, callBack);
-	return this
-}});
-Object.defineProperty(Element.prototype, "frycAPI_shuffleChildren", { value: function () {
-	let me = this;
-	Array.from(me.children).frycAPI_shuffle().forEach(function (daElem) {
-		me.appendChild(daElem);
-	});
-	return me;
-}});
-Object.defineProperty(Element.prototype, "frycAPI_sortChildren", { value: function (sortCallback) {
-	let me = this;
-	let elemArr = Array.from(me.children);
-	elemArr.sort((a, b) => {
-		let a1 = sortCallback(a);
-		let b1 = sortCallback(b);
-		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
-	});
-	elemArr.forEach(function (daElem) {
-		me.appendChild(daElem);
-	});
-}});
-Object.defineProperty(String.prototype, "frycAPI_includesAny", { value: function (list) {
-	for (const daElem of list) {
-		if (this.includes(daElem)) {
-			return true
+});
+Object.defineProperty(Array.prototype, "frycAPI_pushElem", {
+	value: function (elem) {
+		this.push(elem);
+		return elem;
+	}
+});
+Object.defineProperty(Array.prototype, "frycAPI_pushArr", {
+	value: function (elem) {
+		this.push(elem);
+		return this;
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_addClass", {
+	value: function (newClass) {
+		this.classList.add(newClass);
+		return this
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_removeClass", {
+	value: function (remClass) {
+		this.classList.remove(remClass);
+		return this
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_setAttribute", {
+	value: function (attName, attValue) {
+		this.setAttribute(attName, attValue);
+		return this
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_setObjKey", {
+	value: function (keyName, keyValue) {
+		this[keyName] = keyValue;
+		return this
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_setInnerHTML", {
+	value: function (newInnerHTML) {
+		this.innerHTML = newInnerHTML;
+		return this
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_insertAdjacentElement", {
+	value: function (where, elem) {
+		this.insertAdjacentElement(where, elem);
+		return this
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_addEventListener", {
+	value: function (listenerType, callBack) {
+		this.addEventListener(listenerType, callBack);
+		return this
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_shuffleChildren", {
+	value: function () {
+		let me = this;
+		Array.from(me.children).frycAPI_shuffle().forEach(function (daElem) {
+			me.appendChild(daElem);
+		});
+		return me;
+	}
+});
+Object.defineProperty(Element.prototype, "frycAPI_sortChildren", {
+	value: function (sortCallback) {
+		let me = this;
+		let elemArr = Array.from(me.children);
+		elemArr.sort((a, b) => {
+			let a1 = sortCallback(a);
+			let b1 = sortCallback(b);
+			return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
+		});
+		elemArr.forEach(function (daElem) {
+			me.appendChild(daElem);
+		});
+	}
+});
+Object.defineProperty(String.prototype, "frycAPI_includesAny", {
+	value: function (list) {
+		for (const daElem of list) {
+			if (this.includes(daElem)) {
+				return true
+			}
 		}
 	}
-}});
+});
+Object.defineProperty(Object.prototype, "frycAPI_log", {
+	value: frycAPI.logThis,
+	writable: true
+});
 
 if (frycAPI.host == "demo") {
 	frycAPI.nazwaBlokuIf = "Demo";
@@ -409,7 +453,7 @@ MaxLine := 0
 host := "${frycAPI.host}"
 Loop, Parse, Contents, \`n
 {
-	If (InStr(A_loopfield, host)) {
+	If (SubStr(A_loopfield, 1, 2) == "if" and InStr(A_loopfield, host)) {
 		LineNum := A_Index
 		break
 	}
@@ -1992,6 +2036,12 @@ if (1 && frycAPI.host == "chat.openai.com") {
 		.dark.flex-shrink-0.overflow-x-hidden.bg-gray-900 {
 			width: var(--szer) !important;
 		}
+		.dark.flex-shrink-0.overflow-x-hidden.bg-black {
+			width: fit-content !important;
+		}
+		span[data-state]>div>div>div[style*="transform"] {
+			/* transform: translateX(350px) translateY(-50%) !important; */
+		}
 	`);
 }
 if (0 && frycAPI.host == "cke.gov.pl") {
@@ -2197,6 +2247,12 @@ if (1 && frycAPI.host == "css-tricks.com") {
 
 		.grid-special-group {
 			background: #000E00;
+		}
+		.CommentForm li.comment.bypostauthor .comment-content, .commentlist li.comment.bypostauthor .comment-content, .comment ul li.comment.bypostauthor .comment-content {
+			background-image: linear-gradient(-15deg,rgba(255,122,24,.25),#434343);
+		}
+		.wp-block-columns.is-layout-flex.wp-container-core-columns-layout-3.wp-block-columns-is-layout-flex {
+			align-items: flex-start;
 		}
 	`);
 	frycAPI.onLoadSetter(() => {
@@ -3159,7 +3215,7 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 	// Michał Roman: 96866084
 	// Michał Łasica: 71831352
 	let friendsProfileID = "96866084";
-	
+
 	frycAPI.injectStyle(/*css*/`
 		.qrcode_Bit_2Yuvr.qrcode_Active_274P1 {
 			filter: invert(1) contrast(1);
@@ -3311,9 +3367,11 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 
 	frycAPI.nazwaBlokuIf = "Friend Activity";
 	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
-		{name: "Show only specific friend's activity", callBack: () => {
-			document.body.classList.toggle("specific-friend");
-		}},
+		{
+			name: "Show only specific friend's activity", callBack: () => {
+				document.body.classList.toggle("specific-friend");
+			}
+		},
 	]);
 }
 if (1 && frycAPI.host == "support.discord.com") {
@@ -4330,7 +4388,7 @@ if (1 && frycAPI.host == "www.deltami.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.derivative-calculator.net") {
+if (0 && frycAPI.host == "www.derivative-calculator.net") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		filter: invert(1) hue-rotate(180deg);
@@ -6247,6 +6305,313 @@ if (frycAPI.host == "www.arrowheadgamestudios.com") {
 			border-radius: 5px;
 		}
 `);
+}
+if (frycAPI.host == "gist.github.com") {
+	frycAPI.injectStyle(/*css*/`
+		/* .timeline-comment--caret::before {
+			background-color: var(--borderColor-default, var(--color-border-default)) !important;
+		} */
+	`);
+}
+if (frycAPI.host == "e621.net") {
+	frycAPI.injectStyle(/*css*/`
+		* {
+			font-family: IBM Plex Sans Condensed !important;
+		}
+		#search-box {
+			margin-bottom: 1em;
+		}
+		#search-box h1 {
+			font-size: 1.16667em;
+		}
+		#search-box form input {
+			border-radius: 3px 0 0 3px;
+			border-right: 0;
+			box-sizing: border-box;
+			padding: 0.125rem;
+			position: relative;
+			width: calc(100% - 30px);
+			z-index: 1;
+		}
+		#search-box form button {
+			background: #eee;
+			border-left: 1px solid #ccc;
+			border-radius: 0 3px 3px 0;
+			padding: 2px 6px;
+			width: 2em;
+		}
+		.search-help {
+			float: none;
+		}
+		ul#ui-id-1 {
+			width: fit-content !important;
+		}
+		img#image {
+			max-width: 100%;
+			max-height: 94vh;
+			/*     width: 95vw;
+				height: 95vh; */
+		}
+		#mojButon1 {
+			display: none;
+		}
+		.mojSpan {
+			position: absolute;
+			left: 0;
+			background: black;
+		}
+		.fa-chevron-right:before {
+			content: "❯";
+		}
+		.fa-chevron-left:before {
+			content: "❮";
+		}
+		.fa-ellipsis-h:before, .fa-ellipsis:before {
+			content: "…";
+		}
+		.fa-magnifying-glass:before, .fa-search:before {
+			content: "🔍";
+		}
+		.fa-check-circle:before, .fa-circle-check:before {
+			content: "✅";
+		}
+		div.post-score {
+			word-wrap: break-word;
+			display: flex;
+			justify-content: center;
+			gap: 5px;
+			& span {
+				margin: 0 !important;
+			}
+			& span.post-score-faves {
+				color: red;
+			}
+			& span.post-score-comments {
+				color: orange;
+			}
+			& span.post-score-rating {
+				display: block;
+			}
+		}
+		#mojScroll {
+			position: fixed;
+			bottom: 5px;
+			right: 5px;
+			color: #b4c7d9;
+			border: 1px solid;
+			background-color: #1F3C67;
+			padding: 10px;
+			border-radius: 5px;
+			cursor: pointer;
+			&:hover {
+				filter: brightness(1.3);
+			}
+		}
+	`);
+
+	frycAPI.onLoadSetter(() => {
+		let pthNam = window.location.pathname;
+		if (pthNam.startsWith("/posts/")) {
+			document.getElementsByClassName('next')[0].setAttribute('accesskey', 'a');
+			document.getElementsByClassName('prev')[0].setAttribute('accesskey', 'b');
+			(document.body.appendChild(document.createElement("div")).frycAPI_setAttribute("id", "mojScroll")
+				.frycAPI_setInnerHTML("Deafult scroll").onclick = () => {
+					window.scrollTo(0, document.documentElement.scrollTop + document.getElementById("nav-links-top").getBoundingClientRect().y)
+				})();
+		} else if (pthNam == "/posts" || pthNam.startsWith("/posts?")) {
+			document.getElementById("c-posts").insertAdjacentElement("beforebegin", document.getElementById("search-box"));
+			window.scrollTo(0, 0);
+		} else if (pthNam.startsWith("/pools/") && !pthNam.startsWith("/pools/gallery")) {
+			function czytelnyCzas(czas) {
+				return frycAPI.czytelnyCzas(czas, 0, "pol", 0, 1, 0, 1).padStart(13);
+			}
+			(frycAPI.e621_get_pool_dates = async function (pocz, kon) {
+				// np. https://e621.net/pools/35222
+				if (arguments.length == 0) {
+					var pocz = 0; var kon = 0;
+				} else if (arguments.length == 2 && pocz > kon) {
+					console.log("Błąd! Początek nie może być większy niż koniec!");
+					return
+				} else if (arguments.length == 2 && pocz < 1) {
+					console.log("Błąd! Początek nie może być mniejszy niż 1!");
+					return
+				} else if (arguments.length != 2) {
+					console.log("Błąd! Zła liczba parametrów!");
+					return
+				}
+
+				let poolID = pthNam.split("/").slice(-1);
+				if (!frycAPI.datArr) {
+					frycAPI.datArr = ((await (await fetch(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`)).json())
+						.posts.map((elem) => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
+						.map((daElem, daI) => {
+							// Numery postów chronologicznie
+							// document.getElementById("post_" + daElem[1])?.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
+							return daElem[0];
+						})
+					);
+				}
+				let datArr = frycAPI.datArr;
+				let ostatniaData = datArr[datArr.length - 1];
+
+				/* Numery postów wedle kolejności na stronie + daty z informacji na stronie
+				// var datArr = [];
+				document.querySelectorAll("#posts-container>article").forEach(function (daElem, daI, daArr) {
+					daElem.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).innerHTML = "#" + (daI + 1);
+					// datArr.push(new Date(daElem.querySelector("img").title.match(/(?<=Date: ).*(?=$)/gm)).getTime());
+				});
+				*/
+
+				let diffArr = [];
+				for (let i = 1; i < datArr.length; i++) {
+					diffArr.push(Math.max(datArr[i] - datArr[i - 1], 0));
+				}
+
+				if (kon == 0) {
+					kon = diffArr.length;
+				} else if (kon > diffArr.length) {
+					console.log("Błąd! Nie można wybrać pozycji większej niż długość wektora różnic!")
+					return
+				}
+				if (arguments.length == 2) {
+					pocz--;
+				}
+				let diffArrMax = Math.max(...diffArr.slice(pocz, kon));
+				
+				let diffArrMean = (ostatniaData - datArr[0]) / (datArr.length - 1);
+
+				let wykres = ""; let padding = kon.toString().length;
+				for (let i = pocz; i < kon; i++) {
+					var ile = Math.round(diffArr[i] / diffArrMax * 100);
+					wykres += `${String(i + 1).padStart(padding, " ")}. ${czytelnyCzas(diffArr[i])} [${"".padEnd(ile, "|") + "".padEnd(100 - ile, " ")}]\n`;
+				}
+				let obecnyCzas = new Date().getTime();
+				let nowaStrona = new Date(ostatniaData + diffArrMean);
+				let nowaStronaDiff = nowaStrona.getTime() - obecnyCzas;
+				let nowaStronaStr = "";
+				if (nowaStronaDiff >= 0) {
+					nowaStronaStr = `za %c${czytelnyCzas(nowaStronaDiff).trim()}%c`;
+				} else {
+					nowaStronaStr = `powinna być %c${czytelnyCzas(-nowaStronaDiff).trim()}%c temu`;
+				}
+
+				if (!frycAPI.pool) {
+					frycAPI.pool = await (await fetch(`https://e621.net/pools/${poolID}.json`)).json();
+					frycAPI.pool.post_ids.forEach((daElem, daI, daArr) => {
+						document.getElementById("post_" + daElem)?.querySelector(".post-score").insertAdjacentElement("afterbegin", document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
+					});
+				}
+				let overLimitInfo = "%c";
+				if (frycAPI.pool.post_count > 320) {
+					overLimitInfo += "\nUwaga! Przekroczono limit postów (320). Dane mogą być niepełne.";
+				}
+				overLimitInfo += "%c";
+
+				let opcje = {
+					weekday: "short",
+					year: "2-digit",
+					month: "2-digit",
+					day: "2-digit",
+					hour: "2-digit",
+					minute: "2-digit",
+					second: "2-digit",
+				};
+				console.clear();
+				console.log(`Wykres odległości czasowych pomiędzy kolejnymi stronami komiksu:`);
+				console.dir(`${wykres}`.replace(/\t/gm, ""));
+				console.log(
+					`Średni czas pomiędzy wydaniami kolejnych stron wyniósł: %c${czytelnyCzas(diffArrMean).trim()}%c
+					Ostatnia strona ukazała się: %c${new Date(ostatniaData).toLocaleString("pl-PL", opcje)}%c - %c${czytelnyCzas(obecnyCzas - ostatniaData).trim()}%c temu
+					Następna strona ukaże się:   %c${nowaStrona.toLocaleString("pl-PL", opcje)}%c - ${nowaStronaStr}${overLimitInfo}
+					frycAPI.e621_get_pool_dates(pocz,kon)`.replace(/\t/gm, ""),
+					"color:red", "color:white", "color:red", "color:white", "color:red", "color:white", "color:red", "color:white", "color:red", "color:white", "color:red", "color:white"
+				);
+			})();
+		}
+	});
+}
+if (frycAPI.host == "e-hentai.org") {
+	if (window.location.pathname.startsWith("/s/")) {
+		frycAPI.injectStyleNormal(/*css*/`
+			img[src="https://ehgt.org/g/f.png"],
+			img[src="https://ehgt.org/g/p.png"],
+			img[src="https://ehgt.org/g/n.png"],
+			img[src="https://ehgt.org/g/b.png"],
+			img[src="https://ehgt.org/g/l.png"] {
+				filter: invert(0) sepia(1) !important;
+			}
+			div#i2 {
+				display: none;
+			}
+			div#i1 {
+				position: static;
+				width: fit-content!important;
+			}
+			div.sni {
+				padding: 5px;
+			}
+			#i1.sni > h1 {
+				position: absolute;
+				left: 0;
+				z-index: 10;
+				top: 0;
+				margin: 0;
+				padding: 10px;
+				background-color: #EDEBDF;
+				border: 1px solid #5C0D12;
+				margin: 4px 9px;
+				filter: opacity(0.6);
+				cursor: pointer;
+				font-size: 0;
+				&.duży {
+					font-size: 16px;
+				}
+			}
+			img#img {
+				width: auto !important;
+				height: 98vh !important;
+				max-width: 98vw;
+				object-fit: contain;
+			}
+		`);
+
+		frycAPI.onLoadSetter(() => {
+			document.querySelector('#i1.sni>h1').addEventListener("click", (event) => {
+				event.target.classList.toggle("duży");
+			});
+		});
+	}
+}
+if (frycAPI.host == "www.sqlite.org") {
+	frycAPI.injectStyle(/*css*/`
+		body {
+			max-width: 1000px;
+			margin: auto;
+			padding: 10px 10px 0px 10px;
+		}
+		* {
+			font-family: IBM Plex Sans Condensed, sans-serif;
+		}
+		blockquote {
+			font-family: IBM Plex Mono,monospace;
+			color: hsl(120deg 100% 87%);
+		}
+		p {
+			font-size: 18px;
+		}
+		img.logo[alt="SQLite"] {
+			content: url(https://media.discordapp.net/attachments/594793235365232662/1203434041303367720/pngegg.png);
+			width: 220px;
+			filter: invert(1) hue-rotate(180deg);
+		}
+	`);
+}
+if (frycAPI.host == "s.surveylegend.com") {
+	frycAPI.injectStyle(/*css*/`
+		.is-textbox-in-app {
+			user-select: auto !important;
+		}
+	`);
 }
 if (frycAPI.host == "template") {
 	frycAPI.injectStyle(/*css*/`
