@@ -358,6 +358,11 @@ Object.defineProperty(Object.prototype, "frycAPI_log", {
 	value: frycAPI.logThis,
 	writable: true
 });
+Object.defineProperty(Element.prototype, "frycAPI_removeChildren", {
+	value: function () {
+		while(this.firstChild) this.removeChild(this.lastChild);
+	}
+});
 
 if (frycAPI.host == "demo") {
 	frycAPI.nazwaBlokuIf = "Demo";
