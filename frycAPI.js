@@ -6799,8 +6799,7 @@ if (frycAPI.host == "template") {
 	frycAPI.onLoadSetter(() => {
 	});
 
-	frycAPI.nazwaBlokuIf = "";
-	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
+	frycAPI.manualFunctionsCreator("", [
 		// new ManualFunc("aaa", function () {
 		// }),
 	]);
