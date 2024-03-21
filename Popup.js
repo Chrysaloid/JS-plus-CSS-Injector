@@ -1,9 +1,9 @@
-async function runOnPage(duFunc, arguments) {
+async function runOnPage(daFunc, arguments) {
 	const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 	const [{ result }] = await chrome.scripting.executeScript({
 		world: "MAIN",
 		target: { tabId: tab.id },
-		func: duFunc,
+		func: daFunc,
 		args: arguments
 	});
 	return result
@@ -19,25 +19,23 @@ async function runOnPage(duFunc, arguments) {
 		// Tutaj będą twoje funkcje gdy je zdefiniujesz.
 		return
 	}
-	funcArr.forEach(function (daElem, daI, daArr) {
+	const returnValueHandler = {
+		toggleOnOff: function (butt) {
+			butt.classList.toggle("Off");
+		}
+	}
+	funcArr.forEach(function (funcGroup, groupNum) {
 		let containerChild = document.createElement("div");
-		containerChild.appendChild(document.createElement("span")).innerHTML = daElem[0];
-		daElem[1].forEach(function (daElem1, daI1, daArr1) {
+		containerChild.appendChild(document.createElement("span")).innerHTML = funcGroup[0];
+		funcGroup[1].forEach(function (func, funcNum) {
 			let funcButt = document.createElement("button");
-			funcButt.innerHTML = daElem1.name;
-			if (daElem1.hasOwnProperty("Off") && daElem1.Off) {
+			funcButt.innerHTML = func.name;
+			if (func.Off) {
 				funcButt.classList.add("Off");
 			}
-			containerChild.appendChild(funcButt).addEventListener("click", async (event) => {
-				// console.log(new Date().getTime());
-				let currTag = event.currentTarget;
-				let funkRet = await runOnPage((daI, daI1) => frycAPI.manualFunctionsHandler(daI, daI1), [daI, daI1]);
-				// debugger
-				if (funkRet == "toggleOnOff") {
-					currTag.classList.toggle("Off");
-				}
+			containerChild.appendChild(funcButt).addEventListener("click", async function () {
+				returnValueHandler[await runOnPage((groupNum, funcNum) => frycAPI.manualFunctionsHandler(groupNum, funcNum), [groupNum, funcNum])]?.(this);
 			});
-
 		});
 		buttCont.append(containerChild);
 	});
