@@ -1,32 +1,17 @@
 {
+	"manifest_version": 3,
 	"name": "JS + CSS Injector",
 	"version": "0.1.0",
 	"description": "Injects JS and CSS",
-	"manifest_version": 3,
 	"author": "Fryderyk Kukowski",
 	"minimum_chrome_version": "103.0",
-	"icons": {
-		"16" : "icon 16.png" ,
-		"32" : "icon 32.png" ,
-		"48" : "icon 48.png" ,
-		"128": "icon 128.png"
-	},
+	"icons": {"16": "icon 16.png", "32": "icon 32.png", "48": "icon 48.png", "128": "icon 128.png"},
 	"action": {"default_popup": "Popup.html", "default_title": "Injector"},
 	"content_scripts": [
-		{
-			"matches": ["<all_urls>"],
-			"js": ["frycAPI-inject.js"],
-			"run_at": "document_start"
-		}
+		{ "matches": ["<all_urls>"], "js": ["frycAPI-inject.js"], "run_at": "document_start" }
 	],
 	"web_accessible_resources": [
-		{
-			"matches"  : ["<all_urls>"                     ],
-			"resources": ["frycAPI.js", "One Pixel Gif.gif"]
-		}
+		{ "matches": ["<all_urls>"], "resources": ["frycAPI.js", "resources/*"] }
 	],
-	"permissions": ["nativeMessaging", "scripting", "activeTab"],
-	"content_security_policy": {
-		"extension_pages": "default-src 'self' 'wasm-unsafe-eval'; script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
-	}
+	"permissions": ["nativeMessaging", "scripting", "activeTab"]
 }
