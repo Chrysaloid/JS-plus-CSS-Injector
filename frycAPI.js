@@ -1,8 +1,10 @@
 ﻿// #region //* Początek
+/* eslint no-implicit-globals: ["warn", {"lexicalBindings": true}] */
+"use strict";
 // console.time("frycAPI"); // let startTime = performance.now();
-const frycAPI = {};
+// const frycAPI = {}; // eslint-disable-line no-implicit-globals
 
-class frycAPI_ManualFunc extends Object {
+class frycAPI_ManualFunc extends Object { // eslint-disable-line no-implicit-globals
 	constructor(name, callBack, Off = false) {
 		super();
 		this.name = name;
@@ -19,487 +21,638 @@ class frycAPI_ManualFunc extends Object {
 		this.Off = !this.Off;
 	}
 }
+function loguj(...tekst) { // eslint-disable-line no-implicit-globals
+	console.log(...tekst);
+}
 
 // Grupy bloków co 19 pozycji (18.04.2024) // Regex do liczenia ifów: /^if.+/
 // #endregion
 
-// #region //* Funkcje 1
-function loguj(tekst) {
-	console.log(tekst);
-}
-frycAPI.sleep = function (ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-} // await frycAPI.sleep(1);
-frycAPI.injectStyle = function (style) {
-	if ((style = style.trim()).length) { //:)
-		frycAPI.styleStr += "\n" + style;
-	}
-}
-frycAPI.injectStyleNormal = function (style, elem = document.body, staticID) {
-	if ((style = style.trim()).length) {
-		let id = staticID || "frycAPI_styleNormal" + ++frycAPI.injectStyleNormalNum;
-		elem.appendChild(document.createElement("style").frycAPI_setAttribute("id", id)).innerHTML = frycAPI.minifyCSS(style);
-		return id;
-	}
-}
-frycAPI.minifyCSS = function (style) {
-	return style.replaceAll(/^\s+|[\t\f ]+$/gm, "").replaceAll(/\/\*.*?\*\//gm, ""); // /(^\s+|$\s+)/gm
-	// return style
-}
-frycAPI.manualFunctionsCreator = function (nazwaBlokuIf, funcArr) {
-	if (funcArr.length) {
-		frycAPI.funcArr.push([nazwaBlokuIf, funcArr]);
-	}
-}
-frycAPI.manualFunctionsHandler = function (ifNum, funcNum) {
-	return frycAPI.funcArr[ifNum][1][funcNum].callBack();
-}
-frycAPI.ctrlC = function (text) {
-	let textArea = document.createElement("textarea");
-	textArea.value = text;
+// #region //* frycAPI
+const frycAPI = { // eslint-disable-line no-implicit-globals, object-shorthand
+	// #region //* Zmienne 1
+	id: "fmlfdnbhgmgiinaalkmjcmmlohhhgkok",
+	funcArr: [],
+	host: window.location.hostname,
+	colorSchemeDark: false,
+	czasNumer: 1,
+	styleStr: "",
+	// frycAPI.urlParam: new URL(window.location.href).searchParams.getAll("frycAPI_URL_Parameter").pop(),
+	injectStyleNormalNum: 0,
+	simpleFontChange: `* { font-family: IBM Plex Sans Condensed; }`, // ${frycAPI.simpleFontChange}
 
-	textArea.style.top = "0";
-	textArea.style.left = "0";
-	textArea.style.position = "fixed";
+	// #region //* Zmienne 2
+	// #endregion
+	// #endregion
 
-	document.body.appendChild(textArea);
-	textArea.focus();
-	textArea.select();
-
-	try {
-		let successful = document.execCommand("copy");
-		let msg = successful ? "✅" : "❌";
-		console.log("Copy was " + msg);
-	} catch (err) {
-		console.error("Oops, unable to copy", err);
-	}
-	document.body.removeChild(textArea);
-}
-frycAPI.zaokrl = function (val, decimals) {
-	return +(Math.round(+(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
-}
-frycAPI.hostList = function (list) {
-	for (const daElem of list) {
-		if (daElem == frycAPI.host) {
-			return true;
+	// #region //* Funkcje 1
+	sleep(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms)); // eslint-disable-line no-promise-executor-return
+	}, // await frycAPI.sleep(1);
+	injectStyle(style) {
+		if ((style = style.trim()).length) { // :)
+			frycAPI.styleStr += "\n" + style;
 		}
-	}
-	return false;
-}
-frycAPI.hostListIncludes = function (list) {
-	return frycAPI.host.frycAPI_includesAny(list)
-}
-frycAPI.clean = function (node) { // do usuwania komentarzy
-	for (var n = 0; n < node.childNodes.length; n++) {
-		var child = node.childNodes[n];
-		if (child.nodeType === 8) {
-			node.removeChild(child);
-			n--;
-		} else if (child.nodeType === 1) {
-			frycAPI.clean(child);
+	},
+	injectStyleNormal(style, options) {
+		if ((style = style.trim()).length) {
+			const id = options?.staticID ?? "frycAPI_styleNormal" + ++frycAPI.injectStyleNormalNum;
+			(options?.elem ?? document.body).appendChild(document.createElement("style").frycAPI_setAttribute("id", id)).innerHTML = frycAPI.minifyCSS(style);
+			return id;
 		}
-	}
-} // frycAPI.clean(document.body);
-frycAPI.makeTableSortable = function (tabElem, trSel = "tr", tdSel = "td", thSel = "th") { // Podaj referencję do tablicy
-	const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
-	const sortObj = {
-		deafult: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText,
-		ignoreCase: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText.toUpperCase(),
-		numeric: (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText),
-		attrib: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib),
-		attribNumeric: (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib)),
-	}
-	const sortHelp = function (objFun, obj) {
-		return (a, b) => sortHelp0(objFun(a, obj), objFun(b, obj), obj.kierunek);
-	};
-	const sortFun = function (rosnąco) {
-		let th = this;
-		let kier = typeof rosnąco == "boolean" ? !rosnąco : th.classList.contains("posortowana");
-		Array.prototype.slice.call(tabElem.querySelectorAll(`${trSel}:not(:first-child)`), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "deafult"], {
-			attrib: th.getAttribute("attribSort"),
-			myIndex: th.getAttribute("index"), // :scope>tr
-			kierunek: kier ? -1 : 1,
-		})).forEach(function (daElem, daI, daArr) {
-			tabElem.appendChild(daElem);
-		});
-		tabElem.querySelector(".posortowana")?.classList.remove("posortowana");
-		tabElem.querySelector(".anawotrosop")?.classList.remove("anawotrosop");
-		if (kier) {
-			th.classList.add("anawotrosop");
-		} else {
-			th.classList.add("posortowana");
+	},
+	minifyCSS(style) {
+		return frycAPI.removeCommentsSimple(frycAPI.minifyCodeSimple(style));
+		// return style
+	},
+	minifyCodeSimple(code) {
+		return code.replaceAll(/^\s+|[\t\f ]+$/gmu, ""); // /(^\s+|$\s+)/gm
+	}, // frycAPI.minifyCodeSimple(code);
+	removeCommentsSimple(code) {
+		return code.replaceAll(/\/\*.*?\*\//gmu, "");
+	}, // frycAPI.removeCommentsSimple(code);
+	manualFunctionsCreator(nazwaBlokuIf, funcArr) {
+		if (funcArr.length) {
+			frycAPI.funcArr.push([nazwaBlokuIf, funcArr]);
 		}
-	};
-	tabElem.classList.add("sortowalnaTabela");
-	frycAPI.injectStyleNormal(/*css*/`
-		.sortowalnaTabela {
-			& ${thSel} {
-				cursor: pointer;
-				&:hover {
-					background-color: hsla(0, 0%, 20%);
-				}
-				/* &:hover {
-					position: relative;
-				}
-				&:hover::before {
-					content: "";
-					position: absolute;
-					top: 0;
-					left: 0;
-					width: 100%;
-					height: 100%;
-					background-color: hsla(0, 0%, 100%, 0.1);
-				} */
-				&.posortowana::after {
-					content: " ⮟";
-				}
-				&.anawotrosop::after {
-					content: " ⮝";
-				}
-			}
-		}
-	`)
-	tabElem.querySelectorAll(thSel).forEach(function (daElem, daI, daArr) {
-		daElem.setAttribute("index", daI + 1);
-		daElem.addEventListener("click", sortFun);
-		daElem.sortFun = sortFun;
-	});
-} // frycAPI.makeTableSortable(document.querySelector(`table`));
-frycAPI.zmierzCzas = function (callBack) {
-	let t0 = performance.now();
-	callBack();
-	let t1 = performance.now();
-	loguj(`Czas ${frycAPI.czasNumer}: ${frycAPI.zaokrl(t1 - t0, 2)} ms`);
-	frycAPI.czasNumer++;
-}
-frycAPI.onLoadSetter = function (callBack) {
-	if (!frycAPI.hasOwnProperty("onLoadArr")) {
-		frycAPI.onLoadArr = [];
-		window.addEventListener("load", () => {
-			frycAPI.onLoadArr.forEach((daElem) => {
-				daElem();
-			});
-		});
-	}
-	frycAPI.onLoadArr.push(callBack);
-}
-frycAPI.forEach = function (selector, callback) {
-	let list = document.querySelectorAll(selector);
-	list.forEach(callback);
-	return list;
-}
-frycAPI.sortElements = function (parent, elems, sortCallback) {
-	let elemArr = Array.from(elems);
-	elemArr.sort((a, b) => {
-		let a1 = sortCallback(a);
-		let b1 = sortCallback(b);
-		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
-	});
-	elemArr.forEach(function (daElem) {
-		parent.appendChild(daElem);
-	});
-}
-frycAPI.randDouble = function (min, max) {
-	return Math.random() * (max - min) + min;
-}
-frycAPI.randInt = function (min, max) {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-// #endregion
-// #region //* Funkcje 2
-frycAPI.factorial = function (num) {
-	let rval = 1;
-	for (let i = 2; i <= num; i++) {
-		rval = rval * i;
-	}
-	return rval;
-}
-frycAPI.getWorkerURL = function (myWorkerFun) { // podaj funkcję do tej funkcji
-	let str = myWorkerFun.toString()
-	return URL.createObjectURL(new Blob([str.substring(
-		str.indexOf("{") + 1,
-		str.lastIndexOf("}")
-	)]));
-} // let myWorker = new Worker(frycAPI.getWorkerURL(myWorkerFun));
-frycAPI.removeLast = function (str, N) {
-	return str.slice(0, -N);
-} // str = frycAPI.removeLast(str, N);
-frycAPI.printRelTime = function (epoch_ms, czyDiff, lang, compact, space, ago, leftAlign, prec) { // przyjmuje czas jako liczbę milisekund od EPOCH
-	let czas = (czyDiff ? (Date.now() - epoch_ms) : epoch_ms) / 1000, czytCzas = "", timeNames, agoStr;
-	//@ts-format-ignore-region
-	if (lang == "pol") {
-		agoStr = " temu";
-		if (compact == 2) { timeNames = ["s","m","g","d","M","l"];                          } else
-		if (compact == 1) { timeNames = ["sek","min","godz","dni","mies","lat"];            } else
-		if (compact == 0) { timeNames = ["sekund","minut","godzin","dni","miesięcy","lat"]; }
-	} else if (lang == "ang") {
-		agoStr = " ago";
-		if (compact == 2) { timeNames = ["s","m","h","d","M","y"];                             } else
-		if (compact == 1) { timeNames = ["sec","min","hour","days","mon","year"];              } else
-		if (compact == 0) { timeNames = ["seconds","minutes","hours","days","months","years"]; }
-	}
-	if (leftAlign) {
-		let maxLen = timeNames.reduce((max, elem) => max < elem.length ? elem.length : max, 0);
-		timeNames = timeNames.map((elem) => elem.padEnd(maxLen));
-	}
-	if (czas <       60) { czytCzas =                                                                  (czas           ).toFixed(prec ? prec : 0 ) + (space ? " " : "") + timeNames[0]; } else
-	if (czas <     3600) { czytCzas = (czas <       600 ? (czas /       60).toFixed(prec ? prec : 1) : (czas /       60).toFixed(prec ? prec : 0)) + (space ? " " : "") + timeNames[1]; } else
-	if (czas <    86400) { czytCzas = (czas <     36000 ? (czas /     3600).toFixed(prec ? prec : 1) : (czas /     3600).toFixed(prec ? prec : 0)) + (space ? " " : "") + timeNames[2]; } else
-	if (czas <  2592000) { czytCzas = (czas <    864000 ? (czas /    86400).toFixed(prec ? prec : 1) : (czas /    86400).toFixed(prec ? prec : 0)) + (space ? " " : "") + timeNames[3]; } else
-	if (czas < 31536000) { czytCzas = (czas <  25920000 ? (czas /  2592000).toFixed(prec ? prec : 1) : (czas /  2592000).toFixed(prec ? prec : 0)) + (space ? " " : "") + timeNames[4]; } else
-	                     { czytCzas = (czas < 315360000 ? (czas / 31536000).toFixed(prec ? prec : 1) : (czas / 31536000).toFixed(prec ? prec : 0)) + (space ? " " : "") + timeNames[5]; }
-	//@ts-format-ignore-endregion
-	return czytCzas + (ago ? agoStr : "");
-} // frycAPI.printRelTime(new Date().getTime(),0,"pol",1,1,1,0);
-frycAPI.printDateIntl = function (time, dateFormatter) {
-	return dateFormatter.format(time);
-}
-frycAPI.dateFormatter = new Intl.DateTimeFormat('af', {
-	year: "numeric",
-	month: "2-digit",
-	day: "2-digit",
-	hour: "2-digit",
-	minute: "2-digit",
-	// second: "2-digit",
-});
-frycAPI.dateFormatterForFileName = new Intl.DateTimeFormat('af', {
-	year: "numeric",
-	month: "2-digit",
-	day: "2-digit",
-	hour: "2-digit",
-	minute: "2-digit",
-	second: "2-digit",
-});
-frycAPI.printDate = function (date) { // przyjmuje obiekt typu Date
-	return frycAPI.printDateIntl(date, frycAPI.dateFormatter).replace(" ", ", ");
-} // frycAPI.printDate(new Date());
-frycAPI.printDateForFileName = function (date) { // przyjmuje obiekt typu Date
-	return frycAPI.printDateIntl(date, frycAPI.dateFormatterForFileName).replace(":", "꞉");
-} // frycAPI.printDateForFileName(new Date());
-frycAPI.expandPrototype = function (proto, name, func, writable = false) {
-	try {
-		Object.defineProperty(proto.prototype, name, {
-			value: func,
-			writable: writable
-		});
-	} catch (error) {
-		console.warn(error);
-	}
-}
-frycAPI.logThis = function () { // helper do funkcji frycAPI_log
-	console.log(this);
-}
-frycAPI.roughSizeOfObject = function (object) {
-	// https://stackoverflow.com/a/11900218/12035658
-	const objectList = [];
-	const stack = [object];
-	let bytes = 0;
+	},
+	manualFunctionsHandler(ifNum, funcNum) {
+		return frycAPI.funcArr[ifNum][1][funcNum].callBack();
+	},
+	ctrlC(text) {
+		const textArea = document.createElement("textarea");
+		textArea.value = text;
 
-	while (stack.length) {
-		const value = stack.pop();
+		textArea.style.top = "0";
+		textArea.style.left = "0";
+		textArea.style.position = "fixed";
 
-		switch (typeof value) {
-			case 'boolean':
-				bytes += 4;
-				break;
-			case 'string':
-				bytes += value.length * 2;
-				break;
-			case 'number':
-				bytes += 8;
-				break;
-			case 'object':
-				if (!objectList.includes(value)) {
-					objectList.push(value);
-					for (const prop in value) {
-						if (value.hasOwnProperty(prop)) {
-							stack.push(value[prop]);
-							bytes += prop.length * 2;
-						}
-					}
-				}
-				break;
-		}
-	}
-
-	return bytes;
-}
-frycAPI.downloadHelper = function (href, fileName) {
-	let a = document.createElement("a");
-	a.href = href;
-	a.target = "_blank";
-	a.download = fileName;
-	a.style.display = "none";
-	document.body.append(a);
-	a.click();
-	a.remove();
-}
-frycAPI.downloadTxt = function (text, fileName) {
-	// a.href = 'data:attachment/text;charset=utf-8,' + encodeURI(text);
-	frycAPI.downloadHelper(URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" })), fileName);
-}
-frycAPI.redownloadImg = function (img, fileName) {
-	frycAPI.downloadHelper(img.src, fileName);
-}
-frycAPI.determineFileName = function (FR_Result, img, alt) {
-	let nazwa = (() => {
-		if (img.hasAttribute("alt") && (t = img.alt.trim()).length) return t;
+		document.body.appendChild(textArea);
+		textArea.focus();
+		textArea.select();
 
 		try {
-			const url = new URL(img.src);
-			if (url.protocol != "data:") {
-				let n = url.pathname.slice(url.pathname.lastIndexOf("/") + 1);
-				return n.slice(0, (l => l == -1 ? n.length : l)(n.lastIndexOf(".")));
+			const successful = document.execCommand("copy");
+			const msg = successful ? "✅" : "❌";
+			console.log("Copy was " + msg);
+		} catch (err) {
+			console.error("Oops, unable to copy", err);
+		}
+		document.body.removeChild(textArea);
+	},
+	zaokrl(val, decimals) {
+		return Number(Math.round(Number(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
+	},
+	hostList(list) {
+		for (const daElem of list) {
+			if (daElem === frycAPI.host) {
+				return true;
 			}
-		} catch (error) {
-			console.warn("URL Parse Error: " + error);
 		}
-
-		return "Unknown " + frycAPI.printDateForFileName(new Date());
-	})();
-	let ext = (() => {
-		let imgForm = FR_Result.slice(5, FR_Result.indexOf(";")).replace("image/", "");
-		if (alt) {
-			if (imgForm == "jpeg") return ".png"
-			if (imgForm == "png") return ".jpg"
-			if (imgForm == "gif") return ".png"
-			if (imgForm == "svg+xml") return ".png"
-			return ".jpg"
+		return false;
+	},
+	hostListIncludes(list) {
+		return frycAPI.host.frycAPI_includesAny(list);
+	},
+	clean(node) { // do usuwania komentarzy
+		for (let n = 0; n < node.childNodes.length; n++) {
+			const child = node.childNodes[n];
+			if (child.nodeType === 8) {
+				node.removeChild(child);
+				n--;
+			} else if (child.nodeType === 1) {
+				frycAPI.clean(child);
+			}
+		}
+	}, // frycAPI.clean(document.body);
+	makeTableSortable(tabElem, trSel = "tr", tdSel = "td", thSel = "th") { // Podaj referencję do tablicy
+		const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
+		const sortObj = {
+			deafult: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText,
+			ignoreCase: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText.toUpperCase(),
+			numeric: (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText),
+			attrib: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib),
+			attribNumeric: (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib)),
+		};
+		const sortHelp = function (objFun, obj) {
+			return (a, b) => sortHelp0(objFun(a, obj), objFun(b, obj), obj.kierunek);
+		};
+		const sortFun = function (rosnąco) {
+			const th = this;
+			const kier = typeof rosnąco === "boolean" ? !rosnąco : th.classList.contains("posortowana");
+			Array.prototype.slice.call(tabElem.querySelectorAll(`${trSel}:not(:first-child)`), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "deafult"], {
+				attrib: th.getAttribute("attribSort"),
+				myIndex: th.getAttribute("index"), // :scope>tr
+				kierunek: kier ? -1 : 1,
+			})).forEach(function (daElem, daI, daArr) {
+				tabElem.appendChild(daElem);
+			});
+			tabElem.querySelector(".posortowana")?.classList.remove("posortowana");
+			tabElem.querySelector(".anawotrosop")?.classList.remove("anawotrosop");
+			if (kier) {
+				th.classList.add("anawotrosop");
+			} else {
+				th.classList.add("posortowana");
+			}
+		};
+		tabElem.classList.add("sortowalnaTabela");
+		frycAPI.injectStyleNormal(/*css*/`
+			.sortowalnaTabela {
+				& ${thSel} {
+					cursor: pointer;
+					&:hover {
+						background-color: hsla(0, 0%, 20%);
+					}
+					/* &:hover {
+						position: relative;
+					}
+					&:hover::before {
+						content: "";
+						position: absolute;
+						top: 0;
+						left: 0;
+						width: 100%;
+						height: 100%;
+						background-color: hsla(0, 0%, 100%, 0.1);
+					} */
+					&.posortowana::after {
+						content: " ⮟";
+					}
+					&.anawotrosop::after {
+						content: " ⮝";
+					}
+				}
+			}
+		`);
+		tabElem.querySelectorAll(thSel).forEach(function (daElem, daI, daArr) {
+			daElem.setAttribute("index", daI + 1);
+			daElem.addEventListener("click", sortFun);
+			daElem.sortFun = sortFun;
+		});
+	}, // frycAPI.makeTableSortable(document.querySelector(`table`));
+	zmierzCzas(callBack) {
+		const t0 = performance.now();
+		callBack();
+		const t1 = performance.now();
+		loguj(`Czas ${frycAPI.czasNumer}: ${frycAPI.zaokrl(t1 - t0, 2)} ms`);
+		frycAPI.czasNumer++;
+	},
+	onLoadSetter(callBack) {
+		if (!frycAPI.hasOwnProperty("onLoadArr")) {
+			frycAPI.onLoadArr = [];
+			window.addEventListener("load", () => {
+				frycAPI.onLoadArr.forEach(daElem => {
+					daElem();
+				});
+			});
+		}
+		frycAPI.onLoadArr.push(callBack);
+	},
+	forEach(selector, callback) {
+		const list = document.querySelectorAll(selector);
+		list.forEach(callback);
+		return list;
+	},
+	sortElements(parent, elems, sortCallback) {
+		const elemArr = Array.from(elems);
+		elemArr.sort((a, b) => {
+			const a1 = sortCallback(a);
+			const b1 = sortCallback(b);
+			return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
+		});
+		elemArr.forEach(function (daElem) {
+			parent.appendChild(daElem);
+		});
+	},
+	randDouble(min, max) {
+		return Math.random() * (max - min) + min;
+	},
+	randInt(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+	factorial(num) {
+		let rval = 1;
+		for (let i = 2; i <= num; i++) {
+			rval *= i;
+		}
+		return rval;
+	},
+	// #endregion
+	// #region //* Funkcje 2
+	getWorkerURL(myWorkerFun) { // podaj funkcję do tej funkcji
+		const str = myWorkerFun.toString();
+		return URL.createObjectURL(new Blob([str.substring(
+			str.indexOf("{") + 1,
+			str.lastIndexOf("}")
+		)]));
+	}, // let myWorker = new Worker(frycAPI.getWorkerURL(myWorkerFun));
+	removeLast(str, N) {
+		return str.slice(0, -N);
+	}, // str = frycAPI.removeLast(str, N);
+	printRelTime(epoch_ms, czyDiff = 1, lang = "ang", compact = 0, space = 1, ago = 1, leftAlign = 0, prec) {
+		let czas = (czyDiff ? (Date.now() - epoch_ms) : epoch_ms) / 1000;
+		const znak = Math.sign(czas) === -1 ? "-" : "";
+		czas = Math.abs(czas);
+		let czytCzas, timeNames, agoStr;
+		/* eslint-disable */
+		if (lang === "pol") {
+			agoStr = " temu";
+			if (compact === 2) { timeNames = ["s", "m", "g", "d", "M", "l"]                          } else
+			if (compact === 1) { timeNames = ["sek", "min", "godz", "dni", "mies", "lat"]            } else
+			if (compact === 0) { timeNames = ["sekund", "minut", "godzin", "dni", "miesięcy", "lat"] }
+		} else if (lang === "ang") {
+			agoStr = " ago";
+			if (compact === 2) { timeNames = ["s", "m", "h", "d", "M", "y"]                             } else
+			if (compact === 1) { timeNames = ["sec", "min", "hour", "days", "mon", "year"]              } else
+			if (compact === 0) { timeNames = ["seconds", "minutes", "hours", "days", "months", "years"] }
 		} else {
-			if (imgForm == "jpeg") return ".jpg"
-			if (imgForm == "png") return ".png"
-			if (imgForm == "gif") return ".gif"
-			if (imgForm == "svg+xml") return ".svg"
-			return ".png"
+			throw new Error("Language not supported");
 		}
-	})();
-
-	return nazwa + ext;
-}
-frycAPI.downloadImgOld = function (img, fileName, alt) {
-	let httpRequest = new XMLHttpRequest();
-	httpRequest.onload = function () {
-		let fileReader = new FileReader();
-		fileReader.onloadend = function () {
-			frycAPI.downloadHelper(fileReader.result, fileName === undefined ? frycAPI.determineFileName(fileReader.result, img, alt) : fileName);
+		if (leftAlign) {
+			const maxLen = timeNames.reduce((max, elem) => (max < elem.length ? elem.length : max), 0);
+			timeNames = timeNames.map(elem => elem.padEnd(maxLen));
 		}
-		fileReader.readAsDataURL(httpRequest.response);
-	};
-	httpRequest.open("GET", img.src);
-	httpRequest.responseType = "blob";
-	httpRequest.setRequestHeader("Access-Control-Allow-Origin", "*");
-	httpRequest.send();
-}
-frycAPI.imgSrcProcessing = function (imgSrc) {
+		if (czas <       60) { czytCzas =                                                            (czas           ).toFixed(prec ?? 0 ) + (space ? " " : "") + timeNames[0] } else
+		if (czas <     3600) { czytCzas = (czas <       600 ? (czas /       60).toFixed(prec ?? 1) : (czas /       60).toFixed(prec ?? 0)) + (space ? " " : "") + timeNames[1] } else
+		if (czas <    86400) { czytCzas = (czas <     36000 ? (czas /     3600).toFixed(prec ?? 1) : (czas /     3600).toFixed(prec ?? 0)) + (space ? " " : "") + timeNames[2] } else
+		if (czas <  2592000) { czytCzas = (czas <    864000 ? (czas /    86400).toFixed(prec ?? 1) : (czas /    86400).toFixed(prec ?? 0)) + (space ? " " : "") + timeNames[3] } else
+		if (czas < 31536000) { czytCzas = (czas <  25920000 ? (czas /  2592000).toFixed(prec ?? 1) : (czas /  2592000).toFixed(prec ?? 0)) + (space ? " " : "") + timeNames[4] } else
+									{ czytCzas = (czas < 315360000 ? (czas / 31536000).toFixed(prec ?? 1) : (czas / 31536000).toFixed(prec ?? 0)) + (space ? " " : "") + timeNames[5] }
+		/* eslint-enable */
+		return znak + czytCzas + (ago ? agoStr : "");
+	}, // frycAPI.printRelTime(new Date().getTime(),0,"pol",1,1,1,0);
+	printDateIntl(time, dateFormatter) {
+		return dateFormatter.format(time);
+	},
+	dateFormatter: new Intl.DateTimeFormat("af", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+		// second: "2-digit",
+	}),
+	dateFormatterForFileName: new Intl.DateTimeFormat("af", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+	}),
+	printDate(date) { // przyjmuje obiekt typu Date
+		return frycAPI.printDateIntl(date, frycAPI.dateFormatter).replace(" ", ", ");
+	}, // frycAPI.printDate(new Date());
+	printDateForFileName(date) { // przyjmuje obiekt typu Date
+		return frycAPI.printDateIntl(date, frycAPI.dateFormatterForFileName).replace(":", "꞉");
+	}, // frycAPI.printDateForFileName(new Date());
+	expandPrototype(proto, name, func, writable = false) {
+		try {
+			Object.defineProperty(proto.prototype, name, {
+				value: func,
+				writable: writable,
+			});
+		} catch (error) {
+			console.warn(error);
+		}
+	},
+	logThis() { // helper do funkcji frycAPI_log
+		console.log(this);
+	},
+	roughSizeOfObject(object) {
+		// https://stackoverflow.com/a/11900218/12035658
+		const objectList = [];
+		const stack = [object];
+		let bytes = 0;
 
-}
-frycAPI.downloadImg = function (img, fileName, alt, urlParamBool) {
-	/*
-	fetch(img.src, { // "https://cors-anywhere.herokuapp.com/"
-		cache: "only-if-cached",
-		headers: new Headers({
-			"Access-Control-Allow-Origin": "*",
-		}),
-		method: "OPTIONS",
-		mode: "no-cors",
-		priority: "high",
-		referrer: "about:client",
-		referrerPolicy: "origin-when-cross-origin",
-	})
-	*/
-	let imgSrc = img.src;
-	urlParamBool ? img.src = "" : 0;
-	return fetch(imgSrc, { priority: "high" })
+		while (stack.length) {
+			const value = stack.pop();
+
+			switch (typeof value) {
+				case "boolean":
+					bytes += 4;
+					break;
+				case "string":
+					bytes += value.length * 2;
+					break;
+				case "number":
+					bytes += 8;
+					break;
+				case "object":
+					if (!objectList.includes(value)) {
+						objectList.push(value);
+						for (const prop in value) {
+							if (value.hasOwnProperty(prop)) {
+								stack.push(value[prop]);
+								bytes += prop.length * 2;
+							}
+						}
+					}
+					break;
+			}
+		}
+
+		return bytes;
+	},
+	downloadHelper(href, fileName) {
+		const a = document.createElement("a");
+		a.href = href;
+		a.target = "_blank";
+		a.download = fileName;
+		a.style.display = "none";
+		document.body.append(a);
+		a.click();
+		a.remove();
+	},
+	downloadTxt(text, fileName) {
+		// a.href = 'data:attachment/text;charset=utf-8,' + encodeURI(text);
+		frycAPI.downloadHelper(URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" })), fileName);
+	},
+	redownloadImg(img, fileName) {
+		frycAPI.downloadHelper(img.src, fileName);
+	},
+	determineFileName(FR_Result, img, alt) {
+		const nazwa = (() => {
+			if (img.hasAttribute("alt") && (t = img.alt.trim()).length) return t;
+
+			try {
+				const url = new URL(img.src);
+				if (url.protocol !== "data:") {
+					const n = url.pathname.slice(url.pathname.lastIndexOf("/") + 1);
+					return n.slice(0, (l => (l === -1 ? n.length : l))(n.lastIndexOf(".")));
+				}
+			} catch (error) {
+				console.warn("URL Parse Error: " + error);
+			}
+
+			return "Unknown " + frycAPI.printDateForFileName(new Date());
+		})();
+		const ext = (() => {
+			const imgForm = FR_Result.slice(5, FR_Result.indexOf(";")).replace("image/", "");
+			if (alt) {
+				if (imgForm === "jpeg") return ".png";
+				if (imgForm === "png") return ".jpg";
+				if (imgForm === "gif") return ".png";
+				if (imgForm === "svg+xml") return ".png";
+				return ".jpg";
+			} else {
+				if (imgForm === "jpeg") return ".jpg";
+				if (imgForm === "png") return ".png";
+				if (imgForm === "gif") return ".gif";
+				if (imgForm === "svg+xml") return ".svg";
+				return ".png";
+			}
+		})();
+
+		return nazwa + ext;
+	},
+	downloadImgOld(img, fileName, alt) {
+		const httpRequest = new XMLHttpRequest();
+		httpRequest.onload = function () {
+			const fileReader = new FileReader();
+			fileReader.onloadend = function () {
+				frycAPI.downloadHelper(fileReader.result, fileName === undefined ? frycAPI.determineFileName(fileReader.result, img, alt) : fileName);
+			};
+			fileReader.readAsDataURL(httpRequest.response);
+		};
+		httpRequest.open("GET", img.src);
+		httpRequest.responseType = "blob";
+		httpRequest.setRequestHeader("Access-Control-Allow-Origin", "*");
+		httpRequest.send();
+	},
+	imgSrcProcessing(imgSrc) {
+
+	},
+	downloadImg(img, fileName, alt, urlParamBool) {
+		/*
+		fetch(img.src, { // "https://cors-anywhere.herokuapp.com/"
+			cache: "only-if-cached",
+			headers: new Headers({
+				"Access-Control-Allow-Origin": "*",
+			}),
+			method: "OPTIONS",
+			mode: "no-cors",
+			priority: "high",
+			referrer: "about:client",
+			referrerPolicy: "origin-when-cross-origin",
+		})
+		*/
+		const imgSrc = img.src;
+		if (urlParamBool) img.src = "";
+		return fetch(imgSrc, { priority: "high" })
 		.then(resp => resp.blob())
 		.then(blob => URL.createObjectURL(blob))
 		.then(dataUrl => frycAPI.downloadHelper(dataUrl, fileName === undefined ? frycAPI.determineFileName(dataUrl, img, alt) : fileName))
-		.catch(err => {
-			// console.error(err);
-			let url = new URL(imgSrc);
-			url.searchParams.append("frycAPI_URL_Parameter", JSON.stringify({ alt: alt }));
+		.catch(err => { // eslint-disable-line handle-callback-err
+			// console.warn(err);
+			const url = new URL(imgSrc);
+			url.searchParams.append("frycAPI_URL_Parameter", JSON.stringify({ alt }));
 			frycAPI.downloadHelper(url.href, "");
 		});
-}
-// #endregion
-// #region //* Funkcje 3
-frycAPI.downloadImgRaw = function (img, fileName) {
-	let canvas = document.createElement('canvas');
-	canvas.height = img.naturalHeight;
-	canvas.width = img.naturalWidth;
-	// img.setAttribute('crossorigin', 'anonymous');
-	// img.crossOrigin = "anonymous";
-	// img.setAttribute("origin", "anonymous");
-	canvas.getContext('2d').drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+	},
+	downloadImgRaw(img, fileName) {
+		const canvas = document.createElement("canvas");
+		canvas.height = img.naturalHeight;
+		canvas.width = img.naturalWidth;
+		// img.setAttribute('crossorigin', 'anonymous');
+		// img.crossOrigin = "anonymous";
+		// img.setAttribute("origin", "anonymous");
+		canvas.getContext("2d").drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
 
-	frycAPI.downloadHelper(canvas.toDataURL(), fileName);
-}
-if (window.trustedTypes && trustedTypes.createPolicy) { // frycAPI.createHTML
-	frycAPI.escapeHTMLPolicy = trustedTypes.createPolicy('myEscapePolicy', {
-		createHTML: str => str
-	});
-	frycAPI.createHTML = (str) => frycAPI.escapeHTMLPolicy.createHTML(str);
-}
-frycAPI.gDriveOpenToDownload = function (link) { // converts Google drive open link to download link which is possible to be src of an img etc.
-	return `https://drive.usercontent.google.com/u/0/uc?id=${new URL(link).searchParams.get("id")}&export=download`
-}
-frycAPI.isValidDate = function (d) {
-	return d instanceof Date && !isNaN(d);
-}
-frycAPI.changeFavicon = function (href) {
-	document.head.insertAdjacentHTML("beforeend", `<link rel="shortcut icon" href="${href}">`);
-}
-frycAPI.changeFaviconRes = function (fileName) {
-	frycAPI.changeFavicon(frycAPI.getResURL(fileName));
-}
-frycAPI.getResURL = function (fileName) {
-	return `chrome-extension://${frycAPI.id}/resources/` + fileName;
-} // frycAPI.getResURL("")
-frycAPI.readFile = function (fileName, fileType) {
-	return fetch(fileName).then(async resp => {
-		if (resp.ok) {
-			switch (fileType || fileName.split(".").pop().toLowerCase()) {
-				case "json":
-					return resp.json();
-				case "xml":
-					return new DOMParser().parseFromString(await resp.text(), "text/xml")
-				case "jpg":
-				case "jpeg":
-				case "png":
-				case "gif":
-				case "img":
-				case "blob":
-					return resp.blob();
-				default:
-					return resp.text();
+		frycAPI.downloadHelper(canvas.toDataURL(), fileName);
+	},
+	// #endregion
+	// #region //* Funkcje 3
+	gDriveLinkToImgSrc(link) { // converts Google drive open link to download link which is possible to be src of an img etc.
+		// return `https://drive.usercontent.google.com/u/0/uc?id=${new URL(link).searchParams.get("id")}&export=download`; // Old
+		// return `drive.google.com/thumbnail?sz=w1000&id=${new URL(link).searchParams.get("id")}`; // Old poprawione
+		return frycAPI.gDriveIdToImgSrc(new URL(link).pathname.replace("/file/d/", "").replace("/view", ""));
+	},
+	gDriveIdToImgSrc(id) { // converts Google drive image id to download link which is possible to be src of an img etc.
+		return `drive.google.com/thumbnail?sz=w1000&id=${id}`;
+	},
+	isValidDate(d) {
+		return d instanceof Date && !isNaN(d);
+	},
+	isNotValidDate(d) {
+		return !frycAPI.isValidDate(d);
+	},
+	changeFavicon(href) {
+		document.querySelectorAll(`link[rel~="icon"]`).forEach(daElem => daElem.remove());
+		document.head.insertAdjacentHTML("beforeend", `<link rel="icon" href="${href}">`);
+	}, // frycAPI.changeFavicon("href");
+	changeFaviconRes(fileName) {
+		frycAPI.changeFavicon(frycAPI.getResURL(fileName));
+	}, // frycAPI.changeFaviconRes("fileName");
+	getResURL(fileName) {
+		return `chrome-extension://${frycAPI.id}/resources/` + fileName;
+	}, // frycAPI.getResURL("")
+	readFile(fileName, fileType) {
+		return fetch(fileName).then(resp => {
+			if (resp.ok) {
+				switch (fileType ?? (() => {
+					try { return new URL(fileName).pathname } // eslint-disable-line brace-style
+					catch (err) { return fileName }
+				})().split(".").pop().toLowerCase()) {
+					case "json":
+						return resp.json();
+					case "xml":
+						return resp.text().then(txt => new DOMParser().parseFromString(txt, "text/xml"));
+					case "jpg":
+					case "jpeg":
+					case "png":
+					case "gif":
+					case "img":
+					case "blob":
+						return resp.blob();
+					default:
+						return resp.text();
+				}
+			} else {
+				resp.text().then(txt => { throw new Error(txt) });
 			}
+		}).catch(err => console.error(err));
+	}, // await frycAPI.readFile("url_or_fileName")
+	getResData(fileName, fileType) {
+		return frycAPI.readFile(frycAPI.getResURL(fileName), fileType);
+	}, // await frycAPI.getResData("")
+	createMutObs(callBack, objOpts) { // Mutation Observer
+		// runOnLoad = true, elem = document.body, options = { childList: true, subtree: true } // Old
+		const options = {
+			childList            : objOpts?.options?.childList             ?? true,
+			subtree              : objOpts?.options?.subtree               ?? true,
+			attributes           : objOpts?.options?.attributes            ?? false,
+			attributeFilter      : objOpts?.options?.attributeFilter       ?? undefined,
+			attributeOldValue    : objOpts?.options?.attributeOldValue     ?? false,
+			characterData        : objOpts?.options?.characterData         ?? false,
+			characterDataOldValue: objOpts?.options?.characterDataOldValue ?? false,
+		};
+		const elem = objOpts?.elem ?? document.body;
+		const runOnLoad = objOpts?.runOnLoad ?? true;
+
+		if (runOnLoad) callBack();
+		const mut = new MutationObserver(callBack);
+		mut.observe(elem, options);
+		return mut;
+		// new MutationObserver(callBack).observe(elem, options) // Old
+	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runOnLoad: true, elem: document.body, options: { childList: true, subtree: true } });
+	setDefaultDate(selector, options) { // { getDate: 111, setDate: 111, dateTitle: 111 }
+		// flagowe zastosowanie w www.autohotkey.com
+		const getDate = (() => {
+			switch (options?.getDate) {
+				case "txt": return elem => elem.innerText;
+				case "attr":
+				case undefined: return elem => elem.getAttribute("datetime");
+				default: return options?.getDate;
+			}
+		})();
+		const setDate = options?.setDate ?? frycAPI.setDefaultDateText;
+		const setTitle = options?.setTitle ?? frycAPI.setDefaultDateTitle;
+		frycAPI.forEach(selector, daElem => {
+			const data = new Date(getDate(daElem));
+			if (frycAPI.isValidDate(data)) {
+				setDate(daElem, data, options?.dateTitle);
+				setTitle(daElem, data, options?.dateTitle);
+			}
+		});
+		frycAPI.setDefaultDateStyle();
+	},
+	getDefaultDateText(data) {
+		return frycAPI.getDefaultDateHTML(frycAPI.printRelTime(data.getTime()));
+	},
+	getDefaultDateHTML(data) {
+		return `<span class="lepszyCzas"><span>${data}</span></span>`;
+	},
+	setDefaultDateText(elem, data, dateTitle = true) {
+		if (dateTitle) {
+			elem.frycAPI_setInnerHTML(frycAPI.getDefaultDateText(data));
 		} else {
-			throw new Error(await resp.text());
+			elem.frycAPI_setInnerHTML(frycAPI.printRelTime(data.getTime()));
 		}
-	}).catch(err => console.error(err));
-} // await frycAPI.readFile("url_or_fileName")
-frycAPI.getResData = function (fileName, fileType) {
-	return frycAPI.readFile(frycAPI.getResURL(fileName), fileType);
-} // await frycAPI.getResData("")
-frycAPI.template = function () {
+	},
+	setDefaultDateTitleRaw(elem, data) {
+		elem.querySelector(`:scope > span.lepszyCzas`).setAttribute("dateTitle", data);
+	},
+	setDefaultDateTitle(elem, data, dateTitle = true) {
+		if (dateTitle) {
+			frycAPI.setDefaultDateTitleRaw(elem, frycAPI.printDate(data));
+		} else {
+			elem.setAttribute("title", frycAPI.printDate(data));
+		}
+	},
+	setDefaultDateStyle() {
+		if (frycAPI.querySelNull(`#frycAPI_setDefaultDate`)) { // await frycAPI.getResData("DotCursor.png").then(frycAPI.blobToBase64)
+			frycAPI.injectStyleNormal(/*css*/`
+				span.lepszyCzas {
+					/* cursor: url(${frycAPI.getResURL("DotCursor8.png")}) 3 3, auto; */
+					cursor: none;
+				}
+				body:not(.absolutnyCzas) span.lepszyCzas:hover {
+					> span {
+						display: none;
+					}
+					&::after {
+						content: attr(dateTitle);
+					}
+				}
+				body.absolutnyCzas span.lepszyCzas:not(:hover) {
+					> span {
+						display: none;
+					}
+					&::after {
+						content: attr(dateTitle);
+					}
+				}
+			`, { staticID: "frycAPI_setDefaultDate" });
+		}
+	}, // frycAPI.setDefaultDateStyle();
+	querySelNull(selector, elem = document) {
+		return elem.querySelector(selector) === null;
+	},
+	// #endregion
+	// #region //* Funkcje 4
+	querySelNotNull(selector, elem = document) {
+		return elem.querySelector(selector) !== null;
+	},
+	objUrl(blob) {
+		return URL.createObjectURL(blob);
+	}, // .then(frycAPI.objUrl)
+	blobToBase64(blob) {
+		const reader = new FileReader();
+		reader.readAsDataURL(blob);
+		return new Promise(resolve => {
+			reader.onloadend = () => {
+				resolve(reader.result);
+			};
+		});
+	}, // .then(frycAPI.blobToBase64)
+	time12To24(str) { // str = "3:32 PM";
+		const data = new Date("May 3 2001 " + str);
+		return `${data.getHours().toString().padStart(2, "0")}:${data.getMinutes().toString().padStart(2, "0")}`;
+	},
+	template() {
 
+	},
+	// #region //* Funkcje 5
+	// #endregion
+	// #endregion
+};
+// #region //* Reszta
+frycAPI.second = 1000;
+frycAPI.minute = frycAPI.second * 60;
+frycAPI.hour = frycAPI.minute * 60;
+frycAPI.day = frycAPI.hour * 24;
+frycAPI.month = frycAPI.day * 30;
+frycAPI.year = frycAPI.day * 365;
+frycAPI.week = frycAPI.day * 7;
+if (window.trustedTypes && trustedTypes.createPolicy) { // frycAPI.createHTML
+	frycAPI.escapeHTMLPolicy = trustedTypes.createPolicy("myEscapePolicy", {
+		createHTML: str => str,
+	});
+	frycAPI.createHTML = str => frycAPI.escapeHTMLPolicy.createHTML(str);
 }
-// #region //* Funkcje 4
-// #endregion
-// #endregion
-
-// #region //* Zmienne 1
-frycAPI.id = "fmlfdnbhgmgiinaalkmjcmmlohhhgkok";
-frycAPI.funcArr = [];
-frycAPI.host = window.location.hostname;
-frycAPI.colorSchemeDark = false;
-frycAPI.czasNumer = 1;
-frycAPI.styleStr = "";
-// frycAPI.urlParam = new URL(window.location.href).searchParams.getAll("frycAPI_URL_Parameter").pop();
-frycAPI.injectStyleNormalNum = 0;
-// loguj(document.referrer);
-// #region //* Zmienne 2
 // #endregion
 // #endregion
 
@@ -525,47 +678,47 @@ frycAPI.expandPrototype(Array, "frycAPI_pushArr", function (elem) {
 frycAPI.expandPrototype(Array, "frycAPI_numSort", function () {
 	return this.sort((a, b) => a - b);
 });
-frycAPI.expandPrototype(Element, "frycAPI_addClass", function () {
-	this.classList.add(...arguments);
-	return this
+frycAPI.expandPrototype(Element, "frycAPI_addClass", function (...classNames) {
+	this.classList.add(...classNames);
+	return this;
 });
-frycAPI.expandPrototype(Element, "frycAPI_removeClass", function () {
-	this.classList.remove(...arguments);
-	return this
+frycAPI.expandPrototype(Element, "frycAPI_removeClass", function (...classNames) {
+	this.classList.remove(...classNames);
+	return this;
 });
 frycAPI.expandPrototype(Element, "frycAPI_setAttribute", function (attName, attValue) {
 	this.setAttribute(attName, attValue);
-	return this
+	return this;
 });
 frycAPI.expandPrototype(Element, "frycAPI_setObjKey", function (keyName, keyValue) {
 	this[keyName] = keyValue;
-	return this
+	return this;
 });
 frycAPI.expandPrototype(Element, "frycAPI_setInnerHTML", function (newInnerHTML) {
 	this.innerHTML = frycAPI.createHTML(newInnerHTML);
-	return this
+	return this;
 });
 frycAPI.expandPrototype(Element, "frycAPI_insertAdjacentElement", function (where, elem) {
 	this.insertAdjacentElement(where, elem);
-	return this
+	return this;
 });
 frycAPI.expandPrototype(Element, "frycAPI_addEventListener", function (listenerType, callBack) {
 	this.addEventListener(listenerType, callBack);
-	return this
+	return this;
 });
 frycAPI.expandPrototype(Element, "frycAPI_shuffleChildren", function () {
-	let me = this;
+	const me = this;
 	Array.from(me.children).frycAPI_shuffle().forEach(function (daElem) {
 		me.appendChild(daElem);
 	});
 	return me;
 });
 frycAPI.expandPrototype(Element, "frycAPI_sortChildren", function (sortCallback) {
-	let me = this;
-	let elemArr = Array.from(me.children);
+	const me = this;
+	const elemArr = Array.from(me.children);
 	elemArr.sort((a, b) => {
-		let a1 = sortCallback(a);
-		let b1 = sortCallback(b);
+		const a1 = sortCallback(a);
+		const b1 = sortCallback(b);
 		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
 	});
 	elemArr.forEach(function (daElem) {
@@ -576,19 +729,19 @@ frycAPI.expandPrototype(Element, "frycAPI_getFirstTextNode", function () {
 	return [...this.childNodes].find(child => child.nodeType === Node.TEXT_NODE);
 });
 frycAPI.expandPrototype(Element, "frycAPI_getFirstTextNodeContent", function () {
-	let text = this.frycAPI_getFirstTextNode();
+	const text = this.frycAPI_getFirstTextNode();
 	return text && text.textContent.trim();
 });
 frycAPI.expandPrototype(Element, "frycAPI_removeChildren", function () {
 	while (this.firstChild) this.removeChild(this.lastChild);
 });
 frycAPI.expandPrototype(Element, "frycAPI_appendHTML", function (htmlString) { // tylko jeżeli root zawiera pojedynczy element
-	let t = document.createElement("template");
+	const t = document.createElement("template");
 	t.innerHTML = frycAPI.createHTML(htmlString);
 	return this.appendChild(t.content.firstElementChild);
 });
 frycAPI.expandPrototype(Element, "frycAPI_insertHTML", function (position, htmlString) { // tylko jeżeli root zawiera pojedynczy element
-	let t = document.createElement("template");
+	const t = document.createElement("template");
 	t.innerHTML = frycAPI.createHTML(htmlString);
 	return this.insertAdjacentElement(position, t.content.firstElementChild);
 });
@@ -608,12 +761,22 @@ frycAPI.expandPrototype(Object, "frycAPI_log", function () {
 frycAPI.expandPrototype(DOMTokenList, "notContains", function (daClass) {
 	return !this.contains(daClass);
 });
+frycAPI.expandPrototype(Element, "frycAPI_querySelNull", function (selector) {
+	return this.querySelector(selector) === null;
+});
+frycAPI.expandPrototype(Element, "frycAPI_querySelNotNull", function (selector) {
+	return this.querySelector(selector) !== null;
+});
+// elem.frycAPI_querySelNull(``)
+// elem.querySelector(``) === null
+// frycAPI.expandPrototype(Template, "frycAPI_name", function () {
+// });
 // #region //* Prototypy 3
 // #endregion
-//#endregion
+// #endregion
 
 // #region //* IFy 1
-if (frycAPI.host == "demo") { //* Demo
+if (frycAPI.host === "demo") { //* Demo
 	frycAPI.injectStyle(/*css*/`
 		.myDemoDiv {
 			display: block;
@@ -643,11 +806,11 @@ if (frycAPI.host.length) { //* Globalne funkcje
 	`);
 
 	(frycAPI.beforeLoad = function () {
-		//#region //* color scheme only light
+		// #region //* color scheme only light
 		new MutationObserver((mutRec, docObs) => {
 			if (frycAPI.colorSchemeDark) {
 				docObs.disconnect();
-				return
+				return;
 			}
 			if (document.head) {
 				// `<meta name="color-scheme" content="only light">` insertAdjacentHTML
@@ -656,10 +819,10 @@ if (frycAPI.host.length) { //* Globalne funkcje
 				docObs.disconnect();
 			}
 		}).observe(document.documentElement, { childList: true });
-		//#endregion
-		//#region //* 
+		// #endregion
+		// #region //*
 
-		//#endregion
+		// #endregion
 	})();
 
 	/*
@@ -681,7 +844,7 @@ if (frycAPI.host.length) { //* Globalne funkcje
 	frycAPI.onLoadSetter(() => { //* Przycisk do pobierania obrazów
 		// return;
 		let currImg;
-		const singleImageSite = (history.length == 1 && document.querySelector(`body>img:only-child`) !== null);
+		const singleImageSite = (history.length === 1 && document.querySelector(`body>img:only-child`) !== null);
 		// const przycisk = document.body.appendChild(document.createElement("div").frycAPI_addClass("przycisk-do-pobierania-obrazów").frycAPI_setAttribute("title", "Pobierz image").frycAPI_setAttribute("style", "display: none;"));
 		const przycisk = document.body.frycAPI_appendHTML(`<div class="przycisk-do-pobierania-obrazów" title="Pobierz image"></div>`);
 		przycisk.addEventListener("mouseleave", e => { if (e.toElement !== currImg) { przycisk.frycAPI_removeClass("kursor-nad-obrazem", "zły-rozmiar"); } });
@@ -695,7 +858,7 @@ if (frycAPI.host.length) { //* Globalne funkcje
 			return imgRect;
 		}
 		function imgEnter(e) {
-			if (e.fromElement === przycisk && this == currImg) return;
+			if (e.fromElement === przycisk && this === currImg) return;
 			currImg = this;
 			let imgRect = setPrzyciskPosiotion();
 			if (imgRect.width < allowedSize && imgRect.height < allowedSize) przycisk.frycAPI_addClass("zły-rozmiar");
@@ -719,7 +882,7 @@ if (frycAPI.host.length) { //* Globalne funkcje
 		new MutationObserver((mutRecArr, mutObs) => {
 			mutRecArr.forEach(mutRec => {
 				mutRec.addedNodes.forEach(node => {
-					if (node.tagName == "IMG") { przygotujObraz(node); return; }
+					if (node.tagName === "IMG") { przygotujObraz(node); return; }
 					if (node.querySelectorAll) node.querySelectorAll(`img`).forEach(przygotujObraz);
 				});
 			});
@@ -733,12 +896,12 @@ if (frycAPI.host.length) { //* Globalne funkcje
 
 	frycAPI.manualFunctionsCreator("Globalne funkcje", [
 		new frycAPI_ManualFunc("ඞ", function () {
-			let all = document.getElementsByTagName("*");
+			const all = document.getElementsByTagName("*");
 			for (let i = 0, max = all.length; i < max; i++) {
-				if (all[i].nodeName != 'STYLE' && all[i].nodeName != 'SCRIPT' && all[i].nodeName != 'NOSCRIPT') {
+				if (all[i].nodeName !== "STYLE" && all[i].nodeName !== "SCRIPT" && all[i].nodeName !== "NOSCRIPT") {
 					children = all[i].childNodes;
 					for (let j = 0; j < children.length; j++) {
-						if (children[j].nodeType == Node.TEXT_NODE) {
+						if (children[j].nodeType === Node.TEXT_NODE) {
 							children[j].nodeValue = "ඞ";
 						}
 					}
@@ -746,59 +909,41 @@ if (frycAPI.host.length) { //* Globalne funkcje
 			}
 		}),
 		new frycAPI_ManualFunc("Toggle Style", function () {
-			let myStyle = document.getElementById("frycAPI_myStyle");
+			const myStyle = document.getElementById("frycAPI_myStyle");
 			if (myStyle) {
 				frycAPI.style = myStyle.cloneNode(1);
 				myStyle.remove();
 				this.off();
-				return "toggleOnOff"
+				return "toggleOnOff";
 			} else if (frycAPI.style) {
 				document.body.insertAdjacentElement("afterend", frycAPI.style);
 				this.on();
-				return "toggleOnOff"
+				return "toggleOnOff";
 			}
 		}),
+		new frycAPI_ManualFunc("Relative time", function () {
+			document.body.classList.toggle("absolutnyCzas");
+			this.toggle();
+			return "toggleOnOff";
+		}),
 		new frycAPI_ManualFunc("Edit Script", function () {
-			let str =
-				`FileRead, Contents, G:\\Biblioteki Windows\\Dokumenty\\1. Mój Folder\\!HTML stuff\\!Mój Stuff\\Chrome Extensions\\JS + CSS Injector\\frycAPI.js
-LineNum := 1
-MaxLine := 0
-host := "${frycAPI.host}"
-Loop, Parse, Contents, \`n
-{
-	If (SubStr(A_loopfield, 1, 2) == "if" and InStr(A_loopfield, host)) {
-		LineNum := A_Index
-		break
-	}
-	MaxLine := A_Index
-}
-If (LineNum == 1) {
-	Run, % """C:\\Users\\Fryderyk\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"" --goto ""G:\\Biblioteki Windows\\Dokumenty\\1. Mój Folder\\!HTML stuff\\!Mój Stuff\\Chrome Extensions\\JS + CSS Injector\\frycAPI.js:" . MaxLine . ":1"""
-	Clipboard := host
-} else {
-	Run, % """C:\\Users\\Fryderyk\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"" --goto ""G:\\Biblioteki Windows\\Dokumenty\\1. Mój Folder\\!HTML stuff\\!Mój Stuff\\Chrome Extensions\\JS + CSS Injector\\frycAPI.js:" . LineNum . ":1"""
-}
-WinActivate,  - Visual Studio Code
-FileDelete, G:\\Biblioteki Windows\\Pobrane\\VSC_Go_To_Line.ahk`;
-			frycAPI.downloadTxt(str, "VSC_Go_To_Line.ahk");
+			const str = `
+				#Requires AutoHotkey <2.0
+				#Include C:\\Users\\Fryderyk\\Desktop\\AutoHotKey\\VSC_Go_To_Line_Base.ahk
+				openVSCode("${frycAPI.host}")
+			`;
+			frycAPI.downloadTxt(frycAPI.minifyCodeSimple(str), "VSC_Go_To_Line.ahk");
 		}),
 	]);
 }
-if (frycAPI.hostList(["sjp.pwn.pl", "www.baillifard.com"])) { // Prosta zmiana czcionki
-	frycAPI.injectStyle(/*css*/`
-		* {
-			font-family: IBM Plex Sans Condensed;
-		}
-	`);
-}
-if (1 && frycAPI.host == "192.168.1.1") {
+if (1 && frycAPI.host === "192.168.1.1") {
 	frycAPI.injectStyle(/*css*/`
 		#menu a.sel span.text {
 			color: #000000;
 		}
 	`);
 }
-if (1 && frycAPI.host == "alienswarm.fandom.com") {
+if (1 && frycAPI.host === "alienswarm.fandom.com") {
 	frycAPI.injectStyle(/*css*/`
 		button.mojButt {
 			position: fixed;
@@ -810,7 +955,7 @@ if (1 && frycAPI.host == "alienswarm.fandom.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "apps.microsoft.com") {
+if (1 && frycAPI.host === "apps.microsoft.com") {
 	frycAPI.injectStyle(/*css*/`
 		.full-star {
 			fill: #ffbf00;
@@ -818,9 +963,9 @@ if (1 && frycAPI.host == "apps.microsoft.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "ark.fandom.com") {
+if (1 && frycAPI.host === "ark.fandom.com") {
 	// https://ark.fandom.com/wiki/ARK_Survival_Evolved_Wiki
-	let funkcje = "ARK Wiki Powiększ obrazki";
+	const funkcje = "ARK Wiki Powiększ obrazki";
 	frycAPI.injectStyle(/*css*/`
 		.top-ads-container {
 			display: none;
@@ -1479,7 +1624,7 @@ if (1 && frycAPI.host == "ark.fandom.com") {
 		// 			let newSrc = myImgSrc.substr(0, myIndx + scaleStr.length + 1)
 		// 				+ (myWidth * 2)
 		// 				+ myImgSrc.substr(myImgSrc.indexOf("?"));
-		// 			if (myImgSrc != newSrc) {
+		// 			if (myImgSrc !== newSrc) {
 		// 				myImg.src = newSrc;
 		// 				myImg.classList.add("zmienione");
 		// 				// loguj("Zmieniam")
@@ -1502,38 +1647,38 @@ if (1 && frycAPI.host == "ark.fandom.com") {
 
 		// frycAPI.obrazekData = [];
 
+		const scaleStr = "scale-to-width-down";
 		frycAPI.obrazekObserwer = function (myImg) {
-			let myImgSrc = myImg.src;
-			let myIndx = myImgSrc.indexOf(scaleStr);
-			let myWidth = myImg.getAttribute("width");
+			const myImgSrc = myImg.src;
+			const myIndx = myImgSrc.indexOf(scaleStr);
+			const myWidth = myImg.getAttribute("width");
 			// frycAPI.obrazekData.push({myIndx: myIndx, myWidth: myWidth})
 			if (myIndx !== -1 && myWidth !== null) {
-				let newSrc = myImgSrc.substr(0, myIndx + scaleStr.length + 1)
-					+ (myWidth * 2)
-					+ myImgSrc.substr(myImgSrc.indexOf("?"));
-				if (myImgSrc != newSrc) {
+				const newSrc = myImgSrc.substr(0, myIndx + scaleStr.length + 1) +
+								   (myWidth * 2) +
+								   myImgSrc.substr(myImgSrc.indexOf("?"));
+				if (myImgSrc !== newSrc) {
 					myImg.src = newSrc;
 					// myImg.classList.add("zmienione");
 					// loguj("Zmieniam")
 				}
 			}
-		}
+		};
 
-		let scaleStr = "scale-to-width-down";
-		let opcje = { attributes: true };
+		const opcje = { attributes: true };
 		// let obrazekImg = new MutationObserver((mutRec) => {
 		// 	frycAPI.obrazekObserwer(mutRec[0].target);
 		// });
 		// frycAPI.obrazCount = {};
 		function addObserver(daElem) {
 			frycAPI.obrazekObserwer(daElem);
-			new MutationObserver((mutRec) => {
+			new MutationObserver(mutRec => {
 				frycAPI.obrazekObserwer(mutRec[0].target);
 			}).observe(daElem, opcje);
 			// daElem.classList.add("bylem");
 			// loguj(daI)
 		}
-		frycAPI.bodyObs = new MutationObserver((mutRec) => {
+		frycAPI.bodyObs = new MutationObserver(mutRec => {
 			if (!frycAPI.bodyObs.hasOwnProperty("pierwszy")) {
 				frycAPI.bodyObs.pierwszy = 1;
 				frycAPI.forEach("img[src]", function (daElem, daI, daArr) {
@@ -1541,9 +1686,9 @@ if (1 && frycAPI.host == "ark.fandom.com") {
 				});
 			}
 			mutRec.forEach(function (daElem, daI, daArr) {
-				daElem.addedNodes.forEach(function (daElem1, daI, daArr) {
+				daElem.addedNodes.forEach(function (daElem1, daI1, daArr1) {
 					// loguj(daElem1);
-					if (daElem1.nodeName == "IMG" && daElem1.matches("img[src]")) {
+					if (daElem1.nodeName === "IMG" && daElem1.matches("img[src]")) {
 						addObserver(daElem1);
 						// loguj("Nowy obraz!");
 					}
@@ -1565,7 +1710,7 @@ if (1 && frycAPI.host == "ark.fandom.com") {
 			}
 		}).observe(document.documentElement, { childList: true });
 
-		loguj("ARK done!")
+		loguj("ARK done!");
 	})();
 
 	frycAPI.onLoadSetter(() => {
@@ -1575,7 +1720,7 @@ if (1 && frycAPI.host == "ark.fandom.com") {
 		// loguj(frycAPI.obrazCount);
 	});
 }
-if (1 && frycAPI.host == "astronomia.zagan.pl") {
+if (1 && frycAPI.host === "astronomia.zagan.pl") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		  background-image: none;
@@ -1584,14 +1729,14 @@ if (1 && frycAPI.host == "astronomia.zagan.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "bcgplatinion.com") {
+if (1 && frycAPI.host === "bcgplatinion.com") {
 	frycAPI.injectStyle(/*css*/`
 		.cli-barmodal-open {
 			overflow: scroll;
 		}
 	`);
 }
-if (1 && frycAPI.host == "blog.discord.com") {
+if (1 && frycAPI.host === "blog.discord.com") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		  filter: invert(1);
@@ -1601,14 +1746,14 @@ if (1 && frycAPI.host == "blog.discord.com") {
 		}
 	`);
 }
-if (0 && frycAPI.host == "blog.etrapez.pl") {
+if (0 && frycAPI.host === "blog.etrapez.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "bloons.fandom.com") {
+if (1 && frycAPI.host === "bloons.fandom.com") {
 	frycAPI.injectStyle(/*css*/`
 		img.mwe-math-fallback-image-display.mwe-math-element {
 		  filter: none !important;
@@ -1617,8 +1762,8 @@ if (1 && frycAPI.host == "bloons.fandom.com") {
 }
 if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 	let bodyBack, rediSpan;
-	let transTime = 0.25; // 0.25
-	if (frycAPI.host == "boards.4chan.org") {
+	const transTime = 0.25; // 0.25
+	if (frycAPI.host === "boards.4chan.org") {
 		// bodyBack = "#ffe"; rediSpan = "#00e";
 		bodyBack = "#0F131E"; rediSpan = "#A3A3C6";
 	} else {
@@ -2018,7 +2163,7 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 	`);
 
 	if (window.location.pathname.includes("thread")) {
-		let opcje = { childList: true };
+		const opcje = { childList: true };
 		/*
 		async function tumblerize() {
 			function sleep(ms) {
@@ -2040,22 +2185,23 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 		})();
 
 		frycAPI.onLoadSetter(() => {
-			let obserwatorBlok = new MutationObserver(function mutatorBlockquote(myRec) {
+			let obserwatorBlok, obserwatorLink, obserwatorFileThumb, obserwatorImg;
+			obserwatorBlok = new MutationObserver(function mutatorBlockquote(myRec) { // eslint-disable-line prefer-const
 				// debugger
 				// loguj(myRec);
 				if (myRec[0].addedNodes.length) {
-					let nowyNode = myRec[0].addedNodes[0].frycAPI_addClass("powiekszPocz");
-					let targetChildren = myRec[0].target.childNodes;
+					const nowyNode = myRec[0].addedNodes[0].frycAPI_addClass("powiekszPocz");
+					const targetChildren = myRec[0].target.childNodes;
 					if (targetChildren.length > 2) {
-						let trgChildN = targetChildren.length;
+						const trgChildN = targetChildren.length;
 						if ((() => {
 							for (let i = 0; i <= trgChildN - 1; i++) {
 								if (targetChildren[i].id && targetChildren[i].id.split("p")[1] > nowyNode.id.split("p")[1]) {
 									targetChildren[i].insertAdjacentElement("beforebegin", nowyNode);
-									return 0
+									return 0;
 								}
 							}
-							return 1
+							return 1;
 						})()) {
 							targetChildren[trgChildN - 1].insertAdjacentElement("afterend", nowyNode);
 						}
@@ -2064,7 +2210,8 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 					}
 					obserwatorBlok.observe(nowyNode.querySelector("blockquote.postMessage"), opcje);
 					obserwatorLink.observe(nowyNode.querySelector("blockquote.postMessage .myDiv"), opcje);
-					if (fileThumb = nowyNode.querySelector("a.fileThumb")) {
+					const fileThumb = nowyNode.querySelector("a.fileThumb");
+					if (fileThumb !== null) {
 						obserwatorFileThumb.observe(fileThumb, opcje);
 					}
 				} else if (myRec.length > 1 && myRec[0].removedNodes.length) {
@@ -2073,22 +2220,22 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 					});
 				} else {
 					// myRec[0].removedNodes[0]
-					// .frycAPI_removeClass("powiekszPocz")
-					// .frycAPI_removeClass("powiekszKon");
+					// .frycAPI_removeClass("powiekszPocz", "powiekszKon")
 				}
 			});
-			let obserwatorLink = new MutationObserver(function mutatorQuotelink(myRec) {
+			obserwatorLink = new MutationObserver(function mutatorQuotelink(myRec) {
 				// debugger
 				if (myRec[0].addedNodes.length) {
-					let nowyNode = myRec[0].addedNodes[0].frycAPI_addClass("powiekszPocz");
+					const nowyNode = myRec[0].addedNodes[0].frycAPI_addClass("powiekszPocz");
 					// loguj(nowyNode.classList);
-					let linki = myRec[0].target.querySelectorAll("a.linkfade");
+					const linki = myRec[0].target.querySelectorAll("a.linkfade");
 					for (let i = 0; i < linki.length; i++) {
-						if (linki[i].getAttribute("data-pfx") == nowyNode.getAttribute("data-pfx")) {
+						if (linki[i].getAttribute("data-pfx") === nowyNode.getAttribute("data-pfx")) {
 							linki[i].insertAdjacentElement("afterend", nowyNode);
 							obserwatorBlok.observe(nowyNode.querySelector("blockquote.postMessage"), opcje);
 							obserwatorLink.observe(nowyNode.querySelector("blockquote.postMessage .myDiv"), opcje);
-							if (fileThumb = nowyNode.querySelector("a.fileThumb")) {
+							const fileThumb = nowyNode.querySelector("a.fileThumb");
+							if (fileThumb !== null) {
 								obserwatorFileThumb.observe(fileThumb, opcje);
 							}
 							break;
@@ -2100,11 +2247,11 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 					});
 				}
 			});
-			let obserwatorFileThumb = new MutationObserver(function mutatorFileThumb(myRec) {
+			obserwatorFileThumb = new MutationObserver(function mutatorFileThumb(myRec) {
 				{
 					// console.table(myRec);
 					// myRec.forEach(function (daElem, daI, daArr) {
-					// 	if (daElem.type == "attributes" && daElem.target.classList.contains("expanded-thumb")) {
+					// 	if (daElem.type === "attributes" && daElem.target.classList.contains("expanded-thumb")) {
 					// 		loguj(daElem.oldValue);
 					// 		loguj(daElem.target.getAttribute("style"));
 					// 		loguj(daElem.target.style.maxWidth);
@@ -2112,11 +2259,11 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 					// });
 					// myRec[0].addedNodes[0]
 				}
-				let aFile = myRec[0].target;
-				let thumb = aFile.firstChild;
+				const aFile = myRec[0].target;
+				const thumb = aFile.firstChild;
 				aFile.parentNode.parentNode.parentNode.scrollIntoView();
 				if (myRec[0].addedNodes.length) {
-					let addedImg = myRec[0].addedNodes[0];
+					const addedImg = myRec[0].addedNodes[0];
 					// myRec[0].addedNodes[0].setAttribute("style", myRec[0].target.firstChild.getAttribute("deafult_style"));
 
 					// loguj(addedImg.getAttribute("style"));
@@ -2142,7 +2289,7 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 					aFile.parentNode.classList.remove("image-expanded");
 				}
 			});
-			let mini = function (thumb, addedImg) {
+			const mini = function (thumb, addedImg) {
 				window.requestAnimationFrame(() => {
 					// debugger
 					thumb.style.width = addedImg.style.maxWidth;
@@ -2166,9 +2313,9 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 					thumb.style.display = "none";
 					thumb.removeEventListener("transitionend", thumbTrans, false);
 				});
-			}
-			let obserwatorImg = new MutationObserver(function mutatorImg(myRec, mutObs) {
-				let addedImg = myRec[0].target;
+			};
+			obserwatorImg = new MutationObserver(function mutatorImg(myRec, mutObs) {
+				const addedImg = myRec[0].target;
 				// loguj("classList: " + addedImg.classList.value);
 				// if (addedImg.classList.contains("byłem")) {
 				// 	return
@@ -2177,13 +2324,13 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 				// }
 				loguj("obserwatorImg");
 				// debugger
-				let thumb = addedImg.previousSibling;
+				const thumb = addedImg.previousSibling;
 				// loguj(addedImg.getAttribute("style"));
 				// loguj(addedImg.complete);
 				thumb.style.display = "block";
 				// addedImg.style.display = "none";
 				addedImg.classList.add("dispNone");
-				if (addedImg.complete == false) {
+				if (addedImg.complete === false) {
 					// let maxWidth  = addedImg.style.maxWidth ;
 					// let maxHeight = addedImg.style.maxHeight;
 					// addedImg.style.maxWidth = thumb.style.width;
@@ -2209,12 +2356,12 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 			});
 
 			frycAPI.forEach("div.post blockquote.postMessage", function (daElem, daI, daArr) {
-				let myDiv = document.createElement("div");
+				const myDiv = document.createElement("div");
 				myDiv.classList.add("myDiv");
 				while (daElem.childNodes.length > 0) {
 					myDiv.appendChild(daElem.childNodes[0]);
 				}
-				if (myDiv.childNodes.length == 0) {
+				if (myDiv.childNodes.length === 0) {
 					daElem.classList.add("pusty");
 				}
 				daElem.appendChild(myDiv);
@@ -2222,19 +2369,19 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 				obserwatorBlok.observe(daElem, opcje);
 			});
 
-			document.querySelector("div.post.op .file").insertAdjacentElement('beforebegin', document.querySelector("div.post.op .postInfo.desktop"));
+			document.querySelector("div.post.op .file").insertAdjacentElement("beforebegin", document.querySelector("div.post.op .postInfo.desktop"));
 			// document.getElementById("bl_39814357").appendChild(document.getElementById("bl_39814357").firstChild.cloneNode(1))
 
 			frycAPI.forEach(".desktop span.dateTime", function (daElem, daI, daArr) {
-				let d = new Date(Number(daElem.getAttribute("data-utc")) * 1000);
-				daElem.innerHTML = d.toLocaleString("pl-PL", { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'America/New_York' }).replace(", ",
-					"|" + d.toLocaleString("en-GB", { weekday: 'short', timeZone: 'America/New_York' }) + "|");
+				const d = new Date(Number(daElem.getAttribute("data-utc")) * 1000);
+				daElem.innerHTML = d.toLocaleString("pl-PL", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" }).replace(", ",
+					"|" + d.toLocaleString("en-GB", { weekday: "short", timeZone: "America/New_York" }) + "|");
 			});
 
 			{ // Ukrywanie postów
 				frycAPI.hidePost = function (daElem) {
 					daElem.parentNode.parentNode.parentNode.classList.toggle("ukryty");
-				}
+				};
 				frycAPI.forEach(".desktop span.name", function (daElem, daI, daArr) {
 					daElem.setAttribute("onclick", "frycAPI.hidePost(this);");
 					// daElem.addEventListener("click", hidePost);
@@ -2242,7 +2389,7 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 
 				frycAPI.hidePostBar = function (daElem) {
 					daElem.parentNode.classList.toggle("ukryty");
-				}
+				};
 				frycAPI.forEach("div.post.reply", function (daElem, daI, daArr) {
 					// let myDiv = document.createElement("div");
 					// myDiv.classList.add("ukryjBar");
@@ -2251,32 +2398,32 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 
 					daElem.insertAdjacentElement("afterbegin",
 						document.createElement("div")
-							.frycAPI_addClass("ukryjBar")
-							.frycAPI_setAttribute("onclick", "frycAPI.hidePostBar(this);")
+						.frycAPI_addClass("ukryjBar")
+						.frycAPI_setAttribute("onclick", "frycAPI.hidePostBar(this);")
 					);
 				});
 			}
 
-			frycAPI.forEach(".postInfoM.mobile", function (daElem, daI, daArr) { daElem.remove(); });
+			frycAPI.forEach(".postInfoM.mobile", daElem => daElem.remove());
 
 			frycAPI.forEach("a.fileThumb", function (daElem, daI, daArr) {
-				let wymiary = daElem.previousSibling.childNodes[2].data.match(/(?<=[ x])\d+/g);
+				const wymiary = daElem.previousSibling.childNodes[2].data.match(/(?<=[ x])\d+/gu);
 				// daElem.firstChild.setAttribute("a_width", wymiary[0]);
 				// daElem.firstChild.setAttribute("a_height", wymiary[1]);
 				daElem.firstChild.setAttribute("a_aspect", wymiary[0] / wymiary[1]);
 				daElem.firstChild.setAttribute("deafult_style", daElem.firstChild.getAttribute("style"));
-				obserwatorFileThumb.observe(daElem, opcje)
+				obserwatorFileThumb.observe(daElem, opcje);
 			});
 
 			if (document.querySelector(".redditify") === null) {
-				let redSpan = document.createElement("span");
-				let redDiv = document.createElement("div");
+				const redSpan = document.createElement("span");
+				const redDiv = document.createElement("div");
 				redDiv.classList.add("redditify");
 				// redSpan.setAttribute("onclick", "redditify();");
 				redSpan.addEventListener("click", async function redditify() {
-					let reddit = document.querySelector(".redditify span");
+					const reddit = document.querySelector(".redditify span");
 					if (!reddit.classList.contains("koniec")) {
-						reddit.classList.add("koniec")
+						reddit.classList.add("koniec");
 						reddit.innerHTML = "Redditifying";
 						reddit.insertAdjacentHTML("afterend",
 							`<svg id="mySvg" width="200px" height="200px" viewBox="-50 -50 100 100">
@@ -2296,32 +2443,36 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 								</rect>
 							</svg>`
 						);
-						let mySvg = reddit.parentNode.querySelector("svg");
-						let czas = 1.44;
-						let liczba = 12;
+						const mySvg = reddit.parentNode.querySelector("svg");
+						const czas = 1.44;
+						const liczba = 12;
 						for (let i = 1; i < liczba; i++) {
-							let myRect = mySvg.querySelector("rect").cloneNode(1);
+							const myRect = mySvg.querySelector("rect").cloneNode(1);
 							myRect.setAttribute("transform", `rotate(-${i / liczba * 360})`);
 							myRect.children[0].setAttribute("begin", `-${i / liczba * czas}s`);
 							// console.log(myRect);
 							mySvg.append(myRect);
 						}
 						while (await (async function () {
-							let linki = document.querySelectorAll(".backlink>span>.quotelink:not(.linkfade)");
-							//console.log(linki.length);
+							const linki = document.querySelectorAll(".backlink>span>.quotelink:not(.linkfade)");
+							// console.log(linki.length);
 							for (let i = 0; i < linki.length; i++) {
 								linki[i].click();
 								await frycAPI.sleep(1);
 							}
-							return linki.length
+							return linki.length;
 						})()) { }
+						// while (frycAPI.forEach(`.backlink>span>.quotelink:not(.linkfade)`, async daElem => {
+						// 	daElem.click();
+						// 	await frycAPI.sleep(1);
+						// }).length) { }
 
 						reddit.innerHTML = "Redditified";
 						mySvg.remove();
 					}
 				});
 				redSpan.innerHTML = "Redditify";
-				let navDiv = document.querySelector(".navLinks.desktop");
+				const navDiv = document.querySelector(".navLinks.desktop");
 				navDiv.append(" [");
 				navDiv.appendChild(redDiv).appendChild(redSpan);
 				navDiv.append("]");
@@ -2331,7 +2482,7 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 		loguj("4chan done!");
 	}
 }
-if (1 && frycAPI.host == "bugs.chromium.org") {
+if (1 && frycAPI.host === "bugs.chromium.org") {
 	frycAPI.injectStyle(/*css*/`
 		#shadow-root > .comment-body {
 		    padding: 4px;
@@ -2374,7 +2525,7 @@ if (1 && frycAPI.host == "bugs.chromium.org") {
 		*/
 	`);
 }
-if (1 && frycAPI.host == "chat.openai.com") {
+if (1 && frycAPI.host === "chat.openai.com") {
 	frycAPI.injectStyle(/*css*/`
 		/* .mój-tooltip {
 			position: absolute;
@@ -2431,21 +2582,21 @@ if (1 && frycAPI.host == "chat.openai.com") {
 		}).observe(document.querySelector(`nav[aria-label="Chat history"]`), { childList: true, subtree: true });
 	}); */
 }
-if (0 && frycAPI.host == "cke.gov.pl") {
+if (0 && frycAPI.host === "cke.gov.pl") {
 	frycAPI.injectStyle(/*css*/`
 		h2, .h2 {
 		    color: #F8A238;
 		}
 	`);
 }
-if (1 && frycAPI.host == "comforteo.eu") {
+if (1 && frycAPI.host === "comforteo.eu") {
 	frycAPI.injectStyle(/*css*/`
 		.tooltip-static .content-area {
 			color: hsl(0deg 0% 0%);
 		}
 	`);
 }
-if (1 && frycAPI.host == "comparetwolists.com") {
+if (1 && frycAPI.host === "comparetwolists.com") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			margin: auto;
@@ -2495,18 +2646,18 @@ if (1 && frycAPI.host == "comparetwolists.com") {
 		frycAPI.forEach(`img[src="copy.png"], img[src="download.png"]`, (daElem, daI, daArr) => {
 			daElem.frycAPI_addClass("hide");
 		});
-		let tab;
-		if (tab = document.querySelector(`body>table:first-of-type>tbody`)) {
+		const tab = document.querySelector(`body>table:first-of-type>tbody`);
+		if (tab !== null) {
 			tab.querySelector(`tr>td:nth-child(1)>b`).innerHTML = document.querySelector(`input[name="desca"]`).value;
 			tab.querySelector(`tr>td:nth-child(2)>b`).innerHTML = document.querySelector(`input[name="descb"]`).value;
-			let myTr = tab.appendChild(document.createElement("tr"));
+			const myTr = tab.appendChild(document.createElement("tr"));
 			[3, 4, 5].forEach(tr => {
 				daElem = document.querySelector(`body>table:nth-of-type(2)>tbody>tr:nth-child(${tr})`);
-				let myTd = myTr.appendChild(document.createElement("td")).appendChild(document.createElement("div").frycAPI_addClass("myDiv"));
+				const myTd = myTr.appendChild(document.createElement("td")).appendChild(document.createElement("div").frycAPI_addClass("myDiv"));
 				[1, 2, 5, 6].forEach(n => {
 					myTd.appendChild(document.createElement("div")).innerHTML = daElem.querySelector(`td:nth-child(${n})`).innerText;
-				})
-			})
+				});
+			});
 		}
 	});
 
@@ -2519,7 +2670,7 @@ if (1 && frycAPI.host == "comparetwolists.com") {
 		}),
 	]);
 }
-if (1 && frycAPI.host == "cotone.pl") {
+if (1 && frycAPI.host === "cotone.pl") {
 	frycAPI.injectStyle(/*css*/`
 		.floatcenterwrap .paginator li.selected {
 			color: #d69754;
@@ -2562,7 +2713,7 @@ if (1 && frycAPI.host == "cotone.pl") {
 }
 // #endregion
 // #region //* IFy 2
-if (1 && frycAPI.host == "css-tricks.com") {
+if (1 && frycAPI.host === "css-tricks.com") {
 	frycAPI.injectStyle(/*css*/`
 		/* .on-light, .on-light .article-content {
 		    color: hsl(236 15% 90% / 1);
@@ -2714,7 +2865,7 @@ if (1 && frycAPI.host == "css-tricks.com") {
 		});
 	});
 }
-if (1 && frycAPI.host == "derpibooru.org") {
+if (1 && frycAPI.host === "derpibooru.org") {
 	frycAPI.injectStyle(/*css*/`
 		form.header__search.flex.flex--no-wrap.flex--centered[action="/search"] {
 			flex-grow: 1;
@@ -2757,7 +2908,7 @@ if (1 && frycAPI.host == "derpibooru.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "developer.mozilla.org") {
+if (1 && frycAPI.host === "developer.mozilla.org") {
 	frycAPI.injectStyle(/*css*/`
 		/* iframe.sample-code-frame {
 		  filter: invert(1) hue-rotate(180deg);
@@ -2787,7 +2938,7 @@ if (1 && frycAPI.host == "developer.mozilla.org") {
 		}
 	`);
 }
-if (0 && frycAPI.host == "diep.io") {
+if (0 && frycAPI.host === "diep.io") {
 	frycAPI.injectStyle(/*css*/`
 		body #app-mount .container-1r6BKw {
 			justify-content: space-between;
@@ -2796,7 +2947,7 @@ if (0 && frycAPI.host == "diep.io") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "dinopoloclub.com") {
+if (1 && frycAPI.host === "dinopoloclub.com") {
 	frycAPI.injectStyle(/*css*/`
 		.site-header, .site-header .site-title a {
 			filter: invert(1) hue-rotate(180deg);
@@ -2812,7 +2963,7 @@ if (1 && frycAPI.host == "dinopoloclub.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "docs.google.com") {
+if (1 && frycAPI.host === "docs.google.com") {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		body #docs-editor-container .grid-table-container+canvas, .docos-icon-img:before {
@@ -2830,19 +2981,23 @@ if (1 && frycAPI.host == "docs.google.com") {
 		*/
 	`);
 
+	// (frycAPI.beforeLoad = function () {
+	// 	// frycAPI.colorSchemeDark = 1;
+	// })();
+
 	frycAPI.onLoadSetter(function () {
 		new MutationObserver((mutRec, mutObs) => {
 			// loguj(mutRec);
-			let elem = document.getElementById("docs-maestro-prompt-dialog-message");
+			const elem = document.getElementById("docs-maestro-prompt-dialog-message");
 			if (elem && mutRec[0].addedNodes[0].hasAttribute("jsshadow") && elem.innerText.startsWith("!@#$%^&*()")) {
 				// loguj(elem.innerText);
 				frycAPI.ctrlC(elem.innerText.replace("!@#$%^&*()", ""));
 				mutRec[0].addedNodes[0].querySelector(`span.javascriptMaterialdesignGm3WizButtonText-button__touch`).click();
 			}
-		}).observe(document.body, { childList: true, });
+		}).observe(document.body, { childList: true });
 	});
 }
-if (0 && frycAPI.host == "docs.screeps.com") {
+if (0 && frycAPI.host === "docs.screeps.com") {
 	frycAPI.injectStyle(/*css*/`
 		#sidebar {
 			background-color: white;
@@ -2888,7 +3043,7 @@ if (0 && frycAPI.host == "docs.screeps.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "drive.google.com") {
+if (1 && frycAPI.host === "drive.google.com") {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		div[role="dialog"] div[role="document"] {
@@ -2903,7 +3058,7 @@ if (1 && frycAPI.host == "drive.google.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "dydmat.mimuw.edu.pl") {
+if (1 && frycAPI.host === "dydmat.mimuw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -2911,7 +3066,7 @@ if (1 && frycAPI.host == "dydmat.mimuw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "eager.io") {
+if (1 && frycAPI.host === "eager.io") {
 	frycAPI.injectStyle(/*css*/`
 		.blog-post-content a:not(.button):not(.without-underline) {
 			text-shadow: none;
@@ -2919,7 +3074,7 @@ if (1 && frycAPI.host == "eager.io") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "en.wikipedia.org") {
+if (1 && frycAPI.host === "en.wikipedia.org") {
 	frycAPI.injectStyle(/*css*/`
 		img.thumbimage[src*=".png"],
 		img.thumbimage[src*=".gif"] 
@@ -2930,21 +3085,21 @@ if (1 && frycAPI.host == "en.wikipedia.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "epodreczniki.open.agh.edu.pl") {
+if (1 && frycAPI.host === "epodreczniki.open.agh.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "fizyka.dk") {
+if (1 && frycAPI.host === "fizyka.dk") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(1) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "forms.office.com") {
+if (1 && frycAPI.host === "forms.office.com") {
 	frycAPI.injectStyle(/*css*/`
 		.office-form-question-title.with-image {
 		  padding: 10px;
@@ -3029,35 +3184,35 @@ if (1 && frycAPI.host == "forms.office.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "forum.videohelp.com") {
+if (1 && frycAPI.host === "forum.videohelp.com") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			background-color: aliceblue;
 		}
 	`);
 }
-if (1 && frycAPI.host == "gamertools.net") {
+if (1 && frycAPI.host === "gamertools.net") {
 	frycAPI.injectStyle(/*css*/`
 		.gameItem {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 }
-if (1 && frycAPI.host == "industrial.omron.pl") {
+if (1 && frycAPI.host === "industrial.omron.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (0 && frycAPI.host == "jp.pum.edu.pl") {
+if (0 && frycAPI.host === "jp.pum.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		  font-family: IBM Plex Sans !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "json2table.com") {
+if (1 && frycAPI.host === "json2table.com") {
 	frycAPI.injectStyle(/*css*/`
 		table * {
 			font-family: Source Code Fryc;
@@ -3066,14 +3221,14 @@ if (1 && frycAPI.host == "json2table.com") {
 }
 // #endregion
 // #region //* IFy 3
-if (1 && frycAPI.host == "jsongrid.com") {
+if (1 && frycAPI.host === "jsongrid.com") {
 	frycAPI.injectStyle(/*css*/`
 		td.obj.order.index {
 			display: none;
 		}
 	`);
 }
-if (1 && frycAPI.host == "karl.gg") {
+if (1 && frycAPI.host === "karl.gg") {
 	frycAPI.injectStyle(/*css*/`
 		.statsContainer {
 		  border-top: 1px solid;
@@ -3083,14 +3238,14 @@ if (1 && frycAPI.host == "karl.gg") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "kertisjones.weebly.com") {
+if (1 && frycAPI.host === "kertisjones.weebly.com") {
 	frycAPI.injectStyle(/*css*/`
 		#main-wrap .inner-container {
 			background: none;
 		}
 	`);
 }
-if (0 && frycAPI.host == "labfiz1p.if.pw.edu.pl") {
+if (0 && frycAPI.host === "labfiz1p.if.pw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		* {
 		  font-family: IBM Plex Sans !important;
@@ -3107,28 +3262,28 @@ if (0 && frycAPI.host == "labfiz1p.if.pw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "latarnikwyborczy.pl") {
+if (1 && frycAPI.host === "latarnikwyborczy.pl") {
 	frycAPI.injectStyle(/*css*/`
 		.content-questionnaire .answer-candidates .answer {
 			background-image: url(${frycAPI.getResURL("arrow-down.png")});
 		}
 	`);
 }
-if (1 && frycAPI.host == "linuxconfig.org") {
+if (1 && frycAPI.host === "linuxconfig.org") {
 	frycAPI.injectStyle(/*css*/`
 		.asciinema-player.asciinema-theme-asciinema {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 }
-if (1 && frycAPI.host == "llamalab.com") {
+if (1 && frycAPI.host === "llamalab.com") {
 	frycAPI.injectStyle(/*css*/`
 		.background-image.cover.hero-background {
 			display: none;
 		}
 	`);
 }
-if (1 && frycAPI.host == "mail.google.com") {
+if (1 && frycAPI.host === "mail.google.com") {
 	frycAPI.injectStyle(/*css*/`
 		/* .aD::before, .btn::before, .btl.acK, .bs3::before, .T-axO .J-JN-M-I-JG, .J-Z .aaA.aaB, .J-J5-Ji.J-Z-M-I-JG {
 			filter: invert(1);
@@ -3182,7 +3337,7 @@ if (1 && frycAPI.host == "mail.google.com") {
 		*/
 	`);
 }
-if (1 && frycAPI.host == "mat-fiz-samouczek.pw.edu.pl") {
+if (1 && frycAPI.host === "mat-fiz-samouczek.pw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img.teximage {
 		    background-color: #ffffff;
@@ -3191,7 +3346,7 @@ if (1 && frycAPI.host == "mat-fiz-samouczek.pw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "matematykaszkolna.pl") {
+if (1 && frycAPI.host === "matematykaszkolna.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -3199,14 +3354,14 @@ if (1 && frycAPI.host == "matematykaszkolna.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "matlab.mathworks.com") {
+if (1 && frycAPI.host === "matlab.mathworks.com") {
 	frycAPI.injectStyle(/*css*/`
 		.textElement.eoOutputContent {
 			user-select: text !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "matma4u.pl") {
+if (1 && frycAPI.host === "matma4u.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -3214,7 +3369,7 @@ if (1 && frycAPI.host == "matma4u.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "matrixcalc.org") {
+if (1 && frycAPI.host === "matrixcalc.org") {
 	frycAPI.injectStyle(/*css*/`
 		a[title="Бе́ло-кра́сно-бе́лый флаг"] {
 		  display: none !important;
@@ -3224,7 +3379,7 @@ if (1 && frycAPI.host == "matrixcalc.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "minecraft.fandom.com") {
+if (1 && frycAPI.host === "minecraft.fandom.com") {
 	frycAPI.injectStyle(/*css*/`
 		#cont {
 		  position: absolute;
@@ -3248,7 +3403,7 @@ if (1 && frycAPI.host == "minecraft.fandom.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "mlp.fandom.com") {
+if (1 && frycAPI.host === "mlp.fandom.com") {
 	frycAPI.injectStyle(/*css*/`
 		#ucss-code-wrapper .CodeMirror-wrap .CodeMirror-scroll {
 			filter: invert(0) hue-rotate(0deg);
@@ -3274,7 +3429,7 @@ if (1 && frycAPI.host == "mlp.fandom.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "oeis.org") {
+if (1 && frycAPI.host === "oeis.org") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(1) hue-rotate(180deg);
@@ -3284,7 +3439,7 @@ if (1 && frycAPI.host == "oeis.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "ostatnidzwonek.pl") {
+if (1 && frycAPI.host === "ostatnidzwonek.pl") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		background: none;  
@@ -3292,8 +3447,8 @@ if (1 && frycAPI.host == "ostatnidzwonek.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "palobby.com") {
-	let funkcje = "PAT_DB_Unit_Korekta";
+if (1 && frycAPI.host === "palobby.com") {
+	const funkcje = "PAT_DB_Unit_Korekta";
 	frycAPI.injectStyle(/*css*/`
 		.clearfix~div.columns div {
 			margin-right: 0;
@@ -3370,32 +3525,32 @@ if (1 && frycAPI.host == "palobby.com") {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		//<span title="Cooldown Time">0:00</span>
-		if (document.querySelector("span[title='Rolloff Time']") !== null && document.querySelector("div.columns>div:nth-child(2) h4").innerText == "Physics") {
-			let listy = document.querySelectorAll("h4+ul.list-unstyled");
+		// <span title="Cooldown Time">0:00</span>
+		if (document.querySelector("span[title='Rolloff Time']") !== null && document.querySelector("div.columns>div:nth-child(2) h4").innerText === "Physics") {
+			const listy = document.querySelectorAll("h4+ul.list-unstyled");
 			let zbudPrzez;
 			for (let i = 0; i < listy.length; i++) {
-				if (listy[i].previousElementSibling.innerText == "Built By") {
+				if (listy[i].previousElementSibling.innerText === "Built By") {
 					zbudPrzez = listy[i];
 					break;
 				}
 			}
-			let spanRolloffTime = document.createElement("span");
+			const spanRolloffTime = document.createElement("span");
 			spanRolloffTime.title = "Rolloff Time";
 			spanRolloffTime.classList.add("dodane");
 			spanRolloffTime.innerHTML = "0:00";
-			let zbudChild = zbudPrzez.children;
+			const zbudChild = zbudPrzez.children;
 			for (let i = 0; i < zbudChild.length; i++) {
 				if (zbudChild[i].querySelector("span[title='Rolloff Time']") === null) {
 					zbudChild[i].appendChild(document.createTextNode(" + "));
 					zbudChild[i].appendChild(spanRolloffTime.cloneNode(1));
 				}
 			}
-			console.log("Done!")
+			console.log("Done!");
 		}
 	});
 }
-if (1 && frycAPI.host == "pl.wikibooks.org") {
+if (1 && frycAPI.host === "pl.wikibooks.org") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -3405,7 +3560,7 @@ if (1 && frycAPI.host == "pl.wikibooks.org") {
 }
 // #endregion
 // #region //* IFy 4
-if (1 && frycAPI.host == "pl.wikipedia.org") {
+if (1 && frycAPI.host === "pl.wikipedia.org") {
 	frycAPI.injectStyle(/*css*/`
 		img.thumbimage[src*=".png"] 
 		/* a.image:has(img[src*=".png"]) */
@@ -3415,14 +3570,14 @@ if (1 && frycAPI.host == "pl.wikipedia.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "pl.wikisource.org") {
+if (1 && frycAPI.host === "pl.wikisource.org") {
 	frycAPI.injectStyle(/*css*/`
 		.mwe-math-fallback-image-inline {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "planetcalc.com") {
+if (1 && frycAPI.host === "planetcalc.com") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(
@@ -3446,14 +3601,14 @@ if (1 && frycAPI.host == "planetcalc.com") {
 
 	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
 		new frycAPI_ManualFunc("Łatwiejsze kopiowanie", function () {
-			let x = document.querySelectorAll(".mrow>.texatom>.mrow>span.msubsup>span>span>span.mn");
+			const x = document.querySelectorAll(".mrow>.texatom>.mrow>span.msubsup>span>span>span.mn");
 			for (let i = 0; i < x.length; i++) {
 				x[i].innerHTML = "(" + x[i].innerHTML + ")";
 			}
 		}),
 	]);
 }
-if (1 && frycAPI.host == "quicklatex.com") {
+if (1 && frycAPI.host === "quicklatex.com") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 			filter: invert(1);
@@ -3461,7 +3616,7 @@ if (1 && frycAPI.host == "quicklatex.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "robotyka.pl") {
+if (1 && frycAPI.host === "robotyka.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img[src*=".gif"],
 		img[src*=".png"]{
@@ -3469,7 +3624,7 @@ if (1 && frycAPI.host == "robotyka.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "satisfactory.fandom.com") {
+if (1 && frycAPI.host === "satisfactory.fandom.com") {
 	frycAPI.injectStyle(/*css*/`
 		img.mwe-math-fallback-image-inline {
 			filter: invert(1) !important;
@@ -3482,7 +3637,7 @@ if (1 && frycAPI.host == "satisfactory.fandom.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "satisfactory.wiki.gg") {
+if (1 && frycAPI.host === "satisfactory.wiki.gg") {
 	frycAPI.injectStyle(/*css*/`
 		/* Tymczasowe */
 		tr:has([title="Equipment Workshop"]),
@@ -3492,7 +3647,7 @@ if (1 && frycAPI.host == "satisfactory.wiki.gg") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "scripty.abhisheksatre.com") {
+if (1 && frycAPI.host === "scripty.abhisheksatre.com") {
 	frycAPI.injectStyle(/*css*/`
 		.ant-drawer-content-wrapper {
 		  width: 1295px !important;
@@ -3505,15 +3660,15 @@ if (1 && frycAPI.host == "scripty.abhisheksatre.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "second.wiki") {
+if (1 && frycAPI.host === "second.wiki") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "soundcloud.com") {
-	let funkcje = "Get Covers From Sound Cloud";
+if (1 && frycAPI.host === "soundcloud.com") {
+	const funkcje = "Get Covers From Sound Cloud";
 	frycAPI.injectStyle(/*css*/`
 		.playableTile__image>.sc-artwork>span {
 		  
@@ -3539,21 +3694,21 @@ if (1 && frycAPI.host == "soundcloud.com") {
 
 	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
 		new frycAPI_ManualFunc("Get Covers From Sound Cloud", function () {
-			let artwork = document.querySelectorAll(".playableTile__image>.sc-artwork>span");
+			const artwork = document.querySelectorAll(".playableTile__image>.sc-artwork>span");
 			newDiv = document.createElement("div");
 			newDiv.setAttribute("id", "mojelem");
-			let styl = "";
+			let styl;
 			for (let i = 0; i < 184; i++) {
 				styl = window.getComputedStyle(artwork[i]).getPropertyValue("background-image");
 				newDiv.innerHTML += styl;
 				newDiv.innerHTML += "<br>";
 			}
-			let the_div = document.getElementById("app");
+			const the_div = document.getElementById("app");
 			document.body.insertBefore(newDiv, the_div);
 		}),
 	]);
 }
-if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com", "serverfault.com"])) {
+if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com", "serverfault.com", "superuser.com"])) {
 	frycAPI.injectStyle(/*css*/`
 		.user-info .-flair {
 			display: flex !important;
@@ -3576,7 +3731,7 @@ if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com", "se
 		/* Zaznacz nie pierwszy */
 		.-flair > span[title] ~ span[title] {
 			border-left: 0px !important;
-		  border-radius: 0px 0px 0px 0px;
+			border-radius: 0px 0px 0px 0px;
 		}
 		
 		/* Zaznacz ostatni */
@@ -3610,7 +3765,7 @@ if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com", "se
 			--ff-sans: IBM Plex Sans Condensed;
 		}
 		.owner {
-			background-color: ${frycAPI.host == "stackoverflow.com" ? "#d5d5d5" : "#313131"};
+			/* background-color: ${frycAPI.host === "stackoverflow.com" ? "#d5d5d5" : "#313131"}; */
 		}
 		span[title*="badge"] {
 			display: flex;
@@ -3641,65 +3796,56 @@ if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com", "se
 				background-position-x: -60px;
 			}
 		}
+
+		ul.comments-list {
+			.comment-actions {
+				display: flex;
+			}
+			.comment-voting {
+				position: relative;	
+				> a {
+					position: absolute;
+					top: 2px;
+				}
+			}
+			.comment-score {
+				text-align: right;
+			}
+		}
+
+		body.theme-dark .s-topbar .s-topbar--logo .-img, .theme-dark__forced .s-topbar .s-topbar--logo .-img, body.theme-system .theme-dark__forced .s-topbar .s-topbar--logo .-img {
+			filter: invert(1) hue-rotate(180deg) brightness(1.3);
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
 		frycAPI.forEach(".user-info:has(.gravatar-wrapper-32)", function (daElem, daI, daArr) {
-			let myDiv = document.createElement("div");
+			const myDiv = document.createElement("div");
 			myDiv.classList.add("myDiv");
 			daElem.querySelector(".user-action-time").insertAdjacentElement("afterend", myDiv);
 			myDiv.appendChild(daElem.querySelector(".user-gravatar32"));
 			myDiv.appendChild(daElem.querySelector(".user-details"));
 		});
 
-		function zaokrl(val, decimals) {
-			return +(Math.round(+(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
-		}
-		function czytelnyCzas(czas) {
-			czas = czas / 1000; let czytCzas = "";
-			/* sekundy  */ if (60 > czas) { czytCzas = zaokrl(czas, 1).toFixed(1) + " sekund"; } else
-			  /* minuty   */ if (3600 > czas) { czytCzas = zaokrl(czas / 60, 1).toFixed(1) + " minut"; } else
-				 /* godziny  */ if (86400 > czas) { czytCzas = zaokrl(czas / 60 / 60, 1).toFixed(1) + " godzin"; } else
-					/* dni      */ if (2592000 > czas) { czytCzas = zaokrl(czas / 60 / 60 / 24, 1).toFixed(1) + " dni"; } else
-					  /* miesiące */ if (31536000 > czas) { czytCzas = zaokrl(czas / 60 / 60 / 24 / 30, 1).toFixed(1) + " miesięcy"; } else
-						 /* lata     */ { czytCzas = zaokrl(czas / 60 / 60 / 24 / 365, 1).toFixed(1) + " lat"; }
-			return czytCzas + " temu";
-		}
-		function mutObs() {
-			// console.log("Zostałem wezwany!");
-			let czas = new Date().getTime();
-			let opcje = {
-				year: "numeric",
-				month: "2-digit",
-				day: "2-digit",
-				hour: "2-digit",
-				minute: "2-digit"
-			};
+		frycAPI.createMutObs((mutRecArr, mutObs) => {
 			// let nodeI = 0;
 			frycAPI.forEach(".relativetime-clean:not(.mySpanTime), .relativetime:not(.mySpanTime)", function (daElem, daI, daArr) {
-				let data = new Date(daElem.title.replace(/,.*/, ""));
-				daElem.innerHTML = data.toLocaleString("en-ZA", opcje).replaceAll("/", "-");
-				daElem.title = czytelnyCzas(czas - data.getTime());
+				const data = new Date(daElem.title.replace(/,.*/u, ""));
+				daElem.innerHTML = frycAPI.printRelTime(data.getTime(), 1, "ang", 0, 1, 1, 0);
+				daElem.setAttribute("title", frycAPI.printDate(data));
 				daElem.classList.add("mySpanTime");
 				// nodeI++;
 			});
 			// console.log(`Przetworzyłem ${nodeI} nodów!`);
-		}
-		mutObs();
-
-		new MutationObserver(mutObs).observe(document.body, { childList: true, subtree: true });
-
-		let kod = document.createElement("script");
-		kod.innerHTML = zaokrl.toString() + czytelnyCzas.toString() + mutObs.toString();
-		document.body.appendChild(kod);
+		});
 	});
 }
-if (1 && frycAPI.host == "steamcommunity.com") {
-	let funkcje = "Steam Achievments Alphabetical Sort";
+if (1 && frycAPI.host === "steamcommunity.com") {
+	const funkcje = "Steam Achievments Alphabetical Sort";
 	// Dawid Sadowski: 232603985
 	// Michał Roman: 96866084
 	// Michał Łasica: 71831352
-	let friendsProfileID = "96866084";
+	const friendsProfileID = "96866084";
 
 	frycAPI.injectStyle(/*css*/`
 		.qrcode_Bit_2Yuvr.qrcode_Active_274P1 {
@@ -3725,7 +3871,7 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		if (window.location.pathname == "/stats/563560/achievements/") {
+		if (window.location.pathname === "/stats/563560/achievements/") {
 			frycAPI.injectStyleNormal(/*css*/`
 				/* 
 				.achieveFill {
@@ -3791,19 +3937,19 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 				.compareImg {
 					padding-left: 9px;
 				}
-			`)
-			let achiev = document.querySelectorAll("#mainContents .achieveRow");
+			`);
+			const achiev = document.querySelectorAll("#mainContents .achieveRow");
 			// START: Część specjalna
 			{
-				let achievObj = JSON.parse(`
+				const achievObj = JSON.parse(`
 				{"Landing Bay":{"num":1,"camp":"Jacob's Rest"},"Cargo Elevator":{"num":2,"camp":"Jacob's Rest"},"Deima Surface Bridge":{"num":3,"camp":"Jacob's Rest"},"Rydberg Reactor":{"num":4,"camp":"Jacob's Rest"},"SynTek Residential":{"num":5,"camp":"Jacob's Rest"},"Sewer Junction":{"num":6,"camp":"Jacob's Rest"},"Timor Station":{"num":7,"camp":"Jacob's Rest"},"Landing Zone":{"num":1,"camp":"Area 9800"},"Cooling Pump":{"num":2,"camp":"Area 9800"},"Power Generator":{"num":3,"camp":"Area 9800"},"Wastelands":{"num":4,"camp":"Area 9800"},"Storage Facility":{"num":1,"camp":"Operation Cleansweep"},"Landing Bay 7":{"num":2,"camp":"Operation Cleansweep"},"U.S.C. Medusa":{"num":3,"camp":"Operation Cleansweep"},"Transport Facility":{"num":1,"camp":"Research 7"},"Research 7":{"num":2,"camp":"Research 7"},"Illyn Forest":{"num":3,"camp":"Research 7"},"Jericho Mines":{"num":4,"camp":"Research 7"},"Insertion Point":{"num":1,"camp":"Tears for Tarnor"},"Abandoned Maintenance Tunnels":{"num":2,"camp":"Tears for Tarnor"},"Oasis Colony Spaceport":{"num":3,"camp":"Tears for Tarnor"},"Midnight Port":{"num":1,"camp":"Tilarus-5"},"Road to Dawn":{"num":2,"camp":"Tilarus-5"},"Arctic Infiltration":{"num":3,"camp":"Tilarus-5"},"Area 9800":{"num":4,"camp":"Tilarus-5"},"Cold Catwalks":{"num":5,"camp":"Tilarus-5"},"Yanaurus Mine":{"num":6,"camp":"Tilarus-5"},"The Factory":{"num":7,"camp":"Tilarus-5"},"Communication Center":{"num":8,"camp":"Tilarus-5"},"SynTek Hospital":{"num":9,"camp":"Tilarus-5"},"Lana's Bridge":{"num":1,"camp":"Lana's Escape"},"Lana's Sewer":{"num":2,"camp":"Lana's Escape"},"Lana's Maintenance":{"num":3,"camp":"Lana's Escape"},"Lana's Vents":{"num":4,"camp":"Lana's Escape"},"Lana's Complex":{"num":5,"camp":"Lana's Escape"},"Unexpected Encounter":{"num":1,"camp":"Paranoia"},"Hostile Places":{"num":2,"camp":"Paranoia"},"Close Contact":{"num":3,"camp":"Paranoia"},"High Tension":{"num":4,"camp":"Paranoia"},"Crucial Point":{"num":5,"camp":"Paranoia"},"Logistics Area":{"num":1,"camp":"Nam Humanum"},"Platform XVII":{"num":2,"camp":"Nam Humanum"},"Groundwork Labs":{"num":3,"camp":"Nam Humanum"},"Operation X5":{"num":1,"camp":"BioGen Corporation"},"Invisible Threat":{"num":2,"camp":"BioGen Corporation"},"BioGen Labs":{"num":3,"camp":"BioGen Corporation"},"Information Department":{"num":1,"camp":"Accident 32"},"Powerhood":{"num":2,"camp":"Accident 32"},"Research Center":{"num":3,"camp":"Accident 32"},"Confined Facility":{"num":4,"camp":"Accident 32"},"J5 Connector":{"num":5,"camp":"Accident 32"},"Lab Ruins":{"num":6,"camp":"Accident 32"}}
 				`.trim());
 				achiev.forEach(function (daElem, daI, daArr) {
-					let h3 = daElem.querySelector("h3");
+					const h3 = daElem.querySelector("h3");
 					let h3Str = h3.innerHTML;
-					let h5str = daElem.querySelector("h5").innerHTML;
+					const h5str = daElem.querySelector("h5").innerHTML;
 					if (h3Str.includes("Speedrun")) {
-						let missionStr = h3Str.replace(/ ?Speedrun ?/g, "");
+						const missionStr = h3Str.replace(/ ?Speedrun ?/gu, "");
 						if (achievObj.hasOwnProperty(missionStr)) {
 							h3.innerHTML = `A1 Speedrun | ${achievObj[missionStr].camp} | ${achievObj[missionStr].num.toString().padStart(2, "0")} | <b>${missionStr}</b>`;
 						} else {
@@ -3811,37 +3957,37 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 						}
 						// daElem.classList.add("Speedrun");
 					} else if (h3Str.includes("Campaign")) {
-						h3Str = "Campaign " + h3Str.replace(/ ?Campaign ?/g, "");
+						h3Str = "Campaign " + h3Str.replace(/ ?Campaign ?/gu, "");
 						if (h3Str.includes("Easy")) {
-							h3.innerHTML = "A01 " + "<b>" + h3Str + "</b>";
+							h3.innerHTML = `A01 <b>${h3Str}</b>`;
 						} else if (h3Str.includes("Normal")) {
-							h3.innerHTML = "A02 " + "<b>" + h3Str + "</b>";
+							h3.innerHTML = `A02 <b>${h3Str}</b>`;
 						} else if (h3Str.includes("Hard")) {
-							h3.innerHTML = "A03 " + "<b>" + h3Str + "</b>";
+							h3.innerHTML = `A03 <b>${h3Str}</b>`;
 						} else if (h3Str.includes("Insane")) {
-							h3.innerHTML = "A04 " + "<b>" + h3Str + "</b>";
+							h3.innerHTML = `A04 <b>${h3Str}</b>`;
 						} else {
-							h3.innerHTML = "A05 " + "<b>" + h3Str + "</b>";
+							h3.innerHTML = `A05 <b>${h3Str}</b>`;
 						}
 					} else if (h3Str.includes("Outstanding Execution")) {
-						h3.innerHTML = "A1 " + "<b>" + h3Str + "</b>";
+						h3.innerHTML = `A1 <b>${h3Str}</b>`;
 					} else if (h5str.includes("Kill")) {
 						if (h5str.includes(" with ")) {
-							h3.innerHTML = "A21 Kill with | " + "<b>" + h3Str + "</b>";
+							h3.innerHTML = `A21 Kill with | <b>${h3Str}</b>`;
 						} else if (h5str.includes("Swarm.")) {
-							h3.innerHTML = "A22 Kill Swarm | " + "<b>" + h3Str + "</b>";
+							h3.innerHTML = `A22 Kill Swarm | <b>${h3Str}</b>`;
 						} else {
-							h3.innerHTML = "A23 Kill | " + "<b>" + h3Str + "</b>";
+							h3.innerHTML = `A23 Kill | <b>${h3Str}</b>`;
 						}
 					}
 				});
 			}
 			// END: Część specjalna
 
-			frycAPI.sortElements(document.querySelector("#mainContents"), achiev, (a) => a.querySelector("h3").innerHTML);
+			frycAPI.sortElements(document.querySelector("#mainContents"), achiev, a => a.querySelector("h3").innerHTML);
 
-			let butt = document.createElement("button");
-			butt.setAttribute("onclick", "this.toggleAttribute('aktywny')")
+			const butt = document.createElement("button");
+			butt.setAttribute("onclick", "this.toggleAttribute('aktywny')");
 			butt.classList.add("mojButt");
 			butt.innerText = "Przełącz widoczność ukończonych osiągnięć";
 			butt.setAttribute("aktywny", "");
@@ -3857,7 +4003,7 @@ if (1 && frycAPI.host == "steamcommunity.com") {
 		}),
 	]);
 }
-if (0 && frycAPI.host == "support.discord.com") {
+if (0 && frycAPI.host === "support.discord.com") {
 	frycAPI.injectStyle(/*css*/`
 		* {
 		  filter: invert(1) hue-rotate(180deg);
@@ -3872,7 +4018,7 @@ if (0 && frycAPI.host == "support.discord.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "support.microsoft.com") {
+if (1 && frycAPI.host === "support.microsoft.com") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(1) hue-rotate(180deg) !important;
@@ -3883,28 +4029,28 @@ if (1 && frycAPI.host == "support.microsoft.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "teams.microsoft.com") {
+if (1 && frycAPI.host === "teams.microsoft.com") {
 	frycAPI.injectStyle(/*css*/`
 		.fui-Flex.___1jvzdal.f22iagw.f1vx9l62.f10pi13n.f1g2edtw {
 			display: none;
 		}
 	`);
 }
-if (1 && frycAPI.host == "tech.wp.pl") {
+if (1 && frycAPI.host === "tech.wp.pl") {
 	frycAPI.injectStyle(/*css*/`
 		iframe {
 			display: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "terraria.gamepedia.com") {
+if (1 && frycAPI.host === "terraria.gamepedia.com") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		    image-rendering: pixelated;
 		}
 	`);
 }
-if (1 && frycAPI.host == "tiger.chem.uw.edu.pl") {
+if (1 && frycAPI.host === "tiger.chem.uw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -3912,7 +4058,7 @@ if (1 && frycAPI.host == "tiger.chem.uw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "tplinkmodem.net") {
+if (1 && frycAPI.host === "tplinkmodem.net") {
 	frycAPI.injectStyle(/*css*/`
 		tr.head>th.table-head:nth-child(2) {
 		  width: 11% !important;
@@ -3986,7 +4132,7 @@ if (1 && frycAPI.hostList(["translate.google.com", "translate.google.pl"])) {
 		});
 	});
 }
-if (1 && frycAPI.host == "trello.com") {
+if (1 && frycAPI.host === "trello.com") {
 	frycAPI.injectStyle(/*css*/`
 		/* *::-webkit-scrollbar-thumb {
 		  background:rgb(102, 254, 123) !important;
@@ -3997,7 +4143,7 @@ if (1 && frycAPI.host == "trello.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "u4.satisfactorytools.com") {
+if (1 && frycAPI.host === "u4.satisfactorytools.com") {
 	frycAPI.injectStyle(/*css*/`
 		.mojaklasa {
 			display: none;
@@ -4018,7 +4164,7 @@ if (1 && frycAPI.host == "u4.satisfactorytools.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "moodle.usos.pw.edu.pl") {
+if (1 && frycAPI.host === "moodle.usos.pw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		nav.list-group.mt-1 {
 		    margin-bottom: 27px;
@@ -4053,7 +4199,7 @@ if (1 && frycAPI.host == "moodle.usos.pw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
+if (1 && frycAPI.host === "usosweb.usos.pw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		*{
 		  font-family: IBM Plex Sans Condensed
@@ -4528,17 +4674,17 @@ if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
 	})();
 
 	{
-		let ms = 350;
-		let sec = ms / 1000;
-		let del = 100;
-		let sdel = del / 1000;
+		const ms = 350;
+		const sec = ms / 1000;
+		const del = 100;
+		const sdel = del / 1000;
 
 		window.addEventListener("DOMContentLoaded", function () { // end
 			// document.body.style.display = "block";
 			// document.body.style.opacity = 1;
 			// document.body.style.visibility = "visible";
 
-			let dyv = document.createElement("div");
+			const dyv = document.createElement("div");
 			dyv.style.backgroundColor = "#d9d9d9"; // #262626
 			dyv.style.position = "fixed";
 			dyv.style.width = "100vw";
@@ -4562,13 +4708,13 @@ if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
 		frycAPI.onLoadSetter(() => {
 			{ // idle
 				// document.body.style.display = "block";
-				// setTimeout(function () { 
+				// setTimeout(function () {
 				// 	document.body.classList.add("opaque");
 				// }, 10);
 				// document.body.style.opacity = 1;
 				// document.body.style.visibility = "visible";
 
-				let ele = document.querySelector(".dyv");
+				const ele = document.querySelector(".dyv");
 				ele.style.opacity = 0;
 				setTimeout(function () {
 					document.body.classList.add("var1");
@@ -4583,27 +4729,27 @@ if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
 					ele.style.opacity = 1;
 					document.body.classList.remove("var1");
 					setTimeout(function () { }, ms + del + 10);
-				}
+				};
 			}
 
 			if (window.location.search.includes("statystyki")) {
 				new MutationObserver(async function USOS_Fix(mutRec, docObs) {
-					let id1 = document.querySelector("div#chart iframe").getAttribute("id");
+					const id1 = document.querySelector("div#chart iframe").getAttribute("id");
 					while (!frames[id1]) {
 						await frycAPI.sleep(50);
 					}
 					await frycAPI.sleep(50);
-					let head1 = frames[id1].document.querySelector("head");
-					let css1 = document.createElement("style");
-					css1.innerHTML = 'svg text { fill: hsl(0deg 0% 58%); }';
+					const head1 = frames[id1].document.querySelector("head");
+					const css1 = document.createElement("style");
+					css1.innerHTML = "svg text { fill: hsl(0deg 0% 58%); }";
 					head1.append(css1);
-					console.log("Zaobserwowałem!")
+					console.log("Zaobserwowałem!");
 					docObs.disconnect();
 				}).observe(document.getElementById("chart"), { attributes: true, childList: true, subtree: true });
 			}
 
 			{ // Injected
-				let shadowStyle = document.createElement('style').frycAPI_setInnerHTML(frycAPI.minifyCSS(/*css*/`
+				const shadowStyle = document.createElement("style").frycAPI_setInnerHTML(frycAPI.minifyCSS(/*css*/`
 					:host #tooltip {
 						width: min-content !important;
 					}
@@ -4685,7 +4831,7 @@ if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
 					daElem.innerHTML = `<span class="mySpan">${daElem.innerHTML}</span>`;
 				});
 
-				frycAPI.forEach("td > div > form > label:first-of-type + br", function (daElem, daI, daArr) { daElem.remove(); });
+				frycAPI.forEach("td > div > form > label:first-of-type + br", daElem => daElem.remove());
 				["info-box", "success-box", "notice-box"].forEach(daEl => {
 					document.querySelectorAll(daEl, function (daElem, daI, daArr) {
 						daElem.shadowRoot.querySelector("div").classList.add(daEl, "moj-box");
@@ -4698,8 +4844,8 @@ if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
 					// plan = true;
 				}
 				function reqursShadow(elem0) {
-					elem0.querySelectorAll('*').forEach(elem => {
-						if (!!elem.shadowRoot) {
+					elem0.querySelectorAll("*").forEach(elem => {
+						if (elem.shadowRoot !== null) {
 							// if (plan) {
 							// 	elem.shadowRoot.firstElementChild.classList.add("frycPlan");
 							// }
@@ -4707,7 +4853,7 @@ if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
 							reqursShadow(elem.shadowRoot);
 						}
 					});
-				}; reqursShadow(document);
+				} reqursShadow(document);
 				// new MutationObserver((mutRec, docObs) => {
 				// 	loguj(mutRec);
 				// 	mutRec.forEach(elem => {
@@ -4726,16 +4872,16 @@ if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
 						document.querySelector("[aria-label='Panel boczny'] a[href='https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz'].selected") !== null) {
 						frycAPI.forEach(".usos-ui h2", function (daElem, daI, daArr) {
 							// debugger
-							let myDiv = document.createElement("div");
+							const myDiv = document.createElement("div");
 							myDiv.classList.add("myDiv");
 							let h2next = daElem.nextElementSibling;
-							while (h2next !== null && h2next.tagName != "H2") {
-								let h2next1 = h2next.nextElementSibling;
+							while (h2next !== null && h2next.tagName !== "H2") {
+								const h2next1 = h2next.nextElementSibling;
 								myDiv.appendChild(h2next);
 								h2next = h2next1;
 							}
 							daElem.insertAdjacentElement("afterend", myDiv);
-							daElem.setAttribute("onclick", "this.classList.toggle('collapse')")
+							daElem.setAttribute("onclick", "this.classList.toggle('collapse')");
 							if (daElem.nextElementSibling.querySelector(".rejestracja-ikona .rejestracja-ikona") === null) {
 								/* Powyższy warunek może się zepsuć w przyszłości */
 								daElem.classList.add("collapse");
@@ -4745,29 +4891,28 @@ if (1 && frycAPI.host == "usosweb.usos.pw.edu.pl") {
 					}
 				}
 				{ /* Naprawy tabel rejestracji */
-					frycAPI.forEach("td:has(img.rejestracja-ikona[src='https://usosweb.usos.pw.edu.pl//img/spinacz_tip.png']) > br",
-						function (daElem, daI, daArr) { daElem.remove(); });
+					frycAPI.forEach("td:has(img.rejestracja-ikona[src='https://usosweb.usos.pw.edu.pl//img/spinacz_tip.png']) > br", daElem => daElem.remove());
 				}
 			}
-			loguj("USOS Done!")
+			loguj("USOS Done!");
 		});
 	}
-};
-if (1 && frycAPI.host == "viewer.shapez.io") {
+}
+if (1 && frycAPI.host === "viewer.shapez.io") {
 	frycAPI.injectStyle(/*css*/`
 		canvas#result {
 			filter: hue-rotate(180deg) invert(1) saturate(6.5) ;
 		}
 	`);
 }
-if (1 && frycAPI.host == "wazniak.mimuw.edu.pl") {
+if (1 && frycAPI.host === "wazniak.mimuw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "web.whatsapp.com") {
+if (1 && frycAPI.host === "web.whatsapp.com") {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		.message-in span._1kh65 svg {
@@ -4791,14 +4936,14 @@ if (1 && frycAPI.host == "web.whatsapp.com") {
 		} */
 	`);
 }
-if (1 && frycAPI.host == "worldedit.enginehub.org") {
+if (1 && frycAPI.host === "worldedit.enginehub.org") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			filter: brightness(1);
 		}
 	`);
 }
-if (1 && frycAPI.host == "wutwaw-my.sharepoint.com") {
+if (1 && frycAPI.host === "wutwaw-my.sharepoint.com") {
 	frycAPI.injectStyle(/*css*/`
 		svg image {
 		  -webkit-filter: none !important;
@@ -4806,28 +4951,28 @@ if (1 && frycAPI.host == "wutwaw-my.sharepoint.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "wutwaw.sharepoint.com") {
+if (1 && frycAPI.host === "wutwaw.sharepoint.com") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(1);
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.1001fonts.com") {
+if (1 && frycAPI.host === "www.1001fonts.com") {
 	frycAPI.injectStyle(/*css*/`
 		.txt-preview {
 		  filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 }
-if (0 && frycAPI.host == "www.4g-lte.net") {
+if (0 && frycAPI.host === "www.4g-lte.net") {
 	frycAPI.injectStyle(/*css*/`
 		* {
 		  font-family: IBM Plex Sans Condensed !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.autohotkey.com") {
+if (1 && frycAPI.host === "www.autohotkey.com") {
 	frycAPI.injectStyle(/*css*/`
 		.page-width {
 			max-width: calc(100% - 24px);
@@ -4837,14 +4982,19 @@ if (1 && frycAPI.host == "www.autohotkey.com") {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		frycAPI.forEach(`.postbody p.author>a`, (daElem, daI, daArr) => {
-			let data = new Date(new Date(daElem.innerText).getTime() + 7 * 3600000);
-			daElem.innerText = frycAPI.printRelTime(data.getTime(), 1, "ang", 0, 1, 1, 0);
-			daElem.setAttribute("title", frycAPI.printDate(data));
+		frycAPI.setDefaultDate(`.postbody p.author>a`, { getDate: "txt" }); // { getDate: 111, setDate: 111, dateTitle: 111 }
+		frycAPI.setDefaultDate(`.postprofile > .profile-joined`, {
+			getDate: elem => elem.innerText.replace("Joined: ", ""),
+			setDate: (elem, data) => elem.frycAPI_setInnerHTML("<strong>Joined: </strong>" + frycAPI.getDefaultDateText(data)),
+			setTitle: (elem, data) => frycAPI.setDefaultDateTitleRaw(elem, new Intl.DateTimeFormat("af", {
+				year: "numeric",
+				month: "2-digit",
+				day: "2-digit",
+			}).format(data)),
 		});
 	});
 }
-if (1 && frycAPI.host == "www.calculator.net") {
+if (1 && frycAPI.host === "www.calculator.net") {
 	frycAPI.injectStyle(/*css*/`
 		.rightresult svg g[style="paint-order: stroke;stroke: #fff;stroke-width: 2px;"] {
 			stroke: hsl(0 0% 58% / 1) !important;
@@ -4866,14 +5016,14 @@ if (1 && frycAPI.host == "www.calculator.net") {
 		}
 	`);
 }
-if (0 && frycAPI.host == "www.chessvariants.com") {
+if (0 && frycAPI.host === "www.chessvariants.com") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(0deg) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.deltami.edu.pl") {
+if (1 && frycAPI.host === "www.deltami.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img.math-display, figure, img.math-inline {
 			filter: invert(1) hue-rotate(180deg);
@@ -4884,7 +5034,7 @@ if (1 && frycAPI.host == "www.deltami.edu.pl") {
 		}
 	`);
 }
-if (0 && frycAPI.host == "www.derivative-calculator.net") {
+if (0 && frycAPI.host === "www.derivative-calculator.net") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		filter: invert(1) hue-rotate(180deg);
@@ -4946,7 +5096,7 @@ if (0 && frycAPI.host == "www.derivative-calculator.net") {
 		}
 	`);
 }
-if (0 && frycAPI.host == "www.desmos.com") {
+if (0 && frycAPI.host === "www.desmos.com") {
 	frycAPI.injectStyle(/*css*/`
 		::-webkit-scrollbar-thumb {
 			background: #70ffde ;
@@ -4971,14 +5121,14 @@ if (0 && frycAPI.host == "www.desmos.com") {
 }
 // #endregion
 // #region //* IFy 6
-if (1 && frycAPI.host == "www.enpassant.dk") {
+if (1 && frycAPI.host === "www.enpassant.dk") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(0deg) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.facebook.com") {
+if (1 && frycAPI.host === "www.facebook.com") {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		body._z4_._8l3w.fbx._8m53._8bb_._-kb._605a.b_16xvukae6j.chrome.webkit.win.x2.Locale_pl_PL.cores-gte4.__6g._mvg._19_u.vsc-initialized {
@@ -4997,12 +5147,12 @@ if (1 && frycAPI.host == "www.facebook.com") {
 		}
 	`);
 }
-if (0 && frycAPI.host == "www.g") {
+if (0 && frycAPI.host === "www.g") {
 	frycAPI.injectStyle(/*css*/`
 		body::-webkit-scrollbar {  width: 15px;  background: grey;}body::-webkit-scrollbar-thumb {width: 13px;  background: black;border: 1px solid white;}
 	`);
 }
-if (1 && frycAPI.host == "www.geeksforgeeks.org") {
+if (1 && frycAPI.host === "www.geeksforgeeks.org") {
 	frycAPI.injectStyle(/*css*/`
 		iframe[id*="google_ads_iframe"] {
 		  display: none;
@@ -5012,14 +5162,14 @@ if (1 && frycAPI.host == "www.geeksforgeeks.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.geneseo.edu") {
+if (1 && frycAPI.host === "www.geneseo.edu") {
 	frycAPI.injectStyle(/*css*/`
 		mjx-container[jax="CHTML"][display="true"] {
 			overflow: hidden;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.geogebra.org") {
+if (1 && frycAPI.host === "www.geogebra.org") {
 	frycAPI.injectStyle(/*css*/`
 		.checkBoxPanel>* {
 		  margin-right: 5px !important;
@@ -5169,17 +5319,17 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 	`);
 
 	(frycAPI.beforeLoad = function () {
-		if (document.querySelector('#APjFqb') && document.getElementById("searchform")) {
+		if (document.querySelector("#APjFqb") && document.getElementById("searchform")) {
 			// document.body.frycAPI_addClass("google-3-column");
 		}
 	})();
 
 	frycAPI.onLoadSetter(() => {
 		if (document.querySelector("#APjFqb") && document.getElementById("searchform")) {
-			let hide01 = document.createElement("span");
+			const hide01 = document.createElement("span");
 			hide01.setAttribute("class", "hide01");
 			document.body.appendChild(hide01);
-			let input01 = document.querySelector('#APjFqb');
+			const input01 = document.querySelector("#APjFqb");
 			function resize() {
 				hide01.textContent = input01.value;
 				hide01.style.font = window.getComputedStyle(input01).font;
@@ -5213,14 +5363,14 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 		}),
 	]);
 }
-if (1 && frycAPI.host == "www.headspin.io") {
+if (1 && frycAPI.host === "www.headspin.io") {
 	frycAPI.injectStyle(/*css*/`
 		.exit-popup.telco-outer-wp {
 			display: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.ipko.pl") {
+if (1 && frycAPI.host === "www.ipko.pl") {
 	frycAPI.injectStyle(/*css*/`
 		/* .W9geT {
 		  filter: invert(1);
@@ -5235,21 +5385,21 @@ if (1 && frycAPI.host == "www.ipko.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.itl.nist.gov") {
+if (1 && frycAPI.host === "www.itl.nist.gov") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.kalasoft.pl") {
+if (1 && frycAPI.host === "www.kalasoft.pl") {
 	frycAPI.injectStyle(/*css*/`
 		.cli-barmodal-open {
 			overflow: scroll;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.komputronik.pl") {
+if (1 && frycAPI.host === "www.komputronik.pl") {
 	frycAPI.injectStyle(/*css*/`
 		#ri-widget {
 		    display: none !important;
@@ -5274,7 +5424,7 @@ if (1 && frycAPI.host == "www.komputronik.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.kowalskimateusz.pl") {
+if (1 && frycAPI.host === "www.kowalskimateusz.pl") {
 	frycAPI.injectStyle(/*css*/`
 		*{
 		  font-family: IBM Plex Sans Condensed
@@ -5293,7 +5443,7 @@ if (1 && frycAPI.host == "www.kowalskimateusz.pl") {
 		}*/
 	`);
 }
-if (0 && frycAPI.host == "www.lipsum.com") {
+if (0 && frycAPI.host === "www.lipsum.com") {
 	frycAPI.injectStyle(/*css*/`
 		body::-webkit-scrollbar {
 		  width: 15px;
@@ -5306,15 +5456,15 @@ if (0 && frycAPI.host == "www.lipsum.com") {
 		}
 	`);
 }
-if (0 && frycAPI.host == "www.math.us.edu.pl") {
+if (0 && frycAPI.host === "www.math.us.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.mathworks.com") {
-	let funkcje = "Disable highlight on Matlab search";
+if (1 && frycAPI.host === "www.mathworks.com") {
+	const funkcje = "Disable highlight on Matlab search";
 	frycAPI.injectStyle(/*css*/`
 		code.literal {
 			color: #228B22;
@@ -5343,21 +5493,17 @@ if (1 && frycAPI.host == "www.mathworks.com") {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		function sleep(ms) {
-			return new Promise(resolve => setTimeout(resolve, ms));
-		}
-		async function dishi() {
-			await sleep(300);
-			let titles = document.querySelectorAll("p.search_result_title");
+		(async () => { // dishi
+			await frycAPI.sleep(300);
+			const titles = document.querySelectorAll("p.search_result_title");
 			for (let i = 0; i < titles.length; i++) {
-				let atit = titles[i].querySelector("a");
-				atit.href = atit.href.replace(/\?(.*)/, "");
+				const atit = titles[i].querySelector("a");
+				atit.href = atit.href.replace(/\?(.*)/u, "");
 			}
-		}
-		dishi();
+		})();
 	});
 }
-if (1 && frycAPI.host == "www.maxongroup.com") {
+if (1 && frycAPI.host === "www.maxongroup.com") {
 	frycAPI.injectStyle(/*css*/`
 		#cont {
 		  position: absolute;
@@ -5377,7 +5523,7 @@ if (1 && frycAPI.host == "www.maxongroup.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.medianauka.pl") {
+if (1 && frycAPI.host === "www.medianauka.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -5385,7 +5531,7 @@ if (1 && frycAPI.host == "www.medianauka.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.megamatma.pl") {
+if (1 && frycAPI.host === "www.megamatma.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -5395,7 +5541,7 @@ if (1 && frycAPI.host == "www.megamatma.pl") {
 }
 // #endregion
 // #region //* IFy 7
-if (1 && frycAPI.host == "www.messenger.com") {
+if (1 && frycAPI.host === "www.messenger.com") {
 	frycAPI.injectStyle(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -5447,7 +5593,7 @@ if (1 && frycAPI.host == "www.messenger.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.meteo.pl") {
+if (1 && frycAPI.host === "www.meteo.pl") {
 	frycAPI.injectStyle(/*css*/`
 		/* body>div>div>img {
 		  filter: invert(1) hue-rotate(180deg);
@@ -5501,59 +5647,59 @@ if (1 && frycAPI.host == "www.meteo.pl") {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		// https://www.meteo.pl/um/php/meteorogramlet 
+		// https://www.meteo.pl/um/php/meteorogramlet
 		document.head.insertAdjacentHTML("afterbegin", `<meta charset="UTF-8 BOM">`);
 		frycAPI.changeFaviconRes("meteo_pl.png");
 
 		fontElem = document.querySelector("#model_napis font");
 		if (fontElem !== null) {
 			document.title = fontElem
-				.innerText
-				.match(/^([^,])+/g)[0]
-				.trim() + " - meteo.pl";
+			.innerText
+			.match(/^([^,])+/gu)[0]
+			.trim() + " - meteo.pl";
 		} else {
 			document.title = document
-				.querySelector("#napis_xy_ne")
-				.innerText
-				.replaceAll(/[\s\u00A0]+/gm, " ")
-				.trim() + " - meteo.pl";
+			.querySelector("#napis_xy_ne")
+			.innerText
+			.replaceAll(/[\s\u00A0]+/gmu, " ")
+			.trim() + " - meteo.pl";
 		}
-		let butt = document.createElement("button");
+		const butt = document.createElement("button");
 		butt.classList.add("myButt");
 		butt.innerText = "Odśwież stronę";
 		butt.setAttribute("onclick", "location.reload();");
 		document.querySelector('[href="javascript:print_this()"]').insertAdjacentElement("afterend", butt);
 	});
 }
-if (0 && frycAPI.host == "www.minecraftskins.com") {
+if (0 && frycAPI.host === "www.minecraftskins.com") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		  background-color: #9c9c9c
 		}
 	`);
 }
-if (0 && frycAPI.host == "www.mrexcel.com") {
+if (0 && frycAPI.host === "www.mrexcel.com") {
 	frycAPI.injectStyle(/*css*/`
 		[id*="google_ads_iframe"] {
 		  display:none
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.obliczeniowo.com.pl") {
+if (1 && frycAPI.host === "www.obliczeniowo.com.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.pcgamer.com") {
+if (1 && frycAPI.host === "www.pcgamer.com") {
 	frycAPI.injectStyle(/*css*/`
 		div.bordeaux-slot.bordeaux-filled-slot {
 			display: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.pyszne.pl") {
+if (1 && frycAPI.host === "www.pyszne.pl") {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		img {
@@ -5568,7 +5714,7 @@ if (1 && frycAPI.host == "www.pyszne.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.quora.com") {
+if (1 && frycAPI.host === "www.quora.com") {
 	frycAPI.injectStyle(/*css*/`
 		.q-flex.qu-borderColor--raised.qu-borderBottomLeftRadius--small.qu-borderBottomRightRadius--small.qu-borderBottom.qu-borderLeft.qu-borderRight.qu-bg--raised {
 			display: none !important;
@@ -5583,14 +5729,14 @@ if (1 && frycAPI.host == "www.quora.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.real-statistics.com") {
+if (1 && frycAPI.host === "www.real-statistics.com") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.reddit.com") {
+if (1 && frycAPI.host === "www.reddit.com") {
 	frycAPI.injectStyle(/*css*/`
 		shreddit-ad-post {
 			&, + hr {
@@ -5633,22 +5779,22 @@ if (1 && frycAPI.host == "www.reddit.com") {
 	`);
 	// var timeSum = 0;
 	frycAPI.onLoadSetter(function () {
-		let func = (mutRecArr, mutObs) => {
+		const func = (mutRecArr, mutObs) => {
 			// let startTime = performance.now();
 			frycAPI.forEach(`time:not(.poprawnyCzas)`, (daElem, daI, daArr) => {
-				let data = new Date(daElem.getAttribute("datetime"));
+				const data = new Date(daElem.getAttribute("datetime"));
 				daElem.innerHTML = frycAPI.printRelTime(data.getTime(), 1, "ang", 1, 1, 1, 0);
 				daElem.setAttribute("title", frycAPI.printDate(data));
 				daElem.classList.add("poprawnyCzas");
 			});
 
-			let tree = document.querySelector(`shreddit-comment-tree`);
+			const tree = document.querySelector(`shreddit-comment-tree`);
 			if (tree && tree.shadowRoot && tree.shadowRoot.getElementById("shreddit-comment-tree-style") === null) {
 				frycAPI.injectStyleNormal(/*css*/`
 					section[aria-label="Comments"] {
 						gap: 0px;
 					}
-				`, tree.shadowRoot, "shreddit-comment-tree-style");
+				`, { elem: tree.shadowRoot, staticID: "shreddit-comment-tree-style" });
 			}
 
 			frycAPI.forEach(`shreddit-comment:not(.poprawnyKomentarz)`, (daElem, daI, daArr) => {
@@ -5667,7 +5813,7 @@ if (1 && frycAPI.host == "www.reddit.com") {
 								height: 87%;
 							}
 						}
-					`, daElem.shadowRoot, "shreddit-comment-style");
+					`, { elem: daElem.shadowRoot, staticID: "shreddit-comment-style" });
 					daElem.classList.add("poprawnyKomentarz");
 				}
 			});
@@ -5680,10 +5826,10 @@ if (1 && frycAPI.host == "www.reddit.com") {
 			// timeSum += endTime - startTime;
 			// console.log(`Time: ${timeSum.toFixed(1)} ms`);
 		}; func();
-		new MutationObserver(func).observe(document.body, { subtree: true, childList: true, });
+		new MutationObserver(func).observe(document.body, { subtree: true, childList: true });
 	});
 }
-if (1 && frycAPI.host == "www.roblox.com") {
+if (1 && frycAPI.host === "www.roblox.com") {
 	frycAPI.injectStyle(/*css*/`
 		.voting-panel .users-vote .vote-details .vote-container .vote-percentage {
 			background-color: #02b757 !important;
@@ -5693,7 +5839,7 @@ if (1 && frycAPI.host == "www.roblox.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.satisfactorytools.com") {
+if (1 && frycAPI.host === "www.satisfactorytools.com") {
 	frycAPI.injectStyle(/*css*/`
 		.mojaklasa {
 			display: none;
@@ -5712,21 +5858,21 @@ if (1 && frycAPI.host == "www.satisfactorytools.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.slownikslaski.pl") {
+if (1 && frycAPI.host === "www.slownikslaski.pl") {
 	frycAPI.injectStyle(/*css*/`
 		* {
 		  font-family: IBM Plex Sans Condensed !important;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.tenforums.com") {
+if (1 && frycAPI.host === "www.tenforums.com") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			background-color: #2a2a2a;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.tme.eu") {
+if (1 && frycAPI.host === "www.tme.eu") {
 	frycAPI.injectStyle(/*css*/`
 		.czerwony {
 		  color: red;
@@ -5737,7 +5883,7 @@ if (1 && frycAPI.host == "www.tme.eu") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.tutorialspoint.com") {
+if (1 && frycAPI.host === "www.tutorialspoint.com") {
 	frycAPI.injectStyle(/*css*/`
 		._adr_abp_container {
 			display: none !important;
@@ -5748,14 +5894,14 @@ if (1 && frycAPI.host == "www.tutorialspoint.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.ups.com") {
+if (1 && frycAPI.host === "www.ups.com") {
 	frycAPI.injectStyle(/*css*/`
 		div#ups-alerts {
 			color: black;
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.w3schools.com") {
+if (1 && frycAPI.host === "www.w3schools.com") {
 	frycAPI.injectStyle(/*css*/`
 		#colormixer table tbody tr:nth-child(11) {
 		  color: red
@@ -5763,15 +5909,15 @@ if (1 && frycAPI.host == "www.w3schools.com") {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		let lead = document.getElementById("mainLeaderboard");
-		if (lead !== null && lead.nextElementSibling.nodeName == "H1" && lead.nextElementSibling.innerHTML == "How TO - Sort a Table") {
+		const lead = document.getElementById("mainLeaderboard");
+		if (lead !== null && lead.nextElementSibling.nodeName === "H1" && lead.nextElementSibling.innerHTML === "How TO - Sort a Table") {
 			// loguj("Hello");
 			frycAPI.makeTableSortable(document.getElementById("myTable"));
 		}
 	});
 }
-if (1 && frycAPI.host == "www.when2meet.com") {
-	let funkcje = "Konwertuj 12h na 24h";
+if (1 && frycAPI.host === "www.when2meet.com") {
+	const funkcje = "Konwertuj 12h na 24h";
 	frycAPI.injectStyle(/*css*/`
 		[style="text-align:right;width:44px;height:9;font-size:10px;margin:4px 4px 0px 0px;"] {
 			text-align: left !important;
@@ -5781,19 +5927,19 @@ if (1 && frycAPI.host == "www.when2meet.com") {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		let godziny = document.querySelectorAll('[style="text-align:right;width:44px;height:9;font-size:10px;margin:4px 4px 0px 0px;"]');
+		const godziny = document.querySelectorAll('[style="text-align:right;width:44px;height:9;font-size:10px;margin:4px 4px 0px 0px;"]');
 		for (let i = 0; i < godziny.length; i++) {
-			let godz = new Date("11 30 2022 " + godziny[i]
-				.innerText
-				.replace(/\s+/g, ' ')
-				.trim());
+			const godz = new Date("11 30 2022 " + godziny[i]
+			.innerText
+			.replace(/\s+/gu, " ")
+			.trim());
 			godziny[i].innerText = godz.toLocaleTimeString().slice(0, -3);
 		}
 	});
 }
 // #endregion
 // #region //* IFy 8
-if (1 && frycAPI.host == "www.worldometers.info") {
+if (1 && frycAPI.host === "www.worldometers.info") {
 	frycAPI.injectStyle(/*css*/`
 		rect.highcharts-background {
 			filter: invert(1);
@@ -5808,7 +5954,7 @@ if (1 && frycAPI.host == "www.worldometers.info") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "www.youtube.com") {
+if (1 && frycAPI.host === "www.youtube.com") {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		#content-text.ytd-comment-renderer {
@@ -5986,13 +6132,13 @@ if (1 && frycAPI.host == "www.youtube.com") {
 		(async () => {
 			await frycAPI.sleep(2000);
 			if (window.location.pathname.startsWith("/playlist")) {
-				let esval = '<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" class="mySVG"><path d="M11,17H9V8h2V17z M15,8h-2v9h2V8z M19,4v1h-1v16H6V5H5V4h4V3h6v1H19z M17,5H7v15h10V5z" class="style-scope yt-icon"></path></svg>';
+				const esval = '<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" class="mySVG"><path d="M11,17H9V8h2V17z M15,8h-2v9h2V8z M19,4v1h-1v16H6V5H5V4h4V3h6v1H19z M17,5H7v15h10V5z" class="style-scope yt-icon"></path></svg>';
 				frycAPI.forEach(`ytd-menu-renderer.style-scope.ytd-playlist-video-renderer`, function (daElem) {
-					let trDiv = document.createElement('div');
+					const trDiv = document.createElement("div");
 					trDiv.innerHTML = esval;
 					trDiv.classList.add("myDIV");
 					// trDiv.onclick = ytRemove;
-					daElem.insertAdjacentElement('afterbegin', trDiv).addEventListener("click", async function ytRemove() {
+					daElem.insertAdjacentElement("afterbegin", trDiv).addEventListener("click", async function ytRemove() {
 						this.parentNode.querySelector("yt-icon-button#button>button#button").click();
 						await frycAPI.sleep(20);
 						document.querySelectorAll("ytd-menu-service-item-renderer.style-scope.ytd-menu-popup-renderer")[2].click();
@@ -6059,14 +6205,14 @@ if (1 && frycAPI.host == "www.youtube.com") {
 				const t0 = performance.now();
 				let t1;
 				while (1) {
-					let butt = document.querySelector("ytd-popup-container .yt-spec-button-view-model");
+					const butt = document.querySelector("ytd-popup-container .yt-spec-button-view-model");
 					if (butt) {
 						loguj(document.querySelector("ytd-popup-container").cloneNode(1));
 					}
 					await frycAPI.sleep(500);
 					t1 = performance.now();
 					if (t1 - t0 > 10000) {
-						break
+						break;
 					}
 				}
 			})();
@@ -6079,7 +6225,7 @@ if (1 && frycAPI.host == "www.youtube.com") {
 		})();
 	});
 }
-if (1 && frycAPI.host == "wyniki.diag.pl") {
+if (1 && frycAPI.host === "wyniki.diag.pl") {
 	frycAPI.injectStyle(/*css*/`
 		.line-chart::after {
 			background-color: #F55E32;
@@ -6099,18 +6245,18 @@ if (1 && frycAPI.host == "wyniki.diag.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host == "wyznacznik.pl") {
+if (1 && frycAPI.host === "wyznacznik.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img {
 			filter: invert(1);
 		}
 	`);
 }
-if (frycAPI.host == "developer.chrome.com") {
+if (frycAPI.host === "developer.chrome.com") {
 	frycAPI.injectStyle(/*css*/`
 	`);
 }
-if (frycAPI.host == "www.rp.pl") {
+if (frycAPI.host === "www.rp.pl") {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyle(/*css*/`
 		.section--ad--breaker ,
@@ -6139,7 +6285,7 @@ if (frycAPI.host == "www.rp.pl") {
 		}
 	`);
 }
-if (frycAPI.host == "polandsvoice.pl") {
+if (frycAPI.host === "polandsvoice.pl") {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyle(/*css*/`
 		.App-Content>div>svg>text:first-of-type {
@@ -6147,14 +6293,14 @@ if (frycAPI.host == "polandsvoice.pl") {
 		}
 	`);
 }
-if (frycAPI.host == "www.mchtr.pw.edu.pl") {
+if (frycAPI.host === "www.mchtr.pw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		*:not(.naglowek-middle.logo *,[title="Szukaj"] *) {
 			font-family: IBM Plex Sans Condensed;
 		}
 	`);
 }
-if (frycAPI.host == "www.java.com") {
+if (frycAPI.host === "www.java.com") {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyle(/*css*/`
 	`);
@@ -6163,7 +6309,7 @@ if (frycAPI.host == "www.java.com") {
 		frycAPI.colorSchemeDark = 1;
 	})();
 }
-if (frycAPI.host == "www.overleaf.com") {
+if (frycAPI.host === "www.overleaf.com") {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyle(/*css*/`
 		/*
@@ -6263,12 +6409,14 @@ if (frycAPI.hostList(["www.ctan.org", "ctan.org"])) {
 		}
 	`);
 }
-if (1 && frycAPI.host == "help.eclipse.org") {
+if (1 && frycAPI.host === "help.eclipse.org") {
 	frycAPI.onLoadSetter(() => {
-		let frameDoc = window.frames["HelpFrame"].frames["ContentFrame"].frames["ContentViewFrame"].document;
+		const frameDoc = window.frames["HelpFrame"].frames["ContentFrame"].frames["ContentViewFrame"].document; // eslint-disable-line dot-notation
 		// window.frames["ContentViewFrame"].document
 		// document.querySelector("frame[name='ContentViewFrame']").contentDocument
-		if ((frameDoc !== null) && ((myh1 = frameDoc.querySelector("div.header>h1.title")) !== null) && (myh1.innerHTML == "Class DefaultCodeFormatterConstants")) {
+		// if ((frameDoc !== null) && ((myh1 = frameDoc.querySelector("div.header>h1.title")) !== null) && (myh1.innerHTML === "Class DefaultCodeFormatterConstants")) {
+		if (frameDoc !== null && frameDoc.querySelector("div.header>h1.title")?.innerHTML === "Class DefaultCodeFormatterConstants") {
+			// konkretnie dla strony: https://help.eclipse.org/latest/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2Fformatter%2FDefaultCodeFormatterConstants.html
 			frycAPI.injectStyleNormal(/*css*/`
 				#field-summary > .summary-table {
 					/* display: block;
@@ -6326,18 +6474,18 @@ if (1 && frycAPI.host == "help.eclipse.org") {
 						}
 					}
 				}
-			`, frameDoc.body);
-			let myTable = frameDoc.querySelector("#field-summary>.summary-table");
-			let sortFun = function () {
-				// const t0 = performance.now();
+			`, { elem: frameDoc.body });
+			const myTable = frameDoc.querySelector("#field-summary>.summary-table");
+			const sortFun = function () {
+				const t0 = performance.now();
 
-				let docFrag = document.createDocumentFragment();
+				const docFrag = document.createDocumentFragment();
 				Array.prototype.slice.call(myTable.querySelectorAll(`.${this.classList[1]}:not(.table-header)`), 0).sort(function mySort(a, b) {
-					let a1 = a.innerText;
-					let b1 = b.innerText;
+					const a1 = a.innerText;
+					const b1 = b.innerText;
 					return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
 				}).forEach(function forEachAfterSort(daElem, daI, daArr) {
-					daElem["row"].forEach(function forEachElemInRow(daElem1, daI1, daArr1) {
+					daElem.row.forEach(function forEachElemInRow(daElem1, daI1, daArr1) {
 						docFrag.appendChild(daElem1);
 					});
 				});
@@ -6345,15 +6493,15 @@ if (1 && frycAPI.host == "help.eclipse.org") {
 				myTable.querySelector(".posortowana")?.classList.remove("posortowana");
 				this.classList.add("posortowana");
 
-				// const t1 = performance.now();
-				// loguj(`Czas: ${frycAPI.zaokrl(t1 - t0,2)} ms`);
+				const t1 = performance.now();
+				loguj(`${(t1 - t0).toFixed(1)} ms`);
 			};
 			/*
 			let newTable = myTable.appendChild(document.createElement("table").frycAPI_addClass("myTable"));
 			let myDiv = document.createElement("tr");
 			myTable.querySelectorAll(":scope>div").forEach(function (daElem, daI, daArr) {
 				myDiv.appendChild(document.createElement(daI >= 3 ? "td" : "th")).appendChild(daElem);
-				if (myDiv.childElementCount == 3) {
+				if (myDiv.childElementCount === 3) {
 					newTable.appendChild(myDiv);
 					myDiv = document.createElement("tr");
 				}
@@ -6364,17 +6512,17 @@ if (1 && frycAPI.host == "help.eclipse.org") {
 			});
 			myTable.querySelectorAll(":scope>div:not(.table-header)").forEach(function (daElem, daI, daArr) {
 				if (daElem.classList.contains("col-first")) {
-					daElem["row"] = [daElem, daElem.nextElementSibling, daElem.nextElementSibling.nextElementSibling];
+					daElem.row = [daElem, daElem.nextElementSibling, daElem.nextElementSibling.nextElementSibling];
 				} else if (daElem.classList.contains("col-second")) {
-					daElem["row"] = [daElem.previousElementSibling, daElem, daElem.nextElementSibling];
+					daElem.row = [daElem.previousElementSibling, daElem, daElem.nextElementSibling];
 				} else if (daElem.classList.contains("col-last")) {
-					daElem["row"] = [daElem.previousElementSibling.previousElementSibling, daElem.previousElementSibling, daElem];
+					daElem.row = [daElem.previousElementSibling.previousElementSibling, daElem.previousElementSibling, daElem];
 				}
 			});
 		}
 	});
 }
-if (frycAPI.host == "docs.oracle.com") {
+if (frycAPI.host === "docs.oracle.com") {
 	frycAPI.injectStyle(/*css*/`
 		#LeftBar {
 			width: 170px;
@@ -6424,18 +6572,18 @@ if (frycAPI.host == "docs.oracle.com") {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		var mainFlow = document.getElementById("MainFlow");
+		const mainFlow = document.getElementById("MainFlow");
 		try {
 			mainFlow.insertAdjacentElement("afterend",
 				document.createElement("div").frycAPI_addClass("myDiv"))
-				.append(document.getElementById("LeftBar"), mainFlow
-				);
+			.append(document.getElementById("LeftBar"), mainFlow
+			);
 		} catch (error) { }
 
 		try {
 			document.querySelector(".description")
-				.frycAPI_insertAdjacentElement("afterbegin", document.querySelector("ul.inheritance"))
-				.insertAdjacentElement("afterbegin", document.querySelector(".header"));
+			.frycAPI_insertAdjacentElement("afterbegin", document.querySelector("ul.inheritance"))
+			.insertAdjacentElement("afterbegin", document.querySelector(".header"));
 		} catch (error) { }
 
 		if (window.location.pathname.frycAPI_includesAny(["%2Fdocs%2F", "/docs/"])) {
@@ -6443,7 +6591,7 @@ if (frycAPI.host == "docs.oracle.com") {
 		}
 	});
 }
-if (frycAPI.host == "npskills.github.io") { // NINE PARCHMENTS SKILL CALCULATOR
+if (frycAPI.host === "npskills.github.io") { // NINE PARCHMENTS SKILL CALCULATOR
 	frycAPI.injectStyle(/*css*/`
 		body {
 			font: 15pt/17pt IBM Plex Sans Condensed;
@@ -6494,7 +6642,7 @@ if (frycAPI.host == "npskills.github.io") { // NINE PARCHMENTS SKILL CALCULATOR
 		});
 	});
 }
-if (1 && frycAPI.host == "www.konesso.pl") {
+if (1 && frycAPI.host === "www.konesso.pl") {
 	frycAPI.injectStyleNormal(/*css*/`
 		div#preloader {
 			display: none;
@@ -6502,7 +6650,7 @@ if (1 && frycAPI.host == "www.konesso.pl") {
 		svg#loader {
 			display: none;
 		}
-	`, document.documentElement);
+	`, { elem: document.documentElement });
 
 	(frycAPI.beforeLoad = function () {
 		// frycAPI.colorSchemeDark = 1;
@@ -6511,7 +6659,7 @@ if (1 && frycAPI.host == "www.konesso.pl") {
 	frycAPI.onLoadSetter(() => {
 	});
 }
-if (frycAPI.host == "barotraumagame.com") {
+if (frycAPI.host === "barotraumagame.com") {
 	frycAPI.injectStyle(/*css*/`
 		div[style="text-align:center;inline-size:min-content;white-space: nowrap;"] {
 			display: flex;
@@ -6531,14 +6679,14 @@ if (frycAPI.host == "barotraumagame.com") {
 
 	`);
 }
-if (frycAPI.host == "www.tribologia.eu") {
+if (frycAPI.host === "www.tribologia.eu") {
 	frycAPI.injectStyle(/*css*/`
 		html {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 }
-if (frycAPI.host == "steamspy.com") {
+if (frycAPI.host === "steamspy.com") {
 	frycAPI.injectStyle(/*css*/`
 		img[alt="logo"] {
 			filter: invert(1) hue-rotate(180deg);
@@ -6547,14 +6695,14 @@ if (frycAPI.host == "steamspy.com") {
 }
 // #endregion
 // #region //* IFy 9
-if (frycAPI.host == "www.fakrosno.pl") {
+if (frycAPI.host === "www.fakrosno.pl") {
 	frycAPI.injectStyle(/*css*/`
 		.spring-middle>img {
 			filter: invert(1) hue-rotate(180deg) !important;
 		}
 	`);
 }
-if (frycAPI.host == "www.arrowheadgamestudios.com") {
+if (frycAPI.host === "www.arrowheadgamestudios.com") {
 	frycAPI.injectStyle(/*css*/`
 		.comment-author cite.fn {
 			font-size: 22px;
@@ -6612,7 +6760,7 @@ if (frycAPI.host == "www.arrowheadgamestudios.com") {
 		}
 	`);
 }
-if (frycAPI.host == "e621.net") {
+if (frycAPI.hostList(["e621.net", "e926.net"])) {
 	frycAPI.injectStyle(/*css*/`
 		* {
 			font-family: IBM Plex Sans Condensed !important;
@@ -6706,18 +6854,24 @@ if (frycAPI.host == "e621.net") {
 				filter: brightness(1.3);
 			}
 		}
+
+		.styled-dtext .inline-code {
+			padding: 1px 2px;
+			border-radius: 5px;
+			font-size: 0.7rem;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		let pthNam = window.location.pathname;
+		const pthNam = window.location.pathname;
 		if (pthNam.startsWith("/posts/")) {
-			document.getElementsByClassName('next')[0].setAttribute('accesskey', 'a');
-			document.getElementsByClassName('prev')[0].setAttribute('accesskey', 'b');
+			document.getElementsByClassName("next")[0].setAttribute("accesskey", "a");
+			document.getElementsByClassName("prev")[0].setAttribute("accesskey", "b");
 			(document.body.appendChild(document.createElement("div")).frycAPI_setAttribute("id", "mojScroll")
-				.frycAPI_setInnerHTML("Deafult scroll").onclick = () => {
-					window.scrollTo(0, document.documentElement.scrollTop + document.getElementById("nav-links-top").getBoundingClientRect().y)
-				})();
-		} else if (pthNam == "/posts" || pthNam.startsWith("/posts?")) {
+			.frycAPI_setInnerHTML("Deafult scroll").onclick = () => {
+				window.scrollTo(0, document.documentElement.scrollTop + document.getElementById("nav-links-top").getBoundingClientRect().y);
+			})();
+		} else if (pthNam === "/posts" || pthNam.startsWith("/posts?")) {
 			document.getElementById("c-posts").insertAdjacentElement("beforebegin", document.getElementById("search-box"));
 			window.scrollTo(0, 0);
 		} else if (pthNam.startsWith("/pools/") && !pthNam.startsWith("/pools/gallery")) {
@@ -6726,32 +6880,30 @@ if (frycAPI.host == "e621.net") {
 			}
 			(frycAPI.e621_get_pool_dates = async function (pocz, kon) {
 				// np. https://e621.net/pools/35222
-				if (arguments.length == 0) {
-					var pocz = 0; var kon = 0;
-				} else if (arguments.length == 2 && pocz > kon) {
+				if (arguments.length === 0) {
+					pocz = 0; kon = 0;
+				} else if (arguments.length === 2 && pocz > kon) {
 					console.log("Błąd! Początek nie może być większy niż koniec!");
-					return
-				} else if (arguments.length == 2 && pocz < 1) {
+					return;
+				} else if (arguments.length === 2 && pocz < 1) {
 					console.log("Błąd! Początek nie może być mniejszy niż 1!");
-					return
-				} else if (arguments.length != 2) {
+					return;
+				} else if (arguments.length !== 2) {
 					console.log("Błąd! Zła liczba parametrów!");
-					return
+					return;
 				}
 
-				let poolID = pthNam.split("/").slice(-1);
-				if (!frycAPI.datArr) {
-					frycAPI.datArr = ((await (await fetch(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`)).json())
-						.posts.map((elem) => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
-						.map((daElem, daI) => {
-							// Numery postów chronologicznie
-							// document.getElementById("post_" + daElem[1])?.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
-							return daElem[0];
-						})
-					);
-				}
-				let datArr = frycAPI.datArr;
-				let ostatniaData = datArr[datArr.length - 1];
+				const poolID = pthNam.split("/").slice(-1);
+				frycAPI.datArr ||= (await frycAPI.readFile(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`) // eslint-disable-line require-atomic-updates
+				.posts.map(elem => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
+				.map((daElem, daI) => {
+					// Numery postów chronologicznie
+					// document.getElementById("post_" + daElem[1])?.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
+					return daElem[0];
+				})
+				);
+				const datArr = frycAPI.datArr;
+				const ostatniaData = datArr[datArr.length - 1];
 
 				/* Numery postów wedle kolejności na stronie + daty z informacji na stronie
 				// var datArr = [];
@@ -6761,41 +6913,41 @@ if (frycAPI.host == "e621.net") {
 				});
 				*/
 
-				let diffArr = [];
+				const diffArr = [];
 				for (let i = 1; i < datArr.length; i++) {
 					diffArr.push(Math.max(datArr[i] - datArr[i - 1], 0));
 				}
 
-				if (kon == 0) {
+				if (kon === 0) {
 					kon = diffArr.length;
 				} else if (kon > diffArr.length) {
-					console.log("Błąd! Nie można wybrać pozycji większej niż długość wektora różnic!")
-					return
+					console.log("Błąd! Nie można wybrać pozycji większej niż długość wektora różnic!");
+					return;
 				}
-				if (arguments.length == 2) {
+				if (arguments.length === 2) {
 					pocz--;
 				}
-				let diffArrMax = Math.max(...diffArr.slice(pocz, kon));
+				const diffArrMax = Math.max(...diffArr.slice(pocz, kon));
 
-				let diffArrMean = (ostatniaData - datArr[0]) / (datArr.length - 1);
+				const diffArrMean = (ostatniaData - datArr[0]) / (datArr.length - 1);
 
-				let wykres = ""; let padding = kon.toString().length;
+				let wykres = ""; const padding = kon.toString().length;
 				for (let i = pocz; i < kon; i++) {
-					var ile = Math.round(diffArr[i] / diffArrMax * 100);
+					const ile = Math.round(diffArr[i] / diffArrMax * 100);
 					wykres += `${String(i + 1).padStart(padding, " ")}. ${czytelnyCzas(diffArr[i])} [${"".padEnd(ile, "|") + "".padEnd(100 - ile, " ")}]\n`;
 				}
-				let obecnyCzas = new Date().getTime();
-				let nowaStrona = new Date(ostatniaData + diffArrMean);
-				let nowaStronaDiff = nowaStrona.getTime() - obecnyCzas;
-				let nowaStronaStr = "";
+				const obecnyCzas = Date.now();
+				const nowaStrona = new Date(ostatniaData + diffArrMean);
+				const nowaStronaDiff = nowaStrona.getTime() - obecnyCzas;
+				let nowaStronaStr;
 				if (nowaStronaDiff >= 0) {
 					nowaStronaStr = `za %c${czytelnyCzas(nowaStronaDiff).trim()}%c`;
 				} else {
 					nowaStronaStr = `powinna być %c${czytelnyCzas(-nowaStronaDiff).trim()}%c temu`;
 				}
 
-				if (!frycAPI.pool) {
-					frycAPI.pool = await (await fetch(`https://e621.net/pools/${poolID}.json`)).json();
+				if (frycAPI.pool === undefined) {
+					frycAPI.pool = await frycAPI.readFile(`https://e621.net/pools/${poolID}.json`); // eslint-disable-line require-atomic-updates
 					frycAPI.pool.post_ids.forEach((daElem, daI, daArr) => {
 						document.getElementById("post_" + daElem)?.querySelector(".post-score").insertAdjacentElement("afterbegin", document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
 					});
@@ -6806,7 +6958,7 @@ if (frycAPI.host == "e621.net") {
 				}
 				overLimitInfo += "%c";
 
-				let opcje = {
+				const opcje = {
 					weekday: "short",
 					year: "2-digit",
 					month: "2-digit",
@@ -6830,14 +6982,11 @@ if (frycAPI.host == "e621.net") {
 	});
 }
 if (frycAPI.hostList(["static1.e926.net", "static1.e621.net"])) {
-	frycAPI.injectStyle(/*css*/`
-	`);
-
 	frycAPI.onLoadSetter(function () {
 		frycAPI.changeFaviconRes("e621_Logo.png");
 	});
 }
-if (frycAPI.host == "e-hentai.org") {
+if (frycAPI.host === "e-hentai.org") {
 	if (window.location.pathname.startsWith("/s/")) {
 		frycAPI.injectStyleNormal(/*css*/`
 			img[src="https://ehgt.org/g/f.png"],
@@ -6883,13 +7032,13 @@ if (frycAPI.host == "e-hentai.org") {
 		`);
 
 		frycAPI.onLoadSetter(() => {
-			document.querySelector('#i1.sni>h1').addEventListener("click", (event) => {
+			document.querySelector("#i1.sni>h1").addEventListener("click", event => {
 				event.target.classList.toggle("duży");
 			});
 		});
 	}
 }
-if (frycAPI.host == "www.sqlite.org") {
+if (frycAPI.host === "www.sqlite.org") {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			max-width: 1000px;
@@ -6913,7 +7062,7 @@ if (frycAPI.host == "www.sqlite.org") {
 		}
 	`);
 }
-if (frycAPI.host == "s.surveylegend.com") {
+if (frycAPI.host === "s.surveylegend.com") {
 	frycAPI.injectStyle(/*css*/`
 		.is-textbox-in-app {
 			user-select: auto !important;
@@ -6936,7 +7085,7 @@ if (frycAPI.hostList(["issuetracker.google.com", "issues.chromium.org"])) {
 	function correctTimeValues() {
 		frycAPI.forEach(`b-formatted-date-time > time`, (daElem, daI, daArr) => {
 			if (daElem.classList.notContains("zmieniony")) {
-				let data = new Date(daElem.getAttribute("datetime"));
+				const data = new Date(daElem.getAttribute("datetime"));
 				daElem.innerHTML = frycAPI.printRelTime(data.getTime(), 1, "ang", 0, 1, 0, 0);
 				daElem.setAttribute("title", frycAPI.printDate(data));
 				daElem.classList.add("zmieniony");
@@ -6957,14 +7106,14 @@ if (frycAPI.hostList(["issuetracker.google.com", "issues.chromium.org"])) {
 
 	// frycAPI.onLoadSetter(correctTimeValues);
 }
-if (frycAPI.host == "www.pw.edu.pl") {
+if (frycAPI.host === "www.pw.edu.pl") {
 	frycAPI.injectStyle(/*css*/`
 		img[alt="Strona główna"] {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 }
-if (frycAPI.host == "forums.factorio.com") {
+if (frycAPI.host === "forums.factorio.com") {
 	frycAPI.injectStyle(/*css*/`
 		* {
 			font-family: IBM Plex Sans Condensed;
@@ -6973,19 +7122,19 @@ if (frycAPI.host == "forums.factorio.com") {
 
 	frycAPI.onLoadSetter(() => {
 		frycAPI.forEach(`p.author time`, (daElem, daI, daArr) => {
-			let data = new Date(daElem.getAttribute("datetime"));
+			const data = new Date(daElem.getAttribute("datetime"));
 			daElem.innerHTML = frycAPI.printDate(data);
 			daElem.setAttribute("title", frycAPI.printRelTime(data.getTime(), 1, "pol", 0, 1, 1, 0));
 		});
 		frycAPI.forEach(`dd.profile-joined`, (daElem, daI, daArr) => {
-			let node = daElem.frycAPI_getFirstTextNode();
-			let data = new Date(node.textContent.trim());
+			const node = daElem.frycAPI_getFirstTextNode();
+			const data = new Date(node.textContent.trim());
 			node.nodeValue = " " + frycAPI.printDate(data);
 			daElem.setAttribute("title", frycAPI.printRelTime(data.getTime(), 1, "pol", 0, 1, 1, 0));
 		});
 	});
 }
-if (frycAPI.host == "factorio.com") {
+if (frycAPI.host === "factorio.com") {
 	frycAPI.injectStyle(/*css*/`
 		*:not(.header-links > div > a.button.flex.flex-space-between *):not(.user-controls.links.flex.flex-items-baseline.flex-end *) {
 			font-family: IBM Plex Sans Condensed !important;
@@ -6994,38 +7143,92 @@ if (frycAPI.host == "factorio.com") {
 }
 if (frycAPI.hostList(["github.com", "gist.github.com"])) {
 	frycAPI.injectStyle(/*css*/`
-
+		div:has(>pre:first-child) {
+			--wysokość: 13px;
+			--padd: 5px;
+			padding-top: calc(var(--wysokość) + 2*var(--padd));
+			background-color: var(--bgColor-muted, var(--color-canvas-subtle)) !important;
+			&::before {
+				content: attr(my-before-text);
+				/* background-color: #004900 !important; */
+				border-bottom: 1px solid;
+				border-color: var(--borderColor-default, var(--color-border-default, #30363d));
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: var(--wysokość);
+				padding: var(--padd);
+				font-size: var(--wysokość);
+				font-style: italic;
+				color: var(--color-prettylights-syntax-comment);
+				line-height: var(--wysokość);
+				/* box-sizing: border-box; */
+				font-family: var(--fontStack-monospace, ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace);
+			}
+			>.zeroclipboard-container {
+				top: calc(var(--wysokość) + 2*var(--padd)) !important;
+			}
+		}
+		.dspNONE {
+			display: none;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		frycAPI.forEach(`relative-time`, (daElem, daI, daArr) => {
-			let data = new Date(daElem.getAttribute("datetime"));
-			daElem.shadowRoot.innerHTML = frycAPI.printRelTime(data.getTime(), 1, "ang", 0, 1, 1, 0);
-			daElem.setAttribute("title", frycAPI.printDate(data));
-		});
+		frycAPI.createMutObs((mutRecArr, mutObs) => {
+			// const startTime = performance.now();
+
+			// let relTimeCount = 0;
+			frycAPI.forEach(`relative-time`, (daElem, daI, daArr) => { // :not(.poprawnyCzas)
+				if (daElem.shadowRoot.querySelector(`span.dspNONE`) === null) {
+					const data = new Date(daElem.getAttribute("datetime"));
+					daElem.shadowRoot.innerHTML = frycAPI.printRelTime(data.getTime(), 1, "ang", 0, 1, 1, 0) + `<span class="dspNONE"></span>`;
+					daElem.setAttribute("title", frycAPI.printDate(data));
+					// daElem.frycAPI_addClass("poprawnyCzas");
+					// relTimeCount++;
+				}
+			});
+
+			const myBeforeTextCount = frycAPI.forEach(`div:not([my-before-text])>pre:first-child`, (daElem, daI, daArr) => { // Code block names
+				const par = daElem.parentElement;
+				par.setAttribute("my-before-text",
+					par.classList.notContains("highlight") ? "Plain text" :
+					[...par.classList]
+					.find(c => c.startsWith("highlight-source-") || c.startsWith("highlight-text-"))
+					.replace("highlight-source-", "")
+					.replace("highlight-text-", "")
+					.toUpperCase()
+					.replace("-BASIC", "")
+				);
+			}).length;
+
+			// const endTime = performance.now();
+			// loguj(`relative-time: ${relTimeCount}, my-before-text: ${myBeforeTextCount}, ${(endTime - startTime).toFixed(1)} ms`);
+		}, { options: { attributes: true } });
 	});
 }
-if (frycAPI.host == "developers.google.com") {
+if (frycAPI.host === "developers.google.com") {
 	frycAPI.injectStyle(/*css*/`
 		*:not(devsite-code *):not(code) {
 			font-family: IBM Plex Sans Condensed;
 		}
 	`);
 }
-if (frycAPI.host == "support.google.com") {
+if (frycAPI.host === "support.google.com") {
 	frycAPI.injectStyle(/*css*/`
 
 	`);
 
 	frycAPI.onLoadSetter(() => {
 		frycAPI.forEach(`sc-tailwind-thread-post_header-post-date`, (daElem, daI, daArr) => {
-			let data = new Date((htmlBlob = daElem.querySelector(`html-blob`)).innerText);
+			const data = new Date((htmlBlob = daElem.querySelector(`html-blob`)).innerText);
 			daElem.querySelector(`.scTailwindThreadPost_headerPostdateroot`).innerHTML = frycAPI.printRelTime(data.getTime(), 1, "ang", 0, 1, 1, 0);
 			htmlBlob.innerHTML = frycAPI.printDate(data);
 		});
 	});
 }
-if (frycAPI.host == "okazja-hurtownia.pl") {
+if (frycAPI.host === "okazja-hurtownia.pl") {
 	frycAPI.injectStyle(/*css*/`
 		.col2-set.addresses .woocommerce-column--billing-address.col-1,
 		.col2-set.addresses .woocommerce-column--shipping-address.col-2 {
@@ -7048,7 +7251,7 @@ if (frycAPI.hostListIncludes(["aliexpress.com"])) {
 		}
 	`);
 }
-if (frycAPI.host == "www.crazytime.pl") { // Jeżeli strona często zmienia tytuł (aby zwrócić twoją uwagę bez powodu) zastosuj ten kod
+if (frycAPI.host === "www.crazytime.pl") { // Jeżeli strona często zmienia tytuł (aby zwrócić twoją uwagę bez powodu) zastosuj ten kod
 	frycAPI.injectStyle(/*css*/`
 
 	`);
@@ -7056,7 +7259,7 @@ if (frycAPI.host == "www.crazytime.pl") { // Jeżeli strona często zmienia tytu
 	frycAPI.onLoadSetter(function () {
 		const title = document.title;
 		new MutationObserver((mutRec, mutObs) => {
-			if (document.title != title) {
+			if (document.title !== title) {
 				document.title = title;
 				// loguj("Tit");
 			}
@@ -7169,38 +7372,38 @@ if (1 && frycAPI.host.includes("autodesk.com")) { // frycAPI.hostList(["forums.a
 
 	document.addEventListener("DOMContentLoaded", () => {
 		frycAPI.forEach(`span.DateTime`, (daElem, daI, daArr) => {
-			let dateComps = daElem.innerText.trim().replaceAll(/\s+/gm, " ").split(" ");
-			if (dateComps.length == 1) {
+			const dateComps = daElem.innerText.trim().replaceAll(/\s+/gm, " ").split(" ");
+			if (dateComps.length === 1) {
 				dateComps[1] = "0:0";
 				dateComps[2] = "AM";
 			}
-			let timeComps = dateComps[1].split(":").map(a => Number(a));
-			let korekta = (() => {
-				if (dateComps[2] == "PM") {
-					return (timeComps[0] == 12 ? 0 : 3600 * 12);
+			const timeComps = dateComps[1].split(":").map(a => Number(a));
+			const korekta = (() => {
+				if (dateComps[2] === "PM") {
+					return (timeComps[0] === 12 ? 0 : 3600 * 12);
 				} else {
-					return (timeComps[0] == 12 ? -3600 * 12 : 0);
+					return (timeComps[0] === 12 ? -3600 * 12 : 0);
 				}
 			})();
-			let data = new Date(new Date(dateComps[0].replaceAll(/[^\d-]/gm, "")).getTime() + 1000 * (timeComps[0] * 3600 + timeComps[1] * 60 + korekta + 9 * 3600));
+			const data = new Date(new Date(dateComps[0].replaceAll(/[^\d-]/gm, "")).getTime() + 1000 * (timeComps[0] * 3600 + timeComps[1] * 60 + korekta + 9 * 3600));
 			daElem.innerHTML = frycAPI.printRelTime(data.getTime(), 1, "ang", 1, 1, 1, 0);
 			daElem.setAttribute("title", frycAPI.printDate(data));
 		});
 		frycAPI.forEach(`p`, (daElem, daI, daArr) => {
-			if (daElem.innerHTML == "&nbsp;") {
+			if (daElem.innerHTML === "&nbsp;") {
 				daElem.frycAPI_addClass("tylko-nbsp");
 				return;
 			}
-			let chld = daElem.childNodes;
+			const chld = daElem.childNodes;
 			for (let i = 0; i < chld.length; i++) {
-				if (chld[i].nodeName == "BR") {
+				if (chld[i].nodeName === "BR") {
 					chld[i].frycAPI_addClass("bad-br-node");
 				} else {
 					break;
 				}
 			}
 			for (let i = chld.length - 1; i >= 0; i--) {
-				if (chld[i].nodeName == "BR") {
+				if (chld[i].nodeName === "BR") {
 					chld[i].frycAPI_addClass("bad-br-node");
 				} else {
 					break;
@@ -7213,30 +7416,28 @@ if (1 && frycAPI.host.includes("autodesk.com")) { // frycAPI.hostList(["forums.a
 			switch (frycAPI.host) {
 				case "forums.autodesk.com": return "AutodeskOrange.png";
 				case "help.autodesk.com": return "AutodeskBlue.png";
-				default: return "Autodesk.png"
+				default: return "Autodesk.png";
 			}
 		})());
-		if (frycAPI.host == "help.autodesk.com") {
+		if (frycAPI.host === "help.autodesk.com") {
 			frycAPI.injectStyleNormal(/*css*/`
 				tr.header>td {
 					white-space: nowrap;
 				}
 			`);
-			let tableFun = function(mutRecArr, mutObs) {
+			frycAPI.createMutObs((mutRecArr, mutObs) => {
 				// loguj("tableFun");
-				frycAPI.forEach(`table:not(.sortowalnaTabela)`, (daElem, daI, daArr) => {
-					daElem.querySelectorAll(`tr.header>td`).forEach((daElem1, daI, daArr) => {
-						if (daElem1.innerText.trim() == "Value") daElem1.setAttribute("krytSort", "numeric")
+				frycAPI.forEach(`table:not(.sortowalnaTabela)`, daElem => {
+					daElem.querySelectorAll(`tr.header>td`).forEach(daElem1 => {
+						if (daElem1.innerText.trim() === "Value") daElem1.setAttribute("krytSort", "numeric");
 					});
 					frycAPI.makeTableSortable(daElem, "tr", "td", "tr.header>td");
 				});
-			}
-			tableFun();
-			new MutationObserver(tableFun).observe(document.body, { childList: true, subtree: true, });
+			});
 		}
 	});
 }
-if (frycAPI.host == "allegro.pl") {
+if (frycAPI.host === "allegro.pl") {
 	frycAPI.injectStyle(/*css*/`
 		.ukryj-opinie-bez-zdjęć {
 			& [itemprop="review"]:not(:has(> [data-analytics-view-label="reviewsGallery"])) {
@@ -7261,7 +7462,7 @@ if (frycAPI.host == "allegro.pl") {
 }
 // #endregion
 // #region //* IFy 10
-if (1 && frycAPI.host == "knucklecracker.com") {
+if (1 && frycAPI.host === "knucklecracker.com") {
 	frycAPI.injectStyle(/*css*/`
 	`);
 
@@ -7278,18 +7479,18 @@ if (1 && frycAPI.host == "knucklecracker.com") {
 
 	frycAPI.onLoadSetter(() => {
 		if (window.location.pathname.startsWith("/forums/")) {
-			let t = document.querySelector(".user time");
-			let theirDate = new Date(t.innerHTML).getTime();
-			let myDate = new Date(t.getAttribute("datetime")).getTime();
+			const t = document.querySelector(".user time");
+			const theirDate = new Date(t.innerHTML).getTime();
+			const myDate = new Date(t.getAttribute("datetime")).getTime();
 			// let diff = new Date().getTimezoneOffset() * (-1) * 60 * 1000 - (myDate - theirDate);
-			let diff = myDate - theirDate;
+			const diff = myDate - theirDate;
 			t.innerHTML = "Current time: " + frycAPI.printDate(new Date(myDate));
 
 			frycAPI.forEach(`div.postinfo > a.smalltext, .lastpost > p > a:first-child`, (daElem, daI, daArr) => {
 				let data = new Date(daElem.innerText);
-				if (frycAPI.isValidDate(data) == false) {
+				if (frycAPI.isValidDate(data) === false) {
 					data = new Date(new Date().toDateString() + daElem.innerText.replace("Today at", ""));
-					if (frycAPI.isValidDate(data) == false) return;
+					if (frycAPI.isValidDate(data) === false) return;
 				}
 				data = new Date(data.getTime() + diff);
 				daElem.innerHTML = frycAPI.printRelTime(data.getTime(), 1, "ang", 0, 1, 1, 0);
@@ -7298,7 +7499,320 @@ if (1 && frycAPI.host == "knucklecracker.com") {
 		}
 	});
 }
-if (frycAPI.host == "template") {
+if (frycAPI.host === "gist.github.com") {
+	frycAPI.injectStyle(/*css*/`
+		
+	`);
+
+	frycAPI.onLoadSetter(() => {
+		frycAPI.changeFaviconRes("GithubBlue.png");
+
+		const tab = document.querySelector("table[data-tagsearch-lang]");
+	});
+}
+if (frycAPI.host === "nodejs.org") {
+	frycAPI.injectStyle(/*css*/`
+		[class*="layouts_contentLayout"]>:first-child main {
+			word-break: normal;
+		}
+	`);
+}
+if (frycAPI.host === "eslint.org") {
+	frycAPI.injectStyle(/*css*/`
+		.c-toc ol li:before {
+			content: "-";
+			left: 0;
+		}
+	`);
+}
+if (1 && frycAPI.host.includes("metafilter.com")) {
+	frycAPI.injectStyle(/*css*/`
+		:root {
+			--kolor-krawędzi: hsl(0deg, 0%, 100%, 65%);
+			--kolor-cienia: black;
+			--after-shadow-width: 7px;
+		}
+		*, body.thread #posts h1 .smallcopy, body.thread #posts .copy .smallcopy, body.thread #posts .comments .smallcopy {
+			font-family: IBM Plex Sans Condensed, sans-serif !important;
+		}
+		:is(#scontent, #posts, #posts > div:not(#related, .copy, .post, .comments), #boxyleft) > br,
+		.copy:has(> ins.adsbygoogle),
+		.comments:has(> ins.adsbygoogle),
+		.tags:has(> ins.adsbygoogle),
+		div:has(> ins.adsbygoogle),
+		.copy > .miseperator > br:first-of-type,
+		#menu > a[name="sidebar"] {
+			display: none;
+		}
+		.comments,
+		.comments > span.whitesmallcopy,
+		body.thread #posts #related {
+			margin: 0 !important;
+		}
+		p.comments {
+			padding: 0px !important;
+		}
+		div#closedmsg {
+			margin-top: 12px !important;
+		}
+		body.thread {
+			#posts .copy:not(#related),
+			#posts .comments.bestleft {
+				--kolor-krawędzi: hsl(82.43deg, 50.66%, 55.49%, 90%);
+				--kolor-cienia: var(--kolor-krawędzi);
+				> .smallcopy > a[href*="/user/"] {
+					text-decoration: underline;
+				}
+			}
+			span.smallcopy:is(.postbyline, .byline) a[href*="/favorited/"] {
+				&::before {
+					content: "[";
+				}
+				&::after {
+					content: "]";
+				}
+			}
+		}
+		body:not(.thread, :has(nav.tertiary li.current > a[href="https://metatalk.metafilter.com/home/popularfavorites"])) :is(#scontent, #posts, #boxyleft, #page) > :is(h1, h2):not(.posttitle, :has(.smallcopy)) {
+			/* position: absolute; */
+			height: 0;
+			overflow: visible;
+			margin: 0;
+			text-align: right;
+			right: calc(100% + 10px);
+		}
+		body:not(.thread) :is(#scontent, #posts, #boxyleft, #page) > :is(h1, h2):not(.posttitle, :has(.smallcopy)) {
+			padding: 0px !important;
+		}
+		body.thread #posts .comments:has(>.smallcopy),
+		body.thread #posts .copy:not(#related),
+		.my-posttitle-post-wrapper {
+			box-shadow: 0px 0px var(--after-shadow-width) var(--kolor-cienia);
+		}
+		body:not(.thread) :is(#scontent, #posts, #posts > div, #boxyleft, #page) :is(h1, h2).posttitle {
+			margin: 0px !important;
+			padding: 5px !important;
+			border: 1px solid var(--kolor-krawędzi) !important;
+			border-bottom-width: 0px !important;
+		}
+		:is(#scontent, #posts, #posts > div, #boxyleft) div:is(.copy:not(#related), .copy.post) {
+			border: 1px solid var(--kolor-krawędzi) !important;
+			padding: 5px;
+		}
+		#posts .comments:has(>.smallcopy) {
+			border: 1px solid var(--kolor-krawędzi) !important;
+			padding: 5px;
+		}
+		.comments:has(>.smallcopy),
+		.copy:not(#related, #userlist):has(>.smallcopy) {
+			margin: 0 0 10px 0 !important;
+			position: relative;
+			padding-top: 27px !important;
+			left: 0;
+			>.smallcopy {
+				background-color: var(--główny-color-tła);
+				margin: 0px !important;
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				right: 0px;
+				padding: 2px 4px !important;
+				border-bottom: 1px solid var(--kolor-krawędzi);
+				/* display: flex !important;
+				gap: 5px;
+				> a::after {
+					content: ",";
+				} */
+				/* > span:not([class]):not(:last-of-type) {
+					margin-right: 5px;
+				} */
+			}
+		}
+		#posts .copy > .miseperator {
+			margin-top: 10px !important;
+			padding-top: 10px !important;
+		}
+		/* :is(#scontent, #posts, #posts > div, #boxyleft, #page), */
+		:is(#scontent, #posts, #page) {
+			padding: 0 10px 0 0 !important;
+		}
+		#posts.frontposts {
+			padding: 0 !important;
+		}
+		html#myID body div .tags.sidebar{
+			&, > h2 {
+				margin-top: 10px !important;
+				margin-bottom: 10px !important;
+			}
+		}
+		body #threadsub {
+			margin-top: 78px !important;
+		}
+		.row {
+			margin-left: 0;
+			margin-right: 0;
+		}
+		#threadside {
+			padding-right: 0 !important;
+		}
+		.container {
+			padding-left: 10px;
+			padding-right: 0px;
+		}
+		@media (min-width: 1200px) {
+			.site-header nav.primary .search {
+				width: 470px;
+			}
+		}
+		.row :is(#menu.sidebar, #threadsub) {
+			padding: 0;
+			margin: 0;
+			/* > *:not(:first-child, #sidebar-funding) { */
+			> * {
+				margin: 0 0 10px 0 !important;
+			}
+			h2 {
+				margin-top: 5px !important;
+			}
+		}
+		#sidebar-funding > .funding.sidebar {
+			margin: 0;
+		}
+		[role="main"] > .container {
+			padding: 0;
+		}
+		.copy.post {
+			margin-bottom: 10px;
+		}
+		body.thread #posts h1 .smallcopy {
+			margin-top: 10px !important;
+		}
+		body.thread #posts h1 {
+			margin-bottom: 12px !important;
+		}
+		body.subsite-music #boxyleft {
+			padding-right: 0;
+		}
+	`);
+
+	frycAPI.onLoadSetter(async function () {
+		document.documentElement.setAttribute("id", "myID");
+		frycAPI.setDefaultDateStyle();
+		document.documentElement.style.setProperty("--główny-color-tła", document.querySelector(`.comments > span.whitesmallcopy, .comments.whitesmallcopy`)?.computedStyleMap().get("background-color").toString());
+
+		frycAPI.setDefaultDate(`#userlist.copy > span.smallcopy`, { getDate: "txt" });
+
+		if (document.body.classList.contains("thread")) {
+			const xml = await frycAPI.readFile(window.location.origin + window.location.pathname + "/rss", "xml");
+			// xml.querySelector(`parsererror`) === null
+			// frycAPI.querySelNull(`parsererror`, xml)
+			let rss;
+			if (frycAPI.querySelNull(`parsererror`, xml)) {
+				rss = [...xml.querySelectorAll(`item pubDate`)].map(pub => new Date(new Date(pub.innerHTML).getTime() - frycAPI.hour));
+			}
+
+			let smallcopy = document.querySelector(`#posts > .posttitle + .smallcopy`);
+			if (smallcopy) {
+				smallcopy.previousElementSibling.appendChild(document.createElement("br"));
+				smallcopy.previousElementSibling.appendChild(smallcopy);
+			}
+
+			smallcopy = document.querySelector(`h1.posttitle > .smallcopy`);
+			let data0;
+			if (smallcopy) {
+				const txtNode = smallcopy.frycAPI_getFirstTextNode();
+				const span = smallcopy.querySelector(`:scope > span`);
+				data0 = rss ? rss[0] : new Date(txtNode.textContent + span.innerText);
+				const dateText = smallcopy.frycAPI_insertHTML("afterbegin", frycAPI.getDefaultDateText(data0));
+				txtNode.remove();
+				span?.remove();
+				frycAPI.setDefaultDateTitle(smallcopy, data0);
+				if (dateText.nextSibling && dateText.nextSibling.nodeType !== Node.TEXT_NODE) {
+					dateText.frycAPI_insertHTML("afterend", "<span> &nbsp; </span>");
+				}
+			}
+
+			const post0 = document.querySelector(`#posts .copy > span.smallcopy`);
+			post0?.frycAPI_setInnerHTML(post0.innerHTML
+			.replace(/users? marked this as a favorite/, `<span style="font-family: sans-serif !important;">&#x2764;&#xFE0F;</span>`)
+			.replace(/(answers|comments) total/, `<span style="font-family: sans-serif !important;">&#x21A9;&#xFE0F;</span>`)
+			);
+
+			const OP_href = document.querySelector(`.copy > span.smallcopy:is(.postbyline, .byline) > a[href*="/user/"]`)?.href;
+
+			frycAPI.forEach(`.comments > .smallcopy`, (daElem, daI, daArr) => {
+				const user = daElem.querySelector(`a[href*="/user/"]`);
+				const link = daElem.querySelector(`a[href*="${daElem.parentElement.previousElementSibling.name}"]:not([href*="/user/"],[href*="/favorited/"])`);
+				const favs = daElem.querySelector(`a[href*="/favorited/"]`);
+				const staf = daElem.querySelector(`a.staff`);
+				const text = daElem.innerText;
+				user.remove();
+				link.remove();
+				favs?.remove();
+				staf?.remove();
+				daElem.innerHTML = "";
+				daElem.append(link.frycAPI_setInnerHTML(`#${daI + 1}`));
+				daElem.frycAPI_appendHTML("<span> | </span>");
+				daElem.append(user);
+				if (staf) {
+					daElem.frycAPI_appendHTML("<span> </span>");
+					daElem.append(staf);
+				}
+				daElem.frycAPI_appendHTML("<span> | </span>");
+
+				let data;
+				if (rss) {
+					data = rss[daI + 1];
+				} else {
+					const arr = text.replace(/ \[.+/, "").slice(text.indexOf(" at ") + 4).split(" on ");
+					data = new Date(arr[1] + " " + arr[0]);
+					if (data0 && data.getTime() < data0.getTime()) {
+						data.setFullYear(new Date().getFullYear());
+					}
+				}
+
+				daElem.frycAPI_appendHTML(frycAPI.getDefaultDateText(data));
+				frycAPI.setDefaultDateTitle(daElem, data);
+				if (favs) {
+					daElem.frycAPI_appendHTML("<span> | </span>");
+					daElem.append(favs.frycAPI_setInnerHTML(favs.innerHTML.replace(/favorites?/, "&#10084;"))); // ❤
+				}
+
+				if (user.href === OP_href) {
+					daElem.parentElement.classList.add("bestleft");
+				}
+			});
+		} else {
+			frycAPI.forEach(`.copy.post > span.smallcopy:is(.postbyline, .byline)`, (daElem, daI, daArr) => {
+				const regMatch = daElem.innerHTML.match(/(\s+at\s+)(.*?)(\s+-\s+)/);
+				const data = new Date(regMatch[2]);
+				if (frycAPI.isValidDate(data)) {
+					daElem.innerHTML = daElem.innerHTML.replace(regMatch[0], ` at ${frycAPI.getDefaultDateText(data)} - `);
+					frycAPI.setDefaultDateTitle(daElem, data);
+				} else {
+					daElem.innerHTML = daElem.innerHTML.replace(regMatch[0], ` at ${frycAPI.time12To24(regMatch[2])} - `);
+				}
+			});
+			frycAPI.forEach(`:is(#scontent, #posts, #posts > div, #boxyleft) div:is(.copy:not(#related), .copy.post)`, (daElem, daI, daArr) => {
+				daElem.insertAdjacentElement("afterend", document.createElement("div").frycAPI_addClass("my-posttitle-post-wrapper")).append(daElem.previousElementSibling.classList.contains("posttitle") ? daElem.previousElementSibling : "", daElem);
+			});
+		}
+	});
+}
+if (frycAPI.host === "sjp.pwn.pl") {
+	frycAPI.injectStyle(/*css*/`
+		${frycAPI.simpleFontChange}
+		.banner:has(*) {
+			display: none;
+		}
+	`);
+}
+if (frycAPI.host === "www.baillifard.com") {
+	frycAPI.injectStyle(/*css*/`
+		${frycAPI.simpleFontChange}
+	`);
+}
+if (frycAPI.host === "template") {
 	frycAPI.injectStyle(/*css*/`
 
 	`);
@@ -7327,11 +7841,11 @@ if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // dodanie połączon
 		// 	// document.head.insertAdjacentElement("afterbegin", document.createElement("meta").frycAPI_setAttribute("http-equiv","Content-Security-Policy").frycAPI_setAttribute("content","require-trusted-types-for 'script';"));
 		// }
 		if (document.body !== null) {
-			//`<style id="frycAPI_myStyle">${style}</style>` insertAdjacentHTML
+			// `<style id="frycAPI_myStyle">${style}</style>` insertAdjacentHTML
 			document.body.insertAdjacentElement("afterend",
 				document.createElement("style")
-					.frycAPI_setAttribute("id", "frycAPI_myStyle")
-					.frycAPI_setInnerHTML(frycAPI.minifyCSS(frycAPI.styleStr))
+				.frycAPI_setAttribute("id", "frycAPI_myStyle")
+				.frycAPI_setInnerHTML(frycAPI.minifyCSS(frycAPI.styleStr))
 			); // .replaceAll(/\s+/gm," ")
 			docObs.disconnect();
 		}

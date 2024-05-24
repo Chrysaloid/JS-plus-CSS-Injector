@@ -1,10 +1,12 @@
-async function runOnPage(daFunc, arguments) {
+"use strict";
+
+async function runOnPage(daFunc, args) {
 	const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 	const [{ result }] = await chrome.scripting.executeScript({
 		world: "MAIN",
 		target: { tabId: tab.id },
 		func: daFunc,
-		args: arguments
+		args: args
 	});
 	return result
 }
