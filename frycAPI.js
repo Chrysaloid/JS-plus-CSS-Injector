@@ -69,13 +69,13 @@ const frycAPI = { // eslint-disable-line no-implicit-globals, object-shorthand
 	removeCommentsSimple(code) {
 		return code.replaceAll(/\/\*.*?\*\//gmu, "");
 	}, // frycAPI.removeCommentsSimple(code);
-	manualFunctionsCreator(nazwaBlokuIf, funcArr) {
+	createManualFunctions(nazwaBlokuIf, funcArr) {
 		if (funcArr.length) {
 			frycAPI.funcArr.push([nazwaBlokuIf, funcArr]);
 		}
 	},
-	manualFunctionsHandler(ifNum, funcNum) {
-		return frycAPI.funcArr[ifNum][1][funcNum].callBack();
+	handleManualFunction(groupNumber, funcNumber) {
+		return frycAPI.funcArr[groupNumber][1][funcNumber].callBack();
 	},
 	ctrlC(text) {
 		const textArea = document.createElement("textarea");
@@ -803,7 +803,7 @@ if (frycAPI.host("demo")) { //* Demo
 		loguj("onLoad");
 	});
 
-	frycAPI.manualFunctionsCreator("Demo", [
+	frycAPI.createManualFunctions("Demo", [
 		new frycAPI_ManualFunc("Funkcja 1", function () {
 			loguj("Funkcja 1");
 		}),
@@ -905,7 +905,10 @@ if (frycAPI.host().length) { //* Globalne funkcje
 	});
 	*/
 
-	frycAPI.manualFunctionsCreator("Globalne funkcje", [
+	frycAPI.createManualFunctions("Globalne funkcje", [
+		new frycAPI_ManualFunc("Test", function () {
+			loguj("Test");
+		}),
 		new frycAPI_ManualFunc("ඞ", function () {
 			const all = document.getElementsByTagName("*");
 			for (let i = 0, max = all.length; i < max; i++) {
@@ -2677,7 +2680,7 @@ if (1 && frycAPI.host("comparetwolists.com")) {
 		}
 	});
 
-	frycAPI.manualFunctionsCreator("Toggle", [
+	frycAPI.createManualFunctions("Toggle", [
 		new frycAPI_ManualFunc("Toggle copy buttons", function () {
 			document.body.classList.toggle("toggle-copy-buttons");
 			this.toggle();
@@ -3614,7 +3617,7 @@ if (1 && frycAPI.host("planetcalc.com")) {
 		}
 	`);
 
-	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
+	frycAPI.createManualFunctions(frycAPI.nazwaBlokuIf, [
 		new frycAPI_ManualFunc("Łatwiejsze kopiowanie", function () {
 			const x = document.querySelectorAll(".mrow>.texatom>.mrow>span.msubsup>span>span>span.mn");
 			for (let i = 0; i < x.length; i++) {
@@ -3707,7 +3710,7 @@ if (1 && frycAPI.host("soundcloud.com")) {
 		}
 	`);
 
-	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
+	frycAPI.createManualFunctions(frycAPI.nazwaBlokuIf, [
 		new frycAPI_ManualFunc("Get Covers From Sound Cloud", function () {
 			const artwork = document.querySelectorAll(".playableTile__image>.sc-artwork>span");
 			newDiv = document.createElement("div");
@@ -4012,7 +4015,7 @@ if (1 && frycAPI.host("steamcommunity.com")) {
 	});
 
 	frycAPI.nazwaBlokuIf = "Friend Activity";
-	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
+	frycAPI.createManualFunctions(frycAPI.nazwaBlokuIf, [
 		new frycAPI_ManualFunc("Show only specific friend's activity", function () {
 			document.body.classList.toggle("specific-friend");
 		}),
@@ -5394,7 +5397,7 @@ if (1 && frycAPI.host(["www.google.pl", "www.google.com"])) {
 		frycAPI.changeFaviconRes("Google_Logo_dark.png");
 	});
 
-	frycAPI.manualFunctionsCreator("Google", [
+	frycAPI.createManualFunctions("Google", [
 		new frycAPI_ManualFunc("Toggle 3 column view", function () {
 			document.body.classList.toggle("google-3-column");
 		}),
@@ -7494,7 +7497,7 @@ if (frycAPI.host("allegro.pl")) {
 	frycAPI.onLoadSetter(function () {
 	});
 
-	frycAPI.manualFunctionsCreator("Opinie o produkcie", [
+	frycAPI.createManualFunctions("Opinie o produkcie", [
 		new frycAPI_ManualFunc("Ukryj opinie bez zdjęć", function () {
 			document.body.classList.toggle("ukryj-opinie-bez-zdjęć");
 			this.toggle();
@@ -7866,7 +7869,7 @@ if (frycAPI.host("template")) {
 	frycAPI.onLoadSetter(function () {
 	});
 
-	frycAPI.manualFunctionsCreator("aaa", [
+	frycAPI.createManualFunctions("aaa", [
 		new frycAPI_ManualFunc("aaa", function () {
 		}),
 	]);

@@ -6,43 +6,42 @@ async function runOnPage(daFunc, args) {
 		world: "MAIN",
 		target: { tabId: tab.id },
 		func: daFunc,
-		args: args
+		args: args,
 	});
-	return result
+	return result;
 }
 
 (async () => {
-	let frycAPI0 = await runOnPage(() => frycAPI, []);
-	let funcArr = frycAPI0.funcArr;
-	// console.log(frycAPI0);
-	let buttCont = document.getElementById("buttCont");
-	if (funcArr.length == 0) {
-		buttCont.innerText = "Your functions will be here when you define them";
-		// Tutaj będą twoje funkcje gdy je zdefiniujesz.
-		return
+	const frycAPI0 = await runOnPage(() => frycAPI, []);
+	const mainCont = document.getElementById("buttCont");
+	if (frycAPI0 === undefined) {
+		mainCont.innerText = "Something went wrong. frycAPI is undefined";
+		return;
 	}
-	const returnValueHandler = {
+	const funcArr = frycAPI0.funcArr;
+	// console.log(frycAPI0);
+	if (funcArr.length === 0) {
+		mainCont.innerText = "Your functions will be here when you define them"; // Tutaj będą twoje funkcje gdy je zdefiniujesz
+		return;
+	}
+	const returnValueHandler = { // eslint-disable-line object-shorthand
 		toggleOnOff: function (butt) {
 			butt.classList.toggle("Off");
-		}
-	}
+		},
+	};
 	funcArr.forEach(function (funcGroup, groupNum) {
-		let containerChild = document.createElement("div");
-		containerChild.appendChild(document.createElement("span")).innerHTML = funcGroup[0];
+		const subCont = document.createElement("div");
+		subCont.appendChild(document.createElement("span")).innerHTML = funcGroup[0];
 		funcGroup[1].forEach(function (func, funcNum) {
-			let funcButt = document.createElement("button");
+			const funcButt = document.createElement("button");
 			funcButt.innerHTML = func.name;
 			if (func.Off) {
 				funcButt.classList.add("Off");
 			}
-			containerChild.appendChild(funcButt).addEventListener("click", async function () {
-				returnValueHandler[await runOnPage((groupNum, funcNum) => frycAPI.manualFunctionsHandler(groupNum, funcNum), [groupNum, funcNum])]?.(this);
+			subCont.appendChild(funcButt).addEventListener("click", async function () {
+				returnValueHandler[await runOnPage((groupNumber, funcNumber) => frycAPI.handleManualFunction(groupNumber, funcNumber), [groupNum, funcNum])]?.(this);
 			});
 		});
-		buttCont.append(containerChild);
+		mainCont.append(subCont);
 	});
 })();
-
-
-
-
