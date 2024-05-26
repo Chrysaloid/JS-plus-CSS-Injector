@@ -33,14 +33,12 @@ const frycAPI = { // eslint-disable-line no-implicit-globals, object-shorthand
 	// #region //* Zmienne 1
 	id: "fmlfdnbhgmgiinaalkmjcmmlohhhgkok",
 	funcArr: [],
-	host: window.location.hostname,
 	colorSchemeDark: false,
 	czasNumer: 1,
 	styleStr: "",
 	// frycAPI.urlParam: new URL(window.location.href).searchParams.getAll("frycAPI_URL_Parameter").pop(),
 	injectStyleNormalNum: 0,
 	simpleFontChange: `* { font-family: IBM Plex Sans Condensed; }`, // ${frycAPI.simpleFontChange}
-
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -102,17 +100,6 @@ const frycAPI = { // eslint-disable-line no-implicit-globals, object-shorthand
 	},
 	zaokrl(val, decimals) {
 		return Number(Math.round(Number(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
-	},
-	hostList(list) {
-		for (const daElem of list) {
-			if (daElem === frycAPI.host) {
-				return true;
-			}
-		}
-		return false;
-	},
-	hostListIncludes(list) {
-		return frycAPI.host.frycAPI_includesAny(list);
 	},
 	clean(node) { // do usuwania komentarzy
 		for (let n = 0; n < node.childNodes.length; n++) {
@@ -632,6 +619,22 @@ const frycAPI = { // eslint-disable-line no-implicit-globals, object-shorthand
 		const data = new Date("May 3 2001 " + str);
 		return `${data.getHours().toString().padStart(2, "0")}:${data.getMinutes().toString().padStart(2, "0")}`;
 	},
+	host(str) {
+		if (str === undefined) {
+			return window.location.hostname;
+		} else if (Array.isArray(str)) {
+			return window.location.hostname.frycAPI_equalAny(str);
+		} else {
+			return str === window.location.hostname;
+		}
+	},
+	hostIncludes(str) {
+		if (Array.isArray(str)) {
+			return window.location.hostname.frycAPI_includesAny(str);
+		} else {
+			return window.location.hostname.includes(str);
+		}
+	},
 	template() {
 
 	},
@@ -767,6 +770,14 @@ frycAPI.expandPrototype(Element, "frycAPI_querySelNull", function (selector) {
 frycAPI.expandPrototype(Element, "frycAPI_querySelNotNull", function (selector) {
 	return this.querySelector(selector) !== null;
 });
+frycAPI.expandPrototype(String, "frycAPI_equalAny", function (strList) {
+	for (const daElem of strList) {
+		if (this === daElem) {
+			return true;
+		}
+	}
+	return false;
+});
 // elem.frycAPI_querySelNull(``)
 // elem.querySelector(``) === null
 // frycAPI.expandPrototype(Template, "frycAPI_name", function () {
@@ -776,7 +787,7 @@ frycAPI.expandPrototype(Element, "frycAPI_querySelNotNull", function (selector) 
 // #endregion
 
 // #region //* IFy 1
-if (frycAPI.host === "demo") { //* Demo
+if (frycAPI.host("demo")) { //* Demo
 	frycAPI.injectStyle(/*css*/`
 		.myDemoDiv {
 			display: block;
@@ -801,7 +812,7 @@ if (frycAPI.host === "demo") { //* Demo
 		}),
 	]);
 }
-if (frycAPI.host.length) { //* Globalne funkcje
+if (frycAPI.host().length) { //* Globalne funkcje
 	frycAPI.injectStyle(/*css*/`
 	`);
 
@@ -936,14 +947,14 @@ if (frycAPI.host.length) { //* Globalne funkcje
 		}),
 	]);
 }
-if (1 && frycAPI.host === "192.168.1.1") {
+if (1 && frycAPI.host("192.168.1.1")) {
 	frycAPI.injectStyle(/*css*/`
 		#menu a.sel span.text {
 			color: #000000;
 		}
 	`);
 }
-if (1 && frycAPI.host === "alienswarm.fandom.com") {
+if (1 && frycAPI.host("alienswarm.fandom.com")) {
 	frycAPI.injectStyle(/*css*/`
 		button.mojButt {
 			position: fixed;
@@ -955,7 +966,7 @@ if (1 && frycAPI.host === "alienswarm.fandom.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "apps.microsoft.com") {
+if (1 && frycAPI.host("apps.microsoft.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.full-star {
 			fill: #ffbf00;
@@ -963,7 +974,7 @@ if (1 && frycAPI.host === "apps.microsoft.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "ark.fandom.com") {
+if (1 && frycAPI.host("ark.fandom.com")) {
 	// https://ark.fandom.com/wiki/ARK_Survival_Evolved_Wiki
 	const funkcje = "ARK Wiki Powiększ obrazki";
 	frycAPI.injectStyle(/*css*/`
@@ -1720,7 +1731,7 @@ if (1 && frycAPI.host === "ark.fandom.com") {
 		// loguj(frycAPI.obrazCount);
 	});
 }
-if (1 && frycAPI.host === "astronomia.zagan.pl") {
+if (1 && frycAPI.host("astronomia.zagan.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		  background-image: none;
@@ -1729,14 +1740,14 @@ if (1 && frycAPI.host === "astronomia.zagan.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "bcgplatinion.com") {
+if (1 && frycAPI.host("bcgplatinion.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.cli-barmodal-open {
 			overflow: scroll;
 		}
 	`);
 }
-if (1 && frycAPI.host === "blog.discord.com") {
+if (1 && frycAPI.host("blog.discord.com")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		  filter: invert(1);
@@ -1746,24 +1757,24 @@ if (1 && frycAPI.host === "blog.discord.com") {
 		}
 	`);
 }
-if (0 && frycAPI.host === "blog.etrapez.pl") {
+if (0 && frycAPI.host("blog.etrapez.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "bloons.fandom.com") {
+if (1 && frycAPI.host("bloons.fandom.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img.mwe-math-fallback-image-display.mwe-math-element {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
+if (1 && frycAPI.host(["boards.4chan.org", "boards.4channel.org"])) {
 	let bodyBack, rediSpan;
 	const transTime = 0.25; // 0.25
-	if (frycAPI.host === "boards.4chan.org") {
+	if (frycAPI.host("boards.4chan.org")) {
 		// bodyBack = "#ffe"; rediSpan = "#00e";
 		bodyBack = "#0F131E"; rediSpan = "#A3A3C6";
 	} else {
@@ -2482,7 +2493,7 @@ if (1 && frycAPI.hostList(["boards.4chan.org", "boards.4channel.org"])) {
 		loguj("4chan done!");
 	}
 }
-if (1 && frycAPI.host === "bugs.chromium.org") {
+if (1 && frycAPI.host("bugs.chromium.org")) {
 	frycAPI.injectStyle(/*css*/`
 		#shadow-root > .comment-body {
 		    padding: 4px;
@@ -2525,7 +2536,7 @@ if (1 && frycAPI.host === "bugs.chromium.org") {
 		*/
 	`);
 }
-if (1 && frycAPI.host === "chat.openai.com") {
+if (1 && frycAPI.host("chat.openai.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/* .mój-tooltip {
 			position: absolute;
@@ -2582,21 +2593,21 @@ if (1 && frycAPI.host === "chat.openai.com") {
 		}).observe(document.querySelector(`nav[aria-label="Chat history"]`), { childList: true, subtree: true });
 	}); */
 }
-if (0 && frycAPI.host === "cke.gov.pl") {
+if (0 && frycAPI.host("cke.gov.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		h2, .h2 {
 		    color: #F8A238;
 		}
 	`);
 }
-if (1 && frycAPI.host === "comforteo.eu") {
+if (1 && frycAPI.host("comforteo.eu")) {
 	frycAPI.injectStyle(/*css*/`
 		.tooltip-static .content-area {
 			color: hsl(0deg 0% 0%);
 		}
 	`);
 }
-if (1 && frycAPI.host === "comparetwolists.com") {
+if (1 && frycAPI.host("comparetwolists.com")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			margin: auto;
@@ -2629,22 +2640,27 @@ if (1 && frycAPI.host === "comparetwolists.com") {
 				border-right: 1px solid white;
 				font-weight: bold;
 				padding-right: 5px;
+				color: #6ee76e;
 			}
 			:nth-child(4) {
 				font-weight: bold;
+				color: #6ee76e;
 			}
 		}
 		body>table:nth-of-type(2) {
 			display: none !important;
 		}
-		.hide {
+		.toggle-copy-buttons .copy-buttons {
 			display: none !important;
+		}
+		.copy-buttons {
+			cursor: pointer;
 		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
 		frycAPI.forEach(`img[src="copy.png"], img[src="download.png"]`, (daElem, daI, daArr) => {
-			daElem.frycAPI_addClass("hide");
+			daElem.frycAPI_addClass("copy-buttons");
 		});
 		const tab = document.querySelector(`body>table:first-of-type>tbody`);
 		if (tab !== null) {
@@ -2652,7 +2668,7 @@ if (1 && frycAPI.host === "comparetwolists.com") {
 			tab.querySelector(`tr>td:nth-child(2)>b`).innerHTML = document.querySelector(`input[name="descb"]`).value;
 			const myTr = tab.appendChild(document.createElement("tr"));
 			[3, 4, 5].forEach(tr => {
-				daElem = document.querySelector(`body>table:nth-of-type(2)>tbody>tr:nth-child(${tr})`);
+				const daElem = document.querySelector(`body>table:nth-of-type(2)>tbody>tr:nth-child(${tr})`);
 				const myTd = myTr.appendChild(document.createElement("td")).appendChild(document.createElement("div").frycAPI_addClass("myDiv"));
 				[1, 2, 5, 6].forEach(n => {
 					myTd.appendChild(document.createElement("div")).innerHTML = daElem.querySelector(`td:nth-child(${n})`).innerText;
@@ -2661,16 +2677,15 @@ if (1 && frycAPI.host === "comparetwolists.com") {
 		}
 	});
 
-	frycAPI.nazwaBlokuIf = "Toggle";
-	frycAPI.manualFunctionsCreator(frycAPI.nazwaBlokuIf, [
+	frycAPI.manualFunctionsCreator("Toggle", [
 		new frycAPI_ManualFunc("Toggle copy buttons", function () {
-			frycAPI.forEach(`img[src="copy.png"], img[src="download.png"]`, (daElem, daI, daArr) => {
-				daElem.classList.toggle("hide");
-			});
+			document.body.classList.toggle("toggle-copy-buttons");
+			this.toggle();
+			return "toggleOnOff";
 		}),
 	]);
 }
-if (1 && frycAPI.host === "cotone.pl") {
+if (1 && frycAPI.host("cotone.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		.floatcenterwrap .paginator li.selected {
 			color: #d69754;
@@ -2713,7 +2728,7 @@ if (1 && frycAPI.host === "cotone.pl") {
 }
 // #endregion
 // #region //* IFy 2
-if (1 && frycAPI.host === "css-tricks.com") {
+if (1 && frycAPI.host("css-tricks.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/* .on-light, .on-light .article-content {
 		    color: hsl(236 15% 90% / 1);
@@ -2865,7 +2880,7 @@ if (1 && frycAPI.host === "css-tricks.com") {
 		});
 	});
 }
-if (1 && frycAPI.host === "derpibooru.org") {
+if (1 && frycAPI.host("derpibooru.org")) {
 	frycAPI.injectStyle(/*css*/`
 		form.header__search.flex.flex--no-wrap.flex--centered[action="/search"] {
 			flex-grow: 1;
@@ -2908,7 +2923,7 @@ if (1 && frycAPI.host === "derpibooru.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "developer.mozilla.org") {
+if (1 && frycAPI.host("developer.mozilla.org")) {
 	frycAPI.injectStyle(/*css*/`
 		/* iframe.sample-code-frame {
 		  filter: invert(1) hue-rotate(180deg);
@@ -2938,7 +2953,7 @@ if (1 && frycAPI.host === "developer.mozilla.org") {
 		}
 	`);
 }
-if (0 && frycAPI.host === "diep.io") {
+if (0 && frycAPI.host("diep.io")) {
 	frycAPI.injectStyle(/*css*/`
 		body #app-mount .container-1r6BKw {
 			justify-content: space-between;
@@ -2947,7 +2962,7 @@ if (0 && frycAPI.host === "diep.io") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "dinopoloclub.com") {
+if (1 && frycAPI.host("dinopoloclub.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.site-header, .site-header .site-title a {
 			filter: invert(1) hue-rotate(180deg);
@@ -2963,7 +2978,7 @@ if (1 && frycAPI.host === "dinopoloclub.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "docs.google.com") {
+if (1 && frycAPI.host("docs.google.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		body #docs-editor-container .grid-table-container+canvas, .docos-icon-img:before {
@@ -2997,7 +3012,7 @@ if (1 && frycAPI.host === "docs.google.com") {
 		}).observe(document.body, { childList: true });
 	});
 }
-if (0 && frycAPI.host === "docs.screeps.com") {
+if (0 && frycAPI.host("docs.screeps.com")) {
 	frycAPI.injectStyle(/*css*/`
 		#sidebar {
 			background-color: white;
@@ -3043,7 +3058,7 @@ if (0 && frycAPI.host === "docs.screeps.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "drive.google.com") {
+if (1 && frycAPI.host("drive.google.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		div[role="dialog"] div[role="document"] {
@@ -3058,7 +3073,7 @@ if (1 && frycAPI.host === "drive.google.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "dydmat.mimuw.edu.pl") {
+if (1 && frycAPI.host("dydmat.mimuw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -3066,7 +3081,7 @@ if (1 && frycAPI.host === "dydmat.mimuw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "eager.io") {
+if (1 && frycAPI.host("eager.io")) {
 	frycAPI.injectStyle(/*css*/`
 		.blog-post-content a:not(.button):not(.without-underline) {
 			text-shadow: none;
@@ -3074,7 +3089,7 @@ if (1 && frycAPI.host === "eager.io") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "en.wikipedia.org") {
+if (1 && frycAPI.host("en.wikipedia.org")) {
 	frycAPI.injectStyle(/*css*/`
 		img.thumbimage[src*=".png"],
 		img.thumbimage[src*=".gif"] 
@@ -3085,21 +3100,21 @@ if (1 && frycAPI.host === "en.wikipedia.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "epodreczniki.open.agh.edu.pl") {
+if (1 && frycAPI.host("epodreczniki.open.agh.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "fizyka.dk") {
+if (1 && frycAPI.host("fizyka.dk")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(1) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "forms.office.com") {
+if (1 && frycAPI.host("forms.office.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.office-form-question-title.with-image {
 		  padding: 10px;
@@ -3184,35 +3199,35 @@ if (1 && frycAPI.host === "forms.office.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "forum.videohelp.com") {
+if (1 && frycAPI.host("forum.videohelp.com")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			background-color: aliceblue;
 		}
 	`);
 }
-if (1 && frycAPI.host === "gamertools.net") {
+if (1 && frycAPI.host("gamertools.net")) {
 	frycAPI.injectStyle(/*css*/`
 		.gameItem {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 }
-if (1 && frycAPI.host === "industrial.omron.pl") {
+if (1 && frycAPI.host("industrial.omron.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (0 && frycAPI.host === "jp.pum.edu.pl") {
+if (0 && frycAPI.host("jp.pum.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		  font-family: IBM Plex Sans !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "json2table.com") {
+if (1 && frycAPI.host("json2table.com")) {
 	frycAPI.injectStyle(/*css*/`
 		table * {
 			font-family: Source Code Fryc;
@@ -3221,14 +3236,14 @@ if (1 && frycAPI.host === "json2table.com") {
 }
 // #endregion
 // #region //* IFy 3
-if (1 && frycAPI.host === "jsongrid.com") {
+if (1 && frycAPI.host("jsongrid.com")) {
 	frycAPI.injectStyle(/*css*/`
 		td.obj.order.index {
 			display: none;
 		}
 	`);
 }
-if (1 && frycAPI.host === "karl.gg") {
+if (1 && frycAPI.host("karl.gg")) {
 	frycAPI.injectStyle(/*css*/`
 		.statsContainer {
 		  border-top: 1px solid;
@@ -3238,14 +3253,14 @@ if (1 && frycAPI.host === "karl.gg") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "kertisjones.weebly.com") {
+if (1 && frycAPI.host("kertisjones.weebly.com")) {
 	frycAPI.injectStyle(/*css*/`
 		#main-wrap .inner-container {
 			background: none;
 		}
 	`);
 }
-if (0 && frycAPI.host === "labfiz1p.if.pw.edu.pl") {
+if (0 && frycAPI.host("labfiz1p.if.pw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		* {
 		  font-family: IBM Plex Sans !important;
@@ -3262,28 +3277,28 @@ if (0 && frycAPI.host === "labfiz1p.if.pw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "latarnikwyborczy.pl") {
+if (1 && frycAPI.host("latarnikwyborczy.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		.content-questionnaire .answer-candidates .answer {
 			background-image: url(${frycAPI.getResURL("arrow-down.png")});
 		}
 	`);
 }
-if (1 && frycAPI.host === "linuxconfig.org") {
+if (1 && frycAPI.host("linuxconfig.org")) {
 	frycAPI.injectStyle(/*css*/`
 		.asciinema-player.asciinema-theme-asciinema {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 }
-if (1 && frycAPI.host === "llamalab.com") {
+if (1 && frycAPI.host("llamalab.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.background-image.cover.hero-background {
 			display: none;
 		}
 	`);
 }
-if (1 && frycAPI.host === "mail.google.com") {
+if (1 && frycAPI.host("mail.google.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/* .aD::before, .btn::before, .btl.acK, .bs3::before, .T-axO .J-JN-M-I-JG, .J-Z .aaA.aaB, .J-J5-Ji.J-Z-M-I-JG {
 			filter: invert(1);
@@ -3337,7 +3352,7 @@ if (1 && frycAPI.host === "mail.google.com") {
 		*/
 	`);
 }
-if (1 && frycAPI.host === "mat-fiz-samouczek.pw.edu.pl") {
+if (1 && frycAPI.host("mat-fiz-samouczek.pw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img.teximage {
 		    background-color: #ffffff;
@@ -3346,7 +3361,7 @@ if (1 && frycAPI.host === "mat-fiz-samouczek.pw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "matematykaszkolna.pl") {
+if (1 && frycAPI.host("matematykaszkolna.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -3354,14 +3369,14 @@ if (1 && frycAPI.host === "matematykaszkolna.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "matlab.mathworks.com") {
+if (1 && frycAPI.host("matlab.mathworks.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.textElement.eoOutputContent {
 			user-select: text !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "matma4u.pl") {
+if (1 && frycAPI.host("matma4u.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -3369,7 +3384,7 @@ if (1 && frycAPI.host === "matma4u.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "matrixcalc.org") {
+if (1 && frycAPI.host("matrixcalc.org")) {
 	frycAPI.injectStyle(/*css*/`
 		a[title="Бе́ло-кра́сно-бе́лый флаг"] {
 		  display: none !important;
@@ -3379,7 +3394,7 @@ if (1 && frycAPI.host === "matrixcalc.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "minecraft.fandom.com") {
+if (1 && frycAPI.host("minecraft.fandom.com")) {
 	frycAPI.injectStyle(/*css*/`
 		#cont {
 		  position: absolute;
@@ -3403,7 +3418,7 @@ if (1 && frycAPI.host === "minecraft.fandom.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "mlp.fandom.com") {
+if (1 && frycAPI.host("mlp.fandom.com")) {
 	frycAPI.injectStyle(/*css*/`
 		#ucss-code-wrapper .CodeMirror-wrap .CodeMirror-scroll {
 			filter: invert(0) hue-rotate(0deg);
@@ -3429,7 +3444,7 @@ if (1 && frycAPI.host === "mlp.fandom.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "oeis.org") {
+if (1 && frycAPI.host("oeis.org")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(1) hue-rotate(180deg);
@@ -3439,7 +3454,7 @@ if (1 && frycAPI.host === "oeis.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "ostatnidzwonek.pl") {
+if (1 && frycAPI.host("ostatnidzwonek.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		background: none;  
@@ -3447,7 +3462,7 @@ if (1 && frycAPI.host === "ostatnidzwonek.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "palobby.com") {
+if (1 && frycAPI.host("palobby.com")) {
 	const funkcje = "PAT_DB_Unit_Korekta";
 	frycAPI.injectStyle(/*css*/`
 		.clearfix~div.columns div {
@@ -3550,7 +3565,7 @@ if (1 && frycAPI.host === "palobby.com") {
 		}
 	});
 }
-if (1 && frycAPI.host === "pl.wikibooks.org") {
+if (1 && frycAPI.host("pl.wikibooks.org")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -3560,7 +3575,7 @@ if (1 && frycAPI.host === "pl.wikibooks.org") {
 }
 // #endregion
 // #region //* IFy 4
-if (1 && frycAPI.host === "pl.wikipedia.org") {
+if (1 && frycAPI.host("pl.wikipedia.org")) {
 	frycAPI.injectStyle(/*css*/`
 		img.thumbimage[src*=".png"] 
 		/* a.image:has(img[src*=".png"]) */
@@ -3570,14 +3585,14 @@ if (1 && frycAPI.host === "pl.wikipedia.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "pl.wikisource.org") {
+if (1 && frycAPI.host("pl.wikisource.org")) {
 	frycAPI.injectStyle(/*css*/`
 		.mwe-math-fallback-image-inline {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "planetcalc.com") {
+if (1 && frycAPI.host("planetcalc.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(
@@ -3608,7 +3623,7 @@ if (1 && frycAPI.host === "planetcalc.com") {
 		}),
 	]);
 }
-if (1 && frycAPI.host === "quicklatex.com") {
+if (1 && frycAPI.host("quicklatex.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 			filter: invert(1);
@@ -3616,7 +3631,7 @@ if (1 && frycAPI.host === "quicklatex.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "robotyka.pl") {
+if (1 && frycAPI.host("robotyka.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img[src*=".gif"],
 		img[src*=".png"]{
@@ -3624,7 +3639,7 @@ if (1 && frycAPI.host === "robotyka.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "satisfactory.fandom.com") {
+if (1 && frycAPI.host("satisfactory.fandom.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img.mwe-math-fallback-image-inline {
 			filter: invert(1) !important;
@@ -3637,7 +3652,7 @@ if (1 && frycAPI.host === "satisfactory.fandom.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "satisfactory.wiki.gg") {
+if (1 && frycAPI.host("satisfactory.wiki.gg")) {
 	frycAPI.injectStyle(/*css*/`
 		/* Tymczasowe */
 		tr:has([title="Equipment Workshop"]),
@@ -3647,7 +3662,7 @@ if (1 && frycAPI.host === "satisfactory.wiki.gg") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "scripty.abhisheksatre.com") {
+if (1 && frycAPI.host("scripty.abhisheksatre.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.ant-drawer-content-wrapper {
 		  width: 1295px !important;
@@ -3660,14 +3675,14 @@ if (1 && frycAPI.host === "scripty.abhisheksatre.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "second.wiki") {
+if (1 && frycAPI.host("second.wiki")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "soundcloud.com") {
+if (1 && frycAPI.host("soundcloud.com")) {
 	const funkcje = "Get Covers From Sound Cloud";
 	frycAPI.injectStyle(/*css*/`
 		.playableTile__image>.sc-artwork>span {
@@ -3708,7 +3723,7 @@ if (1 && frycAPI.host === "soundcloud.com") {
 		}),
 	]);
 }
-if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com", "serverfault.com", "superuser.com"])) {
+if (1 && frycAPI.hostIncludes(["stackoverflow.com", "stackexchange.com", "serverfault.com", "superuser.com"])) {
 	frycAPI.injectStyle(/*css*/`
 		.user-info .-flair {
 			display: flex !important;
@@ -3840,7 +3855,7 @@ if (1 && frycAPI.hostListIncludes(["stackoverflow.com", "stackexchange.com", "se
 		});
 	});
 }
-if (1 && frycAPI.host === "steamcommunity.com") {
+if (1 && frycAPI.host("steamcommunity.com")) {
 	const funkcje = "Steam Achievments Alphabetical Sort";
 	// Dawid Sadowski: 232603985
 	// Michał Roman: 96866084
@@ -4003,7 +4018,7 @@ if (1 && frycAPI.host === "steamcommunity.com") {
 		}),
 	]);
 }
-if (0 && frycAPI.host === "support.discord.com") {
+if (0 && frycAPI.host("support.discord.com")) {
 	frycAPI.injectStyle(/*css*/`
 		* {
 		  filter: invert(1) hue-rotate(180deg);
@@ -4018,7 +4033,7 @@ if (0 && frycAPI.host === "support.discord.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "support.microsoft.com") {
+if (1 && frycAPI.host("support.microsoft.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(1) hue-rotate(180deg) !important;
@@ -4029,28 +4044,28 @@ if (1 && frycAPI.host === "support.microsoft.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "teams.microsoft.com") {
+if (1 && frycAPI.host("teams.microsoft.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.fui-Flex.___1jvzdal.f22iagw.f1vx9l62.f10pi13n.f1g2edtw {
 			display: none;
 		}
 	`);
 }
-if (1 && frycAPI.host === "tech.wp.pl") {
+if (1 && frycAPI.host("tech.wp.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		iframe {
 			display: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "terraria.gamepedia.com") {
+if (1 && frycAPI.host("terraria.gamepedia.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		    image-rendering: pixelated;
 		}
 	`);
 }
-if (1 && frycAPI.host === "tiger.chem.uw.edu.pl") {
+if (1 && frycAPI.host("tiger.chem.uw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -4058,7 +4073,7 @@ if (1 && frycAPI.host === "tiger.chem.uw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "tplinkmodem.net") {
+if (1 && frycAPI.host("tplinkmodem.net")) {
 	frycAPI.injectStyle(/*css*/`
 		tr.head>th.table-head:nth-child(2) {
 		  width: 11% !important;
@@ -4067,7 +4082,7 @@ if (1 && frycAPI.host === "tplinkmodem.net") {
 }
 // #endregion
 // #region //* IFy 5
-if (1 && frycAPI.hostList(["translate.google.com", "translate.google.pl"])) {
+if (1 && frycAPI.host(["translate.google.com", "translate.google.pl"])) {
 	frycAPI.injectStyle(/*css*/`
 		.myButn {
 			position: absolute;
@@ -4132,7 +4147,7 @@ if (1 && frycAPI.hostList(["translate.google.com", "translate.google.pl"])) {
 		});
 	});
 }
-if (1 && frycAPI.host === "trello.com") {
+if (1 && frycAPI.host("trello.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/* *::-webkit-scrollbar-thumb {
 		  background:rgb(102, 254, 123) !important;
@@ -4143,7 +4158,7 @@ if (1 && frycAPI.host === "trello.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "u4.satisfactorytools.com") {
+if (1 && frycAPI.host("u4.satisfactorytools.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.mojaklasa {
 			display: none;
@@ -4164,7 +4179,7 @@ if (1 && frycAPI.host === "u4.satisfactorytools.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "moodle.usos.pw.edu.pl") {
+if (1 && frycAPI.host("moodle.usos.pw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		nav.list-group.mt-1 {
 		    margin-bottom: 27px;
@@ -4199,7 +4214,7 @@ if (1 && frycAPI.host === "moodle.usos.pw.edu.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "usosweb.usos.pw.edu.pl") {
+if (1 && frycAPI.host("usosweb.usos.pw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		*{
 		  font-family: IBM Plex Sans Condensed
@@ -4898,21 +4913,21 @@ if (1 && frycAPI.host === "usosweb.usos.pw.edu.pl") {
 		});
 	}
 }
-if (1 && frycAPI.host === "viewer.shapez.io") {
+if (1 && frycAPI.host("viewer.shapez.io")) {
 	frycAPI.injectStyle(/*css*/`
 		canvas#result {
 			filter: hue-rotate(180deg) invert(1) saturate(6.5) ;
 		}
 	`);
 }
-if (1 && frycAPI.host === "wazniak.mimuw.edu.pl") {
+if (1 && frycAPI.host("wazniak.mimuw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "web.whatsapp.com") {
+if (1 && frycAPI.host("web.whatsapp.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		.message-in span._1kh65 svg {
@@ -4936,14 +4951,14 @@ if (1 && frycAPI.host === "web.whatsapp.com") {
 		} */
 	`);
 }
-if (1 && frycAPI.host === "worldedit.enginehub.org") {
+if (1 && frycAPI.host("worldedit.enginehub.org")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			filter: brightness(1);
 		}
 	`);
 }
-if (1 && frycAPI.host === "wutwaw-my.sharepoint.com") {
+if (1 && frycAPI.host("wutwaw-my.sharepoint.com")) {
 	frycAPI.injectStyle(/*css*/`
 		svg image {
 		  -webkit-filter: none !important;
@@ -4951,37 +4966,62 @@ if (1 && frycAPI.host === "wutwaw-my.sharepoint.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "wutwaw.sharepoint.com") {
+if (1 && frycAPI.host("wutwaw.sharepoint.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(1);
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.1001fonts.com") {
+if (1 && frycAPI.host("www.1001fonts.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.txt-preview {
 		  filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 }
-if (0 && frycAPI.host === "www.4g-lte.net") {
+if (0 && frycAPI.host("www.4g-lte.net")) {
 	frycAPI.injectStyle(/*css*/`
 		* {
 		  font-family: IBM Plex Sans Condensed !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.autohotkey.com") {
+if (1 && frycAPI.host("www.autohotkey.com")) {
 	frycAPI.injectStyle(/*css*/`
-		.page-width {
+		*:not(
+			.inline_code, .inline_code *,
+			code, code *,
+			i.fa.fa-clock-o, i.fa.fa-clock-o *,
+			#head .h-area .h-tools, #head .h-area .h-tools *
+		) {
+			font-family: "IBM Plex Sans Condensed", "Lucida Grande", Arial, sans-serif !important;
+		}
+		.page-width:not(.inner) {
 			max-width: calc(100% - 24px);
 			width: 1125px;
 			margin: auto;
 		}
+		.navbar .inner.static > .static-inner {
+			margin: 0;
+		}
+		.postbody > div > h3 {
+			display: inline-block !important;
+		}
+		.content h2, .panel h2 {
+			font-weight: unset;
+		}
+		.logo img {
+			content: url(${frycAPI.getResURL("ahk_logo.svg")});
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
+		if (window.location.pathname.startsWith("/boards")) {
+			frycAPI.changeFaviconRes("AHK_Blue.png");
+		} else {
+			frycAPI.changeFaviconRes("AHK_Better.png");
+		}
 		frycAPI.setDefaultDate(`.postbody p.author>a`, { getDate: "txt" }); // { getDate: 111, setDate: 111, dateTitle: 111 }
 		frycAPI.setDefaultDate(`.postprofile > .profile-joined`, {
 			getDate: elem => elem.innerText.replace("Joined: ", ""),
@@ -4994,7 +5034,7 @@ if (1 && frycAPI.host === "www.autohotkey.com") {
 		});
 	});
 }
-if (1 && frycAPI.host === "www.calculator.net") {
+if (1 && frycAPI.host("www.calculator.net")) {
 	frycAPI.injectStyle(/*css*/`
 		.rightresult svg g[style="paint-order: stroke;stroke: #fff;stroke-width: 2px;"] {
 			stroke: hsl(0 0% 58% / 1) !important;
@@ -5016,14 +5056,14 @@ if (1 && frycAPI.host === "www.calculator.net") {
 		}
 	`);
 }
-if (0 && frycAPI.host === "www.chessvariants.com") {
+if (0 && frycAPI.host("www.chessvariants.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(0deg) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.deltami.edu.pl") {
+if (1 && frycAPI.host("www.deltami.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img.math-display, figure, img.math-inline {
 			filter: invert(1) hue-rotate(180deg);
@@ -5034,7 +5074,7 @@ if (1 && frycAPI.host === "www.deltami.edu.pl") {
 		}
 	`);
 }
-if (0 && frycAPI.host === "www.derivative-calculator.net") {
+if (0 && frycAPI.host("www.derivative-calculator.net")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		filter: invert(1) hue-rotate(180deg);
@@ -5096,7 +5136,7 @@ if (0 && frycAPI.host === "www.derivative-calculator.net") {
 		}
 	`);
 }
-if (0 && frycAPI.host === "www.desmos.com") {
+if (0 && frycAPI.host("www.desmos.com")) {
 	frycAPI.injectStyle(/*css*/`
 		::-webkit-scrollbar-thumb {
 			background: #70ffde ;
@@ -5121,14 +5161,14 @@ if (0 && frycAPI.host === "www.desmos.com") {
 }
 // #endregion
 // #region //* IFy 6
-if (1 && frycAPI.host === "www.enpassant.dk") {
+if (1 && frycAPI.host("www.enpassant.dk")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(0deg) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.facebook.com") {
+if (1 && frycAPI.host("www.facebook.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		body._z4_._8l3w.fbx._8m53._8bb_._-kb._605a.b_16xvukae6j.chrome.webkit.win.x2.Locale_pl_PL.cores-gte4.__6g._mvg._19_u.vsc-initialized {
@@ -5147,12 +5187,12 @@ if (1 && frycAPI.host === "www.facebook.com") {
 		}
 	`);
 }
-if (0 && frycAPI.host === "www.g") {
+if (0 && frycAPI.host("www.g")) {
 	frycAPI.injectStyle(/*css*/`
 		body::-webkit-scrollbar {  width: 15px;  background: grey;}body::-webkit-scrollbar-thumb {width: 13px;  background: black;border: 1px solid white;}
 	`);
 }
-if (1 && frycAPI.host === "www.geeksforgeeks.org") {
+if (1 && frycAPI.host("www.geeksforgeeks.org")) {
 	frycAPI.injectStyle(/*css*/`
 		iframe[id*="google_ads_iframe"] {
 		  display: none;
@@ -5162,14 +5202,14 @@ if (1 && frycAPI.host === "www.geeksforgeeks.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.geneseo.edu") {
+if (1 && frycAPI.host("www.geneseo.edu")) {
 	frycAPI.injectStyle(/*css*/`
 		mjx-container[jax="CHTML"][display="true"] {
 			overflow: hidden;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.geogebra.org") {
+if (1 && frycAPI.host("www.geogebra.org")) {
 	frycAPI.injectStyle(/*css*/`
 		.checkBoxPanel>* {
 		  margin-right: 5px !important;
@@ -5179,7 +5219,7 @@ if (1 && frycAPI.host === "www.geogebra.org") {
 		}
 	`);
 }
-if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
+if (1 && frycAPI.host(["www.google.pl", "www.google.com"])) {
 	frycAPI.injectStyle(/*css*/`
 		.hm60ue {
 			margin-top: 50px;
@@ -5363,14 +5403,14 @@ if (1 && frycAPI.hostList(["www.google.pl", "www.google.com"])) {
 		}),
 	]);
 }
-if (1 && frycAPI.host === "www.headspin.io") {
+if (1 && frycAPI.host("www.headspin.io")) {
 	frycAPI.injectStyle(/*css*/`
 		.exit-popup.telco-outer-wp {
 			display: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.ipko.pl") {
+if (1 && frycAPI.host("www.ipko.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		/* .W9geT {
 		  filter: invert(1);
@@ -5385,21 +5425,21 @@ if (1 && frycAPI.host === "www.ipko.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.itl.nist.gov") {
+if (1 && frycAPI.host("www.itl.nist.gov")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.kalasoft.pl") {
+if (1 && frycAPI.host("www.kalasoft.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		.cli-barmodal-open {
 			overflow: scroll;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.komputronik.pl") {
+if (1 && frycAPI.host("www.komputronik.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		#ri-widget {
 		    display: none !important;
@@ -5424,7 +5464,7 @@ if (1 && frycAPI.host === "www.komputronik.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.kowalskimateusz.pl") {
+if (1 && frycAPI.host("www.kowalskimateusz.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		*{
 		  font-family: IBM Plex Sans Condensed
@@ -5443,7 +5483,7 @@ if (1 && frycAPI.host === "www.kowalskimateusz.pl") {
 		}*/
 	`);
 }
-if (0 && frycAPI.host === "www.lipsum.com") {
+if (0 && frycAPI.host("www.lipsum.com")) {
 	frycAPI.injectStyle(/*css*/`
 		body::-webkit-scrollbar {
 		  width: 15px;
@@ -5456,14 +5496,14 @@ if (0 && frycAPI.host === "www.lipsum.com") {
 		}
 	`);
 }
-if (0 && frycAPI.host === "www.math.us.edu.pl") {
+if (0 && frycAPI.host("www.math.us.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.mathworks.com") {
+if (1 && frycAPI.host("www.mathworks.com")) {
 	const funkcje = "Disable highlight on Matlab search";
 	frycAPI.injectStyle(/*css*/`
 		code.literal {
@@ -5503,7 +5543,7 @@ if (1 && frycAPI.host === "www.mathworks.com") {
 		})();
 	});
 }
-if (1 && frycAPI.host === "www.maxongroup.com") {
+if (1 && frycAPI.host("www.maxongroup.com")) {
 	frycAPI.injectStyle(/*css*/`
 		#cont {
 		  position: absolute;
@@ -5523,7 +5563,7 @@ if (1 && frycAPI.host === "www.maxongroup.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.medianauka.pl") {
+if (1 && frycAPI.host("www.medianauka.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -5531,7 +5571,7 @@ if (1 && frycAPI.host === "www.medianauka.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.megamatma.pl") {
+if (1 && frycAPI.host("www.megamatma.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  -webkit-filter: none !important;
@@ -5541,7 +5581,7 @@ if (1 && frycAPI.host === "www.megamatma.pl") {
 }
 // #endregion
 // #region //* IFy 7
-if (1 && frycAPI.host === "www.messenger.com") {
+if (1 && frycAPI.host("www.messenger.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -5593,7 +5633,7 @@ if (1 && frycAPI.host === "www.messenger.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.meteo.pl") {
+if (1 && frycAPI.host("www.meteo.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		/* body>div>div>img {
 		  filter: invert(1) hue-rotate(180deg);
@@ -5671,35 +5711,35 @@ if (1 && frycAPI.host === "www.meteo.pl") {
 		document.querySelector('[href="javascript:print_this()"]').insertAdjacentElement("afterend", butt);
 	});
 }
-if (0 && frycAPI.host === "www.minecraftskins.com") {
+if (0 && frycAPI.host("www.minecraftskins.com")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 		  background-color: #9c9c9c
 		}
 	`);
 }
-if (0 && frycAPI.host === "www.mrexcel.com") {
+if (0 && frycAPI.host("www.mrexcel.com")) {
 	frycAPI.injectStyle(/*css*/`
 		[id*="google_ads_iframe"] {
 		  display:none
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.obliczeniowo.com.pl") {
+if (1 && frycAPI.host("www.obliczeniowo.com.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.pcgamer.com") {
+if (1 && frycAPI.host("www.pcgamer.com")) {
 	frycAPI.injectStyle(/*css*/`
 		div.bordeaux-slot.bordeaux-filled-slot {
 			display: none !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.pyszne.pl") {
+if (1 && frycAPI.host("www.pyszne.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		img {
@@ -5714,7 +5754,7 @@ if (1 && frycAPI.host === "www.pyszne.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.quora.com") {
+if (1 && frycAPI.host("www.quora.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.q-flex.qu-borderColor--raised.qu-borderBottomLeftRadius--small.qu-borderBottomRightRadius--small.qu-borderBottom.qu-borderLeft.qu-borderRight.qu-bg--raised {
 			display: none !important;
@@ -5729,14 +5769,14 @@ if (1 && frycAPI.host === "www.quora.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.real-statistics.com") {
+if (1 && frycAPI.host("www.real-statistics.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 		  filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.reddit.com") {
+if (1 && frycAPI.host("www.reddit.com")) {
 	frycAPI.injectStyle(/*css*/`
 		shreddit-ad-post {
 			&, + hr {
@@ -5829,7 +5869,7 @@ if (1 && frycAPI.host === "www.reddit.com") {
 		new MutationObserver(func).observe(document.body, { subtree: true, childList: true });
 	});
 }
-if (1 && frycAPI.host === "www.roblox.com") {
+if (1 && frycAPI.host("www.roblox.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.voting-panel .users-vote .vote-details .vote-container .vote-percentage {
 			background-color: #02b757 !important;
@@ -5839,7 +5879,7 @@ if (1 && frycAPI.host === "www.roblox.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.satisfactorytools.com") {
+if (1 && frycAPI.host("www.satisfactorytools.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.mojaklasa {
 			display: none;
@@ -5858,21 +5898,21 @@ if (1 && frycAPI.host === "www.satisfactorytools.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.slownikslaski.pl") {
+if (1 && frycAPI.host("www.slownikslaski.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		* {
 		  font-family: IBM Plex Sans Condensed !important;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.tenforums.com") {
+if (1 && frycAPI.host("www.tenforums.com")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			background-color: #2a2a2a;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.tme.eu") {
+if (1 && frycAPI.host("www.tme.eu")) {
 	frycAPI.injectStyle(/*css*/`
 		.czerwony {
 		  color: red;
@@ -5883,7 +5923,7 @@ if (1 && frycAPI.host === "www.tme.eu") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.tutorialspoint.com") {
+if (1 && frycAPI.host("www.tutorialspoint.com")) {
 	frycAPI.injectStyle(/*css*/`
 		._adr_abp_container {
 			display: none !important;
@@ -5894,14 +5934,14 @@ if (1 && frycAPI.host === "www.tutorialspoint.com") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.ups.com") {
+if (1 && frycAPI.host("www.ups.com")) {
 	frycAPI.injectStyle(/*css*/`
 		div#ups-alerts {
 			color: black;
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.w3schools.com") {
+if (1 && frycAPI.host("www.w3schools.com")) {
 	frycAPI.injectStyle(/*css*/`
 		#colormixer table tbody tr:nth-child(11) {
 		  color: red
@@ -5916,7 +5956,7 @@ if (1 && frycAPI.host === "www.w3schools.com") {
 		}
 	});
 }
-if (1 && frycAPI.host === "www.when2meet.com") {
+if (1 && frycAPI.host("www.when2meet.com")) {
 	const funkcje = "Konwertuj 12h na 24h";
 	frycAPI.injectStyle(/*css*/`
 		[style="text-align:right;width:44px;height:9;font-size:10px;margin:4px 4px 0px 0px;"] {
@@ -5939,7 +5979,7 @@ if (1 && frycAPI.host === "www.when2meet.com") {
 }
 // #endregion
 // #region //* IFy 8
-if (1 && frycAPI.host === "www.worldometers.info") {
+if (1 && frycAPI.host("www.worldometers.info")) {
 	frycAPI.injectStyle(/*css*/`
 		rect.highcharts-background {
 			filter: invert(1);
@@ -5954,7 +5994,7 @@ if (1 && frycAPI.host === "www.worldometers.info") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "www.youtube.com") {
+if (1 && frycAPI.host("www.youtube.com")) {
 	frycAPI.injectStyle(/*css*/`
 		/*
 		#content-text.ytd-comment-renderer {
@@ -6225,7 +6265,7 @@ if (1 && frycAPI.host === "www.youtube.com") {
 		})();
 	});
 }
-if (1 && frycAPI.host === "wyniki.diag.pl") {
+if (1 && frycAPI.host("wyniki.diag.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		.line-chart::after {
 			background-color: #F55E32;
@@ -6245,18 +6285,18 @@ if (1 && frycAPI.host === "wyniki.diag.pl") {
 		}
 	`);
 }
-if (1 && frycAPI.host === "wyznacznik.pl") {
+if (1 && frycAPI.host("wyznacznik.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img {
 			filter: invert(1);
 		}
 	`);
 }
-if (frycAPI.host === "developer.chrome.com") {
+if (frycAPI.host("developer.chrome.com")) {
 	frycAPI.injectStyle(/*css*/`
 	`);
 }
-if (frycAPI.host === "www.rp.pl") {
+if (frycAPI.host("www.rp.pl")) {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyle(/*css*/`
 		.section--ad--breaker ,
@@ -6285,7 +6325,7 @@ if (frycAPI.host === "www.rp.pl") {
 		}
 	`);
 }
-if (frycAPI.host === "polandsvoice.pl") {
+if (frycAPI.host("polandsvoice.pl")) {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyle(/*css*/`
 		.App-Content>div>svg>text:first-of-type {
@@ -6293,14 +6333,14 @@ if (frycAPI.host === "polandsvoice.pl") {
 		}
 	`);
 }
-if (frycAPI.host === "www.mchtr.pw.edu.pl") {
+if (frycAPI.host("www.mchtr.pw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		*:not(.naglowek-middle.logo *,[title="Szukaj"] *) {
 			font-family: IBM Plex Sans Condensed;
 		}
 	`);
 }
-if (frycAPI.host === "www.java.com") {
+if (frycAPI.host("www.java.com")) {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyle(/*css*/`
 	`);
@@ -6309,7 +6349,7 @@ if (frycAPI.host === "www.java.com") {
 		frycAPI.colorSchemeDark = 1;
 	})();
 }
-if (frycAPI.host === "www.overleaf.com") {
+if (frycAPI.host("www.overleaf.com")) {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyle(/*css*/`
 		/*
@@ -6322,7 +6362,7 @@ if (frycAPI.host === "www.overleaf.com") {
 		*/
 	`);
 }
-if (frycAPI.hostList(["www.nongnu.org", "www.tug.org", "sunsite.icm.edu.pl", "latexref.xyz"])) {
+if (frycAPI.host(["www.nongnu.org", "www.tug.org", "sunsite.icm.edu.pl", "latexref.xyz"])) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			margin: auto;
@@ -6330,7 +6370,7 @@ if (frycAPI.hostList(["www.nongnu.org", "www.tug.org", "sunsite.icm.edu.pl", "la
 		}
 	`);
 }
-if (frycAPI.hostList(["www.ctan.org", "ctan.org"])) {
+if (frycAPI.host(["www.ctan.org", "ctan.org"])) {
 	frycAPI.injectStyle(/*css*/`
 		.head a[href="/"] {
 			/* -webkit-text-stroke: 1.5px white; */
@@ -6409,7 +6449,7 @@ if (frycAPI.hostList(["www.ctan.org", "ctan.org"])) {
 		}
 	`);
 }
-if (1 && frycAPI.host === "help.eclipse.org") {
+if (1 && frycAPI.host("help.eclipse.org")) {
 	frycAPI.onLoadSetter(() => {
 		const frameDoc = window.frames["HelpFrame"].frames["ContentFrame"].frames["ContentViewFrame"].document; // eslint-disable-line dot-notation
 		// window.frames["ContentViewFrame"].document
@@ -6522,7 +6562,7 @@ if (1 && frycAPI.host === "help.eclipse.org") {
 		}
 	});
 }
-if (frycAPI.host === "docs.oracle.com") {
+if (frycAPI.host("docs.oracle.com")) {
 	frycAPI.injectStyle(/*css*/`
 		#LeftBar {
 			width: 170px;
@@ -6591,7 +6631,7 @@ if (frycAPI.host === "docs.oracle.com") {
 		}
 	});
 }
-if (frycAPI.host === "npskills.github.io") { // NINE PARCHMENTS SKILL CALCULATOR
+if (frycAPI.host("npskills.github.io")) { // NINE PARCHMENTS SKILL CALCULATOR
 	frycAPI.injectStyle(/*css*/`
 		body {
 			font: 15pt/17pt IBM Plex Sans Condensed;
@@ -6642,7 +6682,7 @@ if (frycAPI.host === "npskills.github.io") { // NINE PARCHMENTS SKILL CALCULATOR
 		});
 	});
 }
-if (1 && frycAPI.host === "www.konesso.pl") {
+if (1 && frycAPI.host("www.konesso.pl")) {
 	frycAPI.injectStyleNormal(/*css*/`
 		div#preloader {
 			display: none;
@@ -6659,7 +6699,7 @@ if (1 && frycAPI.host === "www.konesso.pl") {
 	frycAPI.onLoadSetter(() => {
 	});
 }
-if (frycAPI.host === "barotraumagame.com") {
+if (frycAPI.host("barotraumagame.com")) {
 	frycAPI.injectStyle(/*css*/`
 		div[style="text-align:center;inline-size:min-content;white-space: nowrap;"] {
 			display: flex;
@@ -6679,14 +6719,14 @@ if (frycAPI.host === "barotraumagame.com") {
 
 	`);
 }
-if (frycAPI.host === "www.tribologia.eu") {
+if (frycAPI.host("www.tribologia.eu")) {
 	frycAPI.injectStyle(/*css*/`
 		html {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 }
-if (frycAPI.host === "steamspy.com") {
+if (frycAPI.host("steamspy.com")) {
 	frycAPI.injectStyle(/*css*/`
 		img[alt="logo"] {
 			filter: invert(1) hue-rotate(180deg);
@@ -6695,14 +6735,14 @@ if (frycAPI.host === "steamspy.com") {
 }
 // #endregion
 // #region //* IFy 9
-if (frycAPI.host === "www.fakrosno.pl") {
+if (frycAPI.host("www.fakrosno.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		.spring-middle>img {
 			filter: invert(1) hue-rotate(180deg) !important;
 		}
 	`);
 }
-if (frycAPI.host === "www.arrowheadgamestudios.com") {
+if (frycAPI.host("www.arrowheadgamestudios.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.comment-author cite.fn {
 			font-size: 22px;
@@ -6760,7 +6800,7 @@ if (frycAPI.host === "www.arrowheadgamestudios.com") {
 		}
 	`);
 }
-if (frycAPI.hostList(["e621.net", "e926.net"])) {
+if (frycAPI.host(["e621.net", "e926.net"])) {
 	frycAPI.injectStyle(/*css*/`
 		* {
 			font-family: IBM Plex Sans Condensed !important;
@@ -6863,21 +6903,23 @@ if (frycAPI.hostList(["e621.net", "e926.net"])) {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		const pthNam = window.location.pathname;
-		if (pthNam.startsWith("/posts/")) {
-			document.getElementsByClassName("next")[0].setAttribute("accesskey", "a");
-			document.getElementsByClassName("prev")[0].setAttribute("accesskey", "b");
-			(document.body.appendChild(document.createElement("div")).frycAPI_setAttribute("id", "mojScroll")
-			.frycAPI_setInnerHTML("Deafult scroll").onclick = () => {
+		const pathName = window.location.pathname;
+		if (pathName.startsWith("/posts/")) {
+			document.querySelector(`a.next[rel="next"]`)?.setAttribute("accesskey", "a");
+			document.querySelector(`a.prev[rel="prev"]`)?.setAttribute("accesskey", "b");
+			(document.body.appendChild(document.createElement("div"))
+			.frycAPI_setAttribute("id", "mojScroll")
+			.frycAPI_setInnerHTML("Deafult scroll")
+			.onclick = () => {
 				window.scrollTo(0, document.documentElement.scrollTop + document.getElementById("nav-links-top").getBoundingClientRect().y);
 			})();
-		} else if (pthNam === "/posts" || pthNam.startsWith("/posts?")) {
+		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts").insertAdjacentElement("beforebegin", document.getElementById("search-box"));
 			window.scrollTo(0, 0);
-		} else if (pthNam.startsWith("/pools/") && !pthNam.startsWith("/pools/gallery")) {
-			function czytelnyCzas(czas) {
+		} else if (pathName.startsWith("/pools/") && !pathName.startsWith("/pools/gallery")) {
+			const czytelnyCzas = function (czas) {
 				return frycAPI.printRelTime(czas, 0, "pol", 0, 1, 0, 1).padStart(13);
-			}
+			};
 			(frycAPI.e621_get_pool_dates = async function (pocz, kon) {
 				// np. https://e621.net/pools/35222
 				if (arguments.length === 0) {
@@ -6893,8 +6935,8 @@ if (frycAPI.hostList(["e621.net", "e926.net"])) {
 					return;
 				}
 
-				const poolID = pthNam.split("/").slice(-1);
-				frycAPI.datArr ||= (await frycAPI.readFile(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`) // eslint-disable-line require-atomic-updates
+				const poolID = pathName.split("/").slice(-1);
+				frycAPI.datArr ||= ((await frycAPI.readFile(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`)) // eslint-disable-line require-atomic-updates
 				.posts.map(elem => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
 				.map((daElem, daI) => {
 					// Numery postów chronologicznie
@@ -6981,12 +7023,12 @@ if (frycAPI.hostList(["e621.net", "e926.net"])) {
 		}
 	});
 }
-if (frycAPI.hostList(["static1.e926.net", "static1.e621.net"])) {
+if (frycAPI.host(["static1.e926.net", "static1.e621.net"])) {
 	frycAPI.onLoadSetter(function () {
 		frycAPI.changeFaviconRes("e621_Logo.png");
 	});
 }
-if (frycAPI.host === "e-hentai.org") {
+if (frycAPI.host("e-hentai.org")) {
 	if (window.location.pathname.startsWith("/s/")) {
 		frycAPI.injectStyleNormal(/*css*/`
 			img[src="https://ehgt.org/g/f.png"],
@@ -7038,7 +7080,7 @@ if (frycAPI.host === "e-hentai.org") {
 		});
 	}
 }
-if (frycAPI.host === "www.sqlite.org") {
+if (frycAPI.host("www.sqlite.org")) {
 	frycAPI.injectStyle(/*css*/`
 		body {
 			max-width: 1000px;
@@ -7062,14 +7104,14 @@ if (frycAPI.host === "www.sqlite.org") {
 		}
 	`);
 }
-if (frycAPI.host === "s.surveylegend.com") {
+if (frycAPI.host("s.surveylegend.com")) {
 	frycAPI.injectStyle(/*css*/`
 		.is-textbox-in-app {
 			user-select: auto !important;
 		}
 	`);
 }
-if (frycAPI.hostList(["issuetracker.google.com", "issues.chromium.org"])) {
+if (frycAPI.host(["issuetracker.google.com", "issues.chromium.org"])) {
 	frycAPI.injectStyle(/*css*/`
 		*:not(textarea, textarea *, code, code *) {
 			font-family: IBM Plex Sans Condensed !important;
@@ -7106,14 +7148,14 @@ if (frycAPI.hostList(["issuetracker.google.com", "issues.chromium.org"])) {
 
 	// frycAPI.onLoadSetter(correctTimeValues);
 }
-if (frycAPI.host === "www.pw.edu.pl") {
+if (frycAPI.host("www.pw.edu.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		img[alt="Strona główna"] {
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 }
-if (frycAPI.host === "forums.factorio.com") {
+if (frycAPI.host("forums.factorio.com")) {
 	frycAPI.injectStyle(/*css*/`
 		* {
 			font-family: IBM Plex Sans Condensed;
@@ -7134,14 +7176,14 @@ if (frycAPI.host === "forums.factorio.com") {
 		});
 	});
 }
-if (frycAPI.host === "factorio.com") {
+if (frycAPI.host("factorio.com")) {
 	frycAPI.injectStyle(/*css*/`
 		*:not(.header-links > div > a.button.flex.flex-space-between *):not(.user-controls.links.flex.flex-items-baseline.flex-end *) {
 			font-family: IBM Plex Sans Condensed !important;
 		}
 	`);
 }
-if (frycAPI.hostList(["github.com", "gist.github.com"])) {
+if (frycAPI.host(["github.com", "gist.github.com"])) {
 	frycAPI.injectStyle(/*css*/`
 		div:has(>pre:first-child) {
 			--wysokość: 13px;
@@ -7208,14 +7250,14 @@ if (frycAPI.hostList(["github.com", "gist.github.com"])) {
 		}, { options: { attributes: true } });
 	});
 }
-if (frycAPI.host === "developers.google.com") {
+if (frycAPI.host("developers.google.com")) {
 	frycAPI.injectStyle(/*css*/`
 		*:not(devsite-code *):not(code) {
 			font-family: IBM Plex Sans Condensed;
 		}
 	`);
 }
-if (frycAPI.host === "support.google.com") {
+if (frycAPI.host("support.google.com")) {
 	frycAPI.injectStyle(/*css*/`
 
 	`);
@@ -7228,7 +7270,7 @@ if (frycAPI.host === "support.google.com") {
 		});
 	});
 }
-if (frycAPI.host === "okazja-hurtownia.pl") {
+if (frycAPI.host("okazja-hurtownia.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		.col2-set.addresses .woocommerce-column--billing-address.col-1,
 		.col2-set.addresses .woocommerce-column--shipping-address.col-2 {
@@ -7236,7 +7278,7 @@ if (frycAPI.host === "okazja-hurtownia.pl") {
 		}
 	`);
 }
-if (frycAPI.hostListIncludes(["aliexpress.com"])) {
+if (frycAPI.hostIncludes(["aliexpress.com"])) {
 	frycAPI.injectStyle(/*css*/`
 		.multi--shopCart--darm7xs.multi--shopLtr--1kiOXiJ.multi--shopCartImage--2DX88PV {
 			right: 0px;
@@ -7251,7 +7293,7 @@ if (frycAPI.hostListIncludes(["aliexpress.com"])) {
 		}
 	`);
 }
-if (frycAPI.host === "www.crazytime.pl") { // Jeżeli strona często zmienia tytuł (aby zwrócić twoją uwagę bez powodu) zastosuj ten kod
+if (frycAPI.host("www.crazytime.pl")) { // Jeżeli strona często zmienia tytuł (aby zwrócić twoją uwagę bez powodu) zastosuj ten kod
 	frycAPI.injectStyle(/*css*/`
 
 	`);
@@ -7266,7 +7308,7 @@ if (frycAPI.host === "www.crazytime.pl") { // Jeżeli strona często zmienia tyt
 		}).observe(document.querySelector("title"), { subtree: true, characterData: true, childList: true });
 	});
 }
-if (1 && frycAPI.host.includes("autodesk.com")) { // frycAPI.hostList(["forums.autodesk.com"])
+if (1 && frycAPI.hostIncludes("autodesk.com")) {
 	frycAPI.injectStyle(/*css*/`
 		span.DateTime {
 			font-weight: bold;
@@ -7362,7 +7404,7 @@ if (1 && frycAPI.host.includes("autodesk.com")) { // frycAPI.hostList(["forums.a
 			margin-top: 15px !important;
 		}
 	`);
-	if (frycAPI.hostList(["forums.autodesk.com", "profile.autodesk.com"])) {
+	if (frycAPI.host(["forums.autodesk.com", "profile.autodesk.com"])) {
 		frycAPI.injectStyle(/*css*/`
 			.uh-logo-container svg.uh-autodesk-logo {
 				filter: invert(1) hue-rotate(180deg);
@@ -7413,13 +7455,13 @@ if (1 && frycAPI.host.includes("autodesk.com")) { // frycAPI.hostList(["forums.a
 	});
 	frycAPI.onLoadSetter(function () {
 		frycAPI.changeFaviconRes((() => {
-			switch (frycAPI.host) {
+			switch (frycAPI.host()) {
 				case "forums.autodesk.com": return "AutodeskOrange.png";
 				case "help.autodesk.com": return "AutodeskBlue.png";
 				default: return "Autodesk.png";
 			}
 		})());
-		if (frycAPI.host === "help.autodesk.com") {
+		if (frycAPI.host("help.autodesk.com")) {
 			frycAPI.injectStyleNormal(/*css*/`
 				tr.header>td {
 					white-space: nowrap;
@@ -7437,7 +7479,7 @@ if (1 && frycAPI.host.includes("autodesk.com")) { // frycAPI.hostList(["forums.a
 		}
 	});
 }
-if (frycAPI.host === "allegro.pl") {
+if (frycAPI.host("allegro.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		.ukryj-opinie-bez-zdjęć {
 			& [itemprop="review"]:not(:has(> [data-analytics-view-label="reviewsGallery"])) {
@@ -7462,7 +7504,7 @@ if (frycAPI.host === "allegro.pl") {
 }
 // #endregion
 // #region //* IFy 10
-if (1 && frycAPI.host === "knucklecracker.com") {
+if (1 && frycAPI.host("knucklecracker.com")) {
 	frycAPI.injectStyle(/*css*/`
 	`);
 
@@ -7499,7 +7541,7 @@ if (1 && frycAPI.host === "knucklecracker.com") {
 		}
 	});
 }
-if (frycAPI.host === "gist.github.com") {
+if (frycAPI.host("gist.github.com")) {
 	frycAPI.injectStyle(/*css*/`
 		
 	`);
@@ -7510,14 +7552,14 @@ if (frycAPI.host === "gist.github.com") {
 		const tab = document.querySelector("table[data-tagsearch-lang]");
 	});
 }
-if (frycAPI.host === "nodejs.org") {
+if (frycAPI.host("nodejs.org")) {
 	frycAPI.injectStyle(/*css*/`
 		[class*="layouts_contentLayout"]>:first-child main {
 			word-break: normal;
 		}
 	`);
 }
-if (frycAPI.host === "eslint.org") {
+if (frycAPI.host("eslint.org")) {
 	frycAPI.injectStyle(/*css*/`
 		.c-toc ol li:before {
 			content: "-";
@@ -7525,7 +7567,7 @@ if (frycAPI.host === "eslint.org") {
 		}
 	`);
 }
-if (1 && frycAPI.host.includes("metafilter.com")) {
+if (1 && frycAPI.hostIncludes("metafilter.com")) {
 	frycAPI.injectStyle(/*css*/`
 		:root {
 			--kolor-krawędzi: hsl(0deg, 0%, 100%, 65%);
@@ -7799,7 +7841,7 @@ if (1 && frycAPI.host.includes("metafilter.com")) {
 		}
 	});
 }
-if (frycAPI.host === "sjp.pwn.pl") {
+if (frycAPI.host("sjp.pwn.pl")) {
 	frycAPI.injectStyle(/*css*/`
 		${frycAPI.simpleFontChange}
 		.banner:has(*) {
@@ -7807,12 +7849,12 @@ if (frycAPI.host === "sjp.pwn.pl") {
 		}
 	`);
 }
-if (frycAPI.host === "www.baillifard.com") {
+if (frycAPI.host("www.baillifard.com")) {
 	frycAPI.injectStyle(/*css*/`
 		${frycAPI.simpleFontChange}
 	`);
 }
-if (frycAPI.host === "template") {
+if (frycAPI.host("template")) {
 	frycAPI.injectStyle(/*css*/`
 
 	`);
@@ -7835,24 +7877,16 @@ if (frycAPI.host === "template") {
 
 // #region //* Koniec
 if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // dodanie połączonych wszystkich stylów ze wszystkich ifów
-	new MutationObserver((mutRec, docObs) => {
+	frycAPI.createMutObs((mutRecArr, mutObs) => {
 		// if (document.head) {
 		// 	// document.head.insertAdjacentElement("afterbegin", document.createElement("meta").frycAPI_setAttribute("http-equiv","Content-Security-Policy").frycAPI_setAttribute("content","script-src 'self';"));
 		// 	// document.head.insertAdjacentElement("afterbegin", document.createElement("meta").frycAPI_setAttribute("http-equiv","Content-Security-Policy").frycAPI_setAttribute("content","require-trusted-types-for 'script';"));
 		// }
 		if (document.body !== null) {
-			// `<style id="frycAPI_myStyle">${style}</style>` insertAdjacentHTML
-			document.body.insertAdjacentElement("afterend",
-				document.createElement("style")
-				.frycAPI_setAttribute("id", "frycAPI_myStyle")
-				.frycAPI_setInnerHTML(frycAPI.minifyCSS(frycAPI.styleStr))
-			); // .replaceAll(/\s+/gm," ")
-			docObs.disconnect();
+			document.body.frycAPI_insertHTML("afterend", `<style id="frycAPI_myStyle">${frycAPI.minifyCSS(frycAPI.styleStr)}</style>`);
+			mutObs.disconnect();
 		}
-	}).observe(document.documentElement, { childList: true, subtree: true });
-	// window.addEventListener("load", () => {
-	// 	document.body.appendChild(document.createElement("style")).innerHTML = style;
-	// });
+	}, { runOnLoad: false, elem: document.documentElement });
 }
 if (document.currentScript.getAttribute("src").includes("chrome-extension")) {
 	loguj("frycAPI loaded! (from chrome-extension)");
