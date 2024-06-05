@@ -241,6 +241,10 @@ class frycAPI_FuncGroup extends Object {
 function loguj(...tekst) {
 	console.log(...tekst);
 }
+function temₚ(strings, ...values) { // extract contents of string template literal
+	return [strings, values];
+}
+
 
 // Grupy bloków co 19 pozycji (18.04.2024) // Regex do liczenia ifów: /^if.+/
 // #endregion
@@ -295,7 +299,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	injectStyleNormal(style, options) {
 		if ((style = style.trim()).length) {
 			const id = options?.staticID ?? "frycAPI_styleNormal" + ++frycAPI.injectStyleNormalNum;
-			(options?.elem ?? document.body).appendChild(document.createElement("style").frycAPI_setAttribute("id", id)).innerHTML = frycAPI.minifyCSS(style);
+			const styleElem = document.createElement("style").frycAPI_setAttribute("id", id);
+			styleElem.innerHTML = frycAPI.minifyCSS(style); // .frycAPI_log()
+			const elem = options?.elem;
+			if (elem instanceof Node) {
+				elem.appendChild(styleElem);
+			} else {
+				document.body.insertAdjacentElement("afterend", styleElem);
+			}
 			return id;
 		}
 	},
@@ -366,10 +377,10 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	makeTableSortable(tabElem, trSel = "tr", tdSel = "td", thSel = "th") { // Podaj referencję do tablicy
 		const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
 		const sortObj = {
-			deafult: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText,
-			ignoreCase: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText.toUpperCase(),
-			numeric: (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText),
-			attrib: (a, obj) => a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib),
+			deafult      : (a, obj) =>        a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText,
+			ignoreCase   : (a, obj) =>        a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText.toUpperCase(),
+			numeric      : (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText),
+			attrib       : (a, obj) =>        a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib),
 			attribNumeric: (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib)),
 		};
 		const sortHelp = function (objFun, obj) {
@@ -785,25 +796,39 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runOnLoad: true, elem: document.body, options: { childList: true, subtree: true } });
 	setDefaultDate(selector, options) { // { getDate: 111, setDate: 111, dateTitle: 111 }
 		// flagowe zastosowanie w www.autohotkey.com
-		const getDate = (() => {
-			switch (options?.getDate) {
-				case "txt": return elem => elem.innerText;
-				case "attr":
-				case undefined: return elem => elem.getAttribute("datetime");
-				default: return options?.getDate;
-			}
-		})();
-		// debugger;
-		const setDate = options?.setDate ?? frycAPI.setDefaultDateText;
-		const dateEnum = options?.dateEnum ?? (() => {});
-		const dateOpts = options?.dateOpts;
-		frycAPI.forEach(selector, daElem => {
-			const data = new Date(getDate(daElem));
-			if (frycAPI.isValidDate(data)) {
-				dateEnum(setDate(daElem, data, dateOpts));
-			}
-		});
-		frycAPI.setDefaultDateStyle();
+		const sel = document.querySelectorAll(selector);
+		if (sel.length) {
+			const getDate = (() => {
+				switch (options?.getDate) {
+					case "txt": return elem => elem.innerText;
+					case "html": return elem => elem.innerHTML;
+					case "content": return elem => elem.textContent;
+					case "attr":
+					case undefined: return elem => elem.getAttribute("datetime");
+					default: return options?.getDate;
+				}
+			})();
+			// debugger;
+			const setDate = options?.setDate ?? frycAPI.setDefaultDateText;
+			const dateEnumMode = options?.dateEnumMode;
+			const dateEnumStyle = options?.dateEnumStyle;
+			const customStyle = options?.customStyle ?? "";
+			const dateOpts = options?.dateOpts;
+			sel.forEach(daElem => {
+				const data = new Date(getDate(daElem));
+				if (frycAPI.isValidDate(data)) {
+					const lepszyCzas = setDate(daElem, data, dateOpts);
+					dateEnumMode?.(lepszyCzas);
+					dateEnumStyle?.(lepszyCzas);
+					if (lepszyCzas.classList.contains("lepszyCzas")) {
+						lepszyCzas.setAttribute("style", customStyle);
+					} else {
+						lepszyCzas.querySelector(`.lepszyCzas`)?.setAttribute("style", customStyle);
+					}
+				}
+			});
+			frycAPI.setDefaultDateStyle();
+		}
 		return frycAPI.setDefaultDateEnum;
 	},
 	setDefaultDateText(elem, data, dateOpts) {
@@ -829,70 +854,281 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	setDefaultDateStyle() {
 		if (frycAPI.querySelNull(`#frycAPI_setDefaultDate`)) {
-			// await frycAPI.getResData("DotCursor.png").then(frycAPI.blobToBase64)
-			frycAPI.injectStyleNormal(/*css*/`
-				:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) span.lepszyCzas {
-					/* cursor: url(${frycAPI.getResURL("DotCursor8.png")}) 3 3, auto; */
-					cursor: none;
-					> .myślnik-czas { display: none; }
-				}
-				[lepszyCzas="absolutnyCzas"] span.lepszyCzas {
-					&:not(:hover) > .abs-czas { display: inline; }
-					&:hover       > .abs-czas { display: none; }
-					&:not(:hover) > .rel-czas { display: none; }
-					&:hover       > .rel-czas { display: inline; }
-				}
-				[lepszyCzas="relatywnyCzas"] span.lepszyCzas {
-					&:not(:hover) > .abs-czas { display: none; }
-					&:hover       > .abs-czas { display: inline; }
-					&:not(:hover) > .rel-czas { display: inline; }
-					&:hover       > .rel-czas { display: none; }
-				}
-				[lepszyCzas="oba"] span.lepszyCzas > :is(.abs-czas, .rel-czas, .myślnik-czas) {
-					display: inline;
-				}
+			// #region //* Stringi
+			const rel = `[lepszyCzas="relatywnyCzas"]`;
+			const abs = `[lepszyCzas="absolutnyCzas"]`;
+			const stylSpanNotOba = `
+				/* cursor: none; */
+				cursor: inherit;
+				position: relative;
+				> :where(.myślnik-czas) { display: none; }
+			`;
+			const tooltipReset = `
+				background-color: inherit;
+				color: inherit;
+				border: 0;
+				padding: 0;
+			`;
+			const chosenNotHover = `
+				display: inline;
+			`;
+			const chosenHover = `
+				visibility: hidden;
+				position: unset;
+				${tooltipReset}
+			`;
+			const notChosenNotHover = `
+				display: none;
+			`;
+			const notChosenHover = `
+				display: inline;
+				visibility: visible;
+				position: absolute;
+				z-index: 999999;
+				text-decoration: inherit;
+				white-space: nowrap;
+			`;
+			const stylAbs = `
+				&:where(:not(:hover)) > :where(.abs-czas) { ${chosenNotHover} }
+				&:where(:hover      ) > :where(.abs-czas) { ${chosenHover} }
+				&:where(:not(:hover)) > :where(.rel-czas) { ${notChosenNotHover} }
+				&:where(:hover      ) > :where(.rel-czas) { ${notChosenHover} }
+			`;
+			const stylRel = `
+				&:where(:not(:hover)) > :where(.abs-czas) { ${notChosenNotHover} }
+				&:where(:hover      ) > :where(.abs-czas) { ${notChosenHover} }
+				&:where(:not(:hover)) > :where(.rel-czas) { ${chosenNotHover} }
+				&:where(:hover      ) > :where(.rel-czas) { ${chosenHover} }
+			`;
+			const stylOba = `
+				display: inline;
+				visibility: visible;
+				position: unset;
+				${tooltipReset}
+			`;
 
-				span.lepszyCzas:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) {
-					cursor: none;
-					> .myślnik-czas { display: none; }
-				}
-				span.lepszyCzas[lepszyCzas="absolutnyCzas"] {
-					&:not(:hover) > .abs-czas { display: inline; }
-					&:hover       > .abs-czas { display: none; }
-					&:not(:hover) > .rel-czas { display: none; }
-					&:hover       > .rel-czas { display: inline; }
-				}
-				span.lepszyCzas[lepszyCzas="relatywnyCzas"] {
-					&:not(:hover) > .abs-czas { display: none; }
-					&:hover       > .abs-czas { display: inline; }
-					&:not(:hover) > .rel-czas { display: inline; }
-					&:hover       > .rel-czas { display: none; }
-				}
-				span.lepszyCzas[lepszyCzas="oba"] > :is(.abs-czas, .rel-czas, .myślnik-czas) {
-					display: inline;
+			const r = `:where(.lepszyCzas:hover) > :where(.rel-czas)`;
+			const a = `:where(.lepszyCzas:hover) > :where(.abs-czas)`;
+
+			const reset = `
+				top:    unset;
+				right:  unset;
+				bottom: unset;
+				left:   unset;
+				transform: none;
+			`;
+			const tooltip = `${reset}
+				background-color: hsl(0, 0%, 15%);
+				color: hsl(0, 0%, 100%);
+				border: 1px solid hsl(0, 0%, 60%);
+				padding: 1px 3px;
+			`;
+			const float = `${reset}${tooltipReset}`;
+
+			const top = `
+				bottom: calc(var(--tool-tip-calc) - var(--tt-y));
+				left: calc(50% + var(--tt-x));
+				transform: translateX(-50%);
+			`;
+			const right = `
+				left: calc(var(--tool-tip-calc) + var(--tt-x));
+				top: calc(50% + var(--tt-y));
+				transform: translateY(-50%);
+			`;
+			const bottom = `
+				top: calc(var(--tool-tip-calc) + var(--tt-y));
+				left: calc(50% + var(--tt-x));
+				transform: translateX(-50%);
+			`;
+			const left = `
+				right: calc(var(--tool-tip-calc) - var(--tt-x));
+				top: calc(50% + var(--tt-y));
+				transform: translateY(-50%);
+			`;
+			const center = `
+				top: calc(50% + var(--tt-y));
+				left: calc(50% + var(--tt-x));
+				transform: translate(-50%, -50%);
+			`;
+			/* eslint-disable template-curly-spacing,comma-spacing */
+			const arr = [
+				[`[lepszyCzasStyl="toolTip-top"]`   , `${tooltip}${top   }`],
+				[`[lepszyCzasStyl="toolTip-right"]` , `${tooltip}${right }`],
+				[`[lepszyCzasStyl="toolTip-bottom"]`, `${tooltip}${bottom}`],
+				[`[lepszyCzasStyl="toolTip-left"]`  , `${tooltip}${left  }`],
+				[`[lepszyCzasStyl="toolTip-center"]`, `${tooltip}${center}`],
+				[`[lepszyCzasStyl="float-left"]`    , `${float} left: var(--tt-x);`],
+				[`[lepszyCzasStyl="float-center"]`  , `${float} left: calc(50% + var(--tt-x)); transform: translateX(-50%);`],
+				[`[lepszyCzasStyl="float-right"]`   , `${float} right: calc(-1 * var(--tt-x));`],
+				// [`&[lepszyCzasStyl="float-top"]`     , `${float  }${top   }`],
+				// [`&[lepszyCzasStyl="float-bottom"]`  , `${float  }${bottom}`],
+			];
+			const tooltipModSel = `:where([lepszyCzasStyl^="toolTip"]:not([lepszyCzasStyl="toolTip-center"]))`;
+			const tooltipModStyle = `visibility: visible;`;
+			const floatModSel = `:where([lepszyCzasStyl^="float"], [lepszyCzasStyl="toolTip-center"])`;
+			const floatModStyle = `visibility: hidden;`;
+			const bigSpec = frycAPI.repeatString(`[lepszyCzas]`, 1);
+			/* eslint-enable template-curly-spacing,comma-spacing */
+			// #endregion
+			frycAPI.injectStyleNormal(
+				/*
+					:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) span.lepszyCzas {
+						cursor: none;
+						> .myślnik-czas { display: none; }
+					}
+					[lepszyCzas="absolutnyCzas"] span.lepszyCzas {
+						&:not(:hover) > .abs-czas { display: inline; }
+						&:hover       > .abs-czas { display: none; }
+						&:not(:hover) > .rel-czas { display: none; }
+						&:hover       > .rel-czas { display: inline; }
+					}
+					[lepszyCzas="relatywnyCzas"] span.lepszyCzas {
+						&:not(:hover) > .abs-czas { display: none; }
+						&:hover       > .abs-czas { display: inline; }
+						&:not(:hover) > .rel-czas { display: inline; }
+						&:hover       > .rel-czas { display: none; }
+					}
+					[lepszyCzas="oba"] span.lepszyCzas > :is(.abs-czas, .rel-czas, .myślnik-czas) {
+						display: inline;
+					}
+
+					span.lepszyCzas:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) {
+						cursor: none;
+						> .myślnik-czas { display: none; }
+					}
+					span.lepszyCzas[lepszyCzas="absolutnyCzas"] {
+						&:not(:hover) > .abs-czas { display: inline; }
+						&:hover       > .abs-czas { display: none; }
+						&:not(:hover) > .rel-czas { display: none; }
+						&:hover       > .rel-czas { display: inline; }
+					}
+					span.lepszyCzas[lepszyCzas="relatywnyCzas"] {
+						&:not(:hover) > .abs-czas { display: none; }
+						&:hover       > .abs-czas { display: inline; }
+						&:not(:hover) > .rel-czas { display: inline; }
+						&:hover       > .rel-czas { display: none; }
+					}
+					span.lepszyCzas[lepszyCzas="oba"] > :is(.abs-czas, .rel-czas, .myślnik-czas) {
+						display: inline;
+					}
+				*/
+				/*css*/`
+				${bigSpec} {
+					& :where(span.lepszyCzas) {
+						overflow: visible;
+						text-decoration: inherit;
+						--tool-tip-padd: 3px;
+						--tt-x: 0px;
+						--tt-y: 0px;
+						--tool-tip-calc: 100% + var(--tool-tip-padd);
+					}
+					&:where(${abs}, ${rel}) :where(.lepszyCzas) { ${stylSpanNotOba} }
+					&:where(${abs}) :where(.lepszyCzas)         { ${stylAbs} }
+					&:where(${rel}) :where(.lepszyCzas)         { ${stylRel} }
+
+					&:where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) ${r} {${1}}`)} }
+					&:where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) ${a} {${1}}`)} }
+					&:where(${abs}) { &${tooltipModSel} ${a} {${tooltipModStyle}} }
+					&:where(${rel}) { &${tooltipModSel} ${r} {${tooltipModStyle}} }
+
+					&:where([lepszyCzas="oba"]) :where(.lepszyCzas) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
+
+					& {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) :where(${abs})${r} {${1}}`)} }
+					& {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) :where(${rel})${a} {${1}}`)} }
+					
+					&:where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${r} {${1}}`)} }
+					&:where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${a} {${1}}`)} }
+					&:where(${abs}) { ${floatModSel}${a} {${floatModStyle}} }
+					&:where(${rel}) { ${floatModSel}${r} {${floatModStyle}} }
+					
+					& :where(:is(${abs}, ${rel}).lepszyCzas) { ${stylSpanNotOba} }
+					& :where(${abs}.lepszyCzas)              { ${stylAbs} }
+					& :where(${rel}.lepszyCzas)              { ${stylRel} }
+					
+					& { &${tooltipModSel} :where(${abs})${a} {${tooltipModStyle}} }
+					& { &${tooltipModSel} :where(${rel})${r} {${tooltipModStyle}} }
+					& :where(${abs}) { &${floatModSel}${a} {${floatModStyle}} }
+					& :where(${rel}) { &${floatModSel}${r} {${floatModStyle}} }
+					&:where(${abs}) { ${tooltipModSel}${a} {${tooltipModStyle}} }
+					&:where(${rel}) { ${tooltipModSel}${r} {${tooltipModStyle}} }
+					
+					& :where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${r} {${1}}`)} }
+					& :where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${a} {${1}}`)} }
+					& :where(${abs}) { &${tooltipModSel}${a} {${tooltipModStyle}} }
+					& :where(${rel}) { &${tooltipModSel}${r} {${tooltipModStyle}} }
+
+					& :where(.lepszyCzas[lepszyCzas="oba"]) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
 				}
 			`, { staticID: "frycAPI_setDefaultDate" });
-			frycAPI.setDefaultDateEnum.relatywnyCzas();
+			frycAPI.setDefaultDateEnum.mode.oba().floatCenter();
 			return frycAPI.setDefaultDateEnum;
 		}
 	}, // frycAPI.setDefaultDateStyle();
-	setDefaultDateEnum: { // eslint-disable-line object-shorthand
-		relatywnyCzas(elem) { frycAPI.setDefaultDateEnumFunc(elem, "relatywnyCzas"); frycAPI.setDefaultDateEnum.manualFuncRef.setState(0) },
-		absolutnyCzas(elem) { frycAPI.setDefaultDateEnumFunc(elem, "absolutnyCzas"); frycAPI.setDefaultDateEnum.manualFuncRef.setState(1) },
-		oba(elem)           { frycAPI.setDefaultDateEnumFunc(elem, "oba")          ; frycAPI.setDefaultDateEnum.manualFuncRef.setState(2) }, // eslint-disable-line semi-spacing
+	setDefaultDateEnum: {
+		mode: {
+			relatywnyCzas(elem) { return frycAPI.setDefaultDateEnumFunc1(elem, "relatywnyCzas", 0) },
+			absolutnyCzas(elem) { return frycAPI.setDefaultDateEnumFunc1(elem, "absolutnyCzas", 1) },
+			oba(elem)           { return frycAPI.setDefaultDateEnumFunc1(elem, "oba"          , 2) }, // eslint-disable-line comma-spacing
+		},
+		style: {
+			/* eslint-disable */
+			toolTipTop    (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-top"   ) },
+			toolTipRight  (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-right" ) },
+			toolTipBottom (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-bottom") },
+			toolTipLeft   (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-left"  ) },
+			toolTipCenter (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-center") },
+			floatLeft     (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "float-left"    ) },
+			floatCenter   (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "float-center"  ) },
+			floatRight    (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "float-right"   ) },
+			// floatTop      (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "float-top"     ) },
+			// floatBottom   (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "float-bottom"  ) },
+			/* eslint-enable */
+		},
 		manualFuncRef: null,
 	}, // frycAPI.setDefaultDateEnum.relatywnyCzas();
-	setDefaultDateEnumFunc(elem, val) {
+	setDefaultDateEnumFunc1(elem, val, state) {
 		if (elem === undefined) {
 			document.body.setAttribute("lepszyCzas", val);
-		} else if (elem.nodeName === "SPAN" && elem.classList.contains("lepszyCzas")) {
+			frycAPI.setDefaultDateEnum.manualFuncRef.setState(state);
+		} else if (elem.classList.contains("lepszyCzas")) {
 			elem.setAttribute("lepszyCzas", val);
 		} else {
-			elem.querySelector(`span.lepszyCzas`)?.setAttribute("lepszyCzas", val);
+			elem.querySelector(`.lepszyCzas`)?.setAttribute("lepszyCzas", val);
 		}
+		return frycAPI.setDefaultDateEnum.style;
+	},
+	setDefaultDateEnumFunc2(elem, val) {
+		if (elem === undefined) {
+			document.body.setAttribute("lepszyCzasStyl", val);
+		} else if (elem.classList.contains("lepszyCzas")) {
+			elem.setAttribute("lepszyCzasStyl", val);
+		} else {
+			elem.querySelector(`.lepszyCzas`)?.setAttribute("lepszyCzasStyl", val);
+		}
+		return frycAPI.setDefaultDateEnum.mode;
 	},
 	querySelNull(selector, elem = document) {
 		return elem.querySelector(selector) === null;
+	},
+	arrayToTemplate(arr, [strs, vals]) {
+		// debugger;
+		// const cols = vals.length;
+		const isInt = new Array(vals.length);
+		vals.forEach((el, i) => {
+			isInt[i] = frycAPI.isInt(el);
+		});
+		const last = strs[strs.length - 1];
+		let outStr = "";
+		arr.forEach((row, i) => {
+			// if (row.length !== cols) throw new Error("Liczba kolumn i liczba pól w stringu muszą się zgadzać");
+			const rowFun = frycAPI.isArray(row) ? (r, el) => r[el] : r => r;
+			vals.forEach((el, j) => {
+				outStr += strs[j];
+				outStr += isInt[j] ? rowFun(row, el) : el;
+			});
+			outStr += last;
+		});
+		return outStr;
 	},
 	// #endregion
 	// #region //* Funkcje 4
@@ -942,6 +1178,29 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	isBool(value) {
 		return typeof value === "boolean" || value instanceof Boolean;
+	},
+	isInt(value) {
+		if (isNaN(value)) return false;
+		const x = parseFloat(value);
+		return (x | 0) === x;
+	},
+	isArray(value) {
+		return value.constructor === Array;
+	},
+	repeatString(str, count) {
+		let outStr = "";
+		for (let i = 0; i < count; i++) {
+			outStr += str;
+		}
+		return outStr;
+	},
+	perf(t1, t2) {
+		console.log(`${(t2 - t1).toFixed(1)} ms`);
+	},
+	elemFromHTML(htmlString) { // tylko jeżeli root zawiera pojedynczy element
+		const t = document.createElement("template");
+		t.innerHTML = frycAPI.createHTML(htmlString);
+		return t.content.firstElementChild;
 	},
 	template() {
 
@@ -1049,14 +1308,10 @@ frycAPI.expandPrototype(Element, "frycAPI_removeChildren", function () {
 	while (this.firstChild) this.removeChild(this.lastChild);
 });
 frycAPI.expandPrototype(Element, "frycAPI_appendHTML", function (htmlString) { // tylko jeżeli root zawiera pojedynczy element
-	const t = document.createElement("template");
-	t.innerHTML = frycAPI.createHTML(htmlString);
-	return this.appendChild(t.content.firstElementChild);
+	return this.appendChild(frycAPI.elemFromHTML(htmlString));
 });
 frycAPI.expandPrototype(Element, "frycAPI_insertHTML", function (position, htmlString) { // tylko jeżeli root zawiera pojedynczy element
-	const t = document.createElement("template");
-	t.innerHTML = frycAPI.createHTML(htmlString);
-	return this.insertAdjacentElement(position, t.content.firstElementChild);
+	return this.insertAdjacentElement(position, frycAPI.elemFromHTML(htmlString));
 });
 frycAPI.expandPrototype(String, "frycAPI_includesAny", function (strList) {
 	for (const daElem of strList) {
@@ -1070,6 +1325,7 @@ frycAPI.expandPrototype(String, "frycAPI_includesAny", function (strList) {
 // #region //* Prototypy 2
 frycAPI.expandPrototype(Object, "frycAPI_log", function () {
 	console.log(this);
+	return this;
 }, true);
 frycAPI.expandPrototype(DOMTokenList, "notContains", function (daClass) {
 	return !this.contains(daClass);
@@ -1087,6 +1343,13 @@ frycAPI.expandPrototype(String, "frycAPI_equalAny", function (strList) {
 		}
 	}
 	return false;
+});
+frycAPI.expandPrototype(Node, "frycAPI_isText", function (selector) {
+	return this.nodeType === Node.TEXT_NODE;
+});
+frycAPI.expandPrototype(Node, "frycAPI_insertAfter", function (newNode) {
+	this.parentNode.insertBefore(newNode, this.nextSibling);
+	return newNode;
 });
 // elem.frycAPI_querySelNull(``)
 // elem.querySelector(``) === null
@@ -1316,7 +1579,7 @@ if (frycAPI.host().length) { //* Globalne funkcje
 			},
 			(name = "Time format", type = frycAPI_Radio) => {
 				const f = new type({ name });
-				f.setDisplayName("Time :");
+				f.setDisplayName("Time:");
 				f.setNumCols(2);
 				f.setStateDesc(["Relative", "Absolute", "Both"]);
 				f.setState(0);
@@ -1324,9 +1587,9 @@ if (frycAPI.host().length) { //* Globalne funkcje
 				f.callBack = function (obj) {
 					switch (obj.state) {
 						default:
-						case 0: return frycAPI.setDefaultDateEnum.relatywnyCzas();
-						case 1: return frycAPI.setDefaultDateEnum.absolutnyCzas();
-						case 2: return frycAPI.setDefaultDateEnum.oba();
+						case 0: return frycAPI.setDefaultDateEnum.mode.relatywnyCzas();
+						case 1: return frycAPI.setDefaultDateEnum.mode.absolutnyCzas();
+						case 2: return frycAPI.setDefaultDateEnum.mode.oba();
 					}
 				};
 				return f;
@@ -5417,13 +5680,24 @@ if (0 && frycAPI.host("www.4g-lte.net")) {
 }
 if (1 && frycAPI.host("www.autohotkey.com")) {
 	frycAPI.injectStyle(/*css*/`
-		*:not(
+		*:not(:where(
 			.inline_code, .inline_code *,
 			code, code *,
 			i.fa.fa-clock-o, i.fa.fa-clock-o *,
-			#head .h-area .h-tools, #head .h-area .h-tools *
-		) {
+			#head .h-area .h-tools, #head .h-area .h-tools *,
+			.fa-thumb-tack, .fa-thumb-tack *,
+			.glyphicon, .glyphicon *,
+			.mega-octicon, .mega-octicon *,
+			.my-special-class
+		)) {
 			font-family: "IBM Plex Sans Condensed", "Lucida Grande", Arial, sans-serif !important;
+		}
+		.my-special-class {
+			/* font-family: FontAwesome; */
+			font-family: "Glyphicons Regular", "Glyphicons";
+			a[title="Board index"] & {
+				margin-right: var(--padding);
+			}
 		}
 		.page-width:not(.inner) {
 			max-width: calc(100% - 24px);
@@ -5440,13 +5714,203 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 			font-weight: unset;
 		}
 		.logo img {
-			content: url(${frycAPI.getResURL("ahk_logo.svg")});
+			content: url("${frycAPI.getResURL("ahk_logo.svg")}");
+		}
+		.dspNone {
+			display: none;
+		}
+		#format-buttons:has(select[name="addbbcode_codeboxplus"]) {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			.smiley-control{
+				margin: 0;
+				cursor: pointer;
+				color: rgb(119, 163, 196);
+				&:hover {
+					color: rgb(194, 117, 79);
+					text-decoration: underline;
+				}
+			}
+		}
+		cite > .responsive-hide {
+			display: inline;
+			margin-left: 4px;
+			color: hsl(30, 5%, 55%);
+		}
+		#topicreview {
+			padding-right: 0;
+			display: flex;
+			flex-direction: column-reverse;
+		}
+		:root {
+			--padding: 5px;
+			--padding-small: 3px;
+			--padding-big: 7px;
+		}
+		.postbody .content {
+			padding: var(--padding) 0 0 0;
+		}
+		.post > .inner {
+			/* padding: var(--padding) var(--padding-big); */
+			padding: var(--padding);
+		}
+		.content {
+			min-height: 0;
+		}
+		ul.post-buttons {
+			display: flex;
+			gap: var(--padding-small);
+			float: none;
+			> li {
+				margin-right: 0;
+			}
+		}
+		a.top {
+			display: none;
+		}
+		.signature {
+			margin-top: var(--padding);
+		}
+		blockquote, .codebox {
+			margin: var(--padding);
+			margin-left: 0;
+		}
+		.content:not(.pierwszy-node-to-text) :is(blockquote, .codebox):first-child {
+			margin-top: 0;
+		}
+		span.online-ribbon {
+			display: none;
+		}
+		.post:has(>.online-ribbon) .postprofile > dt > a {
+			position: relative;
+			--color: #219D55;
+			&::after {
+				content: " ";
+				display: inline-block;
+				background-color: var(--color);
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				margin-left: var(--padding);
+			}
+			&:hover::before {
+				content: "Online";
+				color: var(--color);
+				position: absolute;
+				right: calc(100% + 2 * var(--padding));
+				border-radius: 3px;
+				background-color: rgb(38, 40, 41);
+				padding: var(--padding-small) var(--padding);
+			}
+		}
+		.row dd.lastpost > span > br + br {
+			display: none;
+		}
+		span.crumb:has(a[title="Board index"]) {
+			padding-left: 0;
+			&::before {
+				content: "";
+			}
+		}
+		a[title="Board index"] {
+			display: inline-flex !important;
+			align-items: center;
+		}
+		.icon-home.breadcrumbs::after {
+			content: "";
+		}
+		
+		.post > .inner {
+			display: flex;
+			.postprofile {
+				min-height: 0 !important;
+				width: auto;
+				/* padding: calc(var(--padding) - var(--padding-small)) 0 0 0; */
+				padding: 0;
+				padding-right: var(--padding);
+				/* flex-basis: 150px; */
+				> * {
+					margin-right: 0;
+				}
+				.has-avatar .avatar-container {
+					margin-bottom: var(--padding);
+				}
+				> dt {
+					margin-bottom: var(--padding);
+					padding-bottom: var(--padding);
+					/* padding-bottom: calc(var(--padding) - 1px); */
+					border: 0px solid rgb(60, 63, 66);
+					border-bottom-width: 1px;
+					> :is(a, strong) {
+						font-size: 15px;
+						line-height: 20px;
+						white-space: nowrap;
+						/* text-transform: uppercase; */
+						/* &, * {
+							font-family: "Roboto Condensed" !important;
+							font-weight: 300;
+						} */
+					}
+				}
+				.avatar {
+					max-width: none;
+				}
+			}
+			.postprofile + .postbody {
+				float: none;
+				margin-left: 0;
+				padding-left: var(--padding);
+				> div {
+					margin-left: 0;
+					display: grid;
+					/* grid-template-columns: auto min-content min-content; */
+					grid-template-columns: 1fr auto auto;
+					grid-template-rows: auto auto;
+					column-gap: var(--padding);
+					> * {
+						padding: 0 !important;
+						margin: 0 !important;
+					}
+					> h3 {
+						grid-area: 1 / 1 / 2 / 2;
+					}
+					> ul.post-buttons {
+						float: none;
+						max-width: none;
+						grid-area: 1 / 3 / 2 / 4;
+					}
+					> p.author {
+						float: none;
+						grid-area: 1 / 2 / 2 / 3;
+						white-space: nowrap;
+					}
+					> .content {
+						grid-area: 2 / 1 / 3 / 4;
+						margin-top: var(--padding) !important;
+						padding-top: var(--padding) !important;
+					}
+					> .signature {
+						grid-column: 1 / 4;
+						margin-top: var(--padding) !important;
+						padding-top: var(--padding) !important;
+					}
+				}
+			}
 		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		// #region Test wydajności
-		/*
+		// const t1 = performance.now();
+		// #region //* Favicon
+		if (window.location.pathname.startsWith("/boards")) {
+			frycAPI.changeFaviconRes("AHK_Blue.png");
+		} else {
+			frycAPI.changeFaviconRes("AHK_Better.png");
+		}
+		// #endregion
+		// #region //* Naprawa dat
+		/* Test wydajności
 		const posts = document.querySelectorAll(`.post`);
 		const pierwszy = posts[0].cloneNode(1);
 		posts.forEach(el => el.remove());
@@ -5455,23 +5919,128 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 			pageBody.appendChild(pierwszy.cloneNode(1));
 		}
 		*/
-		// #endregion
-		// const t0 = performance.now();
-		if (window.location.pathname.startsWith("/boards")) {
-			frycAPI.changeFaviconRes("AHK_Blue.png");
-		} else {
-			frycAPI.changeFaviconRes("AHK_Better.png");
-		}
-		frycAPI.setDefaultDate(`.postbody p.author>a`, { getDate: "txt" }).oba(); // { getDate: elem => { }, setDate: (elem, data) => { }, dateEnum: frycAPI.setDefaultDateEnum }
+		// const t1 = performance.now();
 		const opts = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
+		frycAPI.setDefaultDate(`
+			.postbody p.author > a,
+			cite > .responsive-hide,
+			p.notification-time,
+			.column2 dl.details > dd:nth-of-type(1), .column2 dl.details > dd:nth-of-type(2)
+		`, { getDate: "txt" });
+		frycAPI.setDefaultDate("_" + frycAPI.arrayToTemplate([2, 3, 4, 5, 6, 7], temₚ`,table:has(thead th:nth-child(${0}).joined) td:nth-child(${0})`), {
+			getDate: "txt",
+			dateOpts: { printRelTime: { compact: 2, ago: false } },
+		});
 		frycAPI.setDefaultDate(`.postprofile > .profile-joined`, {
 			getDate: elem => elem.innerText.replace("Joined: ", ""),
 			setDate: (elem, data) => elem.frycAPI_setInnerHTML(
 				"<strong>Joined: </strong>" + frycAPI.getDefaultDateText(data, opts)
 			),
-			dateEnum: frycAPI.setDefaultDateEnum.relatywnyCzas,
+			dateEnumMode: frycAPI.setDefaultDateEnum.mode.relatywnyCzas,
+			dateEnumStyle: frycAPI.setDefaultDateEnum.style.floatLeft,
+			customStyle: `cursor: none;`,
+		}); // .mode.absolutnyCzas().floatLeft();
+		frycAPI.setDefaultDate(`.postbody-inner > p.author > strong`, {
+			getDate: elem => elem.nextSibling.textContent.replace("»", "").trim(),
+			setDate: (elem, data) => {
+				// const txtNode = elem.nextSibling;
+				elem.nextSibling.textContent = " » ";
+				return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data));
+			},
 		});
-		// const t1 = performance.now(); console.log(`${(t1 - t0).toFixed(1)} ms`);
+		frycAPI.setDefaultDate(`.list-inner > .responsive-hide > a:first-of-type`, {
+			getDate: elem => elem.nextSibling.textContent.replaceAll("»", "").replace("in", "").trim(),
+			setDate: (elem, data) => {
+				const txtNode = elem.nextSibling;
+				const containsIn = txtNode.textContent.lastIndexOf("in") !== -1;
+				txtNode.textContent = " » ";
+				const lepCzas = txtNode.frycAPI_insertAfter(frycAPI.elemFromHTML(frycAPI.getDefaultDateText(data, opts)));
+				containsIn && lepCzas.frycAPI_insertAfter(document.createTextNode(" » in "));
+				return lepCzas;
+			},
+		});
+		frycAPI.setDefaultDate(`.row dd.lastpost > span > br`, {
+			getDate: elem => elem.nextSibling.textContent.trim(),
+			setDate: (elem, data) => {
+				// const txtNode = elem.nextSibling;
+				elem.nextSibling.remove();
+				return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, opts));
+			},
+		});
+		const zegar = document.querySelector(`a.dropdown-trigger.time.dropdown-toggle`);
+		zegar?.setAttribute("title", "It is currently " + frycAPI.printDate(new Date(zegar.getAttribute("title").replace("It is currently ", ""))));
+		// const t2 = performance.now(); frycAPI.perf(t1, t2);
+		// #endregion
+		// #region //* Ukrycie nic nie wnoszących tytułów postów
+		let title = document.querySelector(`h2.topic-title > a, h2.posting-title > a`);
+		if (title !== null) {
+			title = "Re: " + document.querySelector(`h2.topic-title > a, h2.posting-title > a`).innerText.trim();
+			frycAPI.forEach(`.postbody h3 > a`, (daElem, daI, daArr) => {
+				if (daElem.innerText.trim() === title) {
+					daElem.frycAPI_addClass("dspNone");
+				}
+			});
+		}
+		// #endregion
+		// #region //* Ukrycie panelu emoji
+		const smileyBox = document.getElementById("smiley-box");
+		if (smileyBox !== null) {
+			document.querySelector(`#format-buttons:has(select[name="addbbcode_codeboxplus"])`)?.appendChild(
+				document.createElement("div")
+				.frycAPI_addClass("smiley-control")
+				.frycAPI_setInnerHTML("Show smiles")
+				.frycAPI_addEventListener("click", function () {
+					if (smileyBox.classList.toggle("dspNone")) {
+						this.frycAPI_setInnerHTML("Show smiles");
+					} else {
+						this.frycAPI_setInnerHTML("Hide smiles");
+					}
+				})
+			);
+			smileyBox.classList.toggle("dspNone");
+		}
+		// #endregion
+		// #region //* Przeniesienie postów ponad pole tekstowe
+		const topicReview = document.getElementById("topicreview");
+		if (topicReview !== null) {
+			const review = document.getElementById("review");
+			review.querySelector(`span.right-box > a`).click();
+			review.classList.add("dspNone");
+			document.getElementById("postform").insertAdjacentElement("afterbegin", topicReview);
+			document.getElementById("preview")?.scrollIntoView();
+		}
+		// #endregion
+		// #region //* Dodanie przycisku Top do Nav-Baru
+		document.querySelector(`ul.leftside > li.tab.home`)?.insertAdjacentHTML("afterend",
+			`<li class="tab top responsive-cloned-item" data-responsive-class="small-icon" title="top"><a class="nav-link" href="#top" data-navbar-reference="Top">Top</a></li>`
+		);
+		// #endregion
+		// #region //* Sprawdzenie które posty mają Text jako pierwszy Node
+		frycAPI.forEach(`.postbody .content`, (daElem, daI, daArr) => {
+			if (daElem.firstChild.frycAPI_isText()) {
+				daElem.frycAPI_addClass("pierwszy-node-to-text");
+			}
+		});
+		// #endregion
+		// #region //* Przypisanie konkrentych wymiarów obrazom profilowym
+		frycAPI.forEach(`img.avatar`, (daElem, daI, daArr) => {
+			daElem.style.width = daElem.getAttribute("width") + "px !important";
+			daElem.style.height = daElem.getAttribute("height") + "px !important";
+		});
+		// #endregion
+		// #region //* Sortowanie tabeli
+		// frycAPI.forEach(`table:has(tr > th):has(tr > td)`, (daElem, daI, daArr) => {
+		// 	daElem.querySelector(`th.posts`).setAttribute("krytSort", "numeric");
+		// 	frycAPI.makeTableSortable(daElem);
+		// });
+		// #endregion
+		// #region //* Poprawienie linka Board index
+		const bIdx = document.querySelector(`a[title="Board index"]`);
+		bIdx && (bIdx.innerHTML = `<span class="my-special-class">&#xE021;</span><span>Board index</span>`); // + bIdx.innerHTML
+		// #endregion
+		// #region //*
+		// #endregion
+		// const t2 = performance.now(); frycAPI.perf(t1, t2);
 	});
 }
 if (1 && frycAPI.host("www.calculator.net")) {
@@ -6089,6 +6658,24 @@ if (1 && frycAPI.host("www.messenger.com")) {
 		.gvxzyvdx.om3e55n1.b0ur3jhr > .q46jt4gp.aesu6q9g.r5g9zsuq.e4ay1f3w.om3e55n1.lq84ybu9.hf30pyar.rt34pxt2.jao8r537.dtqh1a21.l4uc2m3f.t7p7dqev.qsbzbi57.subw1o1z.b0ur3jhr.j8nb7h05 {
 			border: 1px solid #b1b1b1;
 		}
+		
+		/* Zmiana kolory tła
+		:root {
+			--my-custom-color: #6d1e1e;
+		}
+		.__fb-dark-mode {
+			--messenger-card-background: var(--my-custom-color);
+		}
+		.xfpmyvw.x1u998qt.x1vjfegm {
+			background-color: var(--my-custom-color);
+		}
+		.x1eb86dx {
+			background-color: var(--my-custom-color);
+		}
+		.xcrg951 {
+			background-color: var(--my-custom-color);
+		}
+		*/
 	`);
 }
 if (1 && frycAPI.host("www.meteo.pl")) {
@@ -6562,6 +7149,10 @@ if (1 && frycAPI.host("www.youtube.com")) {
 			& #flexible-item-buttons.ytd-menu-renderer:not(:empty)>.ytd-menu-renderer[button-renderer],
 			& ytd-menu-renderer[has-items] yt-button-shape.ytd-menu-renderer {
 				margin-left: calc(8 * var(--myLen) / 24);
+			}
+
+			ytd-watch-metadata[title-headline-xs] h1.ytd-watch-metadata {
+				display: -webkit-box !important;
 			}
 		}
 		
@@ -8208,7 +8799,7 @@ if (1 && frycAPI.hostIncludes("metafilter.com")) {
 
 	frycAPI.onLoadSetter(async function () {
 		document.documentElement.setAttribute("id", "myID");
-		frycAPI.setDefaultDateStyle().oba();
+		frycAPI.setDefaultDateStyle();
 		document.documentElement.style.setProperty("--główny-color-tła",
 			document.querySelector(`.comments > span.whitesmallcopy, .comments.whitesmallcopy`)
 			?.computedStyleMap()

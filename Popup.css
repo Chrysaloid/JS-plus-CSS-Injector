@@ -12,7 +12,7 @@
 	--el-real-height: calc(var(--el-height) + 2*1px + 2*1px);
 }
 * {
-	font-family: IBM Plex Sans Condensed;
+	font-family: "IBM Plex Sans Condensed";
 	color: white;
 	text-align: center;
 }
