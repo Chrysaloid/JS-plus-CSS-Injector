@@ -8917,6 +8917,41 @@ if (frycAPI.host("www.baillifard.com")) {
 		${frycAPI.simpleFontChange}
 	`);
 }
+if (1 && frycAPI.host("web.dev")) {
+	frycAPI.injectStyle(/*css*/`
+		devsite-content-footer.nocontent > p:last-of-type {
+			display: none;
+		}
+		article.devsite-article {
+			overflow: hidden;
+		}
+		button.devsite-devprofile-button > svg {
+			filter: invert(1) hue-rotate(180deg);
+		}
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.setDefaultDateStyle();
+		frycAPI.createMutObs((mutRec, docObs) => {
+			loguj("MutObs");
+			if (frycAPI.querySelNull(`p > .lepszyCzas`)) {
+				let autors = document.querySelector(`.wd-authors`);
+				let pos = "afterend";
+				if (autors === null) {
+					autors = document.querySelector(`.devsite-article-body.clearfix`);
+					pos = "afterbegin";
+				}
+				const dataCont = document.querySelector(`devsite-content-footer.nocontent > p:last-child`);
+				if (autors !== null && dataCont !== null) {
+					const [y, m, d] = dataCont.innerText.replace("Last updated ", "").replace(" UTC.", "").split("-").map(e => Number(e));
+					const opts = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
+					const htmlStr = `<p style="color: var(--devsite-breadcrumb-link-color, var(--devsite-secondary-text-color));; font-size: 0.8em;">Last updated ${frycAPI.getDefaultDateText(new Date(Date.UTC(y, m - 1, d)), opts)}</p>`;
+					autors.insertAdjacentHTML(pos, htmlStr);
+				}
+			}
+		});
+	});
+}
 if (frycAPI.host("template")) {
 	frycAPI.injectStyle(/*css*/`
 
