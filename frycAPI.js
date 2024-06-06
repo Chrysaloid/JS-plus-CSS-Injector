@@ -1351,6 +1351,9 @@ frycAPI.expandPrototype(Node, "frycAPI_insertAfter", function (newNode) {
 	this.parentNode.insertBefore(newNode, this.nextSibling);
 	return newNode;
 });
+frycAPI.expandPrototype(String, "frycAPI_toTitleCase", function () {
+	return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
+});
 // elem.frycAPI_querySelNull(``)
 // elem.querySelector(``) === null
 // frycAPI.expandPrototype(Template, "frycAPI_name", function () {
@@ -8234,11 +8237,17 @@ if (frycAPI.host("factorio.com")) {
 }
 if (frycAPI.host(["github.com", "gist.github.com"])) {
 	frycAPI.injectStyle(/*css*/`
-		div:has(>pre:first-child) {
+		.dspNONE {
+			display: none;
+		}
+		:root {
 			--wysokość: 13px;
 			--padd: 5px;
+		}
+		div:has(>pre:first-child) {
 			padding-top: calc(var(--wysokość) + 2*var(--padd));
 			background-color: var(--bgColor-muted, var(--color-canvas-subtle)) !important;
+			position: relative;	
 			&::before {
 				content: attr(my-before-text);
 				/* background-color: #004900 !important; */
@@ -8261,8 +8270,22 @@ if (frycAPI.host(["github.com", "gist.github.com"])) {
 				top: calc(var(--wysokość) + 2*var(--padd)) !important;
 			}
 		}
-		.dspNONE {
-			display: none;
+		.file-header .file-info::after {
+			--off-set: 25%;
+			--col: hsl(0, 0%, 75%);
+			color: var(--col);
+			content: attr(my-before-text);
+			margin-left: var(--padd);	
+			padding-left: var(--padd);
+			border-left: 1px solid;
+			/* border-left-color: aliceblue; */
+			border-image-slice: 1;
+			border-image-source: linear-gradient(
+				to bottom,
+				transparent var(--off-set),
+				var(--col) var(--off-set) calc(100% - var(--off-set)),
+				transparent calc(100% - var(--off-set))
+			);
 		}
 	`);
 
@@ -8293,6 +8316,16 @@ if (frycAPI.host(["github.com", "gist.github.com"])) {
 					.replace("-BASIC", "")
 				);
 			}).length;
+
+			frycAPI.forEach(`body:has(span.author) .file:not(:has(.file-header .file-info[my-before-text])) [itemprop="text"].Box-body`, (daElem, daI, daArr) => { // File languages
+				daElem.parentElement.querySelector(`.file-header .file-info`).setAttribute("my-before-text",
+					[...daElem.classList]
+					.find(c => c.startsWith("type-"))
+					.replace("type-", "")
+					// .frycAPI_toTitleCase()
+					.toUpperCase()
+				);
+			});
 
 			// const endTime = performance.now();
 			// loguj(`relative-time: ${relTimeCount}, my-before-text: ${myBeforeTextCount}, ${(endTime - startTime).toFixed(1)} ms`);
