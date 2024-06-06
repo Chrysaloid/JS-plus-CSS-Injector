@@ -5826,6 +5826,8 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 		
 		.post > .inner {
 			display: flex;
+			width: 100%;
+			box-sizing: border-box;
 			.postprofile {
 				min-height: 0 !important;
 				width: auto;
@@ -5860,10 +5862,11 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 					max-width: none;
 				}
 			}
-			.postprofile + .postbody {
+			.postbody {
 				float: none;
 				margin-left: 0;
 				padding-left: var(--padding);
+				width: 100% !important;
 				> div {
 					margin-left: 0;
 					display: grid;
@@ -6010,7 +6013,12 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 			review.querySelector(`span.right-box > a`).click();
 			review.classList.add("dspNone");
 			document.getElementById("postform").insertAdjacentElement("afterbegin", topicReview);
-			document.getElementById("preview")?.scrollIntoView();
+			const preview = document.getElementById("preview");
+			if (preview !== null) {
+				preview.scrollIntoView();
+			} else {
+				topicReview.querySelector(`.post:not(.post ~ .post)`).scrollIntoView();
+			}
 		}
 		// #endregion
 		// #region //* Dodanie przycisku Top do Nav-Baru
