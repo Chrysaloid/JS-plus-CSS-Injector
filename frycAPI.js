@@ -1221,6 +1221,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	template() {
 
 	},  // frycAPI.template();
+	// Test
 	// #region //* Funkcje 5
 	// #endregion
 	// #endregion
