@@ -250,7 +250,7 @@ function temₚ(strings, ...values) { // extract contents of string template lit
 // #region //* frycAPI
 var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	// #region //* Zmienne 1
-	id: "fmlfdnbhgmgiinaalkmjcmmlohhhgkok",
+	id: document.currentScript.getAttribute("script-id"),
 	funcGroupArr: [],
 	colorSchemeDark: false,
 	czasNumer: 1,
