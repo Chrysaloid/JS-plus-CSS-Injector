@@ -1217,7 +1217,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			const context = this;
 			func.apply(context, args);
 		};
-	},
+	}, // document.addEventListener("mousemove", frycAPI.throttle(handleMouseMove, 4));
 	template() {
 
 	},
