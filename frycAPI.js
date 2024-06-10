@@ -1,8 +1,7 @@
 ﻿// #region //* Początek
 /* 0 eslint no-implicit-globals: ["warn", {"lexicalBindings": true}] */
 "use strict";
-// const t0 = performance.now();
-// const frycAPI = {}; // eslint-disable-line no-implicit-globals
+const frycAPI_t1 = performance.now();
 
 class frycAPI_ManualFunc extends Object {
 	callBack; funcGroup; num; prevFunc; nextFunc; style; name; Off; displayName; nameClickable;
@@ -244,7 +243,6 @@ function loguj(...tekst) {
 function temₚ(strings, ...values) { // extract contents of string template literal
 	return [strings, values];
 }
-
 
 // Grupy bloków co 19 pozycji (18.04.2024) // Regex do liczenia ifów: /^if.+/
 // #endregion
@@ -613,6 +611,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return bytes;
 	},
 	downloadHelper(href, fileName) {
+		/* Old
 		const a = document.createElement("a");
 		a.href = href;
 		a.target = "_blank";
@@ -621,11 +620,16 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		document.body.append(a);
 		a.click();
 		a.remove();
+		*/
+		const a = document.createElement("a");
+		a.href = href;
+		a.download = fileName;
+		a.click();
 	},
 	downloadTxt(text, fileName) {
 		// a.href = 'data:attachment/text;charset=utf-8,' + encodeURI(text);
 		frycAPI.downloadHelper(URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" })), fileName);
-	},
+	}, // frycAPI.downloadTxt("Test", "Test.txt");
 	redownloadImg(img, fileName) {
 		frycAPI.downloadHelper(img.src, fileName);
 	},
@@ -678,9 +682,6 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		httpRequest.setRequestHeader("Access-Control-Allow-Origin", "*");
 		httpRequest.send();
 	},
-	imgSrcProcessing(imgSrc) {
-
-	},
 	downloadImg(img, fileName, alt, urlParamBool) {
 		/*
 		fetch(img.src, { // "https://cors-anywhere.herokuapp.com/"
@@ -697,7 +698,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		*/
 		const imgSrc = img.src;
 		if (urlParamBool) img.src = "";
-		return fetch(imgSrc, { priority: "high" })
+		return fetch(imgSrc)
 		.then(resp => resp.blob())
 		.then(frycAPI.blobToBase64)
 		.then(dataUrl => frycAPI.downloadHelper(dataUrl, fileName === undefined ? frycAPI.determineFileName(dataUrl, img, alt) : fileName))
@@ -963,13 +964,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				// [`&[lepszyCzasStyl="float-top"]`     , `${float  }${top   }`],
 				// [`&[lepszyCzasStyl="float-bottom"]`  , `${float  }${bottom}`],
 			];
+			/* eslint-enable template-curly-spacing,comma-spacing */
 			const tooltipModSel = `:where([lepszyCzasStyl^="toolTip"]:not([lepszyCzasStyl="toolTip-center"]))`;
 			const tooltipModStyle = `visibility: visible;`;
 			const floatModSel = `:where([lepszyCzasStyl^="float"], [lepszyCzasStyl="toolTip-center"])`;
 			const floatModStyle = `visibility: hidden;`;
-			const bigSpec = frycAPI.repeatString(`[lepszyCzas]`, 1);
-			/* eslint-enable template-curly-spacing,comma-spacing */
+			const bigSpec = `[lepszyCzas]`.repeat(5);
 			// #endregion
+
 			frycAPI.injectStyleNormal(
 				/*
 					:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) span.lepszyCzas {
@@ -1060,6 +1062,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 					& :where(.lepszyCzas[lepszyCzas="oba"]) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
 				}
 			`, { staticID: "frycAPI_setDefaultDate" });
+
 			frycAPI.setDefaultDateEnum.mode.oba().floatCenter();
 			return frycAPI.setDefaultDateEnum;
 		}
@@ -1187,13 +1190,6 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	isArray(value) {
 		return value.constructor === Array;
 	},
-	repeatString(str, count) {
-		let outStr = "";
-		for (let i = 0; i < count; i++) {
-			outStr += str;
-		}
-		return outStr;
-	},
 	perf(t1, t2) {
 		console.log(`${(t2 - t1).toFixed(1)} ms`);
 	},
@@ -1201,6 +1197,26 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const t = document.createElement("template");
 		t.innerHTML = frycAPI.createHTML(htmlString);
 		return t.content.firstElementChild;
+	},
+	clamp(num, min, max) {
+		return Math.min(Math.max(num, min), max);
+	},
+	debounce(func, wait) {
+		let timeout;
+		return function (...args) {
+			const context = this;
+			clearTimeout(timeout);
+			timeout = setTimeout(() => func.apply(context, args), wait);
+		};
+  	}, // document.addEventListener("mousemove", frycAPI.debounce(handleMouseMove, 100));
+	throttle(func, amount) {
+		// amount = ilukrotnie zmniejszyć częstotliwość eventów. Powinien być > 1
+		let throttle = amount - 1;
+		return function (...args) {
+			if ((throttle = (throttle + 1) % amount) !== 0) return;
+			const context = this;
+			func.apply(context, args);
+		};
 	},
 	template() {
 
@@ -2989,7 +3005,7 @@ if (1 && frycAPI.host(["boards.4chan.org", "boards.4channel.org"])) {
 					loguj("transitionend");
 					// await frycAPI.sleep(1);
 					addedImg.classList.remove("dispNone");
-					const alt = thumb.parentElement.previousElementSibling.firstElementChild.innerText;
+					const alt = thumb.parentElement.previousElementSibling.firstElementChild.getAttribute("title");
 					const altDotIdx = alt.lastIndexOf(".");
 					addedImg.setAttribute("alt", alt.slice(0, altDotIdx !== -1 ? altDotIdx : undefined));
 					thumb.style.display = "none";
@@ -6747,7 +6763,7 @@ if (1 && frycAPI.host("www.meteo.pl")) {
 		document.head.insertAdjacentHTML("afterbegin", `<meta charset="UTF-8 BOM">`);
 		frycAPI.changeFaviconRes("meteo_pl.png");
 
-		fontElem = document.querySelector("#model_napis font");
+		const fontElem = document.querySelector("#model_napis font");
 		if (fontElem !== null) {
 			document.title = fontElem
 			.innerText
@@ -7960,6 +7976,10 @@ if (frycAPI.host(["e621.net", "e926.net"])) {
 			border-radius: 5px;
 			font-size: 0.7rem;
 		}
+
+		#ad-leaderboard {
+			display: none;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -7973,6 +7993,10 @@ if (frycAPI.host(["e621.net", "e926.net"])) {
 			.onclick = () => {
 				window.scrollTo(0, document.documentElement.scrollTop + document.getElementById("nav-links-top").getBoundingClientRect().y);
 			})();
+
+			// const download = document.querySelector(`#image-download-link > a.button`);
+			// download.setAttribute("onclick", `location.href = '${download.getAttribute("href")}'`);
+			// download.setAttribute("href", "");
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts").insertAdjacentElement("beforebegin", document.getElementById("search-box"));
 			window.scrollTo(0, 0);
@@ -9044,10 +9068,11 @@ if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // dodanie połączon
 		}
 	}, { runOnLoad: false, elem: document.documentElement });
 }
+let loadSource;
 if (document.currentScript.getAttribute("src").includes("chrome-extension")) {
-	loguj("frycAPI loaded! (from chrome-extension)");
+	loadSource = "chrome-extension";
 } else {
-	loguj("frycAPI loaded! (from cdn.jsdelivr.net)");
+	loadSource = "cdn.jsdelivr.net";
 }
-// const t1 = performance.now(); console.log(`${(t1 - t0).toFixed(1)} ms`);
+const frycAPI_t2 = performance.now(); loguj(`frycAPI loaded in ${(frycAPI_t2 - frycAPI_t1).toFixed(1)} ms! (from ${loadSource})`);
 // #endregion
