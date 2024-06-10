@@ -1220,7 +1220,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // document.addEventListener("mousemove", frycAPI.throttle(handleMouseMove, 4));
 	template() {
 
-	},
+	},  // frycAPI.template();
 	// #region //* Funkcje 5
 	// #endregion
 	// #endregion
