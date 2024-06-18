@@ -554,7 +554,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const leftAlign = obj?.leftAlign ?? false;
 		const prec      = obj?.prec      ?? undefined;
 
-		let czas = (czyDiff ? (Date.now() - epoch_ms) : epoch_ms) / 1000;
+		let czas = (czyDiff ? (Date.now() - epoch_ms) : epoch_ms);
 		const znak = Math.sign(czas) === -1 ? "-" : "";
 		czas = Math.abs(czas);
 		let czytCzas, timeNames, agoStr;
@@ -576,12 +576,12 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			const maxLen = timeNames.reduce((max, elem) => (max < elem.length ? elem.length : max), 0);
 			timeNames = timeNames.map(elem => elem.padEnd(maxLen));
 		}
-		if (czas <       60) { czytCzas =                                                            (czas           ).toFixed(prec ?? 0 ) + space + timeNames[0] } else
-		if (czas <     3600) { czytCzas = (czas <       600 ? (czas /       60).toFixed(prec ?? 1) : (czas /       60).toFixed(prec ?? 0)) + space + timeNames[1] } else
-		if (czas <    86400) { czytCzas = (czas <     36000 ? (czas /     3600).toFixed(prec ?? 1) : (czas /     3600).toFixed(prec ?? 0)) + space + timeNames[2] } else
-		if (czas <  2592000) { czytCzas = (czas <    864000 ? (czas /    86400).toFixed(prec ?? 1) : (czas /    86400).toFixed(prec ?? 0)) + space + timeNames[3] } else
-		if (czas < 31536000) { czytCzas = (czas <  25920000 ? (czas /  2592000).toFixed(prec ?? 1) : (czas /  2592000).toFixed(prec ?? 0)) + space + timeNames[4] } else
-									{ czytCzas = (czas < 315360000 ? (czas / 31536000).toFixed(prec ?? 1) : (czas / 31536000).toFixed(prec ?? 0)) + space + timeNames[5] }
+		if (czas < frycAPI.minute) { czytCzas =                                                                               (czas                 ).toFixed(prec ?? 0 ) + space + timeNames[0] } else
+		if (czas < frycAPI.hour  ) { czytCzas = (czas <= frycAPI.minute * 9.95 ? (czas / frycAPI.minute).toFixed(prec ?? 1) : (czas / frycAPI.minute).toFixed(prec ?? 0)) + space + timeNames[1] } else
+		if (czas < frycAPI.day   ) { czytCzas = (czas <= frycAPI.hour   * 9.95 ? (czas / frycAPI.hour  ).toFixed(prec ?? 1) : (czas / frycAPI.hour  ).toFixed(prec ?? 0)) + space + timeNames[2] } else
+		if (czas < frycAPI.month ) { czytCzas = (czas <= frycAPI.day    * 9.95 ? (czas / frycAPI.day   ).toFixed(prec ?? 1) : (czas / frycAPI.day   ).toFixed(prec ?? 0)) + space + timeNames[3] } else
+		if (czas < frycAPI.year  ) { czytCzas = (czas <= frycAPI.month  * 9.95 ? (czas / frycAPI.month ).toFixed(prec ?? 1) : (czas / frycAPI.month ).toFixed(prec ?? 0)) + space + timeNames[4] } else
+											{ czytCzas = (czas <= frycAPI.year   * 9.95 ? (czas / frycAPI.year  ).toFixed(prec ?? 1) : (czas / frycAPI.year  ).toFixed(prec ?? 0)) + space + timeNames[5] }
 		/* eslint-enable */
 		return znak + czytCzas + (ago ? agoStr : "");
 	}, // frycAPI.printRelTime(new Date);
@@ -863,6 +863,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				const data = new Date(getDate(daElem));
 				if (frycAPI.isValidDate(data)) {
 					const lepszyCzas = setDate(daElem, data, dateOpts);
+					daElem.classList.add("lepszyCzasParent");
 					dateEnumMode?.(lepszyCzas);
 					dateEnumStyle?.(lepszyCzas);
 					if (lepszyCzas.classList.contains("lepszyCzas")) {
@@ -890,6 +891,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		elem.appendChild(lepCzs);
 		return lepCzs;
 		*/
+	},
+	appendDefaultDateText(elem, data, dateOpts) {
+		return elem.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, dateOpts));
 	},
 	getDefaultDateText(data, dateOpts) {
 		return frycAPI.getDefaultDateHTML(frycAPI.printDate(data, dateOpts?.printDate), frycAPI.printRelTime(data, dateOpts?.printRelTime));
@@ -971,29 +975,29 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			const float = `${reset}${tooltipReset}`;
 
 			const top = `
-				bottom: calc(var(--tool-tip-calc) - var(--tt-y));
-				left: calc(50% + var(--tt-x));
-				transform: translateX(-50%);
+				bottom: var(--tool-tip-calc);
+				left: 50%;
+				transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));
 			`;
 			const right = `
-				left: calc(var(--tool-tip-calc) + var(--tt-x));
-				top: calc(50% + var(--tt-y));
-				transform: translateY(-50%);
+				left: var(--tool-tip-calc);
+				top: 50%;
+				transform: translate(var(--tt-x), calc(-50% + var(--tt-y)));
 			`;
 			const bottom = `
-				top: calc(var(--tool-tip-calc) + var(--tt-y));
-				left: calc(50% + var(--tt-x));
-				transform: translateX(-50%);
+				top: var(--tool-tip-calc);
+				left: 50%;
+				transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));
 			`;
 			const left = `
-				right: calc(var(--tool-tip-calc) - var(--tt-x));
-				top: calc(50% + var(--tt-y));
-				transform: translateY(-50%);
+				right: var(--tool-tip-calc);
+				top: 50%;
+				transform: translate(var(--tt-x), calc(-50% + var(--tt-y)));
 			`;
 			const center = `
-				top: calc(50% + var(--tt-y));
-				left: calc(50% + var(--tt-x));
-				transform: translate(-50%, -50%);
+				top: 50%;
+				left: 50%;
+				transform: translate(calc(-50% + var(--tt-x)), calc(-50% + var(--tt-y)));
 			`;
 			/* eslint-disable template-curly-spacing,comma-spacing */
 			const arr = [
@@ -1002,9 +1006,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				[`[lepszyCzasStyl="toolTip-bottom"]`, `${tooltip}${bottom}`],
 				[`[lepszyCzasStyl="toolTip-left"]`  , `${tooltip}${left  }`],
 				[`[lepszyCzasStyl="toolTip-center"]`, `${tooltip}${center}`],
-				[`[lepszyCzasStyl="float-left"]`    , `${float} left: var(--tt-x);`],
-				[`[lepszyCzasStyl="float-center"]`  , `${float} left: calc(50% + var(--tt-x)); transform: translateX(-50%);`],
-				[`[lepszyCzasStyl="float-right"]`   , `${float} right: calc(-1 * var(--tt-x));`],
+				[`[lepszyCzasStyl="float-left"]`    , `${float} left: 0; transform: translate(var(--tt-x), var(--tt-y));`],
+				[`[lepszyCzasStyl="float-center"]`  , `${float} left: 50%; transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));`],
+				[`[lepszyCzasStyl="float-right"]`   , `${float} right: 0; transform: translate(var(--tt-x), var(--tt-y));`],
 				// [`&[lepszyCzasStyl="float-top"]`     , `${float  }${top   }`],
 				// [`&[lepszyCzasStyl="float-bottom"]`  , `${float  }${bottom}`],
 			];
@@ -1066,7 +1070,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 						--tool-tip-padd: 3px;
 						--tt-x: 0px;
 						--tt-y: 0px;
-						--tool-tip-calc: 100% + var(--tool-tip-padd);
+						--tool-tip-calc: calc(100% + var(--tool-tip-padd));
 					}
 					&:where(${abs}, ${rel}) :where(.lepszyCzas) { ${stylSpanNotOba} }
 					&:where(${abs}) :where(.lepszyCzas)         { ${stylAbs} }
@@ -1274,13 +1278,13 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	// #endregion
 };
 // #region //* Reszta
-frycAPI.second = 1000;
-frycAPI.minute = frycAPI.second * 60;
-frycAPI.hour = frycAPI.minute * 60;
-frycAPI.day = frycAPI.hour * 24;
-frycAPI.month = frycAPI.day * 30;
-frycAPI.year = frycAPI.day * 365;
-frycAPI.week = frycAPI.day * 7;
+frycAPI.second =                  1000;
+frycAPI.minute = frycAPI.second *   60;
+frycAPI.hour   = frycAPI.minute *   60;
+frycAPI.day    = frycAPI.hour   *   24;
+frycAPI.month  = frycAPI.day    *   30;
+frycAPI.year   = frycAPI.day    *  365;
+frycAPI.week   = frycAPI.day    *    7;
 frycAPI.dateFormatter = frycAPI.getDateFormatter({ second: undefined });
 frycAPI.dateFormatterForFileName = frycAPI.getDateFormatter();
 frycAPI.dateOptsNoTime = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
@@ -4582,7 +4586,7 @@ if (1 && frycAPI.hostIncludes(["stackoverflow.com", "stackexchange.com", "server
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		frycAPI.forEach(".user-info:has(.gravatar-wrapper-32)", function (daElem, daI, daArr) {
+		frycAPI.forEach(".user-info:has(.gravatar-wrapper-32)", function (daElem, daI, daArr) { // Ulepszenie wyglądu awatarów
 			const myDiv = document.createElement("div");
 			myDiv.classList.add("myDiv");
 			daElem.querySelector(".user-action-time").insertAdjacentElement("afterend", myDiv);
@@ -4590,16 +4594,32 @@ if (1 && frycAPI.hostIncludes(["stackoverflow.com", "stackexchange.com", "server
 			myDiv.appendChild(daElem.querySelector(".user-details"));
 		});
 
+		// Lepsza data
+		frycAPI.setDefaultDateStyle().mode.relatywnyCzas().floatLeft();
+		const getDate = elem => {
+			const title = elem.title;
+			elem.title = "";
+			return title.replace(/,.*/u, "");
+		};
 		frycAPI.createMutObs((mutRecArr, mutObs) => {
-			// let nodeI = 0;
-			frycAPI.forEach(".relativetime-clean:not(.mySpanTime), .relativetime:not(.mySpanTime)", function (daElem, daI, daArr) {
-				const data = new Date(daElem.title.replace(/,.*/u, ""));
-				daElem.innerHTML = frycAPI.printRelTime(data);
-				daElem.setAttribute("title", frycAPI.printDate(data));
-				daElem.classList.add("mySpanTime");
-				// nodeI++;
+			// const t1 = performance.now();
+			frycAPI.setDefaultDate(`.user-action-time > .relativetime:not(.lepszyCzasParent)`, {
+				getDate: getDate,
+				dateEnumStyle: frycAPI.setDefaultDateEnum.style.toolTipTop,
+				customStyle: `cursor: none;`,
 			});
-			// console.log(`Przetworzyłem ${nodeI} nodów!`);
+			frycAPI.setDefaultDate(`a.js-gps-track > .relativetime:not(.lepszyCzasParent)`, {
+				getDate: getDate,
+				dateEnumStyle: frycAPI.setDefaultDateEnum.style.toolTipTop,
+				// customStyle: `--tt-y: 1px;`,
+			});
+			frycAPI.setDefaultDate(`.ai-center:has(.owner) + span.comment-date .relativetime-clean:not(.lepszyCzasParent)`, { getDate, customStyle: `--tt-y: 1px;` }); // eslint-disable-line object-shorthand
+			frycAPI.setDefaultDate(`.comment-body:has(span[title] > svg.iconPencilSm) .relativetime-clean:not(.lepszyCzasParent)`, {
+				getDate: getDate,
+				dateEnumStyle: frycAPI.setDefaultDateEnum.style.toolTipCenter,
+			});
+			frycAPI.setDefaultDate(`:is(.relativetime-clean, .relativetime):not(.lepszyCzasParent)`, { getDate });
+			// const t2 = performance.now(); frycAPI.perf(t1, t2);
 		});
 	});
 }
@@ -6603,7 +6623,6 @@ if (0 && frycAPI.host("www.math.us.edu.pl")) {
 	`);
 }
 if (1 && frycAPI.host("www.mathworks.com")) {
-	const funkcje = "Disable highlight on Matlab search";
 	frycAPI.injectStyleOnLoad(/*css*/`
 		code.literal, code.property {
 			color: #228B22;
@@ -6647,7 +6666,7 @@ if (1 && frycAPI.host("www.mathworks.com")) {
 				getDate: elem => elem.innerText.replace("Modified: ", ""),
 				setDate: (elem, data) => {
 					elem.innerText = "Modified: ";
-					return elem.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, frycAPI.dateOptsNoTime));
+					return frycAPI.appendDefaultDateText(elem, data, frycAPI.dateOptsNoTime);
 				},
 			});
 		}
