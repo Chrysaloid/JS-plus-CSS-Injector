@@ -1,10 +1,11 @@
 "use strict";
-
+async function getActiveTarget() {
+	return { tabId: (await chrome.tabs.query({ active: true, currentWindow: true }))[0].id };
+} // const tabID = await getActiveTarget();
 async function runOnPage(daFunc, args) {
-	const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 	const [{ result }] = await chrome.scripting.executeScript({
 		world: "MAIN",
-		target: { tabId: tab.id },
+		target: await getActiveTarget(),
 		func: daFunc,
 		args: args,
 	});
