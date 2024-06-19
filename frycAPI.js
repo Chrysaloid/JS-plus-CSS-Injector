@@ -1432,7 +1432,7 @@ frycAPI.expandPrototype(String, "frycAPI_toTitleCase", function () {
 // #endregion
 
 // #region //* IFy 1
-if (frycAPI.host().length) { //* Globalne funkcje
+if (1) { //* Globalne funkcje
 	frycAPI.injectStyleOnLoad(/*css*/`
 	`);
 
@@ -8083,7 +8083,7 @@ if (frycAPI.host(["e621.net", "e926.net"])) {
 			// download.setAttribute("onclick", `location.href = '${download.getAttribute("href")}'`);
 			// download.setAttribute("href", "");
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
-			document.getElementById("c-posts").insertAdjacentElement("beforebegin", document.getElementById("search-box"));
+			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.getElementById("search-box"));
 			window.scrollTo(0, 0);
 		} else if (pathName.startsWith("/pools/") && !pathName.startsWith("/pools/gallery")) {
 			const czytelnyCzas = function (czas) {
@@ -9165,6 +9165,13 @@ if (frycAPI.host("template")) {
 			},
 		],
 	});
+}
+if (frycAPI.host("miro.com")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.c-cFaYiI {
+			background-color: #e9e9e9;
+		}
+	`);
 }
 // #region //* IFy 11
 // #endregion
