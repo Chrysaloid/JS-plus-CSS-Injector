@@ -3680,20 +3680,22 @@ if (1 && frycAPI.host("developer.mozilla.org")) {
 			fill: #1bb31c;
 		}
 		*/
-		p {
-			margin: 1rem 0 1rem;
-		}
-		.notecard {
-			margin: 1rem 0 1rem !important;
-		}
-		.code-example {
-			margin: 1rem 0 1rem;
-		}
-		.code-example .example-header~pre {
-			margin: 0;
-		}
-		.main-page-content ol, .main-page-content ul {
-			margin: 1rem 0 1rem;
+		article {
+			*:not(.notecard) > p {
+				margin: 1rem 0 1rem;
+			}
+			.notecard {
+				margin: 1rem 0 1rem !important;
+			}
+			.code-example {
+				margin: 1rem 0 1rem;
+			}
+			.code-example .example-header~pre {
+				margin: 0;
+			}
+			.main-page-content ol, .main-page-content ul {
+				margin: 1rem 0 1rem;
+			}
 		}
 	`);
 }
@@ -6237,26 +6239,26 @@ if (0 && frycAPI.host("www.derivative-calculator.net")) {
 		}
 	`);
 }
-if (0 && frycAPI.host("www.desmos.com")) {
+if (1 && frycAPI.host("www.desmos.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		::-webkit-scrollbar-thumb {
+		/* ::-webkit-scrollbar-thumb {
 			background: #70ffde ;
 		}
-		
 		::-webkit-scrollbar-thumb:hover {
 			background: #52ffd7 ;
 		}
-		
 		::-webkit-scrollbar-thumb:active {
 			background: #24ffcc ;
 		}
-		
 		::-webkit-scrollbar-track {
 			background: #e3e3e3 ;
 		}
-		
 		canvas.dcg-graph-inner {
 			filter: invert(1) hue-rotate(180deg);
+		} */
+
+		[dcg-menu-button="graph-actions"] h1.dcg-variable-title.dcg-tooltip {
+			max-width: 640px !important;
 		}
 	`);
 }
@@ -8055,19 +8057,27 @@ if (frycAPI.host(["e621.net", "e926.net"])) {
 		#ad-leaderboard {
 			display: none;
 		}
+
+		img[src="/images/deleted-preview.png"] {
+			filter: invert(1) hue-rotate(180deg);
+		}
 	`);
 
+	const pathName = window.location.pathname;
+
 	frycAPI.onLoadSetter(() => {
-		const pathName = window.location.pathname;
 		if (pathName.startsWith("/posts/")) {
+			const defaultScroll = () => {
+				window.scrollTo(0, document.documentElement.scrollTop + (document.getElementById("nav-links-top") ?? document.getElementById("image")).getBoundingClientRect().y - 1);
+			};
 			document.querySelector(`a.next[rel="next"]`)?.setAttribute("accesskey", "a");
 			document.querySelector(`a.prev[rel="prev"]`)?.setAttribute("accesskey", "b");
 			(document.body.appendChild(document.createElement("div"))
 			.frycAPI_setAttribute("id", "mojScroll")
 			.frycAPI_setInnerHTML("Deafult scroll")
-			.onclick = () => {
-				window.scrollTo(0, document.documentElement.scrollTop + document.getElementById("nav-links-top").getBoundingClientRect().y);
-			})();
+			.onclick = defaultScroll)();
+
+			document.getElementById("image").addEventListener("load", defaultScroll);
 
 			// const download = document.querySelector(`#image-download-link > a.button`);
 			// download.setAttribute("onclick", `location.href = '${download.getAttribute("href")}'`);
@@ -8181,6 +8191,36 @@ if (frycAPI.host(["e621.net", "e926.net"])) {
 			})();
 		}
 	});
+
+	if (pathName.startsWith("/posts")) {
+		function getPostIDs() {
+			let str = "";
+			frycAPI.forEach(`article.post-preview`, (daElem, daI, daArr) => {
+				str += `~id:${daElem.getAttribute("data-id")} `;
+			});
+			return str.trim();
+		}
+		frycAPI.createManualFunctions("e621", {
+			funcArr: [
+				(name = "Visible posts to link, click", type = frycAPI_Normal) => {
+					const f = new type({ name });
+					f.callBack = function (obj) {
+						document.getElementById("tags").value = getPostIDs();
+						document.querySelector(`#search-box form button`).click();
+					};
+					return f;
+				},
+				(name = "Visible posts to link, copy", type = frycAPI_Normal) => {
+					const f = new type({ name });
+					f.callBack = function (obj) {
+						frycAPI.ctrlC("https://e621.net/posts?tags=" + encodeURIComponent(getPostIDs().replaceAll(/\s+/g, "+")));
+						f.name = "Copied!";
+					};
+					return f;
+				},
+			],
+		});
+	}
 }
 if (frycAPI.host(["static1.e926.net", "static1.e621.net"])) {
 	frycAPI.onLoadSetter(function () {
