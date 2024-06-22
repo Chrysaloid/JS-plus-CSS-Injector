@@ -270,6 +270,10 @@ function temₚ(strings, ...values) { // extract contents of string template lit
 }
 
 // Grupy bloków co 19 pozycji (18.04.2024) // Regex do liczenia ifów: /^if.+/
+
+// Popularny error wyrzucany przez różne rzeczy do konsoli. Poniższy regex wklejony do filtra konsoli go wyłącza
+// -/Unchecked runtime.lastError: The message port closed before a response was received/
+
 // #endregion
 
 // #region //* frycAPI
@@ -771,8 +775,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		// return `drive.google.com/thumbnail?sz=w1000&id=${new URL(link).searchParams.get("id")}`; // Old poprawione
 		return frycAPI.gDriveIdToImgSrc(new URL(link).pathname.replace("/file/d/", "").replace("/view", ""));
 	},
-	gDriveIdToImgSrc(id) { // converts Google drive image id to download link which is possible to be src of an img etc.
-		return `drive.google.com/thumbnail?sz=w1000&id=${id}`;
+	gDriveIdToImgSrc(id, width = 1000) { // converts Google drive image id to download link which is possible to be src of an img etc.
+		return `drive.google.com/thumbnail?sz=w${width}&id=${id}`;
 	},
 	isValidDate(d) {
 		return d instanceof Date && !isNaN(d);
@@ -1018,6 +1022,17 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			const floatModSel = `:where([lepszyCzasStyl^="float"], [lepszyCzasStyl="toolTip-center"])`;
 			const floatModStyle = `visibility: hidden;`;
 			const bigSpec = `[lepszyCzas]`.repeat(5);
+			/* //* Próba konceptualnego ogarnięcia dlaczego ten styl działa
+				g(a,r)
+				g(t,f)
+				go
+				g(t,f) l(a,r)
+				g(a,r) l(t,f)
+
+				l(a,r)
+				l(a,r)l(t,f)
+				lo
+			*/
 			// #endregion
 
 			frycAPI.injectStyle(
@@ -4479,6 +4494,9 @@ if (1 && frycAPI.host("soundcloud.com")) {
 }
 if (1 && frycAPI.hostIncludes(["stackoverflow.com", "stackexchange.com", "serverfault.com", "superuser.com"])) {
 	frycAPI.injectStyleOnLoad(/*css*/`
+		:root {
+			color-scheme: dark;
+		}
 		.user-info .-flair {
 			display: flex !important;
 		}
@@ -4550,9 +4568,6 @@ if (1 && frycAPI.hostIncludes(["stackoverflow.com", "stackexchange.com", "server
 			border-top: 1px solid var(--theme-content-border-color);
 			margin-top: 10px;
 		}
-		footer#footer {
-			filter: invert(1) hue-rotate(180deg);
-		}
 
 		:root:has(meta[property="og:site_name"][content="Signal Processing Stack Exchange"]) {
 			.badge1 {
@@ -4582,7 +4597,9 @@ if (1 && frycAPI.hostIncludes(["stackoverflow.com", "stackexchange.com", "server
 			}
 		}
 
-		body.theme-dark .s-topbar .s-topbar--logo .-img, .theme-dark__forced .s-topbar .s-topbar--logo .-img, body.theme-system .theme-dark__forced .s-topbar .s-topbar--logo .-img {
+		body.theme-dark .s-topbar .s-topbar--logo .-img,
+		.theme-dark__forced .s-topbar .s-topbar--logo .-img,
+		body.theme-system .theme-dark__forced .s-topbar .s-topbar--logo .-img {
 			filter: invert(1) hue-rotate(180deg) brightness(1.3);
 		}
 	`);
@@ -5890,6 +5907,9 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 				padding: var(--padding-small) var(--padding);
 			}
 		}
+		.post:has(span.icon_solved_post) {
+			border: 2px solid #008040;
+		}
 		.row dd.lastpost > span > br + br {
 			display: none;
 		}
@@ -5957,12 +5977,20 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 					grid-template-columns: 1fr auto auto;
 					grid-template-rows: auto auto;
 					column-gap: var(--padding);
+					background-color: transparent !important;
+					border-width: 0 !important;
+					padding: 0 !important;
 					> * {
 						padding: 0 !important;
 						margin: 0 !important;
 					}
 					> h3 {
 						grid-area: 1 / 1 / 2 / 2;
+						> a {
+							display: flex;
+							align-items: center;
+							gap: var(--padding);
+						}
 					}
 					> ul.post-buttons {
 						float: none;
@@ -5985,6 +6013,21 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 						padding-top: var(--padding) !important;
 					}
 				}
+			}
+		}
+
+		.imageset.icon_solved_post, .imageset.icon_solved_head {
+			background-image: url('${frycAPI.getResURL("Correct icon.png")}');
+			background-size: contain;
+		}
+		h2.topic-title {
+			margin: 0;
+			display: flex;
+			align-items: center;
+			gap: var(--padding);
+			> a[title="Topic is solved"] {
+				display: flex;
+				align-items: center;
 			}
 		}
 	`);
@@ -6061,11 +6104,12 @@ if (1 && frycAPI.host("www.autohotkey.com")) {
 		// const t2 = performance.now(); frycAPI.perf(t1, t2);
 		// #endregion
 		// #region //* Ukrycie nic nie wnoszących tytułów postów
-		let title = document.querySelector(`h2.topic-title > a, h2.posting-title > a`);
-		if (title !== null) {
-			title = "Re: " + document.querySelector(`h2.topic-title > a, h2.posting-title > a`).innerText.trim();
+		const titleElem = document.querySelector(`h2.topic-title > a, h2.posting-title > a`);
+		if (titleElem !== null) {
+			const baseTitle = "Re: " + (titleElem.innerText = titleElem.innerText.trim());
 			frycAPI.forEach(`.postbody h3 > a`, (daElem, daI, daArr) => {
-				if (daElem.innerText.trim() === title) {
+				const tNode = daElem.frycAPI_getFirstTextNode();
+				if ((tNode.textContent = tNode.textContent.trim()) === baseTitle) {
 					daElem.frycAPI_addClass("dspNone");
 				}
 			});
