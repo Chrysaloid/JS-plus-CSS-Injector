@@ -425,7 +425,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			}
 		}
 	}, // frycAPI.clean(document.body);
-	makeTableSortable(tabElem, trSel = "tr", tdSel = "td", thSel = "th") { // Podaj referencję do tablicy
+	makeTableSortable(tabElem, trSel = "tr:not(:first-child)", tdSel = "td", thSel = "th") { // Podaj referencję do tablicy
+		if (tabElem === null) return;
 		const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
 		const sortObj = {
 			deafult      : (a, obj) =>        a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText,
@@ -440,12 +441,13 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const sortFun = function (rosnąco) {
 			const th = this;
 			const kier = typeof rosnąco === "boolean" ? !rosnąco : th.classList.contains("posortowana");
-			Array.prototype.slice.call(tabElem.querySelectorAll(`${trSel}:not(:first-child)`), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "deafult"], {
+			const tbody = tabElem.querySelector("tbody") ?? tabElem;
+			Array.prototype.slice.call(tabElem.querySelectorAll(`${trSel}`), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "deafult"], {
 				attrib: th.getAttribute("attribSort"),
 				myIndex: th.getAttribute("index"), // :scope>tr
 				kierunek: kier ? -1 : 1,
 			})).forEach(function (daElem, daI, daArr) {
-				tabElem.appendChild(daElem);
+				tbody.appendChild(daElem);
 			});
 			tabElem.querySelector(".posortowana")?.classList.remove("posortowana");
 			tabElem.querySelector(".anawotrosop")?.classList.remove("anawotrosop");
@@ -461,7 +463,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				& ${thSel} {
 					cursor: pointer;
 					&:hover {
-						background-color: hsla(0, 0%, 20%);
+						background-color: hsla(0, 0%, 20%, 50%);
 					}
 					/* &:hover {
 						position: relative;
@@ -9155,8 +9157,17 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
+} else if (frycAPI.host("bolero-napoje.pl")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		const tab = document.querySelector(`.woocommerce table.shop_table`);
+		frycAPI.makeTableSortable(tab, `tbody tr.cart_item`);
+	});
 }
-// $> `eval(vscode_1.window.activeTextEditor.document.fileName)`
+// $> `opener("./example.txt")`
 
 { // IF template
 	// https://www.freeformatter.com/json-escape.html
