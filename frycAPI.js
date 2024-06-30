@@ -238,29 +238,58 @@ class frycAPI_FuncGroup extends Object {
 	}
 }
 class frycAPI_StyleState extends Object {
-	// Trik: Chodzi o to żeby stan bez klas ustawionych był tym włączonym
-	id; elem; state;
+	id; state; styleElem; on; off; toggle;
 	constructor(obj) {
 		super();
-		this.id = obj.id;
-		this.elem = obj.elem ?? document.documentElement;
-		this.state = obj.state ?? true;
-		this.state = Boolean(this.state);
-		if (this.state === false) { // UWAGA! Trik!
-			this.off();
+		const me = this;
+		me.state = Boolean(obj.state ?? true);
+		if (obj.elevated === true) {
+			me.id = obj.id;
+			me.on = async function () {
+				if (me.state !== true) {
+					await frycAPI.sendEventToBackground("injectStyleAgain", { id: me.id }); // eslint-disable-line no-use-before-define
+					me.state = true; // eslint-disable-line require-atomic-updates
+				}
+			};
+			me.off = async function () {
+				if (me.state !== false) {
+					await frycAPI.sendEventToBackground("removeStyle", { id: me.id }); // eslint-disable-line no-use-before-define
+					me.state = false; // eslint-disable-line require-atomic-updates
+				}
+			};
+			me.toggle = async function () {
+				if (me.state !== true) {
+					await frycAPI.sendEventToBackground("injectStyleAgain", { id: me.id }); // eslint-disable-line no-use-before-define
+					me.state = true; // eslint-disable-line require-atomic-updates
+				} else {
+					await frycAPI.sendEventToBackground("removeStyle", { id: me.id }); // eslint-disable-line no-use-before-define
+					me.state = false; // eslint-disable-line require-atomic-updates
+				}
+			};
+		} else {
+			me.styleElem = obj.styleElem;
+			me.on = function () {
+				if (me.state !== true) {
+					me.styleElem.disabled = false;
+					me.state = true;
+				}
+			};
+			me.off = function () {
+				if (me.state !== false) {
+					me.styleElem.disabled = true;
+					me.state = false;
+				}
+			};
+			me.toggle = function () {
+				if (me.state !== true) {
+					me.styleElem.disabled = false;
+					me.state = true;
+				} else {
+					me.styleElem.disabled = true;
+					me.state = false;
+				}
+			};
 		}
-	}
-	on() {
-		this.elem.classList.remove(this.id); // UWAGA! Trik!
-		this.state = true;
-	}
-	off() {
-		this.elem.classList.add(this.id); // UWAGA! Trik!
-		this.state = false;
-	}
-	toggle() {
-		this.elem.classList.toggle(this.id);
-		this.state = !this.state;
 	}
 }
 function loguj(...tekst) {
@@ -335,30 +364,37 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return new Promise(resolve => setTimeout(resolve, ms)); // eslint-disable-line no-promise-executor-return
 	}, // await frycAPI.sleep(1);
 	injectStyleOnLoad(style, opts) { // wkleja styl do strony w momencie w którym pojawi się element body strony
-		frycAPI.styleStr = style;
+		frycAPI.styleStr += style.trim() + "\n";
 		frycAPI.styleOpts = opts;
 	},
 	injectStyle(style, opts) { // wkleja styl do strony
-		// WAŻNE: jeżeli potrzebujemy dodać selektor odwołujący się do elementu html to należy to koniecznie robić przez :root i musi on być pierwszym tokenem w selektorze
-		// wszystkie selektory z :root muszą być w nowych liniach
+		//// WAŻNE: jeżeli potrzebujemy dodać selektor odwołujący się do elementu html to należy to koniecznie robić przez :root i musi on być pierwszym tokenem w selektorze
+		//// wszystkie selektory z :root muszą być w nowych liniach
 		if ((style = style.trim()).length) {
 			const id = opts?.id ?? "frycAPI_styleNormal" + ++frycAPI.injectStyleNormalNum;
-			// const css = `:where(:root:not(.${id})) {\n${frycAPI.minifyCSS(style).replaceAll(/^:root/gm, "&:root")}\n}`; // .frycAPI_log()
-			const css = `:root:not(.${id}) {\n${frycAPI.minifyCSS(style).replaceAll(/^:root/gm, "&:root")}\n}`; // .frycAPI_log()
-			const elem = opts?.elem;
-			if (opts?.elevated === true) {
+			// const css = `:is(:root, :host):not(.${id}) {\n${frycAPI.minifyCSS(style).replaceAll(/^:root/gm, "&:root")}\n}`; // .frycAPI_log()
+			const css = frycAPI.minifyCSS(style); // .frycAPI_log()
+			let styleElem;
+			const elevated = opts?.elevated;
+			if (elevated === true) {
 				// ta opcja potrafi obejść błąd: Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self'"
-				frycAPI.sendEventToBackground("injectStyle", css);
+				if (opts?.state === false) {
+					frycAPI.sendEventToBackground("defineStyle", { style: css, id: id });
+				} else {
+					frycAPI.sendEventToBackground("injectStyle", { style: css, id: id });
+				}
 			} else {
-				const styleElem = document.createElement("style").frycAPI_setAttribute("id", id);
+				styleElem = document.createElement("style").frycAPI_setAttribute("id", id);
+				if (opts?.state === false) styleElem.disabled = true;
 				styleElem.innerHTML = frycAPI.createHTML(css);
+				const elem = opts?.elem;
 				if (elem instanceof Node) {
 					elem.appendChild(styleElem);
 				} else {
 					document.documentElement.insertAdjacentElement("beforeend", styleElem);
 				}
 			}
-			return new frycAPI_StyleState({ id: id, elem: elem, state: opts?.state });
+			return new frycAPI_StyleState({ id, styleElem, state: opts?.state, elevated }); // eslint-disable-line object-shorthand
 		}
 	}, // frycAPI.injectStyleNormal(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true });
 	minifyCSS(style) {
@@ -836,7 +872,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			return dom;
 		}
 	}, // await frycAPI.parseXML(someXMLStr)
-	createMutObs(callBack, objOpts) { // Mutation Observer
+	async createMutObs(callBack, objOpts) { // Mutation Observer
 		// runCallBack = true, elem = document.body, options = { childList: true, subtree: true } // Old
 		const options = {
 			childList            : objOpts?.options?.childList             ?? true,
@@ -851,7 +887,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const runCallBack = objOpts?.runCallBack ?? true;
 
 		const mut = new MutationObserver(callBack);
-		if (runCallBack && callBack() === true) return mut; // czyNieRejestrowaćMutObs
+		if (runCallBack && await callBack() === true) return mut; // czyNieRejestrowaćMutObs
 		mut.observe(elem, options);
 		return mut;
 		// new MutationObserver(callBack).observe(elem, options) // Old
@@ -1297,8 +1333,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			func.apply(context, args);
 		};
 	}, // document.addEventListener("mousemove", frycAPI.throttle(handleMouseMove, 4));
-	sendEventToBackground(name, data) { // domyślnie async. await sprawia że nie jest async
-		return chrome.runtime.sendMessage(frycAPI.id, { name, data });
+	async sendEventToBackground(name, data) { // domyślnie async. await sprawia że nie jest async
+		return await chrome.runtime.sendMessage(frycAPI.id, { name, data });
 	},  // const result = await frycAPI.sendEventToBackground();
 	async isWebpAnimated(resp) {
 		const buffer = new Uint8Array(await resp.arrayBuffer());
@@ -1477,9 +1513,6 @@ frycAPI.expandPrototype(Element, "frycAPI_hasNotClass", function (klasa) {
 
 // #region //* IFy 1
 if (1) { //* Globalne funkcje
-	frycAPI.injectStyleOnLoad(/*css*/`
-	`);
-
 	(frycAPI.beforeLoad = function () {
 		// #region //* color scheme only light
 		new MutationObserver((mutRec, docObs) => {
@@ -3681,7 +3714,7 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 		div#comments>.block:not(.communication) {
 			order: 1;
 		}
-	`, { elevated: true });
+	`, { elevated: true }); // , state: false
 } else if (1 && frycAPI.host("developer.mozilla.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/* iframe.sample-code-frame {
@@ -4566,7 +4599,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 			content: "–";
 			/* content: "|"; */
 			padding-left: 3px;
-			color: var(--theme-body-font-color, var(--black-600));
+			color: #cccac6;
 		}
 	`);
 
@@ -6895,6 +6928,9 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	`);
 } else if (1 && frycAPI.host("www.reddit.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
 		shreddit-ad-post {
 			&, + hr {
 				display: none !important;
@@ -6936,14 +6972,11 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	`);
 	// var timeSum = 0;
 	frycAPI.onLoadSetter(function () {
-		const func = (mutRecArr, mutObs) => {
+		frycAPI.createMutObs((mutRecArr, mutObs) => {
 			// let startTime = performance.now();
-			frycAPI.forEach(`time:not(.poprawnyCzas)`, (daElem, daI, daArr) => {
-				const data = new Date(daElem.getAttribute("datetime"));
-				daElem.innerHTML = frycAPI.printRelTime(data, { compact: 1 });
-				daElem.setAttribute("title", frycAPI.printDate(data));
-				daElem.classList.add("poprawnyCzas");
-			});
+			frycAPI.setDefaultDate(`time`, {
+				customStyle: `--tt-x: -18px; cursor: none;`,
+			}).mode.relatywnyCzas().toolTipCenter();
 
 			const tree = document.querySelector(`shreddit-comment-tree`);
 			if (tree && tree.shadowRoot && tree.shadowRoot.getElementById("shreddit-comment-tree-style") === null) {
@@ -6982,8 +7015,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 			// let endTime = performance.now();
 			// timeSum += endTime - startTime;
 			// console.log(`Time: ${timeSum.toFixed(1)} ms`);
-		}; func();
-		new MutationObserver(func).observe(document.body, { subtree: true, childList: true });
+		});
 	});
 } else if (1 && frycAPI.host("www.roblox.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -8357,6 +8389,9 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		h4.ng-star-inserted {
 			font-weight: 300;
 		}
+		.hideId {
+			display: none;
+		}
 	`);
 
 	(frycAPI.beforeLoad = function () {
@@ -8364,6 +8399,7 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 			if (document.body !== null) {
 				frycAPI.setDefaultDateStyle().mode.relatywnyCzas().toolTipLeft();
 				frycAPI.createMutObs(() => {
+					// #region //* Zmiana daty
 					frycAPI.setDefaultDate(`:is(b-issues-grid, b-issues-table) b-formatted-date-time > time`, {
 						customStyle: `cursor: none;`,
 						dateEnumStyle: frycAPI.setDefaultDateEnum.style.floatLeft,
@@ -8371,6 +8407,17 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 					frycAPI.setDefaultDate(`b-formatted-date-time > time`, {
 						customStyle: `cursor: none;`, // --tt-y: 10px; --tt-x: 10px;
 					});
+					// #endregion
+					// #region //* Usunięcie nic niewnoszących ("zduplikowanych") części nazwy użytkowników
+					frycAPI.forEach(`h4.bv2-event-user:not(:has(.hideId))`, (daElem, daI, daArr) => {
+						const userName = daElem.querySelector(`b-user-display-name`);
+						const userId = daElem.querySelector(`span.bv2-event-user-id`);
+						if (userName === null || userId === null) return;
+						if (userName.innerText.trim() === userId.innerText.trim().slice(1, -1)) {
+							userId.frycAPI_addClass("hideId");
+						}
+					});
+					// #endregion
 				});
 				mutObs?.disconnect();
 				return true;
@@ -9167,45 +9214,8 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 		frycAPI.makeTableSortable(tab, `tbody tr.cart_item`);
 	});
 }
-// $> `opener("./example.txt")`
+// Code-Lens-Action insert-file frycAPI-if.js
 
-{ // IF template
-	// https://www.freeformatter.com/json-escape.html
-//	else if (frycAPI.host("template")) {
-//		frycAPI.injectStyleOnLoad(/*css*/`
-//
-//		`);
-//
-//		(frycAPI.beforeLoad = function () {
-//			// frycAPI.colorSchemeDark = 1;
-//		})();
-//
-//		frycAPI.onLoadSetter(function () {
-//		});
-//
-//		frycAPI.createManualFunctions("aaa", {
-//			funcArr: [
-//				(name = "aaa", type = frycAPI_Normal) => {
-//					const f = new type({ name });
-//					f.callBack = function (obj) {
-//
-//					};
-//					return f;
-//				},
-//				(name = "aaa", type = frycAPI_State) => {
-//					const f = new type({
-//						name: name,
-//						stateDesc: ["aaa", "aaa"],
-//					});
-//					f.callBack = function (obj) {
-//
-//					};
-//					return f;
-//				},
-//			],
-//		});
-//	}
-}
 // #region //* IFy 11
 // #endregion
 // #endregion
@@ -9220,6 +9230,9 @@ if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // dodanie stylu z ak
 				elem: frycAPI.styleOpts?.elem,
 				state: frycAPI.styleOpts?.state,
 			});
+			if (frycAPI.styleOpts?.state === false) {
+				frycAPI.myStyleManualFunc.setState(1);
+			}
 			// frycAPI.isObject(frycAPI.styleOpts) ? {
 			// 	id: "frycAPI_myStyle",
 			// 	elevated: frycAPI.styleOpts.elevated,
