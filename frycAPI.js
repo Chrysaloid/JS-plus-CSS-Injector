@@ -243,8 +243,8 @@ class frycAPI_StyleState extends Object {
 		super();
 		const me = this;
 		me.state = Boolean(obj.state ?? true);
+		me.id = obj.id;
 		if (obj.elevated === true) {
-			me.id = obj.id;
 			me.on = async function () {
 				if (me.state !== true) {
 					await frycAPI.sendEventToBackground("injectStyleAgain", { id: me.id }); // eslint-disable-line no-use-before-define
@@ -271,24 +271,39 @@ class frycAPI_StyleState extends Object {
 			me.on = function () {
 				if (me.state !== true) {
 					me.styleElem.disabled = false;
+					me.handleDarkreader();
 					me.state = true;
 				}
 			};
 			me.off = function () {
 				if (me.state !== false) {
 					me.styleElem.disabled = true;
+					me.handleDarkreader();
 					me.state = false;
 				}
 			};
 			me.toggle = function () {
 				if (me.state !== true) {
 					me.styleElem.disabled = false;
+					me.handleDarkreader();
 					me.state = true;
 				} else {
 					me.styleElem.disabled = true;
+					me.handleDarkreader();
 					me.state = false;
 				}
 			};
+		}
+	}
+	handleDarkreader() {
+		if (document.documentElement.hasAttribute("data-darkreader-mode")) {
+			let elem = this.styleElem.nextElementSibling;
+			if (elem !== undefined && elem.tagName === "STYLE" && elem.frycAPI_hasClass("darkreader")) {
+				elem.disabled = this.styleElem.disabled;
+			} else {
+				elem = this.styleElem.parentElement.querySelector(`#${this.id} ~ style.darkreader`);
+				if (elem !== undefined) elem.disabled = this.styleElem.disabled;
+			}
 		}
 	}
 }
@@ -1135,6 +1150,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 					& :where(span.lepszyCzas) {
 						overflow: visible;
 						text-decoration: inherit;
+						white-space: nowrap;
 						--tool-tip-padd: 3px;
 						--tt-x: 0px;
 						--tt-y: 0px;
@@ -1177,7 +1193,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 
 					& :where(.lepszyCzas[lepszyCzas="oba"]) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
 				}
-			`, { id: "frycAPI_setDefaultDate" });
+			`.replaceAll(/  +/g, " "), { id: "frycAPI_setDefaultDate" });
 
 			frycAPI.setDefaultDateEnum.mode.oba().floatCenter();
 			return frycAPI.setDefaultDateEnum;
@@ -1346,7 +1362,6 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	template() {
 
 	},  // frycAPI.template();
-	// Test
 	// #region //* Funkcje 5
 	// #endregion
 	// #endregion
@@ -4622,22 +4637,22 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 		frycAPI.createMutObs((mutRecArr, mutObs) => {
 			// #region //* Lepsza data
 			// const t1 = performance.now();
-			frycAPI.setDefaultDate(`.user-action-time > .relativetime:not(.lepszyCzasParent)`, {
+			frycAPI.setDefaultDate(`.user-action-time > .relativetime`, {
 				getDate: getDate,
 				dateEnumStyle: frycAPI.setDefaultDateEnum.style.toolTipTop,
 				customStyle: `cursor: none;`,
 			});
-			frycAPI.setDefaultDate(`a.js-gps-track > .relativetime:not(.lepszyCzasParent)`, {
+			frycAPI.setDefaultDate(`a.js-gps-track > .relativetime`, {
 				getDate: getDate,
 				dateEnumStyle: frycAPI.setDefaultDateEnum.style.toolTipTop,
 				// customStyle: `--tt-y: 1px;`,
 			});
-			frycAPI.setDefaultDate(`.ai-center:has(.owner) + span.comment-date .relativetime-clean:not(.lepszyCzasParent)`, { getDate, customStyle: `--tt-y: 1px;` }); // eslint-disable-line object-shorthand
-			frycAPI.setDefaultDate(`.comment-body:has(span[title] > svg.iconPencilSm) .relativetime-clean:not(.lepszyCzasParent)`, {
+			frycAPI.setDefaultDate(`.comment-body:has(span[title] > svg.iconPencilSm, button.js-comment-edit, button.js-comment-delete) .relativetime-clean`, {
 				getDate: getDate,
 				dateEnumStyle: frycAPI.setDefaultDateEnum.style.toolTipCenter,
 			});
-			frycAPI.setDefaultDate(`:is(.relativetime-clean, .relativetime):not(.lepszyCzasParent)`, { getDate });
+			frycAPI.setDefaultDate(`.ai-center:has(.owner) + span.comment-date .relativetime-clean`, { getDate, customStyle: `--tt-y: 1px;` }); // eslint-disable-line object-shorthand
+			frycAPI.setDefaultDate(`:is(.relativetime-clean, .relativetime)`, { getDate });
 			// #endregion
 			// #region //* Przesunięcie nazwy użytkownika na początek komentarza
 			frycAPI.forEach(`.comment-body:not(.zmieniona-kolejność)`, (daElem, daI, daArr) => {
@@ -9214,7 +9229,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 		frycAPI.makeTableSortable(tab, `tbody tr.cart_item`);
 	});
 }
-// Code-Lens-Action insert-file frycAPI-if.js
+// Code-Lens-Action insert-snippet IF template
 
 // #region //* IFy 11
 // #endregion
