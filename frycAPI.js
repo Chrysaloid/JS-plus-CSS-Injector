@@ -676,6 +676,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			// loguj(name);
 		} catch (error) {
 			console.log(error);
+			proto.prototype[name] = func;
 		}
 	},
 	roughSizeOfObject(object) {
@@ -849,13 +850,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	getResURL(fileName) {
 		return `chrome-extension://${frycAPI.id}/resources/` + fileName;
 	}, // frycAPI.getResURL("")
-	readFile(fileName, fileType) {
-		return fetch(fileName).then(resp => {
+	readFile(fileName, fileType, redirect = false) {
+		return fetch(redirect ? `/redirect?url=${encodeURIComponent(fileName)}` : fileName).then(resp => {
 			if (resp.ok) {
-				switch (fileType ?? (() => {
-					try { return new URL(fileName).pathname } // eslint-disable-line brace-style
-					catch (err) { return fileName }
-				})().split(".").pop().toLowerCase()) {
+				switch (
+					fileType ?? (() => {
+						try { return new URL(fileName).pathname } // eslint-disable-line brace-style
+						catch (err) { return fileName }
+					})().split(".").pop().toLowerCase()
+				) {
 					case "json":
 						return resp.json();
 					case "xml":
@@ -874,7 +877,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				resp.text().then(txt => { throw new Error(txt) });
 			}
 		}); // .catch(err => console.error(err));
-	}, // await frycAPI.readFile("url_or_fileName")
+	}, // await frycAPI.readFile("url_or_fileName");
 	getResData(fileName, fileType) {
 		return frycAPI.readFile(frycAPI.getResURL(fileName), fileType);
 	}, // await frycAPI.getResData("")
@@ -1339,7 +1342,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			clearTimeout(timeout);
 			timeout = setTimeout(() => func.apply(context, args), wait);
 		};
-  	}, // document.addEventListener("mousemove", frycAPI.debounce(handleMouseMove, 100));
+	}, // document.addEventListener("mousemove", frycAPI.debounce(handleMouseMove, 100));
 	throttle(func, amount) {
 		// amount = ilukrotnie zmniejszyć częstotliwość eventów. Powinien być > 1
 		let throttle = amount - 1;
@@ -1351,17 +1354,80 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // document.addEventListener("mousemove", frycAPI.throttle(handleMouseMove, 4));
 	async sendEventToBackground(name, data) { // domyślnie async. await sprawia że nie jest async
 		return await chrome.runtime.sendMessage(frycAPI.id, { name, data });
-	},  // const result = await frycAPI.sendEventToBackground();
+	}, // const result = await frycAPI.sendEventToBackground();
 	async isWebpAnimated(resp) {
 		const buffer = new Uint8Array(await resp.arrayBuffer());
 		if (new TextDecoder().decode(buffer.subarray(12, 16)) === "VP8X") {
 			return Boolean((buffer[20] >> 1) & 1);
 		}
 		return false;
-	},  // await frycAPI.isWebpAnimated(); // await fetch(frycAPI.getResURL("test.webp")).then(frycAPI.isWebpAnimated)
+	}, // await frycAPI.isWebpAnimated(); // await fetch(frycAPI.getResURL("test.webp")).then(frycAPI.isWebpAnimated)
+	xmlObjToJsObj(xmlObj) {
+		const root = xmlObj.documentElement ?? xmlObj;
+		const obj = {
+			name: root.nodeName,
+		};
+		if (root.attributes?.length !== 0) {
+			obj.attributes = {};
+			for (const attrib of root.attributes) {
+				obj.attributes[attrib.name] = attrib.value;
+			}
+		}
+		if (root.childElementCount !== 0) {
+			obj.children = [];
+			for (const node of root.children) {
+				obj.children.push(frycAPI.xmlObjToJsObj(node));
+			}
+		} else {
+			obj.text = root.innerText ?? root.textContent;
+		}
+		return obj;
+	}, // frycAPI.xmlObjToJsObj(xmlObj);
+	xmlStrToJsObj(xmlStr) {
+		return frycAPI.xmlObjToJsObj(frycAPI.parseXML(xmlStr));
+	}, // frycAPI.xmlStrToJsObj(xmlStr);
+	xmlStrToJsStr(xmlStr) {
+		return JSON.stringify(frycAPI.xmlObjToJsObj(frycAPI.parseXML(xmlStr)));
+	}, // frycAPI.xmlStrToJsStr(xmlStr);
+	xmlObjToJsStr(xmlObj) {
+		return JSON.stringify(frycAPI.xmlObjToJsObj(xmlObj));
+	}, // frycAPI.xmlObjToJsStr(xmlObj);
+	xmlObjToJsObjNode(xmlObj) {
+		const root = xmlObj.documentElement ?? xmlObj;
+		if (root instanceof Element) {
+			const obj = {
+				name: root.nodeName,
+				attributes: {},
+				children: [],
+			};
+			for (const attrib of root.attributes) {
+				obj.attributes[attrib.name] = attrib.value;
+			}
+			for (const node of root.childNodes) {
+				obj.children.push(frycAPI.xmlObjToJsObjNode(node));
+			}
+			return obj;
+		} else if (root.nodeType === Node.TEXT_NODE) {
+			return root.textContent;
+		} else {
+			return {
+				name: root.nodeName,
+				text: root.textContent,
+			};
+		}
+	}, // frycAPI.xmlObjToJsObjNode(xmlObj);
+	xmlStrToJsObjNode(xmlStr) {
+		return frycAPI.xmlObjToJsObjNode(frycAPI.parseXML(xmlStr));
+	}, // frycAPI.xmlStrToJsObjNode(xmlStr);
+	xmlStrToJsStrNode(xmlStr) {
+		return JSON.stringify(frycAPI.xmlObjToJsObjNode(frycAPI.parseXML(xmlStr)));
+	}, // frycAPI.xmlStrToJsStrNode(xmlStr);
+	xmlObjToJsStrNode(xmlObj) {
+		return JSON.stringify(frycAPI.xmlObjToJsObjNode(xmlObj));
+	}, // frycAPI.xmlObjToJsStrNode(xmlObj);
 	template() {
 
-	},  // frycAPI.template();
+	}, // frycAPI.template();
 	// #region //* Funkcje 5
 	// #endregion
 	// #endregion
