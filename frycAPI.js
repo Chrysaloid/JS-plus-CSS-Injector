@@ -302,7 +302,7 @@ class frycAPI_StyleState extends Object {
 				elem.disabled = this.styleElem.disabled;
 			} else {
 				elem = this.styleElem.parentElement.querySelector(`#${this.id} ~ style.darkreader`);
-				if (elem !== undefined) elem.disabled = this.styleElem.disabled;
+				if (elem !== null) elem.disabled = this.styleElem.disabled;
 			}
 		}
 	}
@@ -4562,7 +4562,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 			},
 		],
 	});
-} else if (1 && frycAPI.hostIncludes("stackoverflow.com", "stackexchange.com", "serverfault.com", "superuser.com")) {
+} else if (1 && frycAPI.hostIncludes("stackoverflow.com", "stackexchange.com", "superuser.com", "serverfault.com", "askubuntu.com", "stackapps.com", "mathoverflow.net")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		:root {
 			color-scheme: dark;
@@ -4618,11 +4618,185 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 			width: 40px;
 			height: 40px;
 		}
-		body {
-			--ff-sans: IBM Plex Sans Condensed;
+		body${"[class]".repeat(8)} {
+			&, & * {
+				--my-font: "IBM Plex Sans Condensed";
+				--ff-sans: var(--my-font);
+				--theme-body-font-family: var(--my-font);
+				--theme-post-title-font-family: var(--my-font);
+				--theme-post-body-font-family: var(--my-font);
+			}
+		}
+		${!frycAPI.host("stackoverflow.com") ? /*css*/`
+			body${"[class]".repeat(8)} {
+				&, * {
+					--my-bg: var(--darkreader-neutral-background);
+					--darkreader-bg--my-bg: var(--darkreader-neutral-background);
+					/* --my-bg-accent: #0E151C; */
+					--my-bg-accent: #234567;
+					/* --my-bg-accent: var(--theme-button-primary-background-color); */
+					--darkreader-border--my-bg-accent: var(--my-bg-accent);
+					--darkreader-bg--black-150: var(--my-bg-accent);
+					--darkreader-border--black-200: var(--my-bg-accent);
+					--darkreader-border--theme-content-border-color: var(--my-bg-accent);
+					--darkreader-bg--theme-header-background-color: var(--my-bg-accent);
+					--darkreader-bg--_bu-filled-bg: var(--my-bg-accent);
+					--darkreader-border--_no-bc: var(--my-bg-accent);
+					--darkreader-border--blue-400: var(--my-bg-accent);
+					--darkreader-border--_bu-outlined-bc: var(--my-bg-accent);
+					--darkreader-bg--_bu-outlined-bg: var(--my-bg-accent);
+					
+					--my-bg-accent-bright: color-mix(in srgb, var(--my-bg-accent), white 10%);
+					--darkreader-bg--_bu-filled-bg-hover: var(--my-bg-accent-bright);
+					--darkreader-text--theme-link-color-visited: var(--my-bg-accent-bright);
+
+					--my-bg-accent-dark-1: color-mix(in srgb, var(--my-bg-accent), black 10%);
+					--darkreader-bg--theme-post-owner-new-background-color: var(--my-bg-accent-dark-1);
+
+					--my-bg-accent-dark-2: color-mix(in srgb, var(--my-bg-accent), black 30%);
+					--darkreader-bg--theme-post-owner-background-color: var(--my-bg-accent-dark-2);
+					
+					--my-fg-accent: color-mix(in srgb, var(--my-bg-accent), white 40%);
+					--darkreader-text--theme-link-color: var(--my-fg-accent);
+					--my-fg-accent-bright: color-mix(in srgb, var(--my-fg-accent), white 30%);
+					--darkreader-text--theme-link-color-hover: var(--my-fg-accent-bright);
+				}
+				.s-tag.post-tag,
+				.show-votes .sidebar-linked .spacer > a:first-child .answer-votes,
+				.show-votes .sidebar-related .spacer > a:first-child .answer-votes,
+				.s-prose .spoiler {
+					--darkreader-bg--black-150: #272a2b;
+					--darkreader-bg--black-600: #cccac6;
+				}
+			}
+			button[class^="js-vote"] {
+				filter: none !important;
+				border-color: var(--my-bg-accent) !important;
+				background-color: var(--my-bg) !important;
+				path {
+					color: var(--my-bg-accent) !important;
+				}
+				&:hover {
+					border-color: var(--my-bg-accent-bright) !important;
+					path {
+						color: var(--my-bg-accent-bright) !important;
+					}
+				}
+				&[aria-pressed="true"] {
+					background-color: var(--my-bg-accent) !important;
+					path {
+						color: var(--my-bg) !important;
+					}
+				}
+				&[aria-pressed="true"]:hover {
+					background-color: var(--my-bg-accent-bright) !important;
+				}
+			}
+			.wmd-button {
+				& > span {
+					background-position-y: 0px !important;
+				}
+				&:hover > span {
+					filter: brightness(1.6);
+				}
+			}
+			.s-input:focus, .s-textarea:focus, .s-input:focus-within, .s-textarea:focus-within {
+				box-shadow: none;
+				outline: none !important;
+			}
+			.wmd-help-button.active-help {
+				background-color: transparent;
+			}
+			.question-hyperlink, .answer-hyperlink {
+				color: var(--theme-link-color);
+				&:hover {
+					color: var(--my-fg-accent-bright);
+				}
+				&:visited {
+					color: var(--my-bg-accent-bright);
+				}
+				&:hover:visited {
+					color: var(--my-fg-accent);
+				}
+			}
+			.nav-links .youarehere .nav-links--link .svg-icon {
+				background-color: transparent !important;
+				border-radius: 0px !important;
+			}
+			.s-sidebarwidget:not(.s-sidebarwidget__yellow) {
+				&::after, &::before {
+					content: none;
+				}
+				& {
+					border: 1px solid var(--my-bg-accent) !important;
+				}
+				.s-sidebarwidget--header{
+					border: 0;
+				}
+			}
+			.s-notice .s-btn.s-btn__outlined {
+				border-width: 0px;
+				color: var(--_bu-filled-fc);
+			}
+			.site-header {
+				background-image: unset;
+			}
+			.site-header .site-header--link {
+				color: #d3d1cf;
+			}
+			#content {
+				border-width: 0px 0px 0px 1px;
+				border-radius: 0px;
+			}
+			#content, ul.comments-list .comment > * {
+				border-color: var(--my-bg-accent) !important;
+			}
+			/* .s-btn.s-btn__filled {
+				background-color: var(--my-bg-accent);
+			} */
+			body, .s-topbar, .site-footer, #content {
+				background-color: var(--my-bg);
+			}
+			.s-topbar {
+				border-bottom: 1px solid var(--my-bg-accent);
+			}
+			.site-footer {
+				border-top: 1px solid var(--my-bg-accent);
+			}
+			#qlist-wrapper {
+				& {
+					border: 1px solid var(--my-bg-accent);
+					border-left: 0px;
+				}
+			}
+			.s-btn-group {
+				& {
+					border: 1px solid var(--my-bg-accent);
+				}
+			}
+			.s-tag.post-tag {
+				& {
+					border: 0px;
+					background-color: hsl(195, 4%, 17%);
+					color: rgb(165, 160, 151);
+				}
+				&:hover {
+					filter: brightness(1.3);
+				}
+			}
+		` : ""}
+		#qlist-wrapper {
+			margin-bottom: 24px;
+		}
+		#question-mini-list {
+			margin-bottom: 0px;
+		}
+		.s-post-summary .s-post-summary--meta-tags {
+			flex-basis: 100%;
 		}
 		.owner {
-			/* background-color: ${frycAPI.host === "stackoverflow.com" ? "#d5d5d5" : "#313131"}; */
+			/* background-color: color-mix(in srgb, var(--theme-post-owner-background-color), black 70%); */
+			/* background-color: color-mix(in srgb, var(--theme-post-owner-background-color), white 8%); */
 		}
 		span[title*="badge"] {
 			display: flex;
@@ -4682,15 +4856,59 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 			padding-left: 3px;
 			color: #cccac6;
 		}
+
+		.s-topbar .s-topbar--item:not(.s-topbar--item__unset) {
+			--darkreader-bg--_tb-item-bg: transparent;
+		}
+
+		${frycAPI.host("puzzling.stackexchange.com") ? /*css*/`
+			.site-header .site-header--link > img {
+				filter: contrast(1.7) brightness(0.9);
+			}
+		` : ""}
+		${frycAPI.host("stats.stackexchange.com") ? /*css*/`
+			.site-header .site-header--link > img {
+				filter: brightness(1.7);
+			}
+		` : ""}
+		${frycAPI.host("gaming.stackexchange.com") ? /*css*/`
+			.site-header .site-header--container {
+				background-image: url("https://cdn.sstatic.net/Sites/gaming/img/header-foreground-image03.gif?v=330ce6fa0066"), url("https://cdn.sstatic.net/Sites/gaming/img/header-foreground-image01.png?v=069bf27565ea");
+			}
+		` : ""}
+		
+		/* gaming.stackexchange.com */
+		/* .site-header .site-header--container {
+			background-image: url(img/header-foreground-image03.gif?v=330ce6fa0066), url(img/header-foreground-image01.png?v=069bf27565ea);
+		} */
+
+		/* puzzling.stackexchange.com */
+		/* div.my-bg {
+			background-color: var(--theme-background-color);
+			background-image: url(https://cdn.sstatic.net/Sites/puzzling/img/site-background-image.svg?v=c0585d868bdd), linear-gradient(to bottom, #fffed6 0, #bbba9e 270px, #2dbab4 900px);
+			background-position: var(--theme-background-position);
+			background-repeat: var(--theme-background-repeat);
+			background-size: var(--theme-background-size);
+			background-attachment: var(--theme-background-attachment);
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			z-index: -300;
+			filter: invert(1) hue-rotate(180deg);
+		} */
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		frycAPI.forEach(".user-info:has(.user-gravatar32)", function (daElem, daI, daArr) { // Ulepszenie wyglądu awatarów
+		frycAPI.forEach(".user-info:has(.user-gravatar32)", function (daElem) { // Ulepszenie wyglądu awatarów
 			const myDiv = document.createElement("div");
 			myDiv.classList.add("myDiv");
 			daElem.querySelector(".user-action-time").insertAdjacentElement("afterend", myDiv);
-			myDiv.appendChild(daElem.querySelector(".user-gravatar32"));
-			myDiv.appendChild(daElem.querySelector(".user-details"));
+			let el;
+			el = daElem.querySelector(".user-gravatar32"); if (el !== null) myDiv.appendChild(el);
+			el = daElem.querySelector(".user-details");    if (el !== null) myDiv.appendChild(el);
+		});
+		frycAPI.forEach("span.s-badge__staff, span.mod-flair, span.s-badge__moderator", function (daElem) { // Przeniesienie znacznika staff/moderatora do nazwy użytkownika
+			daElem.previousElementSibling.appendChild(daElem);
 		});
 
 		// Lepsza data
