@@ -4907,8 +4907,8 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 			el = daElem.querySelector(".user-gravatar32"); if (el !== null) myDiv.appendChild(el);
 			el = daElem.querySelector(".user-details");    if (el !== null) myDiv.appendChild(el);
 		});
-		frycAPI.forEach("span.s-badge__staff, span.mod-flair, span.s-badge__moderator", function (daElem) { // Przeniesienie znacznika staff/moderatora do nazwy użytkownika
-			daElem.previousElementSibling.appendChild(daElem);
+		frycAPI.forEach("span.s-badge__staff, span.mod-flair, span.s-badge__moderator, .s-badge.s-badge__xs", function (daElem) { // Przeniesienie znacznika staff/moderator/bot do nazwy użytkownika
+			daElem.previousElementSibling?.appendChild(daElem);
 		});
 
 		// Lepsza data
