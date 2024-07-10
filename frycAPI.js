@@ -6941,27 +6941,28 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 		code.literal, code.property {
 			color: #228B22;
 		}
-		
 		p.listimage>img,
 		.paragraphNode>span>img{
 			filter: none !important;
 		}
-		
 		span.MathEquation>img {
 			filter: invert(1);
 		}
-		
 		div#poll_result_body {
 			color: hsl(0deg 0% 100%);
 		}
-		
 		div#dijit_layout_ContentPane_1 {
 			overflow-x: scroll !important;
 		}
-		
 		/* .panel-body div.mediaobject>p>img {
 		  filter: invert(1) hue-rotate(180deg) !important;
 		} */
+
+		button#support_submitsearch {
+			border-top-width: 1.5px;
+			border-right-width: 0px;
+			border-bottom-width: 1.5px;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
