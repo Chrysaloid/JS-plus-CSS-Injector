@@ -667,12 +667,16 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	printDateForFileName(date, dateFormatter) { // przyjmuje obiekt typu Date
 		return frycAPI.printDateIntl(date, dateFormatter ?? frycAPI.dateFormatterForFileName).replaceAll(":", "꞉");
 	}, // frycAPI.printDateForFileName(new Date());
-	expandPrototype(proto, name, func, writable = false) {
+	expandPrototype(proto, name, func, writable = false, czyGet = false) {
 		try {
-			Object.defineProperty(proto.prototype, name, {
-				value: func,
-				writable: writable,
-			});
+			Object.defineProperty(proto.prototype, name,
+				czyGet ? {
+					get: func,
+				} : {
+					value: func,
+					writable: writable,
+				}
+			);
 			// loguj(name);
 		} catch (error) {
 			console.log(error);
@@ -1584,8 +1588,11 @@ frycAPI.expandPrototype(Element, "frycAPI_hasClass", function (klasa) {
 frycAPI.expandPrototype(Element, "frycAPI_hasNotClass", function (klasa) {
 	return !this.classList.contains(klasa);
 });
-// elem.frycAPI_querySelNull(``)
-// elem.querySelector(``) === null
+frycAPI.expandPrototype(Element, "frycAPI_childIndex", function () {
+	let me = this, i = 0;
+	while ((me = me.previousElementSibling) !== null) i++;
+	return i;
+}, false, true);
 // frycAPI.expandPrototype(Template, "frycAPI_name", function () {
 // });
 // #region //* Prototypy 3
@@ -4567,11 +4574,23 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 		:root {
 			color-scheme: dark;
 		}
-		.user-info .-flair {
+		:is(#user-profile-button, .user-info) .-flair {
 			display: flex !important;
 		}
-		.user-info>.d-flex {
+		.user-info > .d-flex {
 			flex-direction: column;
+		}
+		.reputation-score {
+			color: var(--black-400);
+			display: flex;
+			align-items: center;
+		}
+		span[title*="bronze"], span[title*="silver"], span[title*="gold"] {
+			padding: 0px 2px !important;
+			margin: 0 !important;
+		}
+		li.-badges.-flair {
+			height: 19px;
 		}
 		
 		/* Zaznacz każdy */
@@ -4910,6 +4929,15 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 		frycAPI.forEach("span.s-badge__staff, span.mod-flair, span.s-badge__moderator, .s-badge.s-badge__xs", function (daElem) { // Przeniesienie znacznika staff/moderator/bot do nazwy użytkownika
 			daElem.previousElementSibling?.appendChild(daElem);
 		});
+
+		document.querySelectorAll(`:is(.-badges, .-flair) > span.v-visible-sr`).forEach(el => el.remove());
+		const badges = document.querySelector(`.-badges`);
+		if (badges !== null) {
+			const rep = badges.previousElementSibling;
+			badges.frycAPI_insertHTML("afterbegin", `<span class="reputation-score" title="${rep.getAttribute("title")}"><div>${rep.frycAPI_getFirstTextNodeContent()}</div></span>`);
+			badges.frycAPI_addClass("-flair");
+			rep.remove();
+		}
 
 		// Lepsza data
 		frycAPI.setDefaultDateStyle().mode.relatywnyCzas().floatLeft();
