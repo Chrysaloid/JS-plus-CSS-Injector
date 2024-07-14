@@ -370,6 +370,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		// },
 	},
 	script: document.currentScript,
+	createMutObsLicznik: 0,
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -896,6 +897,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // await frycAPI.parseXML(someXMLStr)
 	async createMutObs(callBack, objOpts) { // Mutation Observer
 		// runCallBack = true, elem = document.body, options = { childList: true, subtree: true } // Old
+		// frycAPI.createMutObsLicznik++;
 		const options = {
 			childList            : objOpts?.options?.childList             ?? true,
 			subtree              : objOpts?.options?.subtree               ?? true,
@@ -908,7 +910,18 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const elem = objOpts?.elem ?? document.body;
 		const runCallBack = objOpts?.runCallBack ?? true;
 
-		const mut = new MutationObserver(callBack);
+		// let tSum = 0, tLicznik = 0;
+		const mut = new MutationObserver(async (mutRecArr, mutObs) => {
+			// const t1 = performance.now();
+			mutObs.disconnect();
+			if (await callBack(mutRecArr, mutObs) === true) return;
+			mutObs.observe(elem, options);
+			// const t2 = performance.now();
+			// const diff = t2 - t1;
+			// tSum += diff;
+			// console.log(`${frycAPI.createMutObsLicznik}.${(++tLicznik).toString().padStart(2, "0")} | ${tSum.toFixed(1).padStart(4, "0")} ms | +${diff.toFixed(1).padStart(4, "0")} ms | ${(tSum / tLicznik).toFixed(3)} ms/call`);
+		});
+		// const mut = new MutationObserver(callBack);
 		if (runCallBack && await callBack() === true) return mut; // czyNieRejestrowaćMutObs
 		mut.observe(elem, options);
 		return mut;
@@ -8720,13 +8733,49 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		.hideId {
 			display: none;
 		}
+
+		.only-monorail-migration {
+			padding: 3px 0;
+			.bv2-event-user-image-cell,
+			.bv2-event-content-cell > *:not(h4),
+			.bv2-event-content-cell > h4 > :is(b-user-display, .bv2-event-user-id, .bv2-event-info) {
+				display: none;
+			}
+			.bv2-event-content-cell {
+				margin: 0;
+				margin-left: 50px;
+				padding: 0;
+				> h4 {
+					margin: 0;
+					padding: 0;
+					font-weight: normal;
+					display: flex;
+					align-items: center;
+					gap: 3px;
+					a {
+						filter: brightness(0.6) saturate(0.7);
+					}
+					&::before {
+						content: "Monorail migration";
+						color: var(--text-disabled);
+					}
+				}
+			}
+		}
+		.bv2-event-content-cell .child {
+			
+		}
+		.bv2-event-note-container:has(~ .bv2-issue-event-attachments) {
+			margin-bottom: 6px;
+		}
 	`);
 
+	const daSel = el => (el.nodeType === Node.TEXT_NODE && el.textContent.trim() === "") || el.nodeName === "BR";
 	(frycAPI.beforeLoad = function () {
-		frycAPI.createMutObs((mutRecArr, mutObs) => {
+		frycAPI.createMutObs((mutRecArr0, mutObs0) => {
 			if (document.body !== null) {
 				frycAPI.setDefaultDateStyle().mode.relatywnyCzas().toolTipLeft();
-				frycAPI.createMutObs(() => {
+				frycAPI.createMutObs((mutRecArr, mutObs) => {
 					// #region //* Zmiana daty
 					frycAPI.setDefaultDate(`:is(b-issues-grid, b-issues-table) b-formatted-date-time > time`, {
 						customStyle: `cursor: none;`,
@@ -8746,8 +8795,36 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 						}
 					});
 					// #endregion
+					// #region //* Zmniejszenie nic niewnoszących komentarzy [Empty comment from Monorail migration]
+					frycAPI.forEach(`.bv2-edit-issue-history-stream > div`, daElem => {
+						// const msgText = daElem.querySelector(`:scope .bv2-event-note-container`);
+						if (daElem.querySelector(`:scope .bv2-event-note-container`).innerText === "[Empty comment from Monorail migration]") {
+							daElem.frycAPI_addClass("only-monorail-migration");
+						}
+					});
+					// #endregion
+					// #region //* Zaawansowany trim() na komentarzach
+					frycAPI.forEach(`.bv2-event-content-cell .child`, daElem => {
+						const arr = [...daElem.childNodes];
+						for (let i = 0; i < arr.length; i++) {
+							const el = arr[i];
+							if (daSel(el)) {
+								el.remove();
+							} else {
+								break;
+							}
+						}
+						for (let i = arr.length - 1; i >= 0; i--) {
+							const el = arr[i];
+							if (daSel(el)) {
+								el.remove();
+							} else {
+								break;
+							}
+						}
+					});
+					// #endregion
 				});
-				mutObs?.disconnect();
 				return true;
 			}
 		}, { elem: document.documentElement });
