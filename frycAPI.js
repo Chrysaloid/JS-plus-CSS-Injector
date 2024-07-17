@@ -681,7 +681,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			// loguj(name);
 		} catch (error) {
 			console.log(error);
-			proto.prototype[name] = func;
+			try {
+				proto.prototype[name] = func;
+			} catch (err) {}
 		}
 	},
 	roughSizeOfObject(object) {
@@ -929,7 +931,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runCallBack: true, elem: document.body, options: { childList: true, subtree: true } });
 	setDefaultDate(selector, options) { // { getDate: 111, setDate: 111, dateTitle: 111 }
 		// flagowe zastosowanie w www.autohotkey.com
-		const sel = document.querySelectorAll(selector);
+		const sel = document.querySelectorAll(`:is(${selector.trim()}):not(.lepszyCzasParent)`);
 		if (sel.length) {
 			const getDate = (() => {
 				switch (options?.getDate) {
@@ -941,26 +943,23 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 					default: return options?.getDate;
 				}
 			})();
-			// debugger;
 			const setDate = options?.setDate ?? frycAPI.setDefaultDateText;
 			const dateEnumMode = options?.dateEnumMode;
 			const dateEnumStyle = options?.dateEnumStyle;
 			const customStyle = options?.customStyle ?? "";
 			const dateOpts = options?.dateOpts;
 			sel.forEach(daElem => {
-				if (daElem.frycAPI_hasNotClass("lepszyCzasParent")) {
-					const data = new Date(getDate(daElem));
-					if (frycAPI.isValidDate(data)) {
-						const lepszyCzas = setDate(daElem, data, dateOpts);
-						daElem.classList.add("lepszyCzasParent");
-						daElem.removeAttribute("title");
-						dateEnumMode?.(lepszyCzas);
-						dateEnumStyle?.(lepszyCzas);
-						if (lepszyCzas.classList.contains("lepszyCzas")) {
-							lepszyCzas.setAttribute("style", customStyle);
-						} else {
-							lepszyCzas.querySelector(`.lepszyCzas`)?.setAttribute("style", customStyle);
-						}
+				const data = new Date(getDate(daElem));
+				if (frycAPI.isValidDate(data)) {
+					const lepszyCzas = setDate(daElem, data, dateOpts);
+					daElem.classList.add("lepszyCzasParent");
+					daElem.removeAttribute("title");
+					dateEnumMode?.(lepszyCzas);
+					dateEnumStyle?.(lepszyCzas);
+					if (lepszyCzas.classList.contains("lepszyCzas")) {
+						lepszyCzas.setAttribute("style", customStyle);
+					} else {
+						lepszyCzas.querySelector(`.lepszyCzas`)?.setAttribute("style", customStyle);
 					}
 				}
 			});
@@ -7004,7 +7003,47 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 			border-right-width: 0px;
 			border-bottom-width: 1.5px;
 		}
+
+		.contributor_info > .small, .contribution {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+		}
+		a.author_inline {
+			white-space: nowrap;
+		}
 	`);
+
+	(frycAPI.beforeLoad = function () {
+		if (window.location.pathname.startsWith("/matlabcentral/answers/")) { // Zmiana dat w odpowiedziach
+			frycAPI.createMutObs((mutRecArr0, mutObs0) => {
+				if (document.body !== null) {
+					frycAPI.createMutObs((mutRecArr, mutObs) => {
+						frycAPI.setDefaultDate(`.question-ask-date, .answered-date, .comment-date, .commented-edit-date`, {
+							getDate: elem => elem.innerText.replace("on ", ""),
+							setDate: (elem, data) => {
+								elem.innerText = "- ";
+								return frycAPI.appendDefaultDateText(elem, data, frycAPI.dateOptsNoTime);
+							},
+						});
+						frycAPI.setDefaultDate(`.question_container .contribution.latest-activity`, {
+							getDate: elem => {
+								const nod = elem.lastChild;
+								nod.remove();
+								elem.span = elem.appendChild(document.createElement("span"));
+								elem.span.innerText = "- ";
+								return nod.textContent.trim().replace("on ", "");
+							},
+							setDate: (elem, data) => {
+								return frycAPI.appendDefaultDateText(elem.span, data, frycAPI.dateOptsNoTime);
+							},
+						});
+					});
+					return true;
+				}
+			}, { elem: document.documentElement });
+		}
+	})();
 
 	frycAPI.onLoadSetter(() => {
 		if (window.location.pathname === "/support/search.html") { // Usuwanie podświetlenia z wyników wyszukiwania
