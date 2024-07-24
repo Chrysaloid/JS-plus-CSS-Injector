@@ -1356,7 +1356,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return function (...args) {
 			const context = this;
 			clearTimeout(timeout);
-			timeout = setTimeout(() => func.apply(context, args), wait);
+			return (timeout = setTimeout(() => func.apply(context, args), wait));
 		};
 	}, // document.addEventListener("mousemove", frycAPI.debounce(handleMouseMove, 100));
 	throttle(func, amount) {
@@ -1498,6 +1498,10 @@ frycAPI.expandPrototype(Element, "frycAPI_removeClass", function (...classNames)
 	this.classList.remove(...classNames);
 	return this;
 });
+frycAPI.expandPrototype(Element, "frycAPI_toggleClass", function (className, force) {
+	this.classList.toggle(className, force);
+	return this;
+});
 frycAPI.expandPrototype(Element, "frycAPI_setAttribute", function (attName, attValue) {
 	this.setAttribute(attName, attValue);
 	return this;
@@ -1584,7 +1588,7 @@ frycAPI.expandPrototype(String, "frycAPI_equalAny", function (strList) {
 	}
 	return false;
 });
-frycAPI.expandPrototype(Node, "frycAPI_isText", function (selector) {
+frycAPI.expandPrototype(Node, "frycAPI_isText", function () {
 	return this.nodeType === Node.TEXT_NODE;
 });
 frycAPI.expandPrototype(Node, "frycAPI_insertAfter", function (newNode) {
@@ -1605,6 +1609,12 @@ frycAPI.expandPrototype(Element, "frycAPI_childIndex", function () {
 	while ((me = me.previousElementSibling) !== null) i++;
 	return i;
 }, false, true);
+frycAPI.expandPrototype(Element, "frycAPI_elemByClass", function (klasa) {
+	return this.getElementsByClassName(klasa)[0];
+});
+frycAPI.expandPrototype(Element, "frycAPI_elemByTag", function (tag) {
+	return this.getElementsByTagName(tag)[0];
+});
 // frycAPI.expandPrototype(Template, "frycAPI_name", function () {
 // });
 // #region //* Prototypy 3
@@ -4890,6 +4900,10 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 
 		.s-topbar .s-topbar--item:not(.s-topbar--item__unset) {
 			--darkreader-bg--_tb-item-bg: transparent;
+		}
+
+		.comment-text code {
+			padding: 1px 2px;
 		}
 
 		${frycAPI.host("puzzling.stackexchange.com") ? /*css*/`
@@ -9656,6 +9670,54 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 	frycAPI.onLoadSetter(function () {
 		const tab = document.querySelector(`.woocommerce table.shop_table`);
 		frycAPI.makeTableSortable(tab, `tbody tr.cart_item`);
+	});
+} else if (frycAPI.host("cesium.com")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.nameContainer	{
+			*:where(:not(.optional)) {
+				margin: 5px 0px;
+			}
+			> * {
+				margin: 5px 0px 5px 20px;
+			}
+			h4.name {
+				margin-left: 0;
+				cursor: pointer;
+			}
+			&.collapse-me *:not(h4.name, h4.name *) {
+				display: none;
+			}
+		}
+		footer {
+			padding: 6px 6px;
+			margin: 12px 0;
+		}
+		body, input {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		#ClassList > ul > li, .nameContainer .name, div.nav h5, .page-title, code {
+			font-family: "Source Code Fryc", monospace !important;
+		}
+		.params td, .params th, .props td, .props th {
+			vertical-align: middle;
+		}
+		code {
+			color: #2aac2a;
+		}
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.forEach(`.nameContainer`, daElem => {
+			let next;
+			while ((next = daElem.nextElementSibling)?.frycAPI_hasNotClass("nameContainer") && next.frycAPI_hasNotClass("subsection-title")) {
+				daElem.appendChild(next);
+			}
+			daElem.frycAPI_elemByClass("name").addEventListener("click", function (e) {
+				daElem.frycAPI_toggleClass("collapse-me");
+			});
+			daElem.frycAPI_addClass("collapse-me");
+		});
+		document.querySelector(`.container-overview > .nameContainer`)?.frycAPI_removeClass("collapse-me");
 	});
 }
 // Code-Lens-Action insert-snippet IF template
