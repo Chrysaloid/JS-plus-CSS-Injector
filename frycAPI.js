@@ -7322,7 +7322,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	`);
 } else if (1 && frycAPI.host("www.reddit.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		* {
+		*:not(code, code *) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 		shreddit-ad-post {
