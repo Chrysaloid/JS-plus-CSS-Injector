@@ -1449,6 +1449,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	// #endregion
 };
 // #region //* Reszta
+if (window.location.pathname.endsWith(".pdf")) {
+	frycAPI.sendEventToBackground("downloadPDF", { url: window.location.href, czyZamknąć: history.length === 1 });
+}
 frycAPI.second =                  1000;
 frycAPI.minute = frycAPI.second *   60;
 frycAPI.hour   = frycAPI.minute *   60;
@@ -6836,11 +6839,11 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 		}
 	`);
 
-	(frycAPI.beforeLoad = function () {
-		if (document.querySelector("#APjFqb") && document.getElementById("searchform")) {
-			// document.body.frycAPI_addClass("google-3-column");
-		}
-	})();
+	// (frycAPI.beforeLoad = function () {
+	// 	if (document.querySelector("#APjFqb") && document.getElementById("searchform")) {
+	// 		document.body.frycAPI_addClass("google-3-column");
+	// 	}
+	// })();
 
 	frycAPI.onLoadSetter(() => {
 		if (document.querySelector("#APjFqb") && document.getElementById("searchform")) {
@@ -9718,6 +9721,29 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 			daElem.frycAPI_addClass("collapse-me");
 		});
 		document.querySelector(`.container-overview > .nameContainer`)?.frycAPI_removeClass("collapse-me");
+	});
+} else if (frycAPI.host("archived.moe")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.show-me {
+			display: block !important;
+		}
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		const search = document.querySelector(`.search_box`);
+		const input1 = document.querySelector(`input.search-query`);
+		const container = document.querySelector(`.navbar-inner .container`);
+		const input2 = document.getElementById("search_form_comment");
+		// const main = document.getElementById("main");
+		function show(e) {
+			search.frycAPI_addClass("show-me");
+		}
+		function hide(e) {
+			search.frycAPI_removeClass("show-me");
+		}
+		input1.addEventListener("focus", show);
+		input2.addEventListener("focus", show);
+		container.addEventListener("click", hide);
 	});
 }
 // Code-Lens-Action insert-snippet IF template

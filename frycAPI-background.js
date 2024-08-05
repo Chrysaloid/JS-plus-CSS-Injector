@@ -37,6 +37,17 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 	// console.log(data);
 	sendResp(await (async () => {
 		switch (name) {
+			case "closeTab": return void chrome.tabs.remove(sender.tab.id);
+			case "downloadPDF": {
+				chrome.downloads.download({ url: data.url });
+				if (data.czyZamknąć) {
+					chrome.tabs.remove(sender.tab.id);
+				} else {
+					chrome.tabs.goBack(sender.tab.id);
+				}
+				return;
+			}
+			case "downloadURL": return void chrome.downloads.download({ url: data });
 			case "injectStyle": return await chrome.scripting.insertCSS(defineStyle(data, sender));
 			case "defineStyle": return void defineStyle(data, sender);
 			case "injectStyleAgain": return await chrome.scripting.insertCSS(injectedStyles[data.id]);

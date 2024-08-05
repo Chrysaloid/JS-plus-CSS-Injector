@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "JS + CSS Injector",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "Injects JS and CSS",
 	"author": "Fryderyk Kukowski",
 	"minimum_chrome_version": "103.0",
@@ -15,6 +15,6 @@
 		{ "matches": ["<all_urls>"], "resources": ["frycAPI.js", "resources/*"] }
 	],
 	"externally_connectable": { "matches": ["<all_urls>"] },
-	"host_permissions": ["<all_urls>"],
-	"permissions": ["nativeMessaging", "scripting", "activeTab", "tabs"]
+	"permissions": ["nativeMessaging", "scripting", "activeTab", "tabs", "downloads", "webRequest"],
+	"host_permissions": ["<all_urls>"]
 }
