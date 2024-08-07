@@ -7064,13 +7064,11 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 
 	frycAPI.onLoadSetter(() => {
 		if (window.location.pathname === "/support/search.html") { // Usuwanie podświetlenia z wyników wyszukiwania
-			(async () => { // (dishi) <- Bro, jakby, co to w ogóle ma znaczyć? To był poprzedni komentarz.
-				await frycAPI.sleep(300);
-				frycAPI.forEach(`p.search_result_title`, (daElem, daI, daArr) => {
-					const atit = daElem.querySelector("a");
-					atit.href = atit.href.replace(/\?(.*)/u, "");
+			frycAPI.createMutObs((mutRecArr, mutObs) => {
+				frycAPI.forEach(`p.search_result_title a`, (daElem, daI, daArr) => {
+					daElem.href = daElem.href.replace(/\?(.*)/u, "");
 				});
-			})();
+			});
 		} else if (window.location.pathname === "/support/bugreports/") { // Zmiana dat w bugreportach
 			// frycAPI.createMutObs((mutRecArr, mutObs) => {
 			// });
