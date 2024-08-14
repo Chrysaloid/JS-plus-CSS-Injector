@@ -1618,6 +1618,9 @@ frycAPI.expandPrototype(Element, "frycAPI_elemByClass", function (klasa) {
 frycAPI.expandPrototype(Element, "frycAPI_elemByTag", function (tag) {
 	return this.getElementsByTagName(tag)[0];
 });
+frycAPI.expandPrototype(Element, "frycAPI_hasScroll", function () {
+	return this.scrollHeight > this.clientHeight;
+}, false, true);
 // frycAPI.expandPrototype(Template, "frycAPI_name", function () {
 // });
 // #region //* Prototypy 3
@@ -9743,6 +9746,12 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 		input2.addEventListener("focus", show);
 		container.addEventListener("click", hide);
 	});
+} else if (frycAPI.host("www.oddschecker.com")) {
+	frycAPI.onLoadSetter(function () {
+		frycAPI.forEach(`td.bc`, daElem => {
+			daElem.firstElementChild.innerText = eval(daElem.firstElementChild.innerText).toFixed(2).replace(".00", "");
+		});
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 
@@ -9790,3 +9799,4 @@ if (frycAPI.script.getAttribute("src").includes("chrome-extension")) {
 
 const frycAPI_t2 = performance.now(); loguj(`frycAPI loaded in ${(frycAPI_t2 - frycAPI_t1).toFixed(1)} ms! (from ${loadSource})`);
 // #endregion
+
