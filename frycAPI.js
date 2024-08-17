@@ -346,7 +346,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	czasNumer: 1,
 	// frycAPI.urlParam: new URL(window.location.href).searchParams.getAll("frycAPI_URL_Parameter").pop(),
 	injectStyleNormalNum: 0,
-	simpleFontChange: `* { font-family: IBM Plex Sans Condensed; }`, // ${frycAPI.simpleFontChange}
+	simpleFontChange: `* { font-family: "IBM Plex Sans Condensed", sans-serif; }`, // ${frycAPI.simpleFontChange}
 	functionsForClasses: {
 		setNumCols(numCols) {
 			if (numCols !== undefined && numCols >= 1) {
@@ -371,6 +371,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	script: document.currentScript,
 	createMutObsLicznik: 0,
+	path: window.location.pathname,
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -1449,7 +1450,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	// #endregion
 };
 // #region //* Reszta
-if (window.location.pathname.endsWith(".pdf")) {
+if (frycAPI.path.endsWith(".pdf")) {
 	frycAPI.sendEventToBackground("downloadPDF", { url: window.location.href, czyZamknąć: history.length === 1 });
 }
 frycAPI.second =                  1000;
@@ -3085,7 +3086,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 		}
 	`);
 
-	if (window.location.pathname.includes("thread")) {
+	if (frycAPI.path.includes("thread")) {
 		const opcje = { childList: true };
 		/*
 		async function tumblerize() {
@@ -5040,7 +5041,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 	`);
 
 	frycAPI.onLoadSetter(async () => {
-		if (window.location.pathname === "/stats/563560/achievements/") {
+		if (frycAPI.path === "/stats/563560/achievements/") {
 			// Steam Alien Swarm Reactive Drop Achievments Alphabetical Sort
 			frycAPI.injectStyle(/*css*/`
 				/* 
@@ -6383,7 +6384,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 	frycAPI.onLoadSetter(() => {
 		// const t1 = performance.now();
 		// #region //* Favicon
-		if (window.location.pathname.startsWith("/boards")) {
+		if (frycAPI.path.startsWith("/boards")) {
 			frycAPI.changeFaviconRes("AHK_Blue.png");
 		} else {
 			frycAPI.changeFaviconRes("AHK_Better.png");
@@ -7035,7 +7036,7 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 	`);
 
 	(frycAPI.beforeLoad = function () {
-		if (window.location.pathname.startsWith("/matlabcentral/answers/")) { // Zmiana dat w odpowiedziach
+		if (frycAPI.path.startsWith("/matlabcentral/answers/")) { // Zmiana dat w odpowiedziach
 			frycAPI.createMutObs((mutRecArr0, mutObs0) => {
 				if (document.body !== null) {
 					frycAPI.createMutObs((mutRecArr, mutObs) => {
@@ -7066,13 +7067,13 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 	})();
 
 	frycAPI.onLoadSetter(() => {
-		if (window.location.pathname === "/support/search.html") { // Usuwanie podświetlenia z wyników wyszukiwania
+		if (frycAPI.path === "/support/search.html") { // Usuwanie podświetlenia z wyników wyszukiwania
 			frycAPI.createMutObs((mutRecArr, mutObs) => {
 				frycAPI.forEach(`p.search_result_title a`, (daElem, daI, daArr) => {
 					daElem.href = daElem.href.replace(/\?(.*)/u, "");
 				});
 			});
-		} else if (window.location.pathname === "/support/bugreports/") { // Zmiana dat w bugreportach
+		} else if (frycAPI.path === "/support/bugreports/") { // Zmiana dat w bugreportach
 			// frycAPI.createMutObs((mutRecArr, mutObs) => {
 			// });
 			frycAPI.setDefaultDate(`.bug_description > p > em`, {
@@ -7712,7 +7713,7 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 		// YT Playlist Element Delete Button
 		(async () => {
 			await frycAPI.sleep(2000);
-			if (window.location.pathname.startsWith("/playlist")) {
+			if (frycAPI.path.startsWith("/playlist")) {
 				const esval = '<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" class="mySVG"><path d="M11,17H9V8h2V17z M15,8h-2v9h2V8z M19,4v1h-1v16H6V5H5V4h4V3h6v1H19z M17,5H7v15h10V5z" class="style-scope yt-icon"></path></svg>';
 				frycAPI.forEach(`ytd-menu-renderer.style-scope.ytd-playlist-video-renderer`, function (daElem) {
 					const trDiv = document.createElement("div");
@@ -7729,7 +7730,7 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 			}
 		})();
 
-		if (0 && window.location.pathname.startsWith("/watch")) {
+		if (0 && frycAPI.path.startsWith("/watch")) {
 			loguj("YT Watch Starting!");
 			/*
 			let pop = document.querySelector("ytd-popup-container");
@@ -8155,7 +8156,7 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 			.insertAdjacentElement("afterbegin", document.querySelector(".header"));
 		} catch (error) { }
 
-		if (window.location.pathname.frycAPI_includesAny(["%2Fdocs%2F", "/docs/"])) {
+		if (frycAPI.path.frycAPI_includesAny(["%2Fdocs%2F", "/docs/"])) {
 			frycAPI.changeFaviconRes("ORACLE.png");
 		}
 	});
@@ -8523,7 +8524,7 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		}
 	`);
 
-	const pathName = window.location.pathname;
+	const pathName = frycAPI.path;
 
 	frycAPI.onLoadSetter(() => {
 		if (pathName.startsWith("/posts/")) {
@@ -8694,7 +8695,7 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		frycAPI.changeFaviconRes("e621_Logo.png");
 	});
 } else if (frycAPI.host("e-hentai.org")) {
-	if (window.location.pathname.startsWith("/s/")) {
+	if (frycAPI.path.startsWith("/s/")) {
 		frycAPI.injectStyle(/*css*/`
 			img[src="https://ehgt.org/g/f.png"],
 			img[src="https://ehgt.org/g/p.png"],
@@ -9271,7 +9272,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 	`);
 
 	(frycAPI.beforeLoad = function () {
-		if (window.location.pathname.startsWith("/blog/")) {
+		if (frycAPI.path.startsWith("/blog/")) {
 			frycAPI.colorSchemeDark = 1;
 			frycAPI.injectStyleOnLoad(/*css*/`
 				body.custom-background {
@@ -9282,7 +9283,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 	})();
 
 	frycAPI.onLoadSetter(() => {
-		if (window.location.pathname.startsWith("/forums/")) {
+		if (frycAPI.path.startsWith("/forums/")) {
 			const t = document.querySelector(".user time");
 			const theirDate = new Date(t.innerHTML).getTime();
 			const myDate = new Date(t.getAttribute("datetime")).getTime();
@@ -9511,7 +9512,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 		frycAPI.setDefaultDate(`#userlist.copy > span.smallcopy`, { getDate: "txt" });
 
 		if (document.body.classList.contains("thread")) {
-			const xml = await frycAPI.readFile(window.location.origin + window.location.pathname + "/rss", "xml");
+			const xml = await frycAPI.readFile(window.location.origin + frycAPI.path + "/rss", "xml");
 			// xml.querySelector(`parsererror`) === null
 			// frycAPI.querySelNull(`parsererror`, xml)
 			let rss;
@@ -9752,6 +9753,41 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 			daElem.firstElementChild.innerText = eval(daElem.firstElementChild.innerText).toFixed(2).replace(".00", "");
 		});
 	});
+} else if (frycAPI.host("math.hws.edu") && frycAPI.path === "/graphicsbook/demos/c2/rgb-hsv.html") {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		#canvas-holder {
+			position: relative;
+		}
+		#myDiv {
+			position: absolute;
+			top: 5px;
+			left: 5px;
+		}
+	`);
+	// #region //* colConv
+	const colConv = { "00":0, "01":1, "02":2, "03":3, "04":4, "05":5, "06":6, "07":7, "08":8, "09":9, "0A":10, "0B":11, "0C":12, "0D":13, "0E":14, "0F":15, "10":16, "11":17, "12":18, "13":19, "14":20, "15":21, "16":22, "17":23, "18":24, "19":25, "1A":26, "1B":27, "1C":28, "1D":29, "1E":30, "1F":31, "20":32, "21":33, "22":34, "23":35, "24":36, "25":37, "26":38, "27":39, "28":40, "29":41, "2A":42, "2B":43, "2C":44, "2D":45, "2E":46, "2F":47, "30":48, "31":49, "32":50, "33":51, "34":52, "35":53, "36":54, "37":55, "38":56, "39":57, "3A":58, "3B":59, "3C":60, "3D":61, "3E":62, "3F":63, "40":64, "41":65, "42":66, "43":67, "44":68, "45":69, "46":70, "47":71, "48":72, "49":73, "4A":74, "4B":75, "4C":76, "4D":77, "4E":78, "4F":79, "50":80, "51":81, "52":82, "53":83, "54":84, "55":85, "56":86, "57":87, "58":88, "59":89, "5A":90, "5B":91, "5C":92, "5D":93, "5E":94, "5F":95, "60":96, "61":97, "62":98, "63":99, "64":100, "65":101, "66":102, "67":103, "68":104, "69":105, "6A":106, "6B":107, "6C":108, "6D":109, "6E":110, "6F":111, "70":112, "71":113, "72":114, "73":115, "74":116, "75":117, "76":118, "77":119, "78":120, "79":121, "7A":122, "7B":123, "7C":124, "7D":125, "7E":126, "7F":127, "80":128, "81":129, "82":130, "83":131, "84":132, "85":133, "86":134, "87":135, "88":136, "89":137, "8A":138, "8B":139, "8C":140, "8D":141, "8E":142, "8F":143, "90":144, "91":145, "92":146, "93":147, "94":148, "95":149, "96":150, "97":151, "98":152, "99":153, "9A":154, "9B":155, "9C":156, "9D":157, "9E":158, "9F":159, "A0":160, "A1":161, "A2":162, "A3":163, "A4":164, "A5":165, "A6":166, "A7":167, "A8":168, "A9":169, "AA":170, "AB":171, "AC":172, "AD":173, "AE":174, "AF":175, "B0":176, "B1":177, "B2":178, "B3":179, "B4":180, "B5":181, "B6":182, "B7":183, "B8":184, "B9":185, "BA":186, "BB":187, "BC":188, "BD":189, "BE":190, "BF":191, "C0":192, "C1":193, "C2":194, "C3":195, "C4":196, "C5":197, "C6":198, "C7":199, "C8":200, "C9":201, "CA":202, "CB":203, "CC":204, "CD":205, "CE":206, "CF":207, "D0":208, "D1":209, "D2":210, "D3":211, "D4":212, "D5":213, "D6":214, "D7":215, "D8":216, "D9":217, "DA":218, "DB":219, "DC":220, "DD":221, "DE":222, "DF":223, "E0":224, "E1":225, "E2":226, "E3":227, "E4":228, "E5":229, "E6":230, "E7":231, "E8":232, "E9":233, "EA":234, "EB":235, "EC":236, "ED":237, "EE":238, "EF":239, "F0":240, "F1":241, "F2":242, "F3":243, "F4":244, "F5":245, "F6":246, "F7":247, "F8":248, "F9":249, "FA":250, "FB":251, "FC":252, "FD":253, "FE":254, "FF":255 };
+	// #endregion
+	function getTextColor(hex) {
+		const r = colConv[hex.slice(1, 3)] / 255;
+		const g = colConv[hex.slice(3, 5)] / 255;
+		const b = colConv[hex.slice(5, 7)] / 255;
+		// const war = (Math.max(r, g, b) / 255) >= 0.5;
+		// const war = ((r + g + b) / 765) >= 0.5;
+		// const war = (0.299 * r + 0.587 * g + 0.114 * b) > 128;
+		const war = Math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b) > 0.5;
+		return war ? "#000000" : "#FFFFFF";
+	}
+	const rgb2hex = rgb => `#${rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/).slice(1).map(n => parseInt(n, 10).toString(16).padStart(2, "0")).join("").toUpperCase()}`; // eslint-disable-line radix
+	frycAPI.onLoadSetter(function () {
+		const canv = document.getElementById("maincanvas");
+		const myDiv = canv.parentElement.appendChild(document.createElement("div").frycAPI_setAttribute("id", "myDiv").frycAPI_setInnerHTML("Hello, I'm text"));
+		frycAPI.createMutObs((mutRecArr0, mutObs0) => {
+			if (canv.style.backgroundColor.length > 0) myDiv.style.color = getTextColor(rgb2hex(canv.style.backgroundColor));
+		}, { runOnLoad: false, elem: canv, options: { attributes: true, childList: false, subtree: false } });
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 
@@ -9788,15 +9824,15 @@ if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // dodanie stylu z ak
 	frycAPI.myStyleManualFunc.off();
 }
 
-let loadSource;
+let frycAPI_loadSource;
 if (frycAPI.script.getAttribute("src").includes("chrome-extension")) {
-	loadSource = "chrome-extension";
+	frycAPI_loadSource = "chrome-extension";
 } else {
-	loadSource = "cdn.jsdelivr.net";
+	frycAPI_loadSource = "cdn.jsdelivr.net";
 }
 
 // frycAPI.sendEventToBackground("test");
 
-const frycAPI_t2 = performance.now(); loguj(`frycAPI loaded in ${(frycAPI_t2 - frycAPI_t1).toFixed(1)} ms! (from ${loadSource})`);
+const frycAPI_t2 = performance.now(); loguj(`frycAPI loaded in ${(frycAPI_t2 - frycAPI_t1).toFixed(1)} ms! (from ${frycAPI_loadSource})`);
+document.currentScript.remove();
 // #endregion
-
