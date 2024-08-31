@@ -986,6 +986,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	appendDefaultDateText(elem, data, dateOpts) {
 		return elem.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, dateOpts));
 	},
+	insertDefaultDateText(elem, position, data, dateOpts) {
+		return elem.frycAPI_insertHTML(position, frycAPI.getDefaultDateText(data, dateOpts));
+	},
 	getDefaultDateText(data, dateOpts) {
 		return frycAPI.getDefaultDateHTML(frycAPI.printDate(data, dateOpts?.printDate), frycAPI.printRelTime(data, dateOpts?.printRelTime));
 	},
@@ -1596,7 +1599,14 @@ frycAPI.expandPrototype(Node, "frycAPI_isText", function () {
 	return this.nodeType === Node.TEXT_NODE;
 });
 frycAPI.expandPrototype(Node, "frycAPI_insertAfter", function (newNode) {
-	this.parentNode.insertBefore(newNode, this.nextSibling);
+	if (frycAPI.isString(newNode)) {
+		newNode = frycAPI.elemFromHTML(newNode);
+	}
+	if (this.nextSibling !== null) {
+		this.parentNode.insertBefore(newNode, this.nextSibling);
+	} else {
+		this.parentNode.appendChild(newNode);
+	}
 	return newNode;
 });
 frycAPI.expandPrototype(String, "frycAPI_toTitleCase", function () {
@@ -9787,6 +9797,73 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 		frycAPI.createMutObs((mutRecArr0, mutObs0) => {
 			if (canv.style.backgroundColor.length > 0) myDiv.style.color = getTextColor(rgb2hex(canv.style.backgroundColor));
 		}, { runOnLoad: false, elem: canv, options: { attributes: true, childList: false, subtree: false } });
+	});
+} else if (frycAPI.host("ponepaste.org")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		.tag:not(body) {
+			background-color: #3298dc;
+			color: #fff;
+		}
+		span.tag.is-normal:has(i.fa.fa-hdd.fa-lg) {
+			gap: 5px;
+		}
+		.column.is-4:not(.has-text-centered, .has-text-right) {
+			display: flex;
+			flex-wrap: wrap;
+			align-content: flex-start;
+			gap: 2px 4px;
+			hr {
+				flex-basis: 100%;
+				height: 0;
+				margin: 0;
+				border: 0;
+			}
+			/* span.tag.is-normal:has(i.fa.fa-star.fa-lg) {
+				margin-right: auto;
+			} */
+		}
+	`);
+	frycAPI.onLoadSetter(function () {
+		// #region //* Naprawa wyświetlania info w lewym górnym
+		const br = document.querySelector(`.column.is-4:not(.has-text-centered, .has-text-right) > br`);
+		if (br !== null) {
+			br.frycAPI_insertHTML("afterend", "<hr>");
+			br.remove();
+		}
+		// #endregion
+		// #region //* Naprawa dat
+		const siteDates = document.querySelector(`.column.is-4.has-text-centered small.title`);
+		if (siteDates !== null) {
+			frycAPI.setDefaultDateStyle();
+			function dateHelper(daElem, frontStr) {
+				const modDateStr = daElem.textContent.trim();
+				if (modDateStr.startsWith(frontStr)) {
+					return { frontStr, dateStr: modDateStr.replace(frontStr, "") }; // eslint-disable-line object-shorthand
+				} else {
+					return undefined;
+				}
+			}
+			Array.from(siteDates.childNodes).forEach((daElem, daI, daArr) => {
+				if (daElem.nodeType === Node.TEXT_NODE) {
+					const obj = dateHelper(daElem, "Created: ") ?? dateHelper(daElem, "Updated: ") ?? dateHelper(daElem, "Expiry: ");
+					if (obj?.dateStr !== undefined) {
+						const data = new Date(obj.dateStr);
+						if (frycAPI.isValidDate(data)) {
+							daElem.textContent = obj.frontStr;
+							frycAPI.setDefaultDateEnum.mode.oba(daElem.frycAPI_insertAfter(frycAPI.getDefaultDateText(data)));
+							// daElem.remove();
+						}
+					}
+				}
+			});
+		}
+		frycAPI.createMutObs((mutRecArr, mutObs) => {
+			frycAPI.setDefaultDate(`table#archive tbody td:nth-child(3)`, { getDate: "txt", customStyle: `cursor: none;` }).mode.relatywnyCzas();
+		});
+		// #endregion
 	});
 }
 // Code-Lens-Action insert-snippet IF template
