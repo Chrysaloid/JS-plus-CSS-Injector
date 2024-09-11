@@ -7050,7 +7050,7 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 			frycAPI.createMutObs((mutRecArr0, mutObs0) => {
 				if (document.body !== null) {
 					frycAPI.createMutObs((mutRecArr, mutObs) => {
-						frycAPI.setDefaultDate(`.question-ask-date, .answered-date, .comment-date, .commented-edit-date`, {
+						frycAPI.setDefaultDate(`.question-ask-date, .answered-date, .comment-date, .commented-edit-date, .answered-edit-date`, {
 							getDate: elem => elem.innerText.replace("on ", ""),
 							setDate: (elem, data) => {
 								elem.innerText = "- ";
