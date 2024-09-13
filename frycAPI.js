@@ -298,7 +298,7 @@ class frycAPI_StyleState extends Object {
 	handleDarkreader() {
 		if (document.documentElement.hasAttribute("data-darkreader-mode")) {
 			let elem = this.styleElem.nextElementSibling;
-			if (elem !== undefined && elem.tagName === "STYLE" && elem.frycAPI_hasClass("darkreader")) {
+			if (elem !== null && elem.tagName === "STYLE" && elem.frycAPI_hasClass("darkreader")) {
 				elem.disabled = this.styleElem.disabled;
 			} else {
 				elem = this.styleElem.parentElement.querySelector(`#${this.id} ~ style.darkreader`);
@@ -5910,19 +5910,22 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			}
 
 			if (window.location.search.includes("statystyki")) {
-				new MutationObserver(async function USOS_Fix(mutRec, docObs) {
-					const id1 = document.querySelector("div#chart iframe").getAttribute("id");
-					while (!frames[id1]) {
+				const chart = document.getElementById("chart");
+				if (chart !== null) {
+					new MutationObserver(async function USOS_Fix(mutRec, docObs) {
+						const id1 = document.querySelector("div#chart iframe").getAttribute("id");
+						while (!frames[id1]) {
+							await frycAPI.sleep(50);
+						}
 						await frycAPI.sleep(50);
-					}
-					await frycAPI.sleep(50);
-					const head1 = frames[id1].document.querySelector("head");
-					const css1 = document.createElement("style");
-					css1.innerHTML = "svg text { fill: hsl(0deg 0% 58%); }";
-					head1.append(css1);
-					console.log("Zaobserwowałem!");
-					docObs.disconnect();
-				}).observe(document.getElementById("chart"), { attributes: true, childList: true, subtree: true });
+						const head1 = frames[id1].document.querySelector("head");
+						const css1 = document.createElement("style");
+						css1.innerHTML = "svg text { fill: hsl(0deg 0% 58%); }";
+						head1.append(css1);
+						console.log("Zaobserwowałem!");
+						docObs.disconnect();
+					}).observe(chart, { attributes: true, childList: true, subtree: true });
+				}
 			}
 
 			{ // Injected
