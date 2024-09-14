@@ -9746,21 +9746,20 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 
 	frycAPI.onLoadSetter(function () {
 		const search = document.querySelector(`.search_box`);
+		if (search === null) return;
 		const input1 = document.querySelector(`input.search-query`);
 		const container = document.querySelector(`.navbar-inner .container`);
 		const input2 = document.getElementById("search_form_comment");
 		// const main = document.getElementById("main");
-		if (search !== null && input1 !== null && container !== null && input2 !== null) {
-			function show(e) {
-				search.frycAPI_addClass("show-me");
-			}
-			function hide(e) {
-				search.frycAPI_removeClass("show-me");
-			}
-			input1.addEventListener("focus", show);
-			input2.addEventListener("focus", show);
-			container.addEventListener("click", hide);
+		function show(e) {
+			search.frycAPI_addClass("show-me");
 		}
+		function hide(e) {
+			search.frycAPI_removeClass("show-me");
+		}
+		input1?.addEventListener("focus", show);
+		input2?.addEventListener("focus", show);
+		container?.addEventListener("click", hide);
 	});
 } else if (frycAPI.host("www.oddschecker.com")) {
 	frycAPI.onLoadSetter(function () {
