@@ -39,13 +39,15 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 		switch (name) {
 			case "closeTab": return void chrome.tabs.remove(sender.tab.id);
 			case "downloadPDF": {
-				chrome.downloads.download({ url: data.url });
-				if (data.czyZamknąć) {
-					chrome.tabs.remove(sender.tab.id);
-				} else {
-					chrome.tabs.goBack(sender.tab.id);
-				}
-				return;
+				chrome.downloads.download({ url: data.url }).then(downloadId => {
+					// console.log(downloadId);
+					if (data.czyZamknąć) {
+						chrome.tabs.remove(sender.tab.id);
+					} else {
+						chrome.tabs.goBack(sender.tab.id);
+					}
+				});
+				break;
 			}
 			case "downloadURL": return void chrome.downloads.download({ url: data });
 			case "injectStyle": return await chrome.scripting.insertCSS(defineStyle(data, sender));

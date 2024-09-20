@@ -1448,12 +1448,18 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	template() {
 
 	}, // frycAPI.template();
+	insertImage(elem, fileName, where = "beforeend") {
+		return elem.frycAPI_insertHTML(where, `<img src="${frycAPI.getResURL(fileName)}">`);
+	}, // const img = frycAPI.insertImage(elem, "img.png");
+	insertLoadingGif(elem, where = "beforeend", fileName = "loading.gif") {
+		return elem.frycAPI_insertHTML(where, `<img class="loading-gif" src="${frycAPI.getResURL(fileName)}">`);
+	}, // const img = frycAPI.insertLoadingGif(elem); // .loading-gif
 	// #region //* Funkcje 5
 	// #endregion
 	// #endregion
 };
 // #region //* Reszta
-if (frycAPI.path.endsWith(".pdf")) {
+if (frycAPI.path.endsWith(".pdf") && window.location.protocol !== "file:") {
 	frycAPI.sendEventToBackground("downloadPDF", { url: window.location.href, czyZamknąć: history.length === 1 });
 }
 frycAPI.second =                  1000;
@@ -8420,6 +8426,8 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 			position: fixed;
 			bottom: 5px;
 			right: 5px;
+		}
+		#mojScroll, .pokaż-wykres {
 			color: #b4c7d9;
 			border: 1px solid;
 			background-color: #1F3C67;
@@ -8535,6 +8543,65 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		article.post-preview {
 			flex-shrink: 0;
 		}
+
+		.pool-diff-graph {
+			--f-size: 12px;
+			font-size: var(--f-size);
+			line-height: var(--f-size);
+			&, & * {
+				font-family: "Source Code Fryc" !important;
+			}
+			b {
+				color: red;
+				font-weight: normal;
+			}
+			.txt-col-s { color: var(--palette-text-green); }
+			.txt-col-q { color: var(--palette-text-yellow); }
+			.txt-col-e { color: var(--palette-text-red); }
+			.txt-col-ś {
+				color: color-mix(in srgb, var(--palette-text-green), white 50%);
+				/* text-align: left; */
+			}
+			.diff-number, #reset-graph {
+				cursor: pointer;
+				display: inline;
+			}
+			:is(.diff-number, #reset-graph):hover, .diff-sel {
+				background-color: hsla(0, 0%, 100%, 20%);
+			}
+			.left {
+				background-color: color-mix(in srgb, var(--palette-text-green) 20%, transparent);
+			}
+			.right {
+				background-color: color-mix(in srgb, var(--palette-text-red) 20%, transparent);
+			}
+			#reset-graph {
+			}
+		}
+		.desc .pool-diff-graph {
+			padding: 1px;
+			padding-top: 0;
+		}
+		.loading-gif {
+			filter: invert(1);
+		}
+		div.paginator + .loading-gif {
+			width: 100px;
+		}
+		.desc .loading-gif {
+			height: 30px;
+			border: none !important;
+			display: block;
+		}
+		.pokaż-wykres {
+			width: fit-content;
+		}
+		.pokaż-info {
+			cursor: pointer;
+			&:hover {
+				background-color: hsla(0, 0%, 100%, 10%);
+			}
+		}
 	`);
 
 	const pathName = frycAPI.path;
@@ -8559,90 +8626,53 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.getElementById("search-box"));
 			window.scrollTo(0, 0);
-		} else if (pathName.startsWith("/pools/") && !pathName.startsWith("/pools/gallery")) {
-			const czytelnyCzas = function (czas) {
-				return frycAPI.printRelTime(czas, { czyDiff: false, lang: "pol", space: true, ago: false, leftAlign: true }).padStart(13);
-			};
-			(frycAPI.e621_get_pool_dates = async function (pocz, kon) {
-				// np. https://e621.net/pools/35222
-				if (arguments.length === 0) {
-					pocz = 0; kon = 0;
-				} else if (arguments.length === 2 && pocz > kon) {
-					console.log("Błąd! Początek nie może być większy niż koniec!");
-					return;
-				} else if (arguments.length === 2 && pocz < 1) {
-					console.log("Błąd! Początek nie może być mniejszy niż 1!");
-					return;
-				} else if (arguments.length !== 2) {
-					console.log("Błąd! Zła liczba parametrów!");
-					return;
-				}
-
-				const poolID = pathName.split("/").slice(-1);
-				frycAPI.datArr ||= ((await frycAPI.readFile(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`)) // eslint-disable-line require-atomic-updates
-				.posts.map(elem => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
-				.map((daElem, daI) => {
-					// Numery postów chronologicznie
-					// document.getElementById("post_" + daElem[1])?.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
-					return daElem[0];
-				})
-				);
-				const datArr = frycAPI.datArr;
-				const ostatniaData = datArr[datArr.length - 1];
-
-				/* Numery postów wedle kolejności na stronie + daty z informacji na stronie
-				// var datArr = [];
-				document.querySelectorAll("#posts-container>article").forEach(function (daElem, daI, daArr) {
-					daElem.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).innerHTML = "#" + (daI + 1);
-					// datArr.push(new Date(daElem.querySelector("img").title.match(/(?<=Date: ).*(?=$)/gm)).getTime());
+		} else if (pathName.startsWith("/pools/") && !pathName.startsWith("/pools/new")) {
+			const ratArr = [
+				`<div$class="txt-col-s">Safe        `,
+				`<div$class="txt-col-q">Questionable`,
+				`<div$class="txt-col-e">Explicit    `,
+			];
+			const getRatStr = function (psts) {
+				const ratCount = [0, 0, 0];
+				let rStr = "";
+				let score = 0;
+				psts.forEach(post => {
+					switch (post.rating) {
+						case "s": ratCount[0]++; break;
+						case "q": ratCount[1]++; break;
+						case "e": ratCount[2]++; break;
+					}
+					score += post.score.total;
 				});
-				*/
+				const ratPadd = psts.length.toString().length;
+				ratCount.forEach((rat, i) => {
+					rStr += `${ratArr[i]} : ${ratCount[i].toString().padStart(ratPadd)} | ${(ratCount[i] / psts.length * 100).toFixed(1).padStart(5)} %</div>`;
+				});
+				rStr += `<div$class="txt-col-ś">Średni wynik ↑: ${(score / psts.length).toFixed(1)}</div>`;
+				return rStr;
+			};
+			let posts, datArr, ratStr = "", poolGraph, e621_get_pool_dates, left, right;
 
-				const diffArr = [];
-				for (let i = 1; i < datArr.length; i++) {
-					diffArr.push(Math.max(datArr[i] - datArr[i - 1], 0));
-				}
-
-				if (kon === 0) {
-					kon = diffArr.length;
-				} else if (kon > diffArr.length) {
-					console.log("Błąd! Nie można wybrać pozycji większej niż długość wektora różnic!");
-					return;
-				}
-				if (arguments.length === 2) {
-					pocz--;
-				}
-				const diffArrMax = Math.max(...diffArr.slice(pocz, kon));
-
-				const diffArrMean = (ostatniaData - datArr[0]) / (datArr.length - 1);
-
-				let wykres = ""; const padding = kon.toString().length;
-				for (let i = pocz; i < kon; i++) {
-					const ile = Math.round(diffArr[i] / diffArrMax * 100);
-					wykres += `${String(i + 1).padStart(padding, " ")}. ${czytelnyCzas(diffArr[i])} [${"".padEnd(ile, "|") + "".padEnd(100 - ile, " ")}]\n`;
-				}
-				const obecnyCzas = Date.now();
-				const nowaStrona = new Date(ostatniaData + diffArrMean);
-				const nowaStronaDiff = nowaStrona.getTime() - obecnyCzas;
-				let nowaStronaStr;
-				if (nowaStronaDiff >= 0) {
-					nowaStronaStr = `za %c${czytelnyCzas(nowaStronaDiff).trim()}%c`;
-				} else {
-					nowaStronaStr = `powinna być %c${czytelnyCzas(-nowaStronaDiff).trim()}%c temu`;
-				}
-
-				if (frycAPI.pool === undefined) {
-					frycAPI.pool = await frycAPI.readFile(`https://e621.net/pools/${poolID}.json`); // eslint-disable-line require-atomic-updates
-					frycAPI.pool.post_ids.forEach((daElem, daI, daArr) => {
-						document.getElementById("post_" + daElem)?.querySelector(".post-score").insertAdjacentElement("afterbegin", document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
+			if (pathName.startsWith("/pools/gallery")) {
+				const info = frycAPI.elemFromHTML(`<div class="pokaż-info">Info</div>`);
+				frycAPI.forEach(`article.post-preview .desc`, desc => {
+					desc.appendChild(info.cloneNode(1)).addEventListener("click", function (e) {
+						this.remove();
+						const img = frycAPI.insertLoadingGif(desc);
+						const poolID = desc.firstElementChild.getAttribute("href").replace("/pools/", "");
+						frycAPI.readFile(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`).then(resp => {
+							desc.frycAPI_appendHTML(`<div class="pool-diff-graph">${
+								`Liczba postów: ${resp.posts.length >= 320 ? `<b>${resp.posts.length}</b>` : resp.posts.length} | 100.0 %<br>${getRatStr(resp.posts)}`
+								.replaceAll(" ", "&nbsp").replaceAll("$", " ")
+							}</div>`);
+							img.remove();
+						});
 					});
-				}
-				let overLimitInfo = "%c";
-				if (frycAPI.pool.post_count > 320) {
-					overLimitInfo += "\nUwaga! Przekroczono limit postów (320). Dane mogą być niepełne.";
-				}
-				overLimitInfo += "%c";
-
+				});
+			} else {
+				const czytelnyCzas = function (czas) {
+					return frycAPI.printRelTime(czas, { czyDiff: false, lang: "pol", space: true, ago: false, leftAlign: true }).padStart(12);
+				};
 				const opcje = {
 					weekday: "short",
 					year: "2-digit",
@@ -8652,17 +8682,148 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 					minute: "2-digit",
 					second: "2-digit",
 				};
-				console.clear();
-				console.log(`Wykres odległości czasowych pomiędzy kolejnymi stronami komiksu:`);
-				console.dir(`${wykres}`.replace(/\t/gm, ""));
-				console.log(
-					`Średni czas pomiędzy wydaniami kolejnych stron wyniósł: %c${czytelnyCzas(diffArrMean).trim()}%c
-					Ostatnia strona ukazała się: %c${new Date(ostatniaData).toLocaleString("pl-PL", opcje)}%c - %c${czytelnyCzas(obecnyCzas - ostatniaData).trim()}%c temu
-					Następna strona ukaże się:   %c${nowaStrona.toLocaleString("pl-PL", opcje)}%c - ${nowaStronaStr}${overLimitInfo}
-					frycAPI.e621_get_pool_dates(pocz,kon)`.replace(/\t/gm, ""),
-					"color:red", "color:white", "color:red", "color:white", "color:red", "color:white", "color:red", "color:white", "color:red", "color:white", "color:red", "color:white"
-				);
-			})();
+				const paginator = document.querySelector(`div.paginator`);
+				const poolID = pathName.split("/").slice(-1);
+				const handleClick = function (e) {
+					e.preventDefault();
+					if (e.type === "click") {
+						left = Number(this.getAttribute("num"));
+						poolGraph.querySelector(`.left`)?.frycAPI_removeClass("left");
+						this.frycAPI_addClass("left");
+					} else {
+						right = Number(this.getAttribute("num"));
+						poolGraph.querySelector(`.right`)?.frycAPI_removeClass("right");
+						this.frycAPI_addClass("right");
+					}
+					if (left !== undefined && right !== undefined) {
+						e621_get_pool_dates(left, right);
+					}
+					return false;
+				};
+				e621_get_pool_dates = async function (pocz, kon) {
+					// np. https://e621.net/pools/35222
+					if (arguments.length === 0) {
+						pocz = 0;
+					} else if (arguments.length === 2 && pocz > kon) {
+						console.log("Błąd! Początek nie może być większy niż koniec!");
+						return;
+					} else if (arguments.length === 2 && pocz < 1) {
+						console.log("Błąd! Początek nie może być mniejszy niż 1!");
+						return;
+					}
+
+					if (posts === undefined) {
+						const img = frycAPI.insertLoadingGif(paginator, "afterend");
+						posts = (await frycAPI.readFile(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`)).posts; // eslint-disable-line require-atomic-updates
+						datArr ??= (
+							posts.map(elem => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
+							.map((daElem, daI) => {
+								// Numery postów chronologicznie
+								// document.getElementById("post_" + daElem[1])?.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
+								return daElem[0];
+							})
+						);
+						ratStr = getRatStr(posts);
+						img.remove();
+					}
+					const ostatniaData = datArr.at(-1);
+
+					/* Numery postów wedle kolejności na stronie + daty z informacji na stronie
+					// var datArr = [];
+					document.querySelectorAll("#posts-container>article").forEach(function (daElem, daI, daArr) {
+						daElem.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).innerHTML = "#" + (daI + 1);
+						// datArr.push(new Date(daElem.querySelector("img").title.match(/(?<=Date: ).*(?=$)/gm)).getTime());
+					});
+					*/
+
+					const diffArr = [];
+					for (let i = 1; i < datArr.length; i++) {
+						diffArr.push(Math.max(datArr[i] - datArr[i - 1], 0));
+					}
+
+					if (kon === undefined || kon > diffArr.length) {
+						kon = diffArr.length;
+					}
+					if (arguments.length === 2) {
+						pocz--;
+					}
+					const diffArrMax = Math.max(...diffArr.slice(pocz, kon));
+
+					const diffArrMean = (datArr[kon] - datArr[pocz]) / (kon - pocz);
+
+					let wykres = ""; const padding = kon.toString().length;
+					for (let i = pocz; i < kon; i++) {
+						const ile = Math.round(diffArr[i] / diffArrMax * 100);
+						wykres += `<div$class="diff-number"$num="${i + 1}">${String(i + 1).padStart(padding, " ")}.</div> ${czytelnyCzas(diffArr[i])} [${"".padEnd(ile, "|") + "".padEnd(100 - ile, " ")}]\n`;
+					}
+					const obecnyCzas = Date.now();
+					const nowaStrona = new Date(ostatniaData + diffArrMean);
+					const nowaStronaDiff = nowaStrona.getTime() - obecnyCzas;
+					let nowaStronaStr;
+					if (nowaStronaDiff >= 0) {
+						nowaStronaStr = `za <b>${czytelnyCzas(nowaStronaDiff).trim()}</b>`;
+					} else {
+						nowaStronaStr = `powinna być <b>${czytelnyCzas(-nowaStronaDiff).trim()}</b> temu`;
+					}
+
+					// if (frycAPI.pool === undefined) {
+					// 	frycAPI.pool = await frycAPI.readFile(`https://e621.net/pools/${poolID}.json`); // eslint-disable-line require-atomic-updates
+					// 	frycAPI.pool.post_ids.forEach((daElem, daI, daArr) => {
+					// 		document.getElementById("post_" + daElem)?.querySelector(".post-score").insertAdjacentElement("afterbegin", document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
+					// 	});
+					// }
+
+					let overLimitInfo = "<b>";
+					// if (frycAPI.pool.post_count > 320) overLimitInfo += "\nUwaga! Przekroczono limit postów (320). Dane mogą być niedokładne.";
+
+					/*
+					const pageCount = document.querySelector(`div.paginator > menu`).childElementCount - 2;
+					const currPage = document.querySelector(`li.current-page`).frycAPI_childIndex;
+					const postsOnPage = document.getElementById("posts-container").childElementCount;
+					if (pageCount === 3) {
+						if (currPage === 3 && postsOnPage > 20) {
+							overLimitInfo += "\nUwaga! Przekroczono limit postów (320). Dane mogą być niedokładne.";
+						} else {
+							overLimitInfo += "\nJest szansa, że przekroczono limit postów (320). Dane mają szansę być niedokładne.";
+						}
+					} else if (pageCount > 3) {
+						overLimitInfo += "\nUwaga! Przekroczono limit postów (320). Dane mogą być niedokładne.";
+					} */
+
+					if (datArr.length >= 320) overLimitInfo += "<br>Uwaga! Osiągnięto limit postów (320). Dane mogą być niedokładne.";
+					overLimitInfo += "</b>";
+
+					let innerStr = "";
+					innerStr += `Średni czas pomiędzy wydaniami kolejnych stron wyniósł: <b>${czytelnyCzas(diffArrMean).trim()}</b>
+						Ostatnia strona ukazała się: <b>${new Date(ostatniaData).toLocaleString("pl-PL", opcje)}</b> - <b>${czytelnyCzas(obecnyCzas - ostatniaData).trim()}</b> temu
+						Następna strona ukaże się:   <b>${nowaStrona.toLocaleString("pl-PL", opcje)}</b> - ${nowaStronaStr}${overLimitInfo}<br>
+						Liczba postów: ${posts.length} | 100.0 %<br>${ratStr}`.replaceAll(/\t/gm, "");
+					innerStr += `<br><div$id="reset-graph">Wykres</div> odległości czasowych pomiędzy kolejnymi stronami komiksu:<br>`;
+					innerStr += `${wykres}`.replaceAll(/\t/gm, "");
+					poolGraph?.remove();
+					poolGraph = paginator.frycAPI_insertHTML("afterend", `<div class="pool-diff-graph">${innerStr.replaceAll(/\n/gm, "<br>").replaceAll(" ", "&nbsp").replaceAll("$", " ")}</div>`);
+					left = undefined;
+					right = undefined;
+
+					document.getElementById(`reset-graph`).addEventListener("click", function (e) {
+						e621_get_pool_dates();
+					});
+					poolGraph.querySelectorAll(`.diff-number`).forEach(num => {
+						num.addEventListener("click", handleClick);
+						num.addEventListener("contextmenu", handleClick);
+					});
+					// loguj("OK");
+				};
+				const obserwowanePoole = [20262, 35222, 33649, 37755, 38959];
+				if (obserwowanePoole.indexOf(Number(poolID)) >= 0) {
+					e621_get_pool_dates();
+				} else {
+					paginator.frycAPI_insertHTML("afterend", `<div class="pokaż-wykres">Pokaż wykres</div>`).addEventListener("click", function (e) {
+						this.remove();
+						e621_get_pool_dates();
+					});
+				}
+			}
 		}
 
 		// #region //* Naprawa dat
@@ -9869,6 +10030,12 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 		});
 		// #endregion
 	});
+} else if (frycAPI.host("thepiratebay.org")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
