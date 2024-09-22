@@ -4929,6 +4929,10 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 			padding: 1px 2px;
 		}
 
+		.s-notice.s-notice__info {
+			margin-top: var(--su16) !important;
+		}
+
 		${frycAPI.host("puzzling.stackexchange.com") ? /*css*/`
 			.site-header .site-header--link > img {
 				filter: contrast(1.7) brightness(0.9);
