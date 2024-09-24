@@ -5860,233 +5860,219 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		`;
 	})();
 
-	{
-		const ms = 350;
-		const sec = ms / 1000;
-		const del = 100;
-		const sdel = del / 1000;
+	const ms = 350;
+	const sec = ms / 1000;
+	const del = 100;
+	const sdel = del / 1000;
 
-		window.addEventListener("DOMContentLoaded", function () { // end
+	window.addEventListener("DOMContentLoaded", function () { // end
+		// document.body.style.display = "block";
+		// document.body.style.opacity = 1;
+		// document.body.style.visibility = "visible";
+
+		const dyv = document.createElement("div");
+		dyv.style.backgroundColor = "#d9d9d9"; // #262626
+		dyv.style.position = "fixed";
+		dyv.style.width = "100vw";
+		dyv.style.height = "100vh";
+		dyv.style.top = "0px";
+		dyv.style.zIndex = "1000";
+		dyv.style.transition = `opacity ${sec}s ${sdel}s ease-in-out`;
+		dyv.classList.add("dyv");
+		document.body.appendChild(dyv);
+
+		document.body.style.display = "block";
+		// document.body.style.height = "auto";
+		document.body.appendChild(document.createElement("style")).innerHTML = /*css*/`
+			body {
+				/* background-color: rgb(131 0 0) !important; */
+				opacity: 1;
+			}
+		`;
+	});
+
+	frycAPI.onLoadSetter(() => {
+		{ // idle
 			// document.body.style.display = "block";
+			// setTimeout(function () {
+			// 	document.body.classList.add("opaque");
+			// }, 10);
 			// document.body.style.opacity = 1;
 			// document.body.style.visibility = "visible";
 
-			const dyv = document.createElement("div");
-			dyv.style.backgroundColor = "#d9d9d9"; // #262626
-			dyv.style.position = "fixed";
-			dyv.style.width = "100vw";
-			dyv.style.height = "100vh";
-			dyv.style.top = "0px";
-			dyv.style.zIndex = "1000";
-			dyv.style.transition = `opacity ${sec}s ${sdel}s ease-in-out`;
-			dyv.classList.add("dyv");
-			document.body.appendChild(dyv);
+			const ele = document.querySelector(".dyv");
+			ele.style.opacity = 0;
+			setTimeout(function () {
+				document.body.classList.add("var1");
+			}, 0);
+			setTimeout(function () {
+				ele.style.height = "0";
+			}, ms + del + 10);
 
-			document.body.style.display = "block";
-			// document.body.style.height = "auto";
-			document.body.appendChild(document.createElement("style")).innerHTML = /*css*/`
-				body {
-					/* background-color: rgb(131 0 0) !important; */
-					opacity: 1;
-				}
-			`;
-		});
+			window.onbeforeunload = function (event) {
+				// dyv.style.transition = `opacity ${sec}s 0s ease-in-out`;
+				ele.style.height = "100vh";
+				ele.style.opacity = 1;
+				document.body.classList.remove("var1");
+				setTimeout(function () { }, ms + del + 10);
+			};
+		}
 
-		frycAPI.onLoadSetter(() => {
-			{ // idle
-				// document.body.style.display = "block";
-				// setTimeout(function () {
-				// 	document.body.classList.add("opaque");
-				// }, 10);
-				// document.body.style.opacity = 1;
-				// document.body.style.visibility = "visible";
-
-				const ele = document.querySelector(".dyv");
-				ele.style.opacity = 0;
-				setTimeout(function () {
-					document.body.classList.add("var1");
-				}, 0);
-				setTimeout(function () {
-					ele.style.height = "0";
-				}, ms + del + 10);
-
-				window.onbeforeunload = function (event) {
-					// dyv.style.transition = `opacity ${sec}s 0s ease-in-out`;
-					ele.style.height = "100vh";
-					ele.style.opacity = 1;
-					document.body.classList.remove("var1");
-					setTimeout(function () { }, ms + del + 10);
-				};
-			}
-
-			if (window.location.search.includes("statystyki")) {
-				const chart = document.getElementById("chart");
-				if (chart !== null) {
-					new MutationObserver(async function USOS_Fix(mutRec, docObs) {
-						const id1 = document.querySelector("div#chart iframe").getAttribute("id");
-						while (!frames[id1]) {
-							await frycAPI.sleep(50);
-						}
+		if (window.location.search.includes("statystyki")) {
+			const chart = document.getElementById("chart");
+			if (chart !== null) {
+				new MutationObserver(async function USOS_Fix(mutRec, docObs) {
+					const id1 = document.querySelector("div#chart iframe").getAttribute("id");
+					while (!frames[id1]) {
 						await frycAPI.sleep(50);
-						const head1 = frames[id1].document.querySelector("head");
-						const css1 = document.createElement("style");
-						css1.innerHTML = "svg text { fill: hsl(0deg 0% 58%); }";
-						head1.append(css1);
-						console.log("Zaobserwowałem!");
-						docObs.disconnect();
-					}).observe(chart, { attributes: true, childList: true, subtree: true });
-				}
+					}
+					await frycAPI.sleep(50);
+					const head1 = frames[id1].document.querySelector("head");
+					const css1 = document.createElement("style");
+					css1.innerHTML = "svg text { fill: hsl(0deg 0% 58%); }";
+					head1.append(css1);
+					console.log("Zaobserwowałem!");
+					docObs.disconnect();
+				}).observe(chart, { attributes: true, childList: true, subtree: true });
 			}
+		}
 
-			{ // Injected
-				const shadowStyle = document.createElement("style").frycAPI_setInnerHTML(frycAPI.minifyCSS(/*css*/`
-					:host #tooltip {
-						width: min-content !important;
-					}
-					:host #tooltip-icon {
-						background-color: hsl(0 0% 80% / 1);
-					}
-					:host > div.moj-box {
-						top: 13px !important;
-					}
-					#close::before {
-						content: " " !important;
-						background: hsl(0 0% 80% / 1) !important;
-					}
-					#close:active::before,
-					#close:focus::before,
-					#close:hover::before {
-						background-color: rgb(255 0 0) !important;
-					}
+		{ // Injected
+			const shadowStyle = document.createElement("style").frycAPI_setInnerHTML(frycAPI.minifyCSS(/*css*/`
+				:host #tooltip {
+					width: min-content !important;
+				}
+				:host #tooltip-icon {
+					background-color: hsl(0 0% 80% / 1);
+				}
+				:host > div.moj-box {
+					top: 13px !important;
+				}
+				#close::before {
+					content: " " !important;
+					background: hsl(0 0% 80% / 1) !important;
+				}
+				#close:active::before,
+				#close:focus::before,
+				#close:hover::before {
+					background-color: rgb(255 0 0) !important;
+				}
 
-					:host-context(.frycPlan) {
-						--timetable-row-height: 15px;
+				:host-context(.frycPlan) {
+					--timetable-row-height: 15px;
+				}
+				:host-context(.frycPlan) #page-body { /* :has(usos-timetable) */
+					width: 100% !important;
+				}
+				:host-context(.frycPlan) > div:first-child, #timetable > ::slotted(*) {
+					border-right-width: 2px !important;
+				}
+				:host-context(.frycPlan) #hours > div > div:first-child {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+				}
+				:host-context(.frycPlan) div[aria-describedby="dod-info"] {
+					>#time, >#przedmiot {
 					}
-					:host-context(.frycPlan) #page-body { /* :has(usos-timetable) */
-						width: 100% !important;
+					>#time {
+						border-bottom: 1px solid var(--border-color-local);
+						order: -1;
+						text-align: left;
+						/* color: var(--border-color-local); */
 					}
-					:host-context(.frycPlan) > div:first-child, #timetable > ::slotted(*) {
-						border-right-width: 2px !important;
+					>#info {
+						margin-top: 1px;
+						border-top: 1px solid var(--border-color-local);
 					}
-					:host-context(.frycPlan) #hours > div > div:first-child {
-						display: flex;
-						flex-direction: column;
-						align-items: center;
-					}
-					:host-context(.frycPlan) div[aria-describedby="dod-info"] {
-						>#time, >#przedmiot {
-						}
-						>#time {
-							border-bottom: 1px solid var(--border-color-local);
-							order: -1;
-							text-align: left;
-							/* color: var(--border-color-local); */
-						}
-						>#info {
-							margin-top: 1px;
-							border-top: 1px solid var(--border-color-local);
-						}
-					}
-					:host-context(.frycPlan) #hours > div > div:nth-child(2)::after {
-						border-bottom-width: 1px !important;
-					}
-					/* focus-trap, usos-dialog>div>div:has(>[aria-label="Informacje"]), */
-					:host-context(.frycPlan) #titlebar {
-						filter: invert(1) hue-rotate(180deg);
-					}
-					:host-context(.frycPlan) dialog {
-						color: white;
-						background: #000000;
-						box-shadow: 0 0 20px 2px #ffffff52;
-					}
-					:host-context(.frycPlan) #przedmiot {
-						line-height: 1.14;
-					}
-				`));
+				}
+				:host-context(.frycPlan) #hours > div > div:nth-child(2)::after {
+					border-bottom-width: 1px !important;
+				}
+				/* focus-trap, usos-dialog>div>div:has(>[aria-label="Informacje"]), */
+				:host-context(.frycPlan) #titlebar {
+					filter: invert(1) hue-rotate(180deg);
+				}
+				:host-context(.frycPlan) dialog {
+					color: white;
+					background: #000000;
+					box-shadow: 0 0 20px 2px #ffffff52;
+				}
+				:host-context(.frycPlan) #przedmiot {
+					line-height: 1.14;
+				}
+			`));
 
-				// tbody.autostrong td.strong:has(a)
-				// table:not(:has(span.note)) td
-				frycAPI.forEach(`
-				td:has(
-					usos-tooltip
-				):not(:has(
-					> [action="kontroler.php"],
-					> label:only-child
-				)),
-				usos-frame>ul>li,
-				td > label:only-child,
-				td.strong:has(a[href="file/regulamin_przedmiotu_info.pdf"]),
-				td > div > form > label
-				`, function (daElem, daI, daArr) {
-					daElem.innerHTML = `<span class="mySpan">${daElem.innerHTML}</span>`;
+			// tbody.autostrong td.strong:has(a)
+			// table:not(:has(span.note)) td
+			frycAPI.forEach(`
+			td:has(
+				usos-tooltip
+			):not(:has(
+				> [action="kontroler.php"],
+				> label:only-child
+			)),
+			usos-frame>ul>li,
+			td > label:only-child,
+			td.strong:has(a[href="file/regulamin_przedmiotu_info.pdf"]),
+			td > div > form > label
+			`, function (daElem, daI, daArr) {
+				daElem.innerHTML = `<span class="mySpan">${daElem.innerHTML}</span>`;
+			});
+
+			frycAPI.forEach("td > div > form > label:first-of-type + br", daElem => daElem.remove());
+			["info-box", "success-box", "notice-box"].forEach(daEl => {
+				document.querySelectorAll(daEl, function (daElem, daI, daArr) {
+					daElem.shadowRoot.querySelector("div").classList.add(daEl, "moj-box");
 				});
+			});
 
-				frycAPI.forEach("td > div > form > label:first-of-type + br", daElem => daElem.remove());
-				["info-box", "success-box", "notice-box"].forEach(daEl => {
-					document.querySelectorAll(daEl, function (daElem, daI, daArr) {
-						daElem.shadowRoot.querySelector("div").classList.add(daEl, "moj-box");
-					});
-				});
-
-				// let plan = false;
-				if (document.title.startsWith("Plan zajęć - ")) {
-					document.documentElement.classList.add("frycPlan");
-					// plan = true;
-				}
-				function reqursShadow(elem0) {
-					elem0.querySelectorAll("*").forEach(elem => {
-						if (elem.shadowRoot !== null) {
-							// if (plan) {
-							// 	elem.shadowRoot.firstElementChild.classList.add("frycPlan");
-							// }
-							elem.shadowRoot.appendChild(shadowStyle.cloneNode(1));
-							reqursShadow(elem.shadowRoot);
-						}
-					});
-				} reqursShadow(document);
-				// new MutationObserver((mutRec, docObs) => {
-				// 	loguj(mutRec);
-				// 	mutRec.forEach(elem => {
-				// 		elem.addedNodes.forEach(elem1 => {
-				// 			if (!!elem1.shadowRoot) {
-				// 				elem1.shadowRoot.appendChild(shadowStyle.cloneNode(1));
-				// 			} else if (!!elem1.host) {
-				// 				elem1.appendChild(shadowStyle.cloneNode(1));
-				// 			}
-				// 		});
-				// 	});
-				// }).observe(document.body, { childList: true, subtree: true });
-
-				{ /* Naprawy kalendarza rejestracji */
-					if (!document.title.includes("USOSweb tymczasowo niedostępny") &&
-						document.querySelector("[aria-label='Panel boczny'] a[href='https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz'].selected") !== null) {
-						frycAPI.forEach(".usos-ui h2", function (daElem, daI, daArr) {
-							// debugger
-							const myDiv = document.createElement("div");
-							myDiv.classList.add("myDiv");
-							let h2next = daElem.nextElementSibling;
-							while (h2next !== null && h2next.tagName !== "H2") {
-								const h2next1 = h2next.nextElementSibling;
-								myDiv.appendChild(h2next);
-								h2next = h2next1;
-							}
-							daElem.insertAdjacentElement("afterend", myDiv);
-							daElem.setAttribute("onclick", "this.classList.toggle('collapse')");
-							if (daElem.nextElementSibling.querySelector(".rejestracja-ikona .rejestracja-ikona") === null) {
-								/* Powyższy warunek może się zepsuć w przyszłości */
-								daElem.classList.add("collapse");
-							}
-							daElem.classList.add("USOS-OK");
-						});
-					}
-				}
-				{ /* Naprawy tabel rejestracji */
-					frycAPI.forEach("td:has(img.rejestracja-ikona[src='https://usosweb.usos.pw.edu.pl//img/spinacz_tip.png']) > br", daElem => daElem.remove());
-				}
+			// let plan = false;
+			if (document.title.startsWith("Plan zajęć - ")) {
+				document.documentElement.classList.add("frycPlan");
+				// plan = true;
 			}
-			loguj("USOS Done!");
-		});
-	}
+			(function reqursShadow(elem0) {
+				elem0.querySelectorAll("*").forEach(elem => {
+					if (elem.shadowRoot !== null) {
+						// if (plan) {
+						// 	elem.shadowRoot.firstElementChild.classList.add("frycPlan");
+						// }
+						elem.shadowRoot.appendChild(shadowStyle.cloneNode(1));
+						reqursShadow(elem.shadowRoot);
+					}
+				});
+			})(document);
+
+			// #region //* Naprawy kalendarza rejestracji
+			if (!document.title.includes("USOSweb tymczasowo niedostępny") &&
+				document.querySelector("[aria-label='Panel boczny'] a[href='https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz'].selected") !== null) {
+				frycAPI.forEach(".usos-ui h2", function (daElem, daI, daArr) {
+					// debugger
+					const myDiv = document.createElement("div");
+					myDiv.classList.add("myDiv");
+					let h2next = daElem.nextElementSibling;
+					while (h2next !== null && h2next.tagName !== "H2") {
+						const h2next1 = h2next.nextElementSibling;
+						myDiv.appendChild(h2next);
+						h2next = h2next1;
+					}
+					daElem.insertAdjacentElement("afterend", myDiv);
+					daElem.addEventListener("click", function (e) { this.classList.toggle("collapse") });
+					if (daElem.nextElementSibling.querySelector(".rejestracja-ikona .rejestracja-ikona") === null) {
+						/* Powyższy warunek może się zepsuć w przyszłości */
+						daElem.classList.add("collapse");
+					}
+					daElem.classList.add("USOS-OK");
+				});
+			}
+			// #endregion
+			// #region //* Naprawy tabel rejestracji
+			frycAPI.forEach("td:has(img.rejestracja-ikona[src='https://usosweb.usos.pw.edu.pl//img/spinacz_tip.png']) > br", daElem => daElem.remove());
+			// #endregion
+		}
+		loguj("USOS Done!");
+	});
 } else if (1 && frycAPI.host("viewer.shapez.io")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		canvas#result {
