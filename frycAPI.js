@@ -1344,8 +1344,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const type = typeof value;
 		return type === "object" || type === "function";
 	},
-	perf(t1, t2) {
-		console.log(`${(t2 - t1).toFixed(1)} ms`);
+	perf(t1, t2, suffix = "") {
+		console.log(`${suffix}${(t2 - t1).toFixed(1)} ms`);
 	},
 	elemFromHTML(htmlString) { // tylko jeżeli root zawiera pojedynczy element
 		const t = document.createElement("template");
@@ -1503,6 +1503,13 @@ frycAPI.expandPrototype(Array, "frycAPI_pushArr", function (elem) {
 frycAPI.expandPrototype(Array, "frycAPI_numSort", function () {
 	return this.sort((a, b) => a - b);
 });
+frycAPI.expandPrototype(Array, "frycAPI_sortValues", function (getValue) {
+	return this.sort((a, b) => {
+		const a1 = getValue(a);
+		const b1 = getValue(b);
+		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
+	});
+});
 frycAPI.expandPrototype(Element, "frycAPI_addClass", function (...classNames) {
 	this.classList.add(...classNames);
 	return this;
@@ -1542,14 +1549,10 @@ frycAPI.expandPrototype(Element, "frycAPI_shuffleChildren", function () {
 	});
 	return me;
 });
-frycAPI.expandPrototype(Element, "frycAPI_sortChildren", function (sortCallback) {
+frycAPI.expandPrototype(Element, "frycAPI_sortChildren", function (getValue) {
 	const me = this;
 	const elemArr = Array.from(me.children);
-	elemArr.sort((a, b) => {
-		const a1 = sortCallback(a);
-		const b1 = sortCallback(b);
-		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
-	});
+	elemArr.frycAPI_sortValues(getValue);
 	elemArr.forEach(function (daElem) {
 		me.appendChild(daElem);
 	});
@@ -5708,7 +5711,11 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		}
 		
 		.usos-ui h2.USOS-OK {
-		  cursor: pointer;
+			cursor: pointer;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow-x: clip;
+			/* overflow-y: visible; */
 		}
 		.usos-ui h2.USOS-OK::before {
 			display: inline-block;
@@ -5841,6 +5848,10 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 				border-bottom: 0;
 			}
 		}
+		
+		.usos-ui .autoscroll:has(table.wrnav) {
+			overflow: visible;
+		}
 	`);
 
 	(frycAPI.beforeLoad = function () {
@@ -5892,6 +5903,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 	});
 
 	frycAPI.onLoadSetter(() => {
+		const t1 = performance.now();
 		{ // idle
 			// document.body.style.display = "block";
 			// setTimeout(function () {
@@ -6046,11 +6058,19 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 
 			// #region //* Naprawy kalendarza rejestracji
 			if (!document.title.includes("USOSweb tymczasowo niedostępny") &&
-				document.querySelector("[aria-label='Panel boczny'] a[href='https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz'].selected") !== null) {
+				// document.querySelector("[aria-label='Panel boczny'] a[href='https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz'].selected") !== null
+				(
+					window.location.href === "https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz" ||
+					window.location.href.startsWith("https://usosweb.usos.pw.edu.pl/kontroler.php?_action=news/rejestracje/rejJednostki")
+				)
+			) {
+				const myDivBase = frycAPI.elemFromHTML(`<div class="myDiv"></div>`);
+				const myDivOuterBase = frycAPI.elemFromHTML(`<div class="myDivOuter"></div>`);
+				const elemArr = [];
 				frycAPI.forEach(".usos-ui h2", function (daElem, daI, daArr) {
 					// debugger
-					const myDiv = document.createElement("div");
-					myDiv.classList.add("myDiv");
+					const myDiv = myDivBase.cloneNode(1);
+					const myDivOuter = myDivOuterBase.cloneNode(1);
 					let h2next = daElem.nextElementSibling;
 					while (h2next !== null && h2next.tagName !== "H2") {
 						const h2next1 = h2next.nextElementSibling;
@@ -6064,6 +6084,15 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 						daElem.classList.add("collapse");
 					}
 					daElem.classList.add("USOS-OK");
+					daElem.insertAdjacentElement("afterend", myDivOuter);
+					myDivOuter.append(daElem, myDiv);
+					elemArr.push(myDivOuter);
+				});
+				const usosUi = elemArr[0].parentElement;
+				elemArr.frycAPI_sortValues(e => e.firstElementChild.innerText.toLowerCase());
+				// elemArr.frycAPI_sortValues(e => e.firstElementChild.innerText);
+				elemArr.forEach(function (daElem) {
+					usosUi.appendChild(daElem);
 				});
 			}
 			// #endregion
@@ -6071,7 +6100,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			frycAPI.forEach("td:has(img.rejestracja-ikona[src='https://usosweb.usos.pw.edu.pl//img/spinacz_tip.png']) > br", daElem => daElem.remove());
 			// #endregion
 		}
-		loguj("USOS Done!");
+		const t2 = performance.now(); frycAPI.perf(t1, t2, "USOS: ");
 	});
 } else if (1 && frycAPI.host("viewer.shapez.io")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
