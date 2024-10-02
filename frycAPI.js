@@ -1472,11 +1472,17 @@ frycAPI.week   = frycAPI.day    *    7;
 frycAPI.dateFormatter = frycAPI.getDateFormatter({ second: undefined });
 frycAPI.dateFormatterForFileName = frycAPI.getDateFormatter();
 frycAPI.dateOptsNoTime = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
-if (window.trustedTypes && trustedTypes.createPolicy) { // frycAPI.createHTML
-	frycAPI.escapeHTMLPolicy = trustedTypes.createPolicy("safeInnerHtml", {
-		createHTML: str => str,
-	});
-	frycAPI.createHTML = str => frycAPI.escapeHTMLPolicy.createHTML(str);
+try { // frycAPI.createHTML
+	if (!frycAPI.host("teams.microsoft.com") && window?.trustedTypes?.createPolicy) {
+		frycAPI.escapeHTMLPolicy = trustedTypes.createPolicy("safeInnerHtml", {
+			createHTML: str => str,
+		});
+		frycAPI.createHTML = str => frycAPI.escapeHTMLPolicy.createHTML(str);
+	} else {
+		throw new Error("Wystąpił błąd");
+	}
+} catch (e) {
+	frycAPI.createHTML = str => str;
 }
 // #endregion
 // #endregion
@@ -5848,7 +5854,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 				border-bottom: 0;
 			}
 		}
-		
+
 		.usos-ui .autoscroll:has(table.wrnav) {
 			overflow: visible;
 		}
