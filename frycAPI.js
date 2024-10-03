@@ -6137,13 +6137,6 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 							if (row.frycAPI_querySelNotNull("img[src*='brak_uprawnien.svg']")) return 2;
 							if (row.frycAPI_querySelNotNull("img[src*='brak_miejsc.svg']")) return 3;
 							return 4;
-							/*
-							let licz = 0;
-							licz++; if (row.frycAPI_querySelNotNull("img[src*='zarejestruj.svg']")) return licz;
-							licz++; if (row.frycAPI_querySelNotNull("img[src*='brak_miejsc.svg']")) return licz;
-							licz++; if (row.frycAPI_querySelNotNull("img[src*='brak_uprawnien.svg']")) return licz;
-							licz++; return licz;
-							*/
 						};
 						const nazwJedn = row => { // nazwa jednostki
 							return row.querySelector(`td:nth-child(2)`).firstElementChild.innerText;
