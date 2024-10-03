@@ -1475,18 +1475,6 @@ frycAPI.week   = frycAPI.day    *    7;
 frycAPI.dateFormatter = frycAPI.getDateFormatter({ second: undefined });
 frycAPI.dateFormatterForFileName = frycAPI.getDateFormatter();
 frycAPI.dateOptsNoTime = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
-try { // frycAPI.createHTML
-	if (!frycAPI.host("teams.microsoft.com") && window?.trustedTypes?.createPolicy) {
-		frycAPI.escapeHTMLPolicy = trustedTypes.createPolicy("safeInnerHtml", {
-			createHTML: str => str,
-		});
-		frycAPI.createHTML = str => frycAPI.escapeHTMLPolicy.createHTML(str);
-	} else {
-		throw new Error("Wystąpił błąd");
-	}
-} catch (e) {
-	frycAPI.createHTML = str => str;
-}
 // #endregion
 // #endregion
 
@@ -1670,6 +1658,21 @@ frycAPI.expandPrototype(Element, "frycAPI_hasScroll", function () {
 // });
 // #region //* Prototypy 3
 // #endregion
+// #endregion
+
+// #region //* frycAPI.createHTML
+try {
+	if (!frycAPI.host("teams.microsoft.com") && window?.trustedTypes?.createPolicy) {
+		frycAPI.escapeHTMLPolicy = trustedTypes.createPolicy("safeInnerHtml", {
+			createHTML: str => str,
+		});
+		frycAPI.createHTML = str => frycAPI.escapeHTMLPolicy.createHTML(str);
+	} else {
+		throw new Error("Wystąpił błąd");
+	}
+} catch (e) {
+	frycAPI.createHTML = str => str;
+}
 // #endregion
 
 // #region //* IFy 1
@@ -6133,6 +6136,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 						const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row`));
 						const lastElem = rows[0].parentElement.lastElementChild;
 						const możRej = row => { // możliwość rejestracji
+							if (row.frycAPI_querySelNotNull("img[src*='wyrejestruj.svg']")) return 0;
 							if (row.frycAPI_querySelNotNull("img[src*='zarejestruj.svg']")) return 1;
 							if (row.frycAPI_querySelNotNull("img[src*='brak_uprawnien.svg']")) return 2;
 							if (row.frycAPI_querySelNotNull("img[src*='brak_miejsc.svg']")) return 3;
@@ -6146,11 +6150,10 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 						};
 						const zapełnienie = row => { // zapełnienie grup
 							const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);
-							if (smartyTip !== null) {
-								return -Number(row.querySelector(`div > div`).style.width.replace("px", ""));
-							} else {
-								return 1;
-							}
+							if (smartyTip === null) return 1;
+							const div = smartyTip.querySelector(`div > div`);
+							if (div === null) return 1;
+							return -Number(div.style.width.replace("px", ""));
 						};
 						rows.frycAPI_sortMultiValues(
 							możRej,
