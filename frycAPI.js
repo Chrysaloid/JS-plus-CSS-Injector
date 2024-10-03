@@ -1344,6 +1344,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const type = typeof value;
 		return type === "object" || type === "function";
 	},
+	isFunc(value) {
+		return typeof value === "function";
+	},
 	perf(t1, t2, suffix = "") {
 		console.log(`${suffix}${(t2 - t1).toFixed(1)} ms`);
 	},
@@ -1514,6 +1517,22 @@ frycAPI.expandPrototype(Array, "frycAPI_sortValues", function (getValue) {
 		const a1 = getValue(a);
 		const b1 = getValue(b);
 		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
+	});
+});
+frycAPI.expandPrototype(Array, "frycAPI_sortMultiValues", function (...getValues) {
+	getValues = getValues.filter(frycAPI.isFunc);
+	if (getValues.length === 0) return this;
+	return this.sort((a, b) => {
+		for (const getValue of getValues) {
+			const a1 = getValue(a);
+			const b1 = getValue(b);
+			if (a1 < b1) {
+				return -1;
+			} else if (a1 > b1) {
+				return 1;
+			}
+		}
+		return 0;
 	});
 });
 frycAPI.expandPrototype(Element, "frycAPI_addClass", function (...classNames) {
@@ -5613,7 +5632,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		usos-frame>div.flex img { /* Uwaga */
 			filter: none !important; /* invert(1) hue-rotate(180deg) */
 		} 
-		body usos-frame>div.flex+div {
+		body usos-frame>div.flex+div:not(:has(>form:first-child)) {
 		  filter: invert(1) hue-rotate(180deg);
 		  color: black !important;
 		}
@@ -6104,6 +6123,54 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			// #endregion
 			// #region //* Naprawy tabel rejestracji
 			frycAPI.forEach("td:has(img.rejestracja-ikona[src='https://usosweb.usos.pw.edu.pl//img/spinacz_tip.png']) > br", daElem => daElem.remove());
+			// #endregion
+			// #region //* Sortowanie tabel rejestracji
+			if (true) {
+				const daUrl = new URL(window.location.href);
+				if (daUrl.pathname === "/kontroler.php" && daUrl.searchParams.get("_action") === "katalog2/przedmioty/szukajPrzedmiotu") {
+					const tab = document.querySelector(`.usos-ui > div > table.wrnav`);
+					if (tab !== null) {
+						const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row`));
+						const lastElem = rows[0].parentElement.lastElementChild;
+						const możRej = row => { // możliwość rejestracji
+							if (row.frycAPI_querySelNotNull("img[src*='zarejestruj.svg']")) return 1;
+							if (row.frycAPI_querySelNotNull("img[src*='brak_uprawnien.svg']")) return 2;
+							if (row.frycAPI_querySelNotNull("img[src*='brak_miejsc.svg']")) return 3;
+							return 4;
+							/*
+							let licz = 0;
+							licz++; if (row.frycAPI_querySelNotNull("img[src*='zarejestruj.svg']")) return licz;
+							licz++; if (row.frycAPI_querySelNotNull("img[src*='brak_miejsc.svg']")) return licz;
+							licz++; if (row.frycAPI_querySelNotNull("img[src*='brak_uprawnien.svg']")) return licz;
+							licz++; return licz;
+							*/
+						};
+						const nazwJedn = row => { // nazwa jednostki
+							return row.querySelector(`td:nth-child(2)`).firstElementChild.innerText;
+						};
+						const nazwPrzed = row => { // nazwa przedmiotu
+							return row.querySelector(`td:nth-child(2)`).lastElementChild.innerText;
+						};
+						const zapełnienie = row => { // zapełnienie grup
+							const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);
+							if (smartyTip !== null) {
+								return -Number(row.querySelector(`div > div`).style.width.replace("px", ""));
+							} else {
+								return 1;
+							}
+						};
+						rows.frycAPI_sortMultiValues(
+							możRej,
+							zapełnienie,
+							nazwJedn,
+							nazwPrzed,
+						);
+						rows.forEach(row => {
+							lastElem.insertAdjacentElement("beforebegin", row);
+						});
+					}
+				}
+			}
 			// #endregion
 		}
 		const t2 = performance.now(); frycAPI.perf(t1, t2, "USOS: ");
