@@ -1658,7 +1658,6 @@ frycAPI.expandPrototype(Element, "frycAPI_hasScroll", function () {
 // });
 // #region //* Prototypy 3
 // #endregion
-// #endregion
 
 // #region //* frycAPI.createHTML
 try {
@@ -1673,6 +1672,7 @@ try {
 } catch (e) {
 	frycAPI.createHTML = str => str;
 }
+// #endregion
 // #endregion
 
 // #region //* IFy 1
