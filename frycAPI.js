@@ -5941,21 +5941,23 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			// document.body.style.visibility = "visible";
 
 			const ele = document.querySelector(".dyv");
-			ele.style.opacity = 0;
-			setTimeout(function () {
-				document.body.classList.add("var1");
-			}, 0);
-			setTimeout(function () {
-				ele.style.height = "0";
-			}, ms + del + 10);
+			if (ele !== null) {
+				ele.style.opacity = 0;
+				setTimeout(function () {
+					document.body.classList.add("var1");
+				}, 0);
+				setTimeout(function () {
+					ele.style.height = "0";
+				}, ms + del + 10);
 
-			window.onbeforeunload = function (event) {
-				// dyv.style.transition = `opacity ${sec}s 0s ease-in-out`;
-				ele.style.height = "100vh";
-				ele.style.opacity = 1;
-				document.body.classList.remove("var1");
-				setTimeout(function () { }, ms + del + 10);
-			};
+				window.onbeforeunload = function (event) {
+					// dyv.style.transition = `opacity ${sec}s 0s ease-in-out`;
+					ele.style.height = "100vh";
+					ele.style.opacity = 1;
+					document.body.classList.remove("var1");
+					setTimeout(function () { }, ms + del + 10);
+				};
+			}
 		}
 
 		if (window.location.search.includes("statystyki")) {
@@ -6046,16 +6048,16 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			// tbody.autostrong td.strong:has(a)
 			// table:not(:has(span.note)) td
 			frycAPI.forEach(`
-			td:has(
-				usos-tooltip
-			):not(:has(
-				> [action="kontroler.php"],
-				> label:only-child
-			)),
-			usos-frame>ul>li,
-			td > label:only-child,
-			td.strong:has(a[href="file/regulamin_przedmiotu_info.pdf"]),
-			td > div > form > label
+				td:has(
+					usos-tooltip
+				):not(:has(
+					> [action="kontroler.php"],
+					> label:only-child
+				)),
+				usos-frame>ul>li,
+				td > label:only-child,
+				td.strong:has(a[href="file/regulamin_przedmiotu_info.pdf"]),
+				td > div > form > label
 			`, function (daElem, daI, daArr) {
 				daElem.innerHTML = `<span class="mySpan">${daElem.innerHTML}</span>`;
 			});
@@ -6136,6 +6138,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 						const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row`));
 						const lastElem = rows[0].parentElement.lastElementChild;
 						const możRej = row => { // możliwość rejestracji
+							if (row.frycAPI_querySelNotNull("img[src*='zarejestrowany.svg']")) return -1;
 							if (row.frycAPI_querySelNotNull("img[src*='wyrejestruj.svg']")) return 0;
 							if (row.frycAPI_querySelNotNull("img[src*='zarejestruj.svg']")) return 1;
 							if (row.frycAPI_querySelNotNull("img[src*='brak_uprawnien.svg']")) return 2;
@@ -7605,22 +7608,20 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 } else if (1 && frycAPI.host("www.when2meet.com")) {
 	const funkcje = "Konwertuj 12h na 24h";
 	frycAPI.injectStyleOnLoad(/*css*/`
-		[style="text-align:right;width:44px;height:9;font-size:10px;margin:4px 4px 0px 0px;"] {
+		:is(#YouGrid, #GroupGrid) [style="text-align:right;width:44px;height:9;font-size:10px;margin:4px 4px 0px 0px;"] {
 			text-align: left !important;
 			width: fit-content !important;
 			margin: 4px 0px 4px 13px !important;
 		}
+		:is(#YouGrid, #GroupGrid) [style="display:inline-block;*display:inline;zoom:1; vertical-align:bottom;text-align:right;"] > div > div {
+			border-left: none !important;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		const godziny = document.querySelectorAll('[style="text-align:right;width:44px;height:9;font-size:10px;margin:4px 4px 0px 0px;"]');
-		for (let i = 0; i < godziny.length; i++) {
-			const godz = new Date("11 30 2022 " + godziny[i]
-			.innerText
-			.replace(/\s+/gu, " ")
-			.trim());
-			godziny[i].innerText = godz.toLocaleTimeString().slice(0, -3);
-		}
+		frycAPI.forEach(`[style="text-align:right;width:44px;height:9;font-size:10px;margin:4px 4px 0px 0px;"]`, godzElem => {
+			godzElem.innerText = (new Date("11 30 2022 " + godzElem.innerText.replace(/\s+/gu, " ").trim())).toLocaleTimeString().slice(0, -3);
+		});
 	});
 } // eslint-disable-line brace-style
 // #endregion
