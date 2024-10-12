@@ -372,6 +372,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	script: document.currentScript,
 	createMutObsLicznik: 0,
 	path: window.location.pathname,
+	onLoadArr: [[], [], []],
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -552,16 +553,18 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		loguj(`Czas ${frycAPI.czasNumer}: ${frycAPI.zaokrl(t1 - t0, 2)} ms`);
 		frycAPI.czasNumer++;
 	},
-	onLoadSetter(callBack) {
-		if (!frycAPI.hasOwnProperty("onLoadArr")) {
-			frycAPI.onLoadArr = [];
-			window.addEventListener("load", () => {
-				frycAPI.onLoadArr.forEach(daElem => {
-					daElem();
-				});
-			});
+	onLoadSetter(callBack, when = 1) { // 0 = document DOMContentLoaded, 1 = window DOMContentLoaded, 2 = window load
+		if (frycAPI.onLoadArr[when].push(callBack) === 1) { // new length === 1 | This means that the first element was just added
+			/* eslint-disable */
+			if        (when === 0) {
+				document.addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
+			} else if (when === 1) {
+				window  .addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
+			} else if (when === 2) {
+				window  .addEventListener("load",             () => frycAPI.onLoadArr[when].frycAPI_run());
+			}
+			/* eslint-enable */
 		}
-		frycAPI.onLoadArr.push(callBack);
 	},
 	forEach(selector, callback) {
 		const list = document.querySelectorAll(selector);
@@ -1522,6 +1525,14 @@ frycAPI.expandPrototype(Array, "frycAPI_sortMultiValues", function (...getValues
 		}
 		return 0;
 	});
+});
+frycAPI.expandPrototype(Array, "frycAPI_run", function (...args) {
+	this.forEach(daElem => daElem(...args));
+});
+frycAPI.expandPrototype(Array, "frycAPI_runReturn", function (...args) {
+	const retArr = [];
+	this.forEach(daElem => retArr.push(daElem(...args)));
+	return retArr;
 });
 frycAPI.expandPrototype(Element, "frycAPI_addClass", function (...classNames) {
 	this.classList.add(...classNames);
@@ -5857,6 +5868,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		.frycPlan {
 			& usos-timetable {
 				border: 1px solid var(--timetable-border-color);
+				--timetable-row-height: 15px !important;
 			}
 			& .timetable-wrapper {
 				width: unset;
@@ -6016,6 +6028,9 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 				}
 				:host-context(.frycPlan) div[aria-describedby="dod-info"] {
 					>#time, >#przedmiot {
+					}
+					>#przedmiot {
+						-webkit-line-clamp: none;
 					}
 					>#time {
 						border-bottom: 1px solid var(--border-color-local);
@@ -7194,7 +7209,13 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 				},
 			});
 		}
-	});
+	}, 1);
+	frycAPI.onLoadSetter(async () => { // Fixed weird scrolling to bottom behavior
+		if (frycAPI.path.startsWith("/matlabcentral/answers/")) {
+			await frycAPI.sleep(100);
+			window.scrollTo(0, 0);
+		}
+	}, 2);
 } else if (1 && frycAPI.host("www.maxongroup.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#cont {
