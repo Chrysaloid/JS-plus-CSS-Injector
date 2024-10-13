@@ -1503,18 +1503,9 @@ frycAPI.expandPrototype(Array, "frycAPI_pushArr", function (elem) {
 frycAPI.expandPrototype(Array, "frycAPI_numSort", function () {
 	return this.sort((a, b) => a - b);
 });
-frycAPI.expandPrototype(Array, "frycAPI_sortValues", function (getValue) {
-	return this.sort((a, b) => {
-		const a1 = getValue(a);
-		const b1 = getValue(b);
-		if (a1 < b1) return -1;
-		if (a1 > b1) return 1;
-		return 0;
-	});
-});
-frycAPI.expandPrototype(Array, "frycAPI_sortMultiValues", function (...getValues) {
-	getValues = getValues.filter(frycAPI.isFunc);
-	if (getValues.length === 0) return this;
+frycAPI.expandPrototype(Array, "frycAPI_sortValues", function (...getValues) {
+	// getValues = getValues.filter(frycAPI.isFunc);
+	// if (getValues.length === 0) return this;
 	return this.sort((a, b) => {
 		for (const getValue of getValues) {
 			const a1 = getValue(a);
@@ -6172,7 +6163,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 							if (div === null) return 1;
 							return -Number(div.style.width.replace("px", ""));
 						};
-						rows.frycAPI_sortMultiValues(
+						rows.frycAPI_sortValues(
 							możRej,
 							zapełnienie,
 							nazwJedn,
