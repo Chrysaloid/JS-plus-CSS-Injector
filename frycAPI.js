@@ -1607,7 +1607,7 @@ frycAPI.expandPrototype(DOMTokenList, "notContains", function (daClass) {
 frycAPI.expandPrototype(Element, "frycAPI_querySelNull", function (selector) {
 	return this.querySelector(selector) === null;
 });
-frycAPI.expandPrototype(Element, "frycAPI_querySelNotNull", function (selector) {
+frycAPI.expandPrototype(Element, "frycAPI_querySelExists", function (selector) {
 	return this.querySelector(selector) !== null;
 });
 frycAPI.expandPrototype(String, "frycAPI_equalAny", function (strList) {
@@ -6143,11 +6143,11 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 						const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row`));
 						const lastElem = rows[0].parentElement.lastElementChild;
 						const możRej = row => { // możliwość rejestracji
-							if (row.frycAPI_querySelNotNull("img[src*='zarejestrowany.svg']")) return -1;
-							if (row.frycAPI_querySelNotNull("img[src*='wyrejestruj.svg']")) return 0;
-							if (row.frycAPI_querySelNotNull("img[src*='zarejestruj.svg']")) return 1;
-							if (row.frycAPI_querySelNotNull("img[src*='brak_uprawnien.svg']")) return 2;
-							if (row.frycAPI_querySelNotNull("img[src*='brak_miejsc.svg']")) return 3;
+							if (row.frycAPI_querySelExists("img[src*='zarejestrowany.svg']")) return -1;
+							if (row.frycAPI_querySelExists("img[src*='wyrejestruj.svg']")) return 0;
+							if (row.frycAPI_querySelExists("img[src*='zarejestruj.svg']")) return 1;
+							if (row.frycAPI_querySelExists("img[src*='brak_uprawnien.svg']")) return 2;
+							if (row.frycAPI_querySelExists("img[src*='brak_miejsc.svg']")) return 3;
 							return 4;
 						};
 						const nazwJedn = row => { // nazwa jednostki
