@@ -1507,7 +1507,9 @@ frycAPI.expandPrototype(Array, "frycAPI_sortValues", function (getValue) {
 	return this.sort((a, b) => {
 		const a1 = getValue(a);
 		const b1 = getValue(b);
-		return (a1 < b1) ? -1 : (a1 > b1) ? 1 : 0;
+		if (a1 < b1) return -1;
+		if (a1 > b1) return 1;
+		return 0;
 	});
 });
 frycAPI.expandPrototype(Array, "frycAPI_sortMultiValues", function (...getValues) {
@@ -1517,11 +1519,8 @@ frycAPI.expandPrototype(Array, "frycAPI_sortMultiValues", function (...getValues
 		for (const getValue of getValues) {
 			const a1 = getValue(a);
 			const b1 = getValue(b);
-			if (a1 < b1) {
-				return -1;
-			} else if (a1 > b1) {
-				return 1;
-			}
+			if (a1 < b1) return -1;
+			if (a1 > b1) return 1;
 		}
 		return 0;
 	});
