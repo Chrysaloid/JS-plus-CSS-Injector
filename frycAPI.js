@@ -314,7 +314,8 @@ function temₚ(strings, ...values) { // extract contents of string template lit
 	return [strings, values];
 }
 
-// Grupy bloków co 19 pozycji (18.04.2024) // Regex do liczenia ifów: /^if.+/
+// Grupy bloków co 19 pozycji (18.04.2024)
+// 184 ifów 21.10.2024 // Regex do liczenia ifów: /(^if.+|^\}? ?else if)/gm
 
 // Popularny error wyrzucany przez różne rzeczy do konsoli. Poniższy regex wklejony do filtra konsoli go wyłącza
 // -/Unchecked runtime.lastError: The message port closed before a response was received/
@@ -3639,14 +3640,13 @@ if (1 && frycAPI.host("192.168.1.1")) {
 
 	frycAPI.createManualFunctions("Toggle copy buttons", {
 		funcArr: [
-			(name = "Toggle copy buttons", type = frycAPI_State) => {
+			(name = "Toggle copy buttons", type = frycAPI_PureState) => {
 				const f = new type({
 					name: name,
 					stateDesc: ["Copy buttons: on", "Copy buttons: off"],
 				});
 				f.callBack = function (obj) {
 					document.body.classList.toggle("toggle-copy-buttons");
-					f.nextState();
 				};
 				return f;
 			},
@@ -5219,14 +5219,13 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 
 	frycAPI.createManualFunctions("Friend Activity", {
 		funcArr: [
-			(name = "Show only specific friend's activity", type = frycAPI_State) => {
+			(name = "Show only specific friend's activity", type = frycAPI_PureState) => {
 				const f = new type({
 					name: name,
 					stateDesc: ["Only specific friend: NO", "Only specific friend: YES"],
 				});
 				f.callBack = function (obj) {
 					document.body.classList.toggle("specific-friend");
-					f.nextState();
 				};
 				return f;
 			},
@@ -6996,25 +6995,23 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 
 	frycAPI.createManualFunctions("Google", {
 		funcArr: [
-			(name = "Toggle 3 column view", type = frycAPI_State) => {
+			(name = "Toggle 3 column view", type = frycAPI_PureState) => {
 				const f = new type({
 					name: name,
 					stateDesc: ["3 column view: off", "3 column view: on"],
 				});
 				f.callBack = function (obj) {
 					document.body.classList.toggle("google-3-column");
-					f.nextState();
 				};
 				return f;
 			},
-			(name = "Toggle translate buttons", type = frycAPI_State) => {
+			(name = "Toggle translate buttons", type = frycAPI_PureState) => {
 				const f = new type({
 					name: name,
 					stateDesc: ["Translate buttons: off", "Translate buttons: on"],
 				});
 				f.callBack = function (obj) {
 					document.body.classList.toggle("google-translate-buttons");
-					f.nextState();
 				};
 				return f;
 			},
@@ -7821,6 +7818,8 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 		}
 	`);
 
+	let disableEndScreen;
+
 	(frycAPI.beforeLoad = function () {
 		// Delete comments
 		document.addEventListener("DOMContentLoaded", function (event) {
@@ -7924,6 +7923,27 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 			await frycAPI.sleep(3000);
 			frycAPI.clean(document.body);
 		})();
+
+		disableEndScreen = frycAPI.injectStyle(/*css*/`
+			.ytp-ce-element {
+				display: none;
+			}
+		`);
+	});
+
+	frycAPI.createManualFunctions("YouTube", {
+		funcArr: [
+			(name = "Disable End Screen", type = frycAPI_PureState) => {
+				const f = new type({
+					name: name,
+					stateDesc: ["Disable End Screen: Yes", "Disable End Screen: No"],
+				});
+				f.callBack = function (obj) {
+					disableEndScreen.toggle();
+				};
+				return f;
+			},
+		],
 	});
 } else if (1 && frycAPI.host("wyniki.diag.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -9510,6 +9530,11 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 	});
 } else if (frycAPI.host("allegro.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
+		/* *, .mp0t_0a, .l8c4v, .mp0t_ji, .b1vwg, .oyynn, .t1szo { */
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
+		}
+
 		.ukryj-opinie-bez-zdjęć {
 			& [itemprop="review"]:not(:has(> [data-analytics-view-label="reviewsGallery"])) {
 				display: none;
@@ -9518,21 +9543,51 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 				display: none;
 			}
 		}
+
+		[data-box-name="baby-search"]:has(.suma-od-jednego-sprzedawcy) {
+			justify-content: space-between;
+		}
+		.suma-od-jednego-sprzedawcy {
+			display: flex;
+			align-items: center;
+		}
 	`);
 
 	frycAPI.onLoadSetter(function () {
-	});
+		const path = window.location.pathname;
+		if (path.startsWith("/koszyk")) {
+			frycAPI.createMutObs((mutRecArr, mutObs) => {
+				frycAPI.forEach(`cart div > section`, sekcja => {
+					let suma = 0;
+					sekcja.querySelectorAll(`.pr127m.pro3hx`).forEach(cena => {
+						suma += Number(cena.innerText.replace(/.zł/, "").replace(",", "."));
+					});
+					const dostawa = sekcja.querySelector(`.mpof_uk.munh_4.pr127m`);
+					if (dostawa !== null) suma += Number(dostawa.innerText.replace(/.zł/, "").replace(",", "."));
+					const sumaParent = sekcja.querySelector(`[data-box-name="baby-search"]`);
+					if (sumaParent !== null) {
+						suma = `Suma: ${suma.toFixed(2).replace(".", ",")} zł`;
+						const sumaElem = sumaParent.querySelector(`.suma-od-jednego-sprzedawcy`);
+						if (sumaElem !== null) {
+							sumaElem.innerText = suma;
+						} else {
+							sumaParent.frycAPI_appendHTML(`<div class="suma-od-jednego-sprzedawcy">${suma}</div>`);
+						}
+					}
+				});
+			}, { elem: document.querySelector(`cart cart-header + div`) });
+		}
+	}, 2);
 
 	frycAPI.createManualFunctions("Opinie o produkcie", {
 		funcArr: [
-			(name = "Ukryj opinie bez zdjęć", type = frycAPI_State) => {
+			(name = "Ukryj opinie bez zdjęć", type = frycAPI_PureState) => {
 				const f = new type({
 					name: name,
 					stateDesc: ["Opinie bez zdjęć: WIDOCZNE", "Opinie bez zdjęć: UKRYTE"],
 				});
 				f.callBack = function (obj) {
 					document.body.classList.toggle("ukryj-opinie-bez-zdjęć");
-					f.nextState();
 				};
 				return f;
 			},
