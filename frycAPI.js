@@ -3527,7 +3527,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 		}
 		body {
 			--my-width: 360px;
-			.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary {
+			.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary:first-child {
 				width: var(--my-width) !important;
 				& > div {
 					width: var(--my-width) !important;
@@ -6283,7 +6283,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			content: url("${frycAPI.getResURL("ahk_logo.svg")}");
 		}
 		.dspNone {
-			display: none;
+			display: none !important;
 		}
 		#format-buttons:has(select[name="addbbcode_codeboxplus"]) {
 			display: flex;
