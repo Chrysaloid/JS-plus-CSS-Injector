@@ -592,11 +592,11 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	},
 	factorial(num) {
-		let rval = 1;
+		let fact = 1;
 		for (let i = 2; i <= num; i++) {
-			rval *= i;
+			fact *= i;
 		}
-		return rval;
+		return fact;
 	},
 	// #endregion
 	// #region //* Funkcje 2
@@ -854,7 +854,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	changeFavicon(href) {
 		document.querySelectorAll(`link[rel~="icon"]`).forEach(daElem => daElem.remove());
-		document.head.insertAdjacentHTML("beforeend", `<link rel="icon" href="${href}">`);
+		document.head.frycAPI_appendHTML(`<link rel="icon" href="${href}">`);
 	}, // frycAPI.changeFavicon("href");
 	changeFaviconRes(fileName) {
 		frycAPI.changeFavicon(frycAPI.getResURL(fileName));
