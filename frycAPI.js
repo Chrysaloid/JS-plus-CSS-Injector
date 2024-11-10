@@ -1518,11 +1518,11 @@ frycAPI.expandPrototype(Array, "frycAPI_sortValues", function (...getValues) {
 	});
 });
 frycAPI.expandPrototype(Array, "frycAPI_run", function (...args) {
-	this.forEach(daElem => daElem(...args));
+	this.forEach(fun => fun(...args));
 });
 frycAPI.expandPrototype(Array, "frycAPI_runReturn", function (...args) {
 	const retArr = [];
-	this.forEach(daElem => retArr.push(daElem(...args)));
+	this.forEach(fun => retArr.push(fun(...args)));
 	return retArr;
 });
 frycAPI.expandPrototype(Element, "frycAPI_addClass", function (...classNames) {
