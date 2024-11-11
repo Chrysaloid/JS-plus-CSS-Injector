@@ -10191,6 +10191,12 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
+} else if (window.location.href === "https://www.elka.pw.edu.pl/Aktualnosci/Kalendarz-akademicki") {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		iframe#external {
+			height: 1200px !important;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
