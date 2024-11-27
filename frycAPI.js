@@ -1372,13 +1372,32 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // document.addEventListener("mousemove", frycAPI.debounce(handleMouseMove, 100));
 	throttle(func, amount) {
 		// amount = ilukrotnie zmniejszyć częstotliwość eventów. Powinien być > 1
-		let throttle = amount - 1;
+		let counter = 1;
 		return function (...args) {
-			if ((throttle = (throttle + 1) % amount) !== 0) return;
-			const context = this;
-			func.apply(context, args);
+			if (counter < amount) {
+				counter++;
+			} else {
+				counter = 1;
+				const context = this;
+				func.apply(context, args);
+			}
 		};
 	}, // document.addEventListener("mousemove", frycAPI.throttle(handleMouseMove, 4));
+	throttleDebounce(func, amount, wait) {
+		// amount = ilukrotnie zmniejszyć częstotliwość eventów. Powinien być > 1
+		let counter = 1;
+		return function (...args) {
+			const context = this;
+			clearTimeout(timeout);
+			if (counter < amount) {
+				counter++;
+				timeout = setTimeout(() => func.apply(context, args), wait);
+			} else {
+				counter = 1;
+				func.apply(context, args);
+			}
+		};
+	}, // document.addEventListener("mousemove", frycAPI.throttleDebounce(handleMouseMove, 4));
 	async sendEventToBackground(name, data) { // domyślnie async. await sprawia że nie jest async
 		return await chrome.runtime.sendMessage(frycAPI.id, { name, data });
 	}, // const result = await frycAPI.sendEventToBackground();
@@ -1687,9 +1706,13 @@ if (1) { //* Globalne funkcje
 				return;
 			}
 			if (document.head) {
-				// `<meta name="color-scheme" content="only light">` insertAdjacentHTML
-				// document.head.insertAdjacentHTML("afterbegin", `<meta name="color-scheme" content="only light">`);
-				document.head.insertAdjacentElement("afterbegin", document.createElement("meta").frycAPI_setAttribute("name", "color-scheme").frycAPI_setAttribute("content", "only light"));
+				if (document.head.frycAPI_querySelNull("meta[name=color-scheme][content=dark]")) {
+					document.head.insertAdjacentElement("afterbegin",
+						document.createElement("meta")
+						.frycAPI_setAttribute("name", "color-scheme")
+						.frycAPI_setAttribute("content", "only light")
+					);
+				}
 				docObs.disconnect();
 			}
 		}).observe(document.documentElement, { childList: true });
@@ -7246,7 +7269,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		*:not([class*="hljs"]):not(code) {
 			font-family: IBM Plex Sans Condensed !important;
 		}
-		._7kpk {
+		/* ._7kpk {
 			background-color: rgba(0, 0, 0, 0.05);
 			border: 1px solid rgba(195, 195, 195, 0.6);
 		}
@@ -7268,9 +7291,6 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		.uiScrollableAreaGripper {
 			border-color: rgba(195, 195, 195, 1);
 		}
-		span._3oh-._58nk {
-			/*text-shadow: 0 0 3px black;*/
-		}
 		._1t_q ._1t_r, ._1t_q ._4ldz, ._1t_q ._4ld-, ._1t_q ._4ld- img {
 			max-height: 33px;
 			max-width: 31px;
@@ -7288,9 +7308,9 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		}
 		.gvxzyvdx.om3e55n1.b0ur3jhr > .q46jt4gp.aesu6q9g.r5g9zsuq.e4ay1f3w.om3e55n1.lq84ybu9.hf30pyar.rt34pxt2.jao8r537.dtqh1a21.l4uc2m3f.t7p7dqev.qsbzbi57.subw1o1z.b0ur3jhr.j8nb7h05 {
 			border: 1px solid #b1b1b1;
-		}
+		} */
 		
-		/* Zmiana kolory tła
+		/* Zmiana koloru tła
 		:root {
 			--my-custom-color: #6d1e1e;
 		}
@@ -7308,6 +7328,14 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		}
 		*/
 	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.createMutObs((mutRecArr, mutObs) => {
+			if (document.title !== "Messenger") {
+				document.title = "Messenger";
+			}
+		}, { elem: document.querySelector("title"), options: { characterData: true } });
+	});
 } else if (1 && frycAPI.host("www.meteo.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/* body>div>div>img {
@@ -7499,7 +7527,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 			if (tree && tree.shadowRoot && tree.shadowRoot.getElementById("shreddit-comment-tree-style") === null) {
 				frycAPI.injectStyle(/*css*/`
 					section[aria-label="Comments"] {
-						gap: 0px;
+						gap: 6px;
 					}
 				`, { elem: tree.shadowRoot, id: "shreddit-comment-tree-style" });
 			}
@@ -9351,12 +9379,11 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 
 	frycAPI.onLoadSetter(function () {
 		const title = document.title;
-		new MutationObserver((mutRec, mutObs) => {
+		frycAPI.createMutObs((mutRecArr, mutObs) => {
 			if (document.title !== title) {
 				document.title = title;
-				// loguj("Tit");
 			}
-		}).observe(document.querySelector("title"), { subtree: true, characterData: true, childList: true });
+		}, { elem: document.querySelector("title"), options: { characterData: true } });
 	});
 } else if (1 && frycAPI.hostIncludes("autodesk.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
