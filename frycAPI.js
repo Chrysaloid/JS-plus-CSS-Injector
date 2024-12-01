@@ -992,240 +992,240 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return /*html*/`<span class="lepszyCzas"><span class="abs-czas">${absCzas}</span><span class="myślnik-czas"> - </span><span class="rel-czas">${relCzas}</span></span>`;
 	},
 	setDefaultDateStyle() {
-		if (frycAPI.querySelNull(`#frycAPI_setDefaultDate`)) {
-			// #region //* Stringi
-			const rel = `[lepszyCzas="relatywnyCzas"]`;
-			const abs = `[lepszyCzas="absolutnyCzas"]`;
-			const stylSpanNotOba = `
-				/* cursor: none; */
-				cursor: inherit;
-				position: relative;
-				> :where(.myślnik-czas) { display: none; }
-			`;
-			const tooltipReset = `
-				background-color: inherit;
-				color: inherit;
-				border: 0;
-				padding: 0;
-			`;
-			const chosenNotHover = `
-				display: inline;
-			`;
-			const chosenHover = `
-				visibility: hidden;
-				position: unset;
-				${tooltipReset}
-			`;
-			const notChosenNotHover = `
-				display: none;
-			`;
-			const notChosenHover = `
-				display: inline;
-				visibility: visible;
-				position: absolute;
-				z-index: 999999;
-				text-decoration: inherit;
-				white-space: nowrap;
-			`;
-			const stylAbs = `
-				&:where(:not(:hover)) > :where(.abs-czas) { ${chosenNotHover} }
-				&:where(:hover      ) > :where(.abs-czas) { ${chosenHover} }
-				&:where(:not(:hover)) > :where(.rel-czas) { ${notChosenNotHover} }
-				&:where(:hover      ) > :where(.rel-czas) { ${notChosenHover} }
-			`;
-			const stylRel = `
-				&:where(:not(:hover)) > :where(.abs-czas) { ${notChosenNotHover} }
-				&:where(:hover      ) > :where(.abs-czas) { ${notChosenHover} }
-				&:where(:not(:hover)) > :where(.rel-czas) { ${chosenNotHover} }
-				&:where(:hover      ) > :where(.rel-czas) { ${chosenHover} }
-			`;
-			const stylOba = `
-				display: inline;
-				visibility: visible;
-				position: unset;
-				${tooltipReset}
-			`;
+		if (frycAPI.querySelOk(`#frycAPI_setDefaultDate`)) return frycAPI.setDefaultDateEnum;
 
-			const r = `:where(.lepszyCzas:hover) > :where(.rel-czas)`;
-			const a = `:where(.lepszyCzas:hover) > :where(.abs-czas)`;
+		// #region //* Stringi
+		const rel = `[lepszyCzas="relatywnyCzas"]`;
+		const abs = `[lepszyCzas="absolutnyCzas"]`;
+		const stylSpanNotOba = `
+			/* cursor: none; */
+			cursor: inherit;
+			position: relative;
+			> :where(.myślnik-czas) { display: none; }
+		`;
+		const tooltipReset = `
+			background-color: inherit;
+			color: inherit;
+			border: 0;
+			padding: 0;
+		`;
+		const chosenNotHover = `
+			display: inline;
+		`;
+		const chosenHover = `
+			visibility: hidden;
+			position: unset;
+			${tooltipReset}
+		`;
+		const notChosenNotHover = `
+			display: none;
+		`;
+		const notChosenHover = `
+			display: inline;
+			visibility: visible;
+			position: absolute;
+			z-index: 999999;
+			text-decoration: inherit;
+			white-space: nowrap;
+		`;
+		const stylAbs = `
+			&:where(:not(:hover)) > :where(.abs-czas) { ${chosenNotHover} }
+			&:where(:hover      ) > :where(.abs-czas) { ${chosenHover} }
+			&:where(:not(:hover)) > :where(.rel-czas) { ${notChosenNotHover} }
+			&:where(:hover      ) > :where(.rel-czas) { ${notChosenHover} }
+		`;
+		const stylRel = `
+			&:where(:not(:hover)) > :where(.abs-czas) { ${notChosenNotHover} }
+			&:where(:hover      ) > :where(.abs-czas) { ${notChosenHover} }
+			&:where(:not(:hover)) > :where(.rel-czas) { ${chosenNotHover} }
+			&:where(:hover      ) > :where(.rel-czas) { ${chosenHover} }
+		`;
+		const stylOba = `
+			display: inline;
+			visibility: visible;
+			position: unset;
+			${tooltipReset}
+		`;
 
-			const reset = `
-				top:    unset;
-				right:  unset;
-				bottom: unset;
-				left:   unset;
-				transform: none;
-			`;
-			const tooltip = `${reset}
-				background-color: hsl(0, 0%, 15%);
-				color: hsl(0, 0%, 100%);
-				border: 1px solid hsl(0, 0%, 60%);
-				padding: 1px 3px;
-				line-height: normal;
-			`;
-			const float = `${reset}${tooltipReset}`;
+		const r = `:where(.lepszyCzas:hover) > :where(.rel-czas)`;
+		const a = `:where(.lepszyCzas:hover) > :where(.abs-czas)`;
 
-			const top = `
-				bottom: var(--tool-tip-calc);
-				left: 50%;
-				transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));
-			`;
-			const right = `
-				left: var(--tool-tip-calc);
-				top: 50%;
-				transform: translate(var(--tt-x), calc(-50% + var(--tt-y)));
-			`;
-			const bottom = `
-				top: var(--tool-tip-calc);
-				left: 50%;
-				transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));
-			`;
-			const left = `
-				right: var(--tool-tip-calc);
-				top: 50%;
-				transform: translate(var(--tt-x), calc(-50% + var(--tt-y)));
-			`;
-			const center = `
-				top: 50%;
-				left: 50%;
-				transform: translate(calc(-50% + var(--tt-x)), calc(-50% + var(--tt-y)));
-			`;
-			/* eslint-disable template-curly-spacing,comma-spacing */
-			const arr = [
-				[`[lepszyCzasStyl="toolTip-top"]`   , `${tooltip}${top   }`],
-				[`[lepszyCzasStyl="toolTip-right"]` , `${tooltip}${right }`],
-				[`[lepszyCzasStyl="toolTip-bottom"]`, `${tooltip}${bottom}`],
-				[`[lepszyCzasStyl="toolTip-left"]`  , `${tooltip}${left  }`],
-				[`[lepszyCzasStyl="toolTip-center"]`, `${tooltip}${center}`],
-				[`[lepszyCzasStyl="float-left"]`    , `${float} left: 0; transform: translate(var(--tt-x), var(--tt-y));`],
-				[`[lepszyCzasStyl="float-center"]`  , `${float} left: 50%; transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));`],
-				[`[lepszyCzasStyl="float-right"]`   , `${float} right: 0; transform: translate(var(--tt-x), var(--tt-y));`],
-				// [`&[lepszyCzasStyl="float-top"]`     , `${float  }${top   }`],
-				// [`&[lepszyCzasStyl="float-bottom"]`  , `${float  }${bottom}`],
-			];
-			/* eslint-enable template-curly-spacing,comma-spacing */
-			const tooltipModSel = `:where([lepszyCzasStyl^="toolTip"]:not([lepszyCzasStyl="toolTip-center"]))`;
-			const tooltipModStyle = `visibility: visible;`;
-			const floatModSel = `:where([lepszyCzasStyl^="float"], [lepszyCzasStyl="toolTip-center"])`;
-			const floatModStyle = `visibility: hidden;`;
-			const bigSpec = `[lepszyCzas]`.repeat(5);
-			/* //* Próba konceptualnego ogarnięcia dlaczego ten styl działa
-				g(a,r)
-				g(t,f)
-				go
-				g(t,f) l(a,r)
-				g(a,r) l(t,f)
+		const reset = `
+			top:    unset;
+			right:  unset;
+			bottom: unset;
+			left:   unset;
+			transform: none;
+		`;
+		const tooltip = `${reset}
+			background-color: hsl(0, 0%, 15%);
+			color: hsl(0, 0%, 100%);
+			border: 1px solid hsl(0, 0%, 60%);
+			padding: 1px 3px;
+			line-height: normal;
+		`;
+		const float = `${reset}${tooltipReset}`;
 
-				l(a,r)
-				l(a,r)l(t,f)
-				lo
-			*/
-			// #endregion
+		const top = `
+			bottom: var(--tool-tip-calc);
+			left: 50%;
+			transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));
+		`;
+		const right = `
+			left: var(--tool-tip-calc);
+			top: 50%;
+			transform: translate(var(--tt-x), calc(-50% + var(--tt-y)));
+		`;
+		const bottom = `
+			top: var(--tool-tip-calc);
+			left: 50%;
+			transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));
+		`;
+		const left = `
+			right: var(--tool-tip-calc);
+			top: 50%;
+			transform: translate(var(--tt-x), calc(-50% + var(--tt-y)));
+		`;
+		const center = `
+			top: 50%;
+			left: 50%;
+			transform: translate(calc(-50% + var(--tt-x)), calc(-50% + var(--tt-y)));
+		`;
+		/* eslint-disable template-curly-spacing,comma-spacing */
+		const arr = [
+			[`[lepszyCzasStyl="toolTip-top"]`   , `${tooltip}${top   }`],
+			[`[lepszyCzasStyl="toolTip-right"]` , `${tooltip}${right }`],
+			[`[lepszyCzasStyl="toolTip-bottom"]`, `${tooltip}${bottom}`],
+			[`[lepszyCzasStyl="toolTip-left"]`  , `${tooltip}${left  }`],
+			[`[lepszyCzasStyl="toolTip-center"]`, `${tooltip}${center}`],
+			[`[lepszyCzasStyl="float-left"]`    , `${float} left: 0; transform: translate(var(--tt-x), var(--tt-y));`],
+			[`[lepszyCzasStyl="float-center"]`  , `${float} left: 50%; transform: translate(calc(-50% + var(--tt-x)), var(--tt-y));`],
+			[`[lepszyCzasStyl="float-right"]`   , `${float} right: 0; transform: translate(var(--tt-x), var(--tt-y));`],
+			// [`&[lepszyCzasStyl="float-top"]`     , `${float  }${top   }`],
+			// [`&[lepszyCzasStyl="float-bottom"]`  , `${float  }${bottom}`],
+		];
+		/* eslint-enable template-curly-spacing,comma-spacing */
+		const tooltipModSel = `:where([lepszyCzasStyl^="toolTip"]:not([lepszyCzasStyl="toolTip-center"]))`;
+		const tooltipModStyle = `visibility: visible;`;
+		const floatModSel = `:where([lepszyCzasStyl^="float"], [lepszyCzasStyl="toolTip-center"])`;
+		const floatModStyle = `visibility: hidden;`;
+		const bigSpec = `[lepszyCzas]`.repeat(5);
+		/* //* Próba konceptualnego ogarnięcia dlaczego ten styl działa
+			g(a,r)
+			g(t,f)
+			go
+			g(t,f) l(a,r)
+			g(a,r) l(t,f)
 
-			frycAPI.injectStyle(
-				/*
-					:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) span.lepszyCzas {
-						cursor: none;
-						> .myślnik-czas { display: none; }
-					}
-					[lepszyCzas="absolutnyCzas"] span.lepszyCzas {
-						&:not(:hover) > .abs-czas { display: inline; }
-						&:hover       > .abs-czas { display: none; }
-						&:not(:hover) > .rel-czas { display: none; }
-						&:hover       > .rel-czas { display: inline; }
-					}
-					[lepszyCzas="relatywnyCzas"] span.lepszyCzas {
-						&:not(:hover) > .abs-czas { display: none; }
-						&:hover       > .abs-czas { display: inline; }
-						&:not(:hover) > .rel-czas { display: inline; }
-						&:hover       > .rel-czas { display: none; }
-					}
-					[lepszyCzas="oba"] span.lepszyCzas > :is(.abs-czas, .rel-czas, .myślnik-czas) {
-						display: inline;
-					}
+			l(a,r)
+			l(a,r)l(t,f)
+			lo
+		*/
+		// #endregion
 
-					span.lepszyCzas:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) {
-						cursor: none;
-						> .myślnik-czas { display: none; }
-					}
-					span.lepszyCzas[lepszyCzas="absolutnyCzas"] {
-						&:not(:hover) > .abs-czas { display: inline; }
-						&:hover       > .abs-czas { display: none; }
-						&:not(:hover) > .rel-czas { display: none; }
-						&:hover       > .rel-czas { display: inline; }
-					}
-					span.lepszyCzas[lepszyCzas="relatywnyCzas"] {
-						&:not(:hover) > .abs-czas { display: none; }
-						&:hover       > .abs-czas { display: inline; }
-						&:not(:hover) > .rel-czas { display: inline; }
-						&:hover       > .rel-czas { display: none; }
-					}
-					span.lepszyCzas[lepszyCzas="oba"] > :is(.abs-czas, .rel-czas, .myślnik-czas) {
-						display: inline;
-					}
-				*/
-				/*css*/`
-				${bigSpec} {
-					& :where(span.lepszyCzas) {
-						overflow: visible;
-						text-decoration: inherit;
-						white-space: nowrap;
-						--tool-tip-padd: 3px;
-						--tt-x: 0px;
-						--tt-y: 0px;
-						--tool-tip-calc: calc(100% + var(--tool-tip-padd));
-					}
-					&:where(${abs}, ${rel}) :where(.lepszyCzas) { ${stylSpanNotOba} }
-					&:where(${abs}) :where(.lepszyCzas)         { ${stylAbs} }
-					&:where(${rel}) :where(.lepszyCzas)         { ${stylRel} }
-
-					&:where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) ${r} {${1}}`)} }
-					&:where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) ${a} {${1}}`)} }
-					&:where(${abs}) { &${tooltipModSel} ${a} {${tooltipModStyle}} }
-					&:where(${rel}) { &${tooltipModSel} ${r} {${tooltipModStyle}} }
-
-					&:where([lepszyCzas="oba"]) :where(.lepszyCzas) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
-
-					& {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) :where(${abs})${r} {${1}}`)} }
-					& {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) :where(${rel})${a} {${1}}`)} }
-					
-					&:where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${r} {${1}}`)} }
-					&:where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${a} {${1}}`)} }
-					&:where(${abs}) { ${floatModSel}${a} {${floatModStyle}} }
-					&:where(${rel}) { ${floatModSel}${r} {${floatModStyle}} }
-					
-					& :where(:is(${abs}, ${rel}).lepszyCzas) { ${stylSpanNotOba} }
-					& :where(${abs}.lepszyCzas)              { ${stylAbs} }
-					& :where(${rel}.lepszyCzas)              { ${stylRel} }
-					
-					& { &${tooltipModSel} :where(${abs})${a} {${tooltipModStyle}} }
-					& { &${tooltipModSel} :where(${rel})${r} {${tooltipModStyle}} }
-					& :where(${abs}) { &${floatModSel}${a} {${floatModStyle}} }
-					& :where(${rel}) { &${floatModSel}${r} {${floatModStyle}} }
-					&:where(${abs}) { ${tooltipModSel}${a} {${tooltipModStyle}} }
-					&:where(${rel}) { ${tooltipModSel}${r} {${tooltipModStyle}} }
-					
-					& :where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${r} {${1}}`)} }
-					& :where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${a} {${1}}`)} }
-					& :where(${abs}) { &${tooltipModSel}${a} {${tooltipModStyle}} }
-					& :where(${rel}) { &${tooltipModSel}${r} {${tooltipModStyle}} }
-
-					& :where(.lepszyCzas[lepszyCzas="oba"]) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
+		frycAPI.injectStyle(
+			/*
+				:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) span.lepszyCzas {
+					cursor: none;
+					> .myślnik-czas { display: none; }
 				}
-			`.replaceAll(/  +/g, " "), { id: "frycAPI_setDefaultDate" });
+				[lepszyCzas="absolutnyCzas"] span.lepszyCzas {
+					&:not(:hover) > .abs-czas { display: inline; }
+					&:hover       > .abs-czas { display: none; }
+					&:not(:hover) > .rel-czas { display: none; }
+					&:hover       > .rel-czas { display: inline; }
+				}
+				[lepszyCzas="relatywnyCzas"] span.lepszyCzas {
+					&:not(:hover) > .abs-czas { display: none; }
+					&:hover       > .abs-czas { display: inline; }
+					&:not(:hover) > .rel-czas { display: inline; }
+					&:hover       > .rel-czas { display: none; }
+				}
+				[lepszyCzas="oba"] span.lepszyCzas > :is(.abs-czas, .rel-czas, .myślnik-czas) {
+					display: inline;
+				}
 
-			frycAPI.setDefaultDateEnum.mode.oba().floatCenter();
-			return frycAPI.setDefaultDateEnum;
-		}
+				span.lepszyCzas:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) {
+					cursor: none;
+					> .myślnik-czas { display: none; }
+				}
+				span.lepszyCzas[lepszyCzas="absolutnyCzas"] {
+					&:not(:hover) > .abs-czas { display: inline; }
+					&:hover       > .abs-czas { display: none; }
+					&:not(:hover) > .rel-czas { display: none; }
+					&:hover       > .rel-czas { display: inline; }
+				}
+				span.lepszyCzas[lepszyCzas="relatywnyCzas"] {
+					&:not(:hover) > .abs-czas { display: none; }
+					&:hover       > .abs-czas { display: inline; }
+					&:not(:hover) > .rel-czas { display: inline; }
+					&:hover       > .rel-czas { display: none; }
+				}
+				span.lepszyCzas[lepszyCzas="oba"] > :is(.abs-czas, .rel-czas, .myślnik-czas) {
+					display: inline;
+				}
+			*/
+			/*css*/`
+			${bigSpec} {
+				& :where(span.lepszyCzas) {
+					overflow: visible;
+					text-decoration: inherit;
+					white-space: nowrap;
+					--tool-tip-padd: 3px;
+					--tt-x: 0px;
+					--tt-y: 0px;
+					--tool-tip-calc: calc(100% + var(--tool-tip-padd));
+				}
+				&:where(${abs}, ${rel}) :where(.lepszyCzas) { ${stylSpanNotOba} }
+				&:where(${abs}) :where(.lepszyCzas)         { ${stylAbs} }
+				&:where(${rel}) :where(.lepszyCzas)         { ${stylRel} }
+
+				&:where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) ${r} {${1}}`)} }
+				&:where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) ${a} {${1}}`)} }
+				&:where(${abs}) { &${tooltipModSel} ${a} {${tooltipModStyle}} }
+				&:where(${rel}) { &${tooltipModSel} ${r} {${tooltipModStyle}} }
+
+				&:where([lepszyCzas="oba"]) :where(.lepszyCzas) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
+
+				& {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) :where(${abs})${r} {${1}}`)} }
+				& {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) :where(${rel})${a} {${1}}`)} }
+
+				&:where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${r} {${1}}`)} }
+				&:where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${a} {${1}}`)} }
+				&:where(${abs}) { ${floatModSel}${a} {${floatModStyle}} }
+				&:where(${rel}) { ${floatModSel}${r} {${floatModStyle}} }
+
+				& :where(:is(${abs}, ${rel}).lepszyCzas) { ${stylSpanNotOba} }
+				& :where(${abs}.lepszyCzas)              { ${stylAbs} }
+				& :where(${rel}.lepszyCzas)              { ${stylRel} }
+
+				& { &${tooltipModSel} :where(${abs})${a} {${tooltipModStyle}} }
+				& { &${tooltipModSel} :where(${rel})${r} {${tooltipModStyle}} }
+				& :where(${abs}) { &${floatModSel}${a} {${floatModStyle}} }
+				& :where(${rel}) { &${floatModSel}${r} {${floatModStyle}} }
+				&:where(${abs}) { ${tooltipModSel}${a} {${tooltipModStyle}} }
+				&:where(${rel}) { ${tooltipModSel}${r} {${tooltipModStyle}} }
+
+				& :where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${r} {${1}}`)} }
+				& :where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${a} {${1}}`)} }
+				& :where(${abs}) { &${tooltipModSel}${a} {${tooltipModStyle}} }
+				& :where(${rel}) { &${tooltipModSel}${r} {${tooltipModStyle}} }
+
+				& :where(.lepszyCzas[lepszyCzas="oba"]) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
+			}
+		`.replaceAll(/  +/g, " "), { id: "frycAPI_setDefaultDate" });
+
+		frycAPI.setDefaultDateEnum.mode.oba().floatCenter();
+		return frycAPI.setDefaultDateEnum;
 	}, // frycAPI.setDefaultDateStyle();
 	setDefaultDateEnum: {
+		/* eslint-disable */
 		mode: {
 			relatywnyCzas(elem) { return frycAPI.setDefaultDateEnumFunc1(elem, "relatywnyCzas", 0) },
 			absolutnyCzas(elem) { return frycAPI.setDefaultDateEnumFunc1(elem, "absolutnyCzas", 1) },
-			oba(elem)           { return frycAPI.setDefaultDateEnumFunc1(elem, "oba"          , 2) }, // eslint-disable-line comma-spacing
+			oba(elem)           { return frycAPI.setDefaultDateEnumFunc1(elem, "oba"          , 2) },
 		},
 		style: {
-			/* eslint-disable */
 			toolTipTop    (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-top"   ) },
 			toolTipRight  (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-right" ) },
 			toolTipBottom (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-bottom") },
@@ -1236,14 +1236,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			floatRight    (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "float-right"   ) },
 			// floatTop      (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "float-top"     ) },
 			// floatBottom   (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "float-bottom"  ) },
-			/* eslint-enable */
 		},
+		/* eslint-enable */
 		manualFuncRef: null,
 	}, // frycAPI.setDefaultDateEnum.relatywnyCzas();
 	setDefaultDateEnumFunc1(elem, val, state) {
 		if (elem === undefined) {
 			document.body.setAttribute("lepszyCzas", val);
-			frycAPI.setDefaultDateEnum.manualFuncRef.setState(state);
+			frycAPI.setDefaultDateEnum.manualFuncRef?.setState(state);
 		} else if (elem.classList.contains("lepszyCzas")) {
 			elem.setAttribute("lepszyCzas", val);
 		} else {
@@ -1463,15 +1463,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	xmlObjToJsStrNode(xmlObj) {
 		return JSON.stringify(frycAPI.xmlObjToJsObjNode(xmlObj));
 	}, // frycAPI.xmlObjToJsStrNode(xmlObj);
-	template() {
-
-	}, // frycAPI.template();
 	insertImage(elem, fileName, where = "beforeend") {
 		return elem.frycAPI_insertHTML(where, `<img src="${frycAPI.getResURL(fileName)}">`);
 	}, // const img = frycAPI.insertImage(elem, "img.png");
 	insertLoadingGif(elem, where = "beforeend", fileName = "loading.gif") {
 		return elem.frycAPI_insertHTML(where, `<img class="loading-gif" src="${frycAPI.getResURL(fileName)}">`);
 	}, // const img = frycAPI.insertLoadingGif(elem); // .loading-gif
+	template() {
+	}, // frycAPI.template();
 	// #region //* Funkcje 5
 	// #endregion
 	// #endregion
@@ -1692,7 +1691,7 @@ try {
 // #endregion
 // #endregion
 
-// #region //* IFy 1
+// #region //* IFy  1
 if (1) { //* Globalne funkcje
 	(frycAPI.beforeLoad = function () {
 		// #region //* color scheme only light
@@ -1976,31 +1975,31 @@ if (1 && frycAPI.host("192.168.1.1")) {
 		tr[style*="background"]>td {
 			filter: brightness(0);
 		}
-		
+
 		img[src].bylem {
 			border: 1px solid red;
 		}
 		img[src].zmienione {
 			border: 1px solid green;
 		}
-		
+
 		.theme-fandomdesktop-light .cell-green {
 			background-color: hsl(120 73% 39% / 1) !important;
 		}
-		
+
 		.theme-fandomdesktop-light .cell-pink {
 			background-color: hsl(0 53% 43% / 1) !important;
 		}
-		
+
 		.global-navigation span,
 		.global-navigation .global-navigation__label{
 			color: hsl(0 0% 58% / 1);
 		}
-		
+
 		.global-navigation svg.wds-icon {
 			fill: hsl(0 0% 58% / 1);
 		}
-		
+
 		img[alt="Aberrant Achatina"],
 		img[alt="Aberrant Anglerfish"],
 		img[alt="Aberrant Ankylosaurus"],
@@ -2606,7 +2605,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 		img[alt="Zomdodo"] {
 			filter: invert(1) hue-rotate(180deg);
 		}
-		
+
 		.info-X1-100 img{
 			filter: none;
 		}
@@ -2722,9 +2721,9 @@ if (1 && frycAPI.host("192.168.1.1")) {
 } else if (1 && frycAPI.host("astronomia.zagan.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
-		  background-image: none;
-		  background-color: #656565;
-		  color: white;
+			background-image: none;
+			background-color: #656565;
+			color: white;
 		}
 	`);
 } else if (1 && frycAPI.host("bcgplatinion.com")) {
@@ -2736,22 +2735,22 @@ if (1 && frycAPI.host("192.168.1.1")) {
 } else if (1 && frycAPI.host("blog.discord.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
-		  filter: invert(1);
+			filter: invert(1);
 		}
 		img {
-		  filter: invert(1) !important;
+			filter: invert(1) !important;
 		}
 	`);
 } else if (0 && frycAPI.host("blog.etrapez.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("bloons.fandom.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img.mwe-math-fallback-image-display.mwe-math-element {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("boards.4chan.org", "boards.4channel.org")) {
@@ -2857,9 +2856,9 @@ if (1 && frycAPI.host("192.168.1.1")) {
 			color: #FF7D5D;
 		}
 		body.yotsuba_b_new div.post.reply {
-			
+
 		}
-		.postMessage > .myDiv > :is(.quoteLink, .quotelink), 
+		.postMessage > .myDiv > :is(.quoteLink, .quotelink),
 		.deadlink,
 		body[class][class][class][class] a:hover,
 		.yotsuba_b_new .backlink a:hover {
@@ -2990,7 +2989,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 		}
 		div.post.reply,
 		.postInfo.desktop {
-			transition: 
+			transition:
 				/* max-width  ${transTime}s 0s ease-in-out,
 				max-height ${transTime}s 0s ease-in-out; */
 				transform ${transTime}s 0s ease-in-out,
@@ -3098,7 +3097,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 			object-position: top left;
 		}
 		a.fileThumb img[data-md5] {
-			transition:	
+			transition:
 				width .4s 0s ease-in-out,
 				height .4s 0s ease-in-out; /* ${transTime} */
 			/* height: auto !important;
@@ -3494,28 +3493,28 @@ if (1 && frycAPI.host("192.168.1.1")) {
 			border-bottom: 0px;
 		}
 		mr-comment {
-		  border: 1px solid hsl(0deg 0% 60%);
+			border: 1px solid hsl(0deg 0% 60%);
 		}
-		
+
 		/*
 		::part(mr-comment) {
-		  
+
 		}
 		mr-app > #shadow-root {
-		  
+
 		}
 		mr-header {
-		  
+
 		}
 		:host {
-		  
+
 		}
-		
+
 		[headinglevel="2"] {
-		  
+
 		}
 		:host(mr-header) {
-		  
+
 		}
 		*/
 	`);
@@ -3578,7 +3577,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 } else if (0 && frycAPI.host("cke.gov.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		h2, .h2 {
-		    color: #F8A238;
+			color: #F8A238;
 		}
 	`);
 } else if (1 && frycAPI.host("comforteo.eu")) {
@@ -3595,7 +3594,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 			flex-direction: column;
 			align-items: center;
 			&,&>* {
-				width: fit-content;	
+				width: fit-content;
 			}
 		}
 		*:not(textarea):not(img) {
@@ -3713,23 +3712,23 @@ if (1 && frycAPI.host("192.168.1.1")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 2
+// #region //* IFy  2
 else if (1 && frycAPI.host("css-tricks.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/* .on-light, .on-light .article-content {
-		    color: hsl(236 15% 90% / 1);
+			color: hsl(236 15% 90% / 1);
 		}
 		.article-and-sidebar>.article-content {
-		    background: #000;
+			background: #000;
 		}
 		code {
-		  color: #1e1e17;
+			color: #1e1e17;
 		}
 		pre code, em code, [rel="CSS"] code, [class*="language-css"], .language-html{
-		  color: inherit;
+			color: inherit;
 		}
 		.header-breadcrumbs .on-light .breadcrumb_last, .header-breadcrumbs .on-light .breadcrumb_last a, .on-light .header-breadcrumbs .breadcrumb_last, .on-light .header-breadcrumbs .breadcrumb_last a, .on-light h1, .on-light h1 a, .on-light h2, .on-light h2 a, .on-light h3, .on-light h3 a, .on-light h4, .on-light h4 a, .on-light h5, .on-light h5 a, .on-light h6, .on-light h6 a {
-		    color: hsl(236 15% 90% / 1);
+			color: hsl(236 15% 90% / 1);
 		}
 		figure.wp-block-image.is-resized>img[src*=".svg"] {
 			filter: invert(1) hue-rotate(180deg) brightness(48);
@@ -3875,13 +3874,13 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 			max-width: unset;
 			width: unset;
 		}
-		
+
 		/*
 		object, iframe, embed {
 			border: 0;
 			margin: 0;
 		}
-		
+
 		div.image-container object,
 		div.image-container iframe,
 		div.image-container embed{
@@ -3890,7 +3889,7 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 			vertical-align: middle;
 		}
 		*/
-		
+
 		div#comments {
 			display: flex;
 			flex-direction: column-reverse;
@@ -3902,7 +3901,7 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 } else if (1 && frycAPI.host("developer.mozilla.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/* iframe.sample-code-frame {
-		  filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg);
 		} */
 		iframe.interactive body {
 			background-color: #2b2b2b;
@@ -3944,7 +3943,7 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 			filter: invert(1) hue-rotate(180deg);
 		}
 		/* body, button, input, optgroup, select, textarea {
-		  color: #7a7a7a !important;
+			color: #7a7a7a !important;
 		} */
 		.main-navigation a, .entry-content span {
 			color: hsl(0 0% 58% / 1) !important;
@@ -3957,7 +3956,7 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*
 		body #docs-editor-container .grid-table-container+canvas, .docos-icon-img:before {
-		  filter: invert(1) !important;
+			filter: invert(1) !important;
 		}
 		.eAQI0e {
 			white-space: nowrap;
@@ -3979,7 +3978,7 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 		new MutationObserver((mutRec, mutObs) => {
 			// loguj(mutRec);
 			const elem = document.getElementById("docs-maestro-prompt-dialog-message");
-			if (elem && mutRec[0].addedNodes[0].hasAttribute("jsshadow") && elem.innerText.startsWith("!@#$%^&*()")) {
+			if (elem !== null && mutRec[0].addedNodes[0].hasAttribute("jsshadow") && elem.innerText.startsWith("!@#$%^&*()")) {
 				// loguj(elem.innerText);
 				frycAPI.ctrlC(elem.innerText.replace("!@#$%^&*()", ""));
 				mutRec[0].addedNodes[0].querySelector(`span.javascriptMaterialdesignGm3WizButtonText-button__touch`).click();
@@ -3993,28 +3992,28 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 		}
 		body {
 			filter: invert(1) hue-rotate(180deg);
-		  background-color: black;
-		  height: initial;
+			background-color: black;
+			height: initial;
 		}
 		#header {
 			background-color: white;
 		}
-		
+
 		img {
-		  filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg);
 		}
 		#ucss-code-wrapper .CodeMirror-wrap .CodeMirror-scroll {
 			filter: invert(0) hue-rotate(0deg);
-		  background-color: white;
-		  color: black;
+			background-color: white;
+			color: black;
 		}
-		
+
 		.CodeMirror-activeline {
-		  filter: invert(1);
-		  background-color: black;
-		  color: white;
+			filter: invert(1);
+			background-color: black;
+			color: white;
 		}
-		
+
 		.content {
 			background-color: white;
 		}
@@ -4026,7 +4025,7 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 			position: sticky;
 			height: 100vh;
 		}
-		
+
 		.page-wrapper {
 			margin-top: -1007px;
 		}
@@ -4048,8 +4047,8 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 } else if (1 && frycAPI.host("dydmat.mimuw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  -webkit-filter: none !important;
-		    filter: none !important;
+			-webkit-filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("eager.io")) {
@@ -4062,107 +4061,107 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 } else if (1 && frycAPI.host("en.wikipedia.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img.thumbimage[src*=".png"],
-		img.thumbimage[src*=".gif"] 
+		img.thumbimage[src*=".gif"]
 		/* a.image:has(img[src*=".png"]) */
 		{
-			  filter: invert(1) hue-rotate(180deg);
-			  background-color: #c9c9c9;
+			filter: invert(1) hue-rotate(180deg);
+			background-color: #c9c9c9;
 		}
 	`);
 } else if (1 && frycAPI.host("epodreczniki.open.agh.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("fizyka.dk")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(1) !important;
+			filter: invert(1) !important;
 		}
 	`);
 } else if (1 && frycAPI.host("forms.office.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.office-form-question-title.with-image {
-		  padding: 10px;
+			padding: 10px;
 		}
 		.office-form-question-title.with-image:last-child {
-		  padding-bottom: 10px;
+			padding-bottom: 10px;
 		}
 		.office-form-question-title div.immersive-reader-button-wrapper {
-		  display: none;
+			display: none;
 		}
 		.office-form-question-element {
-		  margin-top: 0px;
-		  margin-left: 0px;
+			margin-top: 0px;
+			margin-left: 0px;
 		}
 		.office-form-question-choice+.office-form-question-choice {
-		  margin-top: 0px;
+			margin-top: 0px;
 		}
 		.office-form-question-element {
-		  padding: 10px;
+			padding: 10px;
 		}
 		.office-form-question-ordinal {
-		  position: absolute;
-		  top: 11px;
-		  left: 11px;
-		  width: 20px;
-		  height: 20px;
+			position: absolute;
+			top: 11px;
+			left: 11px;
+			width: 20px;
+			height: 20px;
 		}
 		.office-form-question-ordinal span {
-		  line-height: 20px;
+			line-height: 20px;
 		}
 		.office-form-question-title>span:not([class]) {
-		  margin-left: 5px;
+			margin-left: 5px;
 		}
 		.office-form-question-title>div:not(.immersive-reader-button-wrapper) {
-		  display: inline-block;
-		  margin-left: 10px; 
+			display: inline-block;
+			margin-left: 10px;
 		}
 		.office-form-question-content {
-		  padding: 0px;
-		  border: 1px solid #6d6d6d;
-		  border-top-width: 0px;
+			padding: 0px;
+			border: 1px solid #6d6d6d;
+			border-top-width: 0px;
 		}
 		.office-form-question:first-child .office-form-question-content {
-		  border-top-width: 1px;
+			border-top-width: 1px;
 		}
 		.office-form-question {
-		  padding: 0px;
-		  margin: 0px;
+			padding: 0px;
+			margin: 0px;
 		}
 		.office-form-question-content>div:first-child:not(.question-title-container):not(.question-title-box) {
-		  display: none;
+			display: none;
 		}
 		.office-form-question-title>.ordinal-number {
-		  position: static;
+			position: static;
 		}
 		.office-form-question-title {
-		      margin-left: 0px;
+			margin-left: 0px;
 		}
 		.question-title-box {
-		  padding: 10px 10px 0 12px
+			padding: 10px 10px 0 12px
 		}
 		.office-form-notice-container>div:not(:last-child) {
-		  margin-bottom: 0px;
+			margin-bottom: 0px;
 		}
 		.office-form-notice-container>div:last-child {
-		  margin-bottom: 20px;
+			margin-bottom: 20px;
 		}
 		.office-form-content {
-		  padding-top: 0px;
+			padding-top: 0px;
 		}
 		.office-form-theme-footer {
-		  display: none;
+			display: none;
 		}
 		.office-form-result-container {
-		  min-height: 100px;
+			min-height: 100px;
 		}
 		div>span.text-format-content {
-		    padding-left: 26px;
+			padding-left: 26px;
 		}
 		.office-form-question-title {
-		    margin-left: 15px;
+			margin-left: 15px;
 		}
 	`);
 } else if (1 && frycAPI.host("forum.videohelp.com")) {
@@ -4180,24 +4179,24 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 } else if (1 && frycAPI.host("industrial.omron.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (0 && frycAPI.host("jp.pum.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
-		  font-family: IBM Plex Sans !important;
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 	`);
 } else if (1 && frycAPI.host("json2table.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		table * {
-			font-family: Source Code Fryc;
+			font-family: "Source Code Fryc";
 		}
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 3
+// #region //* IFy  3
 else if (1 && frycAPI.host("jsongrid.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		td.obj.order.index {
@@ -4207,10 +4206,10 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 } else if (1 && frycAPI.host("karl.gg")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.statsContainer {
-		  border-top: 1px solid;
+			border-top: 1px solid;
 		}
 		.statsText[data-v-a848cd50] {
-		  line-height: inherit;
+			line-height: inherit;
 		}
 	`);
 } else if (1 && frycAPI.host("kertisjones.weebly.com")) {
@@ -4222,17 +4221,17 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 } else if (0 && frycAPI.host("labfiz1p.if.pw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
-		  font-family: IBM Plex Sans !important;
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
-		
+
 		body{
-		  filter: invert(1) hue-rotate(180deg);
-		  background: none;
-		  background-color: black;
+			filter: invert(1) hue-rotate(180deg);
+			background: none;
+			background-color: black;
 		}
-		
+
 		#ucss-code-wrapper {
-		  filter: invert(1) hue-rotate(180deg) !important;
+			filter: invert(1) hue-rotate(180deg) !important;
 		}
 	`);
 } else if (1 && frycAPI.host("latarnikwyborczy.pl")) {
@@ -4258,16 +4257,16 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 		/* .aD::before, .btn::before, .btl.acK, .bs3::before, .T-axO .J-JN-M-I-JG, .J-Z .aaA.aaB, .J-J5-Ji.J-Z-M-I-JG {
 			filter: invert(1);
 		} */
-		
+
 		/*
 		body::-webkit-scrollbar {
 		width:15px !important;
 		}
-		
+
 		body::-webkit-scrollbar-track {
 		background:rgb(47, 54, 60) !important;
 		}
-		
+
 		body::-webkit-scrollbar-thumb {
 		background:rgb(102, 254, 123) !important;
 		border-width:2px !important;
@@ -4275,50 +4274,50 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 		border-color:rgba(0, 0, 0, 0.5) !important;
 		border-radius:7.5px !important;
 		}
-		
+
 		body::-webkit-scrollbar-thumb:hover {
 		background:rgba(0, 230, 42, 1) !important;
-		border-width:2px !important; 
+		border-width:2px !important;
 		border-style:solid !important;
 		}
-		
+
 		body::-webkit-scrollbar-thumb:active {
 		border-width:2px !important;
 		border-style:dotted !important;
 		}
 		*/
-		
+
 		/* .aYi.cQ {
 			color: #fff;
 		} */
-		
+
 		.pG>.a9q {
 			background-position: center;
 		}
-		
+
 		/* .agJ:hover, .agJ.bjE {
 			background: rgb(71 70 70 / 31%);
 		} */
-		
+
 		/*
 		[dir="ltr"] {
-		  filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg);
 		}
 		*/
 	`);
 } else if (1 && frycAPI.host("mat-fiz-samouczek.pw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img.teximage {
-		    background-color: #ffffff;
-		    border: 5px solid white;
-		    border-radius: 3px;
+			background-color: #ffffff;
+			border: 5px solid white;
+			border-radius: 3px;
 		}
 	`);
 } else if (1 && frycAPI.host("matematykaszkolna.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  -webkit-filter: none !important;
-		    filter: none !important;
+			-webkit-filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("matlab.mathworks.com")) {
@@ -4330,14 +4329,14 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 } else if (1 && frycAPI.host("matma4u.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  -webkit-filter: none !important;
-		    filter: none !important;
+			-webkit-filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("matrixcalc.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		a[title="Бе́ло-кра́сно-бе́лый флаг"] {
-		  display: none !important;
+			display: none !important;
 		}
 		mtr:not(:last-child) {
 			height: 25px;
@@ -4346,34 +4345,34 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 } else if (1 && frycAPI.host("minecraft.fandom.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#cont {
-		  position: absolute;
-		  z-index: 9999;
-		  background-color: black;
-		  padding: 10px;
-		  font-family: IBM Plex Sans;
-		  display: flex;
+			position: absolute;
+			z-index: 9999;
+			background-color: black;
+			padding: 10px;
+			font-family: IBM Plex Sans;
+			display: flex;
 		}
 		#cont div {
-		  padding: 5px 10px;
+			padding: 5px 10px;
 			border: 1px solid white;
-		  border-left: 0px;
+			border-left: 0px;
 		}
 		#licz {
-		  border: 1px solid white !important;
+			border: 1px solid white !important;
 		}
-		
+
 		.top-ads-container {
-		  display: none;
+			display: none;
 		}
 	`);
 } else if (1 && frycAPI.host("mlp.fandom.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#ucss-code-wrapper .CodeMirror-wrap .CodeMirror-scroll {
 			filter: invert(0) hue-rotate(0deg);
-		  background-color: white;
-		  color: black;
+			background-color: white;
+			color: black;
 		}
-		
+
 		.pojemnik {
 		position: absolute;
 			z-index: 99999;
@@ -4385,16 +4384,16 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 			display: flex;
 			flex-wrap: wrap;
 		}
-		
+
 		.pojemnikSmall {
-		  display: flex;
+			display: flex;
 			flex-direction: column;
 		}
 	`);
 } else if (1 && frycAPI.host("oeis.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg);
 		}
 		body {
 			background-color: black;
@@ -4403,8 +4402,8 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 } else if (1 && frycAPI.host("ostatnidzwonek.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
-		background: none;  
-		background-color: white;
+			background: none;
+			background-color: white;
 		}
 	`);
 } else if (1 && frycAPI.host("palobby.com")) {
@@ -4433,27 +4432,27 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 		span[title="Build Time"] {
 			margin-left: auto;
 			padding-left: 5px;
-		  padding-right: 3px;
+			padding-right: 3px;
 		}
 		span[title="Build Time"]:last-child {
-		  padding-right: 0px;
+			padding-right: 0px;
 		}
 		span[title="Cooldown Time"] {
 			padding-left: 3px;
-		  padding-right: 3px;
+			padding-right: 3px;
 		}
 		span[title="Rolloff Time"],
 		span[title="Cooldown Time"]:last-child{
 			padding-left: 3px;
-		  padding-right: 0px;
+			padding-right: 0px;
 		}
 		span[title="Build Time"],
 		span[title="Cooldown Time"],
 		span[title="Rolloff Time"] {
-		  align-self: center;
+			align-self: center;
 		}
 		.clearfix~div.columns ul.list-unstyled>li:has(a.default) {
-		  font-family: monospace;
+			font-family: monospace;
 		}
 		a.default {
 			font-family: "Helvetica Neue","Segoe UI",Helvetica,Arial,sans-serif;
@@ -4468,7 +4467,7 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 		}
 		.content:has(.clearfix) > div.columns > div {
 			border: 0px solid #eee;
-		  padding: 0px 15px;
+			padding: 0px 15px;
 		}
 		.content:has(.clearfix) > div.columns > div ~ div {
 			border-left: 0px;
@@ -4477,10 +4476,10 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 			border-top: 0px;
 		}
 		.content:has(.clearfix) > div.columns {
-		  margin-top: 20px;
+			margin-top: 20px;
 		}
 		.content:has(.clearfix) > div.columns ~ div.columns {
-		  margin-top: 0px;
+			margin-top: 0px;
 		}
 	`);
 
@@ -4512,45 +4511,44 @@ else if (1 && frycAPI.host("jsongrid.com")) {
 } else if (1 && frycAPI.host("pl.wikibooks.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  -webkit-filter: none !important;
-		    filter: none !important;
+			-webkit-filter: none !important;
+			filter: none !important;
 		}
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 4
+// #region //* IFy  4
 else if (1 && frycAPI.host("pl.wikipedia.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		img.thumbimage[src*=".png"] 
+		img.thumbimage[src*=".png"]
 		/* a.image:has(img[src*=".png"]) */
 		{
-			  filter: invert(1) hue-rotate(180deg);
-			  background-color: #c9c9c9;
+			filter: invert(1) hue-rotate(180deg);
+			background-color: #c9c9c9;
 		}
 	`);
 } else if (1 && frycAPI.host("pl.wikisource.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.mwe-math-fallback-image-inline {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("planetcalc.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(0) hue-rotate(
-		180deg) !important;
+			filter: invert(0) hue-rotate(180deg) !important;
 		}
 		/*
 		.x_.j0[style="display: block; opacity: 1;"] {
-		  border-top: 1px solid black;
+			border-top: 1px solid black;
 		}
 		*/
 		.x_.j0>.o8 {
-		  font-size: 1.25rem;
-		  margin-bottom: 5px;
-		  color: #fa7014;
+			font-size: 1.25rem;
+			margin-bottom: 5px;
+			color: #fa7014;
 		}
-		
+
 		.fuse-slot:has([id*="google_ads_iframe"]) {
 			display: none;
 		}
@@ -4589,7 +4587,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 		img.mwe-math-fallback-image-inline {
 			filter: invert(1) !important;
 		}
-		
+
 		.resizable-container {
 			max-width: 100%;
 			width: calc(100% - 34px * 2);
@@ -4602,13 +4600,13 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 		tr:has([title="Equipment Workshop"]),
 		tr:has([title="Build Gun"]),
 		tr:has(.recipe-alternate){
-		  display: none;
+			display: none;
 		}
 	`);
 } else if (1 && frycAPI.host("scripty.abhisheksatre.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.ant-drawer-content-wrapper {
-		  width: 1295px !important;
+			width: 1295px !important;
 		}
 		.CodeMirror.cm-s-default {
 			height: 520px;
@@ -4620,30 +4618,29 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 } else if (1 && frycAPI.host("second.wiki")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("soundcloud.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.playableTile__image>.sc-artwork>span {
-		  
 		}
-		
+
 		#cont {
-		  position: absolute;
-		  z-index: 9999;
-		  background-color: white;
-		  padding: 10px;
-		  font-family: IBM Plex Sans;
-		  display: flex;
+			position: absolute;
+			z-index: 9999;
+			background-color: white;
+			padding: 10px;
+			font-family: IBM Plex Sans;
+			display: flex;
 		}
 		#cont div {
-		  padding: 5px 10px;
+			padding: 5px 10px;
 			border: 1px solid black;
-		  border-left: 0px;
+			border-left: 0px;
 		}
 		#licz {
-		  border: 1px solid black !important;
+			border: 1px solid black !important;
 		}
 	`);
 
@@ -4688,9 +4685,9 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 		li.-badges.-flair {
 			height: 19px;
 		}
-		
+
 		/* Zaznacz każdy */
-		.-flair > span[title] { 
+		.-flair > span[title] {
 			/* display: flex !important; */
 			border: 1px solid #797979;
 			margin: 0px;
@@ -4699,13 +4696,13 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 			/* align-items: center; */
 			text-wrap: nowrap;
 		}
-		
+
 		/* Zaznacz nie pierwszy */
 		.-flair > span[title] ~ span[title] {
 			border-left: 0px !important;
 			border-radius: 0px 0px 0px 0px;
 		}
-		
+
 		/* Zaznacz ostatni */
 		.-flair > span[title]:not(:has( ~ span[title])) {
 			border-radius: 0px 4px 4px 0px;
@@ -4713,7 +4710,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 		.-flair > span[title]:not(:has( ~ span[title])):first-of-type {
 			border-radius: 4px;
 		}
-		
+
 		.myDiv {
 			display: flex;
 			width: fit-content;
@@ -4727,8 +4724,8 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 			width: auto;
 			height: auto;
 		}
-		.user-info .user-gravatar32, 
-		.gravatar-wrapper-32, 
+		.user-info .user-gravatar32,
+		.gravatar-wrapper-32,
 		.gravatar-wrapper-32 img{
 			width: 40px;
 			height: 40px;
@@ -4760,7 +4757,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 					--darkreader-border--blue-400: var(--my-bg-accent);
 					--darkreader-border--_bu-outlined-bc: var(--my-bg-accent);
 					--darkreader-bg--_bu-outlined-bg: var(--my-bg-accent);
-					
+
 					--my-bg-accent-bright: color-mix(in srgb, var(--my-bg-accent), white 10%);
 					--darkreader-bg--_bu-filled-bg-hover: var(--my-bg-accent-bright);
 					--darkreader-text--theme-link-color-visited: var(--my-bg-accent-bright);
@@ -4770,7 +4767,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 
 					--my-bg-accent-dark-2: color-mix(in srgb, var(--my-bg-accent), black 30%);
 					--darkreader-bg--theme-post-owner-background-color: var(--my-bg-accent-dark-2);
-					
+
 					--my-fg-accent: color-mix(in srgb, var(--my-bg-accent), white 40%);
 					--darkreader-text--theme-link-color: var(--my-fg-accent);
 					--my-fg-accent-bright: color-mix(in srgb, var(--my-fg-accent), white 30%);
@@ -4945,7 +4942,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 				display: flex;
 			}
 			.comment-voting {
-				position: relative;	
+				position: relative;
 				> a {
 					position: absolute;
 					top: 2px;
@@ -4999,7 +4996,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 				background-image: url("https://cdn.sstatic.net/Sites/gaming/img/header-foreground-image03.gif?v=330ce6fa0066"), url("https://cdn.sstatic.net/Sites/gaming/img/header-foreground-image01.png?v=069bf27565ea");
 			}
 		` : ""}
-		
+
 		/* gaming.stackexchange.com */
 		/* .site-header .site-header--container {
 			background-image: url(img/header-foreground-image03.gif?v=330ce6fa0066), url(img/header-foreground-image01.png?v=069bf27565ea);
@@ -5108,18 +5105,18 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 				}
 			}
 		}
-		
+
 	`);
 
 	frycAPI.onLoadSetter(async () => {
 		if (frycAPI.path === "/stats/563560/achievements/") {
 			// Steam Alien Swarm Reactive Drop Achievments Alphabetical Sort
 			frycAPI.injectStyle(/*css*/`
-				/* 
+				/*
 				.achieveFill {
 				display: none;
 				}
-				
+
 				.achieveTxt {
 					padding: 9px 6px;
 				}
@@ -5127,7 +5124,7 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 					top: 1px;
 				}
 				*/
-				.achieveFill { 
+				.achieveFill {
 					display: none;
 				}
 				.mojButt {
@@ -5253,10 +5250,10 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 } else if (0 && frycAPI.host("support.discord.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
-		  filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg);
 		}
 		img {
-		  filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg);
 		}
 		p>span[style="color: #2e3338;"],
 		a.sidenav-item,
@@ -5267,11 +5264,11 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 } else if (1 && frycAPI.host("support.microsoft.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(1) hue-rotate(180deg) !important;
+			filter: invert(1) hue-rotate(180deg) !important;
 		}
-		
+
 		img[itemprop="logo"] {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("teams.microsoft.com")) {
@@ -5289,25 +5286,25 @@ else if (1 && frycAPI.host("pl.wikipedia.org")) {
 } else if (1 && frycAPI.host("terraria.gamepedia.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		    image-rendering: pixelated;
+			image-rendering: pixelated;
 		}
 	`);
 } else if (1 && frycAPI.host("tiger.chem.uw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  -webkit-filter: none !important;
-		    filter: none !important;
+			-webkit-filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("tplinkmodem.net")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		tr.head>th.table-head:nth-child(2) {
-		  width: 11% !important;
+			width: 11% !important;
 		}
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 5
+// #region //* IFy  5
 else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.myButn {
@@ -5324,24 +5321,24 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		}
 		/*
 		body::-webkit-scrollbar {
-		  all: initial;
+			all: initial;
 		}
 		body::-webkit-scrollbar-corner {
-		  all: initial;
+			all: initial;
 		}
-		
+
 		body::-webkit-scrollbar-track {
-		  all: initial;
+			all: initial;
 		}
 		body::-webkit-scrollbar-thumb {
-		  all: initial;
+			all: initial;
 		}
 		body::-webkit-scrollbar-thumb:hover {
-		  all: initial;
+			all: initial;
 		}
-		
+
 		body::-webkit-scrollbar-thumb:active {
-		  all: initial;
+			all: initial;
 		}
 		*/
 	`);
@@ -5353,7 +5350,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 } else if (1 && frycAPI.host("trello.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/* *::-webkit-scrollbar-thumb {
-		  background:rgb(102, 254, 123) !important;
+			background:rgb(102, 254, 123) !important;
 		} */
 		.js-list-actions.mod-card-back {
 			display: flex;
@@ -5365,34 +5362,32 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		.mojaklasa {
 			display: none;
 		}
-		
+
 		#SUS {
-		  position: absolute;
+			position: absolute;
 			right: 69px;
 			top: 335px;
 		}
-		
+
 		#IN {
-		  
 		}
-		
+
 		#button {
-		  
 		}
 	`);
 } else if (1 && frycAPI.host("moodle.usos.pw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		nav.list-group.mt-1 {
-		    margin-bottom: 27px;
+			margin-bottom: 27px;
 		}
 		.fixed-top2.navbar2 {
-		  display: none;
+			display: none;
 		}
 		#page {
 			margin-top: 46px;
 		}
 		.img-epwbt {
-		  margin: 10px;
+			margin: 10px;
 		}
 		#nav-drawer {
 			top: 46px;
@@ -5416,12 +5411,12 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 	`);
 } else if (1 && frycAPI.host("usosweb.usos.pw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		*{
-		  font-family: IBM Plex Sans Condensed
+		* {
+			font-family: IBM Plex Sans Condensed
 		}
 		/*
 		#layout-c22a > div{
-		  background-position-x: -958px !important;
+			background-position-x: -958px !important;
 		}
 		*/
 		body {
@@ -5431,35 +5426,35 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			margin: 0;
 			padding: 0;
 			font-size: 14px;
-		  /*
+			/*
 			transition: all ease-in-out;
 			transition-duration: 2s;
-		  */
+			*/
 		}
 		/*
 		#layout-c21 {
-		  color: black !important;
-		  background-color: rgba(220, 220, 220, 0.6);
-		  background-blend-mode: overlay;
+			color: black !important;
+			background-color: rgba(220, 220, 220, 0.6);
+			background-blend-mode: overlay;
 		}
 		#layout-c21 a, #layout-c21 a:visited,   #layout-c21 a:active, #layout-c21 a:hover {
-		  color: black !important;
+			color: black !important;
 		}
 		#layout-c12-t .m a {
-		  text-shadow: 0px 0px 2px #000;
-		  background-position-y: 20% !important;
+			text-shadow: 0px 0px 2px #000;
+			background-position-y: 20% !important;
 		}
 		#layout-c12-t .m a {
-		  transition: all 0.4s;
+			transition: all 0.4s;
 		}
 		#layout-c12-t .m a:hover, #layout-c12-t .m a:focus {
-		  transition: all 0.4s;
-		  background-color: #DDAC00;
+			transition: all 0.4s;
+			background-color: #DDAC00;
 		}
 		*/
 		/*
 		td[style*="height: 17px"] {
-		  height: 0px !important;
+			height: 0px !important;
 		}
 		*/
 		td[style*="img/decor_info3.gif"] {
@@ -5493,7 +5488,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			height: 59px !important;
 		}
 		td[style*="img/decor_notice.gif"] {
-		   background-image: url(${frycAPI.getResURL("Fine_exclamation_mark_icon.png")}) !important;
+			 background-image: url(${frycAPI.getResURL("Fine_exclamation_mark_icon.png")}) !important;
 			background-origin: content-box !important;
 			background-color: transparent !important;
 			background-size: 72% !important;
@@ -5507,13 +5502,13 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			/*top: 17px;*/
 			height: 59px !important;
 		}
-		
+
 		td[style*="background: rgb(227, 225, 255)"] {
 			background: hsl(200deg 6% 12%) !important;
 		}
 		/*
 		.wrtext h1 {
-		    margin: 5px 0 10px 0;
+			margin: 5px 0 10px 0;
 		}
 		*/
 		table.nopaddingunder.decori {
@@ -5539,21 +5534,21 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		}
 		*/
 		td[style*="max-width: 400px"] {
-		  max-width: 600px !important;
-		  width: 181px !important;
+			max-width: 600px !important;
+			width: 181px !important;
 		}
-		
+
 		td[colspan="2"][style="vertical-align:middle; max-width: 400px"] {
-		  max-width: 600px !important;
-		  width: 543px !important;
+			max-width: 600px !important;
+			width: 543px !important;
 		}
-		
+
 		img[src="img/tip_info.gif"], img[src="https://usosweb.usos.pw.edu.pl//img/tip_info.gif"] {
 			content: url(${frycAPI.getResURL("Fine_info_icon.png")});
 			width: 16px;
 			height: 16px;
 		}
-		
+
 		img[src="https://usosweb.usos.pw.edu.pl//img/tip_redinfo.gif"] {
 			content: url(${frycAPI.getResURL("transparent_square_PNG.png")});
 			background-image: url(${frycAPI.getResURL("Fine_info_icon.png")});
@@ -5566,14 +5561,14 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			max-width: 16px;
 			max-height: 16px;
 		}
-		
+
 		img[src="https://usosweb.usos.pw.edu.pl//img/greencheck.gif"],
 		img[src="https://usosweb.usos.pw.edu.pl/img/tip_rej2_zarejestrowany.gif"], img[src*="img/tip_positive.gif"] {
 			content: url(${frycAPI.getResURL("Fine_correct_icon_small.png")});
 			width: 19px;
 			height: 19px;
 		}
-		
+
 		img[src*="https://usosweb.usos.pw.edu.pl//img/tip_greyinfo.gif"], img[src*="https://usosweb.usos.pw.edu.pl//img/tip_small_greyinfo.gif"], img[src*="https://usosweb.usos.pw.edu.pl//img/greyinfolink.gif"] {
 			content: url(${frycAPI.getResURL("transparent_square_PNG.png")});
 			background-image: url(${frycAPI.getResURL("Fine_info_icon.png")});
@@ -5584,7 +5579,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			max-width: 16px;
 			max-height: 16px;
 		}
-		
+
 		table.nopaddingunder.decori>tbody>tr:last-child>td, table.nopaddingunder.decorn>tbody>tr:last-child>td {
 			background-color: transparent !important;
 			border-color: hsl(197deg 50% 73%) !important;
@@ -5598,18 +5593,18 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			background: #fff;
 		}
 		*/
-		
+
 		img[src="https://usosweb.usos.pw.edu.pl//img/rejB_brakMiejsc.gif"] {
-		  content: url(${frycAPI.getResURL("red_square.png")});
+			content: url(${frycAPI.getResURL("red_square.png")});
 		}
 		img[src="https://usosweb.usos.pw.edu.pl//img/rejB_limitWyborow.gif"] {
-		  content: url(${frycAPI.getResURL("yellow_square.png")});
+			content: url(${frycAPI.getResURL("yellow_square.png")});
 		}
 		img[src="https://usosweb.usos.pw.edu.pl//img/koszyk_outB.gif"] {
-		  content: url(${frycAPI.getResURL("blue_square.png")});
+			content: url(${frycAPI.getResURL("blue_square.png")});
 		}
 		img[src="https://usosweb.usos.pw.edu.pl//img/koszyk_inB.gif"] {
-		  content: url(${frycAPI.getResURL("green_square.png")});
+			content: url(${frycAPI.getResURL("green_square.png")});
 		}
 		.ec-header {
 			background-color: transparent !important;
@@ -5631,12 +5626,12 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		}
 		usos-frame>div.flex img { /* Uwaga */
 			filter: none !important; /* invert(1) hue-rotate(180deg) */
-		} 
-		body usos-frame>div.flex+div:not(:has(>form:first-child)) {
-		  filter: invert(1) hue-rotate(180deg);
-		  color: black !important;
 		}
-		
+		body usos-frame>div.flex+div:not(:has(>form:first-child)) {
+			filter: invert(1) hue-rotate(180deg);
+			color: black !important;
+		}
+
 		a[href="https://usosweb.usos.pw.edu.pl/kontroler.php?_action=logowaniecas/index"] {
 			color: hsl(244deg 18% 50%);
 			text-decoration: underline;
@@ -5651,7 +5646,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			filter: invert(1) hue-rotate(180deg);
 		}
 		svg text {
-		  fill: #959595;
+			fill: #959595;
 		}
 		.grey_theme .ui-widget-header {
 			color: hsl(0 0% 58% / 1);
@@ -5665,20 +5660,20 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		.ui-dialog.ui-widget.ui-widget-content.ui-corner-all.ui-front.grey_theme.ui-dialog-buttons, .ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix, div.ui-dialog-content.ui-widget-content.wrtext {
 			filter: invert(1) hue-rotate(180deg);
 		}
-		
+
 		label.to-left:has(input[type=radio]:checked) {
 			color: green;
 		}
 		input[type=radio]:checked::after {
 			background-color: green;
 		}
-		
+
 		.usos-ui h2:not([slot="title"]) {
 			border-top: 4px solid hsl(0 0% 58% / 1);
 			margin-top: 1rem;
 			padding-top: 1rem;
 		}
-		
+
 		span.mySpan {
 			display: flex;
 			align-items: center;
@@ -5693,9 +5688,9 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			width: auto;
 			height: auto;
 			display: inline-flex;
-		  padding-right: 5px;
+			padding-right: 5px;
 		}
-		
+
 		.ua-tip.tooltipstered {
 			padding-left: 5px;
 		}
@@ -5728,13 +5723,13 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			content: " " !important;
 			background: hsl(0 0% 80% / 1) !important;
 		}
-		
+
 		.flex.gap1 p {
 			color: hsl(0 0% 58% / 1);
 			/* color: #0000; */
 			/* text-shadow: 0px 0px 0px black; */
 		}
-		
+
 		.usos-ui h2.USOS-OK {
 			cursor: pointer;
 			white-space: nowrap;
@@ -5752,28 +5747,28 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			content: "⮞"
 		}
 		h2.USOS-OK.collapse + .myDiv {
-		  	display: none;
+				display: none;
 		}
-		
+
 		[src='https://usosweb.usos.pw.edu.pl//img/spinacz_tip.png'] {
 			filter: invert(1);
 		}
-		
+
 		.usos-ui table.grey > * > tr > td, .usos-ui .layout-table.grey > .layout-row > .layout-cell {
 			padding: 5px 5px;
 		}
-		
+
 		input[type=radio]::after {
 			top: 0;
 		}
-		
+
 		/*
 		.usos-ui table:is(.wrnav, .grey) tr:is(.even_row, .odd_row) td:is(:nth-child(3), :nth-child(4))  {
 			white-space: nowrap;
 		}
 		*/
 		td:has(span.smarty-tip-wrapper) {
-		  white-space: nowrap;
+			white-space: nowrap;
 		}
 		.mySpan span.note {
 			margin: 0 3px;
@@ -5791,64 +5786,64 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		*/
 		/*
 		table.grey>tbody>tr:nth-child(3n) td {
-		  background-color: green !important;
+			background-color: green !important;
 		}
 		table.grey>tbody>tr:nth-child(3n+1) td{
-		  background-color: red !important;
+			background-color: red !important;
 		}
 		table.grey>tbody>tr:nth-child(3n+2) td {
-		  background-color: blue !important;
+			background-color: blue !important;
 		}
 		*/
 		/*
 		tr td>a img:not([src*="img/more.gif"]), [style="white-space:nowrap"] img:not([src*="img/more.gif"]), .redforms table tbody tr td img {
-		    content: url(https://cdn.discordapp.com/attachments/697158463247220806/759560648890777620/Fine_info_icon.png) !important;
-		    width: 16px;
-		    height: 16px;
+			content: url(https://cdn.discordapp.com/attachments/697158463247220806/759560648890777620/Fine_info_icon.png) !important;
+			width: 16px;
+			height: 16px;
 		}
 		table.grey>tbody>tr>td>span+img {
-		    content: url(https://cdn.discordapp.com/attachments/594793235365232662/810662242944155678/transparent_square_PNG.png);
-		    background-image: url(https://cdn.discordapp.com/attachments/697158463247220806/759560648890777620/Fine_info_icon.png);
-		    background-size: contain;
-		    background-color: red;
-		    background-blend-mode: luminosity;
-		    border-radius: 69%;
-		    width: 16px;
-		    height: 16px;
-		    max-width: 16px;
-		    max-height: 16px;
+			content: url(https://cdn.discordapp.com/attachments/594793235365232662/810662242944155678/transparent_square_PNG.png);
+			background-image: url(https://cdn.discordapp.com/attachments/697158463247220806/759560648890777620/Fine_info_icon.png);
+			background-size: contain;
+			background-color: red;
+			background-blend-mode: luminosity;
+			border-radius: 69%;
+			width: 16px;
+			height: 16px;
+			max-width: 16px;
+			max-height: 16px;
 		}
 		table.grey.cycle>tbody>tr>td>img:first-of-type, tr[element="wiersz_tury"]>td>img:only-of-type {
-		  content: url(https://cdn.discordapp.com/attachments/697158463247220806/759561370395082782/Fine_correct_icon_small.png) !important;
-		    width: 19px;
-		    height: 19px;
+			content: url(https://cdn.discordapp.com/attachments/697158463247220806/759561370395082782/Fine_correct_icon_small.png) !important;
+			width: 19px;
+			height: 19px;
 		}
 		*/
-		
+
 		/*
 		tr {
-		  display: none;
+			display: none;
 		}
-		
+
 		tr:nth-last-child(3), tr:nth-last-child(4), table.grey.cycle>tbody>tr:nth-child(1) {
-		    display: table-row;
+			display: table-row;
 		}
 		*/
 		/*
 		.wrtext ul {
-		    color: #d2d2d2;
+			color: #d2d2d2;
 		}
-		
+
 		td {
-		  background-color: #3c3c3c !important;
+			background-color: #3c3c3c !important;
 		}
-		
+
 		p {
-		  color: #d2d2d2;
+			color: #d2d2d2;
 		}
-		
+
 		.wrtext h1 {
-		    color: #d2d2d2;
+			color: #d2d2d2;
 		}
 		*/
 		.frycPlan {
@@ -6184,7 +6179,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 } else if (1 && frycAPI.host("wazniak.mimuw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("web.whatsapp.com")) {
@@ -6219,26 +6214,26 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 } else if (1 && frycAPI.host("wutwaw-my.sharepoint.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		svg image {
-		  -webkit-filter: none !important;
-		    filter: none !important;
+			-webkit-filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("wutwaw.sharepoint.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(1);
+			filter: invert(1);
 		}
 	`);
 } else if (1 && frycAPI.host("www.1001fonts.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.txt-preview {
-		  filter: invert(0) hue-rotate(180deg) !important;
+			filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 } else if (0 && frycAPI.host("www.4g-lte.net")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
-		  font-family: IBM Plex Sans Condensed !important;
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.autohotkey.com")) {
@@ -6386,7 +6381,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		.icon-home.breadcrumbs::after {
 			content: "";
 		}
-		
+
 		.post > .inner {
 			display: flex;
 			width: 100%;
@@ -6649,22 +6644,22 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			/* stroke: hsl(0 0% 58% / 1) !important; */
 			/* color: hsl(0 0% 0% / 0) !important; */
 			/* text-shadow: 0px 0px 0px black !important; */
-		  /* filter: drop-shadow(0px 0px 1px black); */
-		  fill: hsl(0 0% 58% / 1);
+			/* filter: drop-shadow(0px 0px 1px black); */
+			fill: hsl(0 0% 58% / 1);
 		}
-		
+
 		.rightresult svg line[marker-end="url(#arrowhead)"] {
-		  filter: brightness(0);
+			filter: brightness(0);
 		}
-		
+
 		.rightresult svg circle {
-		  filter: brightness(0);
+			filter: brightness(0);
 		}
 	`);
 } else if (0 && frycAPI.host("www.chessvariants.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(0) hue-rotate(0deg) !important;
+			filter: invert(0) hue-rotate(0deg) !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.deltami.edu.pl")) {
@@ -6673,17 +6668,17 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			filter: invert(1) hue-rotate(180deg);
 		}
 		img.highslide-image {
-		  filter: invert(1) hue-rotate(180deg);
-		  background-color: rgb(255 255 255 / 0%) !important;
+			filter: invert(1) hue-rotate(180deg);
+			background-color: rgb(255 255 255 / 0%) !important;
 		}
 	`);
 } else if (0 && frycAPI.host("www.derivative-calculator.net")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
 		filter: invert(1) hue-rotate(180deg);
-		  color: hsl(0deg 0% 58%);
+			color: hsl(0deg 0% 58%);
 		}
-		
+
 		.support-me.highlighted {
 			background-color: hsl(83deg 71% 9%);
 			background-image: none;
@@ -6728,14 +6723,14 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		}
 		.calc-content div:not(.export-button):not(.check-answer-button)>a {
 			filter: invert(1) hue-rotate(180deg);
-		  color: hsl(0deg 0% 81%) !important;
+			color: hsl(0deg 0% 81%) !important;
 		}
 		#calc div.calc-look-up-definition {
 			filter: invert(1) hue-rotate(180deg);
-		  background-color: hsl(239deg 100% 28%);
+			background-color: hsl(239deg 100% 28%);
 		}
 		div#plot-toolboxes {
-		  	filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
 } else if (1 && frycAPI.host("www.desmos.com")) {
@@ -6762,29 +6757,29 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 6
+// #region //* IFy  6
 else if (1 && frycAPI.host("www.enpassant.dk")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(0) hue-rotate(0deg) !important;
+			filter: invert(0) hue-rotate(0deg) !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.facebook.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*
 		body._z4_._8l3w.fbx._8m53._8bb_._-kb._605a.b_16xvukae6j.chrome.webkit.win.x2.Locale_pl_PL.cores-gte4.__6g._mvg._19_u.vsc-initialized {
-		  font-family: IBM Plex Sans Condensed !important;
+			font-family: IBM Plex Sans Condensed !important;
 		}
 		div#mount_0_0 {
-		  font-family: IBM Plex Sans Condensed !important;
+			font-family: IBM Plex Sans Condensed !important;
 		}
 		._8l3w._8bb_ {
-		    font-family: IBM Plex Sans Condensed !important;
+			font-family: IBM Plex Sans Condensed !important;
 		}
 		*/
-		
+
 		*:not(code) {
-		    font-family: IBM Plex Sans Condensed !important;
+			font-family: IBM Plex Sans Condensed !important;
 		}
 	`);
 } else if (0 && frycAPI.host("www.g")) {
@@ -6794,7 +6789,7 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 } else if (1 && frycAPI.host("www.geeksforgeeks.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		iframe[id*="google_ads_iframe"] {
-		  display: none;
+			display: none;
 		}
 		aside[id*="text-"] {
 			display: none !important;
@@ -6808,11 +6803,11 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 	`);
 } else if (1 && frycAPI.host("www.geogebra.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		.checkBoxPanel>* {
-		  margin-right: 5px !important;
+		.checkBoxPanel > * {
+			margin-right: 5px !important;
 		}
 		.checkBoxPanel {
-		  display: block;
+			display: block;
 		}
 	`);
 } else if (1 && frycAPI.host("www.google.pl", "www.google.com")) {
@@ -6821,9 +6816,9 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 			margin-top: 50px;
 		}
 		span.U3A9Ac.qV8iec {
-		  font-weight: 100;
-		  color: white !important;
-		  text-shadow: 
+			font-weight: 100;
+			color: white !important;
+			text-shadow:
 			-1px -1px 0 red,
 			+1px -1px 0 red,
 			-1px +1px 0 red,
@@ -6834,34 +6829,34 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 			+0px -1px 0 red;
 		}
 		.abuKkc>.jpu5Q>span {
-		  color: #aaadb2;
+			color: #aaadb2;
 		}
 		[role="text"],
 		[role="text"] * {
-		  color: #92ffaa;
+			color: #92ffaa;
 		}
 		/* canvas.MyME0d.widget-scene-canvas, img.k48Abe, span.ita-kd-img.ita-kd-icon.ita-kd-icon-span.ita-icon-0,span.ita-kd-img.ita-kd-arrow.ita-kd-icon-span,img.bDDiq, .RGzwUc.pFz1xc,.pKQ3pb,.oGZkwf,.fd5il,.Eq03vc,.fd5il {
 			filter: invert(1) hue-rotate(180deg);
 		} */
 		.app-imagery-mode canvas.MyME0d.widget-scene-canvas {
-		  filter: none;
+			filter: none;
 		}
 		:root {
-		  --szer: 800px;
+			--szer: 800px;
 		}
 		.RNNXgb, .A8SBwf, .IormK, .tsf, .sbfc {
-		  min-width: fit-content;
+			min-width: fit-content;
 		}
 		.gLFyf, .YacQv {
-		  /* min-width: 449px; */
-		  max-width: 1190px;
+			/* min-width: 449px; */
+			max-width: 1190px;
 		}
 		.hide01 {
-		  position: fixed;
-		  height: 0;
-		  overflow: hidden;
-		  white-space: pre;
-		  top: 0px;
+			position: fixed;
+			height: 0;
+			overflow: hidden;
+			white-space: pre;
+			top: 0px;
 		}
 		a.fl.iUh30 {
 			display: none;
@@ -6879,7 +6874,7 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 			margin-top: 13px !important;
 		} */
 		/* .s6JM6d, .g, .KIy09e, div[jscontroller="SC7lYd"] {
-		  width: var(--szer) !important;
+			width: var(--szer) !important;
 		} */
 
 		body.google-3-column {
@@ -6902,11 +6897,11 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 				width: calc((100vw - 50px)/3) !important;
 				box-sizing: border-box;
 				padding: 10px;
-	
+
 				/* border: 1px solid #3c4043;
 				margin-left: -1px;
 				margin-bottom: -1px; */
-	
+
 				--shad-col: #3c4043ab;
 				box-shadow: inset 0px 0px 5px 0px var(--shad-col), 0px 0px 5px 0px var(--shad-col);
 			}
@@ -7023,21 +7018,21 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 } else if (1 && frycAPI.host("www.ipko.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/* .W9geT {
-		  filter: invert(1);
+			filter: invert(1);
 		} */
 		._2aoi5 ._2MA2D ._2Q5WK+._1ro01 ._1YJx2 ._1t72D,._2aoi5 ._2MA2D ._2Q5WK:enabled:focus+._1ro01 ._1YJx2 ._1t72D {
-		  background: none !important;
+			background: none !important;
 		}
-		
+
 		._2aoi5 ._2MA2D ._2Q5WK:enabled:checked+._1ro01 ._1YJx2 ._1t72D {
-		  background: url(data:image/svg+xml;base64,PHN2ZwogIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICB3aWR0aD0iMjAiCiAgaGVpZ2h0PSIyMCIKICB2aWV3Qm94PSIwIDAgMjAgMjAiCj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmEgewogICAgICAgIGZpbGw6ICMwMDM1NzQ7CiAgICAgICAgc3Ryb2tlOiAjMDAzNTc0OwogICAgICB9CiAgICAgIC5iIHsKICAgICAgICBmaWxsOiAjZmZmOwogICAgICB9CiAgICAgIC5jIHsKICAgICAgICBzdHJva2U6IG5vbmU7CiAgICAgIH0KICAgICAgLmQgewogICAgICAgIGZpbGw6IG5vbmU7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0zODQgLTM2MCkiPgogICAgPGcgY2xhc3M9ImEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM4NCAzNjApIj4KICAgICAgPHJlY3QgY2xhc3M9ImMiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcng9IjIiIC8+CiAgICAgIDxyZWN0IGNsYXNzPSJkIiB4PSIwLjUiIHk9IjAuNSIgd2lkdGg9IjE5IiBoZWlnaHQ9IjE5IiByeD0iMS41IiAvPgogICAgPC9nPgogICAgPHBhdGgKICAgICAgY2xhc3M9ImIiCiAgICAgIGQ9Ik01LjM4NiwxMC4zNTlsOS4zLTguNjkyQTIuMjA3LDIuMjA3LDAsMCwwLDEzLjQ2NiwxLjNjLS40MjgsMC0xLjA0MS4xMjItMi4wMiwxLjE2M2gwTDYuMDYsNy40ODJsLS40OS40OS0uNDktLjQ5LTEuODM2LTEuOUMyLjI2NSw0LjU0NCwxLjcxNCw0LjM2LDEuMjI0LDQuMzZBMi4xOTQsMi4xOTQsMCwwLDAsMCw0Ljc4OVoiCiAgICAgIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM4Ny4xNDUgMzY1LjEzNikiCiAgICAvPgogIDwvZz4KPC9zdmc+Cg==) no-repeat !important;
-		  	filter: invert(1) hue-rotate(180deg) brightness(3.5) !important;
+			background: url(data:image/svg+xml;base64,PHN2ZwogIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICB3aWR0aD0iMjAiCiAgaGVpZ2h0PSIyMCIKICB2aWV3Qm94PSIwIDAgMjAgMjAiCj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmEgewogICAgICAgIGZpbGw6ICMwMDM1NzQ7CiAgICAgICAgc3Ryb2tlOiAjMDAzNTc0OwogICAgICB9CiAgICAgIC5iIHsKICAgICAgICBmaWxsOiAjZmZmOwogICAgICB9CiAgICAgIC5jIHsKICAgICAgICBzdHJva2U6IG5vbmU7CiAgICAgIH0KICAgICAgLmQgewogICAgICAgIGZpbGw6IG5vbmU7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0zODQgLTM2MCkiPgogICAgPGcgY2xhc3M9ImEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM4NCAzNjApIj4KICAgICAgPHJlY3QgY2xhc3M9ImMiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcng9IjIiIC8+CiAgICAgIDxyZWN0IGNsYXNzPSJkIiB4PSIwLjUiIHk9IjAuNSIgd2lkdGg9IjE5IiBoZWlnaHQ9IjE5IiByeD0iMS41IiAvPgogICAgPC9nPgogICAgPHBhdGgKICAgICAgY2xhc3M9ImIiCiAgICAgIGQ9Ik01LjM4NiwxMC4zNTlsOS4zLTguNjkyQTIuMjA3LDIuMjA3LDAsMCwwLDEzLjQ2NiwxLjNjLS40MjgsMC0xLjA0MS4xMjItMi4wMiwxLjE2M2gwTDYuMDYsNy40ODJsLS40OS40OS0uNDktLjQ5LTEuODM2LTEuOUMyLjI2NSw0LjU0NCwxLjcxNCw0LjM2LDEuMjI0LDQuMzZBMi4xOTQsMi4xOTQsMCwwLDAsMCw0Ljc4OVoiCiAgICAgIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM4Ny4xNDUgMzY1LjEzNikiCiAgICAvPgogIDwvZz4KPC9zdmc+Cg==) no-repeat !important;
+			filter: invert(1) hue-rotate(180deg) brightness(3.5) !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.itl.nist.gov")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(0) hue-rotate(180deg) !important;
+			filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.kalasoft.pl")) {
@@ -7049,15 +7044,15 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 } else if (1 && frycAPI.host("www.komputronik.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#ri-widget {
-		    display: none !important;
+			display: none !important;
 		}
-		
+
 		/*
 		img {
-		  filter: none !important;
+			filter: none !important;
 		}
 		.faq-no-answer-consultant.hidden-sm-down {
-		  filter: invert(1) hue-rotate(180deg)!important;
+			filter: invert(1) hue-rotate(180deg)!important;
 		}
 		*/
 		div#snrs-set {
@@ -7072,38 +7067,40 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 	`);
 } else if (1 && frycAPI.host("www.kowalskimateusz.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		*{
-		  font-family: IBM Plex Sans Condensed
+		* {
+			font-family: IBM Plex Sans Condensed
 		}
 		img {
-		    mix-blend-mode: difference;
+			mix-blend-mode: difference;
 		}
-		/*a[href*="kowalskimateusz"][href*="uploads"]::before {
-		    content: "";
-		    display: block;
-		    position: relative;
-		    background: green !important;
-		    width: 640px !important;
-		    height: 480px !important;
-		    left: 40px; 
-		}*/
+		/*
+		a[href*="kowalskimateusz"][href*="uploads"]::before {
+			content: "";
+			display: block;
+			position: relative;
+			background: green !important;
+			width: 640px !important;
+			height: 480px !important;
+			left: 40px;
+		}
+		*/
 	`);
 } else if (0 && frycAPI.host("www.lipsum.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body::-webkit-scrollbar {
-		  width: 15px;
-		  background: grey;
+			width: 15px;
+			background: grey;
 		}
 		body::-webkit-scrollbar-thumb {
-		  width: 13px;
-		  background: black;
-		  border: 1px solid white;
+			width: 13px;
+			background: black;
+			border: 1px solid white;
 		}
 	`);
 } else if (0 && frycAPI.host("www.math.us.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.mathworks.com")) {
@@ -7125,7 +7122,7 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 			overflow-x: scroll !important;
 		}
 		/* .panel-body div.mediaobject>p>img {
-		  filter: invert(1) hue-rotate(180deg) !important;
+			filter: invert(1) hue-rotate(180deg) !important;
 		} */
 
 		button#support_submitsearch {
@@ -7203,39 +7200,39 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 } else if (1 && frycAPI.host("www.maxongroup.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#cont {
-		  position: absolute;
-		  z-index: 9999;
-		  background-color: white;
-		  padding: 10px;
-		  font-family: IBM Plex Sans;
-		  display: flex;
+			position: absolute;
+			z-index: 9999;
+			background-color: white;
+			padding: 10px;
+			font-family: IBM Plex Sans;
+			display: flex;
 		}
 		#cont div {
-		  padding: 5px 10px;
+			padding: 5px 10px;
 			border: 1px solid black;
-		  border-left: 0px;
+			border-left: 0px;
 		}
 		#licz {
-		  border: 1px solid black !important;
+			border: 1px solid black !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.medianauka.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  -webkit-filter: none !important;
-		    filter: none !important;
+			-webkit-filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.megamatma.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  -webkit-filter: none !important;
-		    filter: none !important;
+			-webkit-filter: none !important;
+			filter: none !important;
 		}
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 7
+// #region //* IFy  7
 else if (1 && frycAPI.host("www.messenger.com")) {
 	const messageContainer = ".x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x193iq5w.xeuugli.xs83m0k.xjhlixk.xgyuaek";
 	const messageList = ".x78zum5.xdt5ytf.x1iyjqo2.x2lah0s.xl56j7k.x121v3j4";
@@ -7297,7 +7294,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		.gvxzyvdx.om3e55n1.b0ur3jhr > .q46jt4gp.aesu6q9g.r5g9zsuq.e4ay1f3w.om3e55n1.lq84ybu9.hf30pyar.rt34pxt2.jao8r537.dtqh1a21.l4uc2m3f.t7p7dqev.qsbzbi57.subw1o1z.b0ur3jhr.j8nb7h05 {
 			border: 1px solid #b1b1b1;
 		} */
-		
+
 		/* Zmiana koloru tła
 		:root {
 			--my-custom-color: #6d1e1e;
@@ -7315,7 +7312,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 			background-color: var(--my-custom-color);
 		}
 		*/
-		
+
 		:root {
 			--s1: 28px;
 			--s2: 20px;
@@ -7489,7 +7486,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 } else if (1 && frycAPI.host("www.meteo.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/* body>div>div>img {
-		  filter: invert(1) hue-rotate(180deg);
+			filter: invert(1) hue-rotate(180deg);
 		} */
 		body {
 			background-color: #181818 !important;
@@ -7510,7 +7507,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		:has(>#wtg_meteorogram_bottom){
 			display: none;
 		}
-		
+
 		.myButt {
 			position: absolute;
 			right: calc(100% + 15px);
@@ -7566,19 +7563,19 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 } else if (0 && frycAPI.host("www.minecraftskins.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
-		  background-color: #9c9c9c
+			background-color: #9c9c9c
 		}
 	`);
 } else if (0 && frycAPI.host("www.mrexcel.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		[id*="google_ads_iframe"] {
-		  display:none
+			display:none
 		}
 	`);
 } else if (1 && frycAPI.host("www.obliczeniowo.com.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: none !important;
+			filter: none !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.pcgamer.com")) {
@@ -7591,7 +7588,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*
 		img {
-		  filter: invert(1) hue-rotate(180deg) !important;
+			filter: invert(1) hue-rotate(180deg) !important;
 		}
 		tspan.css-1kt4f9t {
 			filter: invert(1);
@@ -7606,11 +7603,11 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		.q-flex.qu-borderColor--raised.qu-borderBottomLeftRadius--small.qu-borderBottomRightRadius--small.qu-borderBottom.qu-borderLeft.qu-borderRight.qu-bg--raised {
 			display: none !important;
 		}
-		
+
 		.q-box.Card___StyledBackroundTemporaryHighlightBoxChild-qc006b-0.spacing_log_question_page_ad.qu-borderAll.qu-borderRadius--small.qu-borderColor--raised.qu-boxShadow--small.qu-mb--small.qu-bg--raised {
 			display: none !important;
 		}
-		
+
 		#mainContent>div>.q-box:has(.q-box.qu-mb--tiny) {
 			display: none !important;
 		}
@@ -7618,7 +7615,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 } else if (1 && frycAPI.host("www.real-statistics.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-		  filter: invert(0) hue-rotate(180deg) !important;
+			filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.reddit.com")) {
@@ -7729,13 +7726,13 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		.mojaklasa {
 			display: none;
 		}
-		
+
 		#SUS {
 			position: absolute;
 			top: 416px;
 			right: 69px;
 		}
-		
+
 		#SUS2 {
 			position: absolute;
 			top: 416px;
@@ -7745,7 +7742,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 } else if (1 && frycAPI.host("www.slownikslaski.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
-		  font-family: IBM Plex Sans Condensed !important;
+			font-family: IBM Plex Sans Condensed !important;
 		}
 	`);
 } else if (1 && frycAPI.host("www.tenforums.com")) {
@@ -7757,9 +7754,9 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 } else if (1 && frycAPI.host("www.tme.eu")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.czerwony {
-		  color: red;
+			color: red;
 		}
-		
+
 		div#select_list_42 {
 			height: 500px;
 		}
@@ -7769,7 +7766,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		._adr_abp_container {
 			display: none !important;
 		}
-		
+
 		div#google-right-ads {
 			display: none !important;
 		}
@@ -7783,7 +7780,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 } else if (1 && frycAPI.host("www.w3schools.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#colormixer table tbody tr:nth-child(11) {
-		  color: red
+			color: red
 		}
 	`);
 
@@ -7814,17 +7811,17 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	});
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 8
+// #region //* IFy  8
 else if (1 && frycAPI.host("www.worldometers.info")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		rect.highcharts-background {
 			filter: invert(1);
 		}
-		
+
 		g.highcharts-label.highcharts-tooltip {
 			filter: invert(1);
 		}
-		
+
 		g.highcharts-label.highcharts-tooltip tspan {
 			fill: hsl(0 0% 58%);
 		}
@@ -7833,9 +7830,9 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*
 		#content-text.ytd-comment-renderer {
-		  font-family: IBM Plex Sans Conde;
-		  font-size: 17px;
-		  font-weight: lighter;
+			font-family: IBM Plex Sans Conde;
+			font-size: 17px;
+			font-weight: lighter;
 		}
 		*/
 		#owner.ytd-watch-metadata {
@@ -7860,22 +7857,22 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 			filter: invert(1) hue-rotate(180deg);
 		} */
 		/* ytd-playlist-video-renderer:not(:hover):not([style-type=playlist-video-renderer-style-recommended-video]) ytd-menu-renderer.ytd-playlist-video-renderer:not([menu-active]).ytd-playlist-video-renderer:not(:focus-within) {
-		  opacity: 1;
+			opacity: 1;
 		} */
-		
+
 		ytd-menu-renderer.style-scope.ytd-playlist-video-renderer {
 			display: flex;
 		}
-		
+
 		.mySVG {
-		  pointer-events: none; 
-		  display: block; 
-		  height: 40px;
+			pointer-events: none;
+			display: block;
+			height: 40px;
 		}
-		
+
 		.myDIV {
-		  cursor: pointer;
-		  fill: white;
+			cursor: pointer;
+			fill: white;
 		}
 
 		ytd-watch-metadata.ytd-watch-flexy #actions {
@@ -7945,53 +7942,53 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 				display: -webkit-box !important;
 			}
 		}
-		
+
 		/* --- */
 		/*
 		div#content:has([title="Subskrypcje"]>tp-yt-paper-item[aria-selected="true"]) ytd-rich-grid-row {
-		   display: inline-block;
-		   width: min-content;
+			 display: inline-block;
+			 width: min-content;
 		}
 		div#content:has([title="Subskrypcje"]>tp-yt-paper-item[aria-selected="true"]) div#contents.ytd-rich-grid-row {
-		   margin: 0;
+			 margin: 0;
 		}
 		div#content:has([title="Subskrypcje"]>tp-yt-paper-item[aria-selected="true"]) ytd-rich-item-renderer {
-		   width: 190px;
-		   margin: 1px;
+			 width: 190px;
+			 margin: 1px;
 		}
 		div#content:has([title="Subskrypcje"]>tp-yt-paper-item[aria-selected="true"]) #video-title.ytd-rich-grid-media {
-		   font-size: 14px;
-		   line-height: initial;
+			 font-size: 14px;
+			 line-height: initial;
 		}
 		div#content:has([title="Subskrypcje"]>tp-yt-paper-item[aria-selected="true"]) #text.complex-string.ytd-channel-name,
 		div#content:has([title="Subskrypcje"]>tp-yt-paper-item[aria-selected="true"]) ytd-video-meta-block[rich-meta]#metadata-line.ytd-video-meta-block {
-		   font-size: 12px;
-		   line-height: initial;
+			 font-size: 12px;
+			 line-height: initial;
 		}
 		*/
-		
+
 		/*
 		body:has(ytd-guide-entry-renderer[active]>a[href="/feed/subscriptions"]) {
-		  & ytd-rich-grid-row {
-		    display: inline-block;
-		    width: min-content;
-		  }
-		  & div#contents.ytd-rich-grid-row {
-		    margin: 0;
-		  }
-		  & ytd-rich-item-renderer {
-		    width: 200px;
-		    margin: 1px;
-		  }
-		  & #video-title.ytd-rich-grid-media {
-		    font-size: 14px;
-		    line-height: initial;
-		  }
-		  & #text.complex-string.ytd-channel-name,
-		  & ytd-video-meta-block[rich-meta] #metadata-line.ytd-video-meta-block {
-		    font-size: 12px;
-		    line-height: initial;
-		  }
+			& ytd-rich-grid-row {
+			display: inline-block;
+			width: min-content;
+			}
+			& div#contents.ytd-rich-grid-row {
+			margin: 0;
+			}
+			& ytd-rich-item-renderer {
+			width: 200px;
+			margin: 1px;
+			}
+			& #video-title.ytd-rich-grid-media {
+			font-size: 14px;
+			line-height: initial;
+			}
+			& #text.complex-string.ytd-channel-name,
+			& ytd-video-meta-block[rich-meta] #metadata-line.ytd-video-meta-block {
+			font-size: 12px;
+			line-height: initial;
+			}
 		}
 		*/
 		button.ytp-miniplayer-button.ytp-button {
@@ -8131,16 +8128,16 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 		.line-chart::after {
 			background-color: #F55E32;
 		}
-		
+
 		[data-text*="Badanie wykonano metodą spektrofotometryczną na aparacie Cobas 8000"], [data-text*="Badanie wykonano metodą spektrofotometryczną na aparacie Cobas 8000"]+span {
 			display: none !important;
 		}
-		
+
 		.table__container .table--results .table__row {
 			padding-top: 10px !important;
 			padding-bottom: 10px !important;
 		}
-		
+
 		.table--results .table__cell {
 			justify-content: center;
 		}
@@ -8226,14 +8223,14 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.head a[href="/"] {
 			/* -webkit-text-stroke: 1.5px white; */
-			/* text-shadow: 
-				-1px -1px 0px #000, 
-				+1px -1px 0px #000, 
-				-1px +1px 0px #000, 
+			/* text-shadow:
+				-1px -1px 0px #000,
+				+1px -1px 0px #000,
+				-1px +1px 0px #000,
 				+1px +1px 0px #000; */
 		}
-		/* span.lion, 
-		#activity-summary, 
+		/* span.lion,
+		#activity-summary,
 		#upload-summary,
 		table.entry td:has([class*="icon"]),
 		table.entry td:has([class*="icon"]) a {
@@ -8435,7 +8432,7 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 		.description, .contentContainer, .header {
 			margin: 0;
 			padding: 0;
-			box-sizing: border-box;	
+			box-sizing: border-box;
 		}
 		.description {
 			padding: 10px 20px 0 20px ;
@@ -8579,7 +8576,7 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 9
+// #region //* IFy  9
 else if (frycAPI.host("www.fakrosno.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.spring-middle>img {
@@ -9296,7 +9293,7 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 			}
 		}
 		.bv2-event-content-cell .child {
-			
+
 		}
 		.bv2-event-note-container:has(~ .bv2-issue-event-attachments) {
 			margin-bottom: 6px;
@@ -9408,7 +9405,7 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		div:has(>pre:first-child) {
 			padding-top: calc(var(--wysokość) + 2*var(--padd));
 			background-color: var(--bgColor-muted, var(--color-canvas-subtle)) !important;
-			position: relative;	
+			position: relative;
 			&::before {
 				content: attr(my-before-text);
 				/* background-color: #004900 !important; */
@@ -9436,7 +9433,7 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 			--col: hsl(0, 0%, 75%);
 			color: var(--col);
 			content: attr(my-before-text);
-			margin-left: var(--padd);	
+			margin-left: var(--padd);
 			padding-left: var(--padd);
 			border-left: 1px solid;
 			/* border-left-color: aliceblue; */
@@ -9519,7 +9516,7 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		}
 		span.image--icon--HQGC-D_ {
 			opacity: 50%;
-			transition: opacity 0.3s 0s ease-in-out;	
+			transition: opacity 0.3s 0s ease-in-out;
 			&:hover {
 				opacity: 100%;
 			}
@@ -9814,7 +9811,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 	});
 } else if (frycAPI.host("gist.github.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		
+
 	`);
 
 	frycAPI.onLoadSetter(() => {
