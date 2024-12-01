@@ -1390,8 +1390,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			}
 		};
 	}, // document.addEventListener("mousemove", frycAPI.throttleDebounce(handleMouseMove, 4));
-	async sendEventToBackground(name, data) { // domyślnie async. await sprawia że nie jest async
-		return await chrome.runtime.sendMessage(frycAPI.id, { name, data });
+	sendEventToBackground(name, data) {
+		return chrome.runtime.sendMessage(frycAPI.id, { name, data }); // returns a Promise
 	}, // const result = await frycAPI.sendEventToBackground();
 	async isWebpAnimated(resp) {
 		const buffer = new Uint8Array(await resp.arrayBuffer());
@@ -8148,9 +8148,6 @@ else if (1 && frycAPI.host("www.worldometers.info")) {
 			filter: invert(1);
 		}
 	`);
-} else if (frycAPI.host("developer.chrome.com")) {
-	frycAPI.injectStyleOnLoad(/*css*/`
-	`);
 } else if (frycAPI.host("www.rp.pl")) {
 	frycAPI.nazwaBlokuIf = "";
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -10122,7 +10119,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		${frycAPI.simpleFontChange}
 	`);
-} else if (1 && frycAPI.host("web.dev", "developers.google.com")) {
+} else if (frycAPI.host("web.dev", "developers.google.com", "developer.chrome.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		*:not(devsite-code, devsite-code *, code, code *, .material-icons, a.devsite-nav-toggle) {
 			font-family: "IBM Plex Sans Condensed";

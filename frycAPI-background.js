@@ -1,5 +1,7 @@
 "use strict";
 
+const log = console.log;
+
 async function getActiveTarget() {
 	return { tabId: (await chrome.tabs.query({ active: true, currentWindow: true }))[0].id };
 } // const tabID = await getActiveTarget();
@@ -25,29 +27,29 @@ function defineStyle(data, sender) {
 			break;
 		}
 		case "test": {
-			console.log(data);
+			log(data);
 			break;
 		}
-		default: console.log(`Nie ma eventu o nazwie "${name}". Otrzymano dane:`, data); break;
+		default: log(`Nie ma eventu o nazwie "${name}". Otrzymano dane:`, data); break;
 	}
 	return true; // konieczne jeśli chcemy wysłać odpowiedź za pomocą sendResp
 }); */
 chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sender, sendResp) {
-	// console.log(name);
-	// console.log(data);
+	// log(name);
+	// log(data);
 	sendResp(await (async () => {
 		switch (name) {
 			case "closeTab": return void chrome.tabs.remove(sender.tab.id);
 			case "downloadPDF": {
 				chrome.downloads.download({ url: data.url }).then(downloadId => {
-					// console.log(downloadId);
+					// log(downloadId);
 					if (data.czyZamknąć) {
 						chrome.tabs.remove(sender.tab.id);
 					} else {
 						chrome.tabs.goBack(sender.tab.id);
 					}
 				});
-				break;
+				return;
 			}
 			case "downloadURL": return void chrome.downloads.download({ url: data });
 			case "injectStyle": return await chrome.scripting.insertCSS(defineStyle(data, sender));
@@ -55,10 +57,10 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 			case "injectStyleAgain": return await chrome.scripting.insertCSS(injectedStyles[data.id]);
 			case "removeStyle": return await chrome.scripting.removeCSS(injectedStyles[data.id]);
 			case "test": {
-				console.log(data);
+				log(data);
 				return data;
 			}
-			default: return console.log(`Nie ma eventu o nazwie "${name}". Otrzymano dane:`, data);
+			default: return log(`Nie ma eventu o nazwie "${name}". Otrzymano dane:`, data);
 		}
 	})());
 	return true; // konieczne jeśli chcemy wysłać odpowiedź za pomocą sendResp
