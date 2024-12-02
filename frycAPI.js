@@ -7240,9 +7240,10 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	const reactCSS = `[aria-label="Zareaguj"]`;
 	const replyCSS = `[aria-label="Odpowiedz"]`;
 	const moreCSS = `[aria-label="Więcej"]`;
+	const shareCSS = `[aria-label="Prześlij"]`;
+	const shareItemCSS = `${shareCSS}[role="menuitem"]`;
+	const replyItemCSS = `${replyCSS}[role="menuitem"]`;
 	const delCSS = `[aria-label="Usuń wiadomość"][role="menuitem"]`;
-	const shareCSS = `[aria-label="Prześlij"][role="menuitem"]`;
-	const prześlijCSS = `[aria-label="Prześlij"]`;
 	const editCSS = `[aria-label="Edytuj"][role="menuitem"]`;
 	const mojaWiadomość = `.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x78zum5.x15zctf7`;
 	const iconWidth = `.x1mqs8db`;
@@ -7369,7 +7370,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 					background-image: url("${frycAPI.getResURL("share.png")}");
 				}
 			}
-			& > :is(:has(${reactCSS}), :has(${replyCSS}), :has(${moreCSS}), :has(${prześlijCSS})) {
+			& > :is(:has(${reactCSS}), :has(${replyCSS}), :has(${moreCSS}), :has(${shareCSS})) {
 				width: 0;
 				overflow: hidden;
 			}
@@ -7459,14 +7460,25 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 								frycAPI.sleep(10).then(() => document.querySelector(delCSS).click());
 							}));
 							container.append(share.cloneNode(1).frycAPI_addEventListener("click", () => {
-								container.querySelector(moreCSS).click();
-								frycAPI.sleep(10).then(() => document.querySelector(shareCSS).click());
+								const shareButt = container.querySelector(shareCSS);
+								if (shareButt !== null) {
+									shareButt.click();
+								} else {
+									container.querySelector(moreCSS).click();
+									frycAPI.sleep(10).then(() => document.querySelector(shareItemCSS).click());
+								}
 							}));
 							container.append(react.cloneNode(1).frycAPI_addEventListener("click", () => {
 								container.querySelector(reactCSS).click();
 							}));
 							container.append(reply.cloneNode(1).frycAPI_addEventListener("click", () => {
-								container.querySelector(replyCSS).click();
+								const replyButt = container.querySelector(replyCSS);
+								if (replyButt !== null) {
+									replyButt.click();
+								} else {
+									container.querySelector(moreCSS).click();
+									frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS).click());
+								}
 							}));
 						});
 						const text = document.querySelector(`[role="gridcell"] > [aria-current="page"] ${conversationTime}`).innerText;
