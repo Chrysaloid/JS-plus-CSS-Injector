@@ -307,33 +307,33 @@ class frycAPI_StyleState extends Object {
 		}
 	}
 }
-class frycAPI_Div extends Object {
-	div;
-	constructor() {
+class frycAPI_Elem extends Object {
+	elem;
+	constructor(elemType) {
 		super();
-		this.div = document.createElement("div");
+		this.elem = document.createElement(elemType);
 	}
 	get _() {
-		return this.div;
+		return this.elem;
 	}
 	text(str) {
-		this.div.innerText = str;
+		this.elem.innerText = str;
 		return this;
 	}
 	HTML(str) {
-		this.div.innerHTML = frycAPI.createHTML(str); // eslint-disable-line no-use-before-define
+		this.elem.innerHTML = frycAPI.createHTML(str); // eslint-disable-line no-use-before-define
 		return this;
 	}
 	class(...cls) {
-		this.div.classList.add(...cls);
+		this.elem.classList.add(...cls);
 		return this;
 	}
 	attr(attr, val) {
-		this.div.setAttribute(attr, val);
+		this.elem.setAttribute(attr, val);
 		return this;
 	}
 	event(name, fun) {
-		this.div.addEventListener(name, fun);
+		this.elem.addEventListener(name, fun);
 		return this;
 	}
 }
@@ -1499,13 +1499,17 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	insertLoadingGif(elem, where = "beforeend", fileName = "loading.gif") {
 		return elem.frycAPI_insertHTML(where, `<img class="loading-gif" src="${frycAPI.getResURL(fileName)}">`);
 	}, // const img = frycAPI.insertLoadingGif(elem); // .loading-gif
-	div(divFactory = true) {
-		if (divFactory) {
-			return new frycAPI_Div();
-		} else {
-			return document.createElement("div");
+	elem(elemType = "div", elemFactory = true) {
+		if (!frycAPI.isString(elemType)) {
+			elemFactory = elemType;
+			elemType = "div";
 		}
-	}, // const div = frycAPI.div(0);
+		if (elemFactory) {
+			return new frycAPI_Elem(elemType);
+		} else {
+			return document.createElement(elemType);
+		}
+	}, // const elem = frycAPI.elem()._; const elem = frycAPI.elem(0); const elem = frycAPI.elem("span");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -6244,7 +6248,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 						rows.forEach(row => {
 							const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);
 							if (smartyTip === null) return;
-							smartyTip.insertAdjacentElement("afterend", frycAPI.div().text(smartyTip.nextElementSibling.firstElementChild.nextElementSibling.innerText).class("zapeł-div")._);
+							smartyTip.insertAdjacentElement("afterend", frycAPI.elem().text(smartyTip.nextElementSibling.firstElementChild.nextElementSibling.innerText).class("zapeł-div")._);
 						});
 					}
 				}
