@@ -307,6 +307,36 @@ class frycAPI_StyleState extends Object {
 		}
 	}
 }
+class frycAPI_Div extends Object {
+	div;
+	constructor() {
+		super();
+		this.div = document.createElement("div");
+	}
+	get _() {
+		return this.div;
+	}
+	text(str) {
+		this.div.innerText = str;
+		return this;
+	}
+	HTML(str) {
+		this.div.innerHTML = frycAPI.createHTML(str); // eslint-disable-line no-use-before-define
+		return this;
+	}
+	class(...cls) {
+		this.div.classList.add(...cls);
+		return this;
+	}
+	attr(attr, val) {
+		this.div.setAttribute(attr, val);
+		return this;
+	}
+	event(name, fun) {
+		this.div.addEventListener(name, fun);
+		return this;
+	}
+}
 function loguj(...tekst) {
 	console.log(...tekst);
 }
@@ -391,8 +421,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		//// wszystkie selektory z :root muszą być w nowych liniach
 		if ((style = style.trim()).length) {
 			const id = opts?.id ?? "frycAPI_styleNormal" + ++frycAPI.injectStyleNormalNum;
-			// const css = `:is(:root, :host):not(.${id}) {\n${frycAPI.minifyCSS(style).replaceAll(/^:root/gm, "&:root")}\n}`; // .frycAPI_log()
-			const css = frycAPI.minifyCSS(style); // .frycAPI_log()
+			// const css = `:is(:root, :host):not(.${id}) {\n${frycAPI.minifyCSS(style).replaceAll(/^:root/gm, "&:root")}\n}`; // .frycAPI_log
+			const css = frycAPI.minifyCSS(style); // .frycAPI_log
 			let styleElem;
 			const elevated = opts?.elevated;
 			if (elevated === true) {
@@ -1469,6 +1499,13 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	insertLoadingGif(elem, where = "beforeend", fileName = "loading.gif") {
 		return elem.frycAPI_insertHTML(where, `<img class="loading-gif" src="${frycAPI.getResURL(fileName)}">`);
 	}, // const img = frycAPI.insertLoadingGif(elem); // .loading-gif
+	div(divFactory = true) {
+		if (divFactory) {
+			return new frycAPI_Div();
+		} else {
+			return document.createElement("div");
+		}
+	}, // const div = frycAPI.div(0);
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -1559,6 +1596,10 @@ frycAPI.expandPrototype(Element, "frycAPI_setInnerHTML", function (newInnerHTML)
 	this.innerHTML = frycAPI.createHTML(newInnerHTML);
 	return this;
 });
+frycAPI.expandPrototype(Element, "frycAPI_setInnerText", function (newInnerText) {
+	this.innerText = newInnerText;
+	return this;
+});
 frycAPI.expandPrototype(Element, "frycAPI_insertAdjacentElement", function (where, elem) {
 	this.insertAdjacentElement(where, elem);
 	return this;
@@ -1611,7 +1652,7 @@ frycAPI.expandPrototype(String, "frycAPI_includesAny", function (strList) {
 frycAPI.expandPrototype(Object, "frycAPI_log", function () {
 	console.log(this);
 	return this;
-}, true);
+}, true, true);
 frycAPI.expandPrototype(DOMTokenList, "notContains", function (daClass) {
 	return !this.contains(daClass);
 });
@@ -1631,7 +1672,7 @@ frycAPI.expandPrototype(String, "frycAPI_equalAny", function (strList) {
 });
 frycAPI.expandPrototype(Node, "frycAPI_isText", function () {
 	return this.nodeType === Node.TEXT_NODE;
-});
+}, false, true);
 frycAPI.expandPrototype(Node, "frycAPI_insertAfter", function (newNode) {
 	if (frycAPI.isString(newNode)) {
 		newNode = frycAPI.elemFromHTML(newNode);
@@ -1670,6 +1711,28 @@ frycAPI.expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (li
 	this.addEventListener(listenerType, callBack);
 	return callBack;
 });
+frycAPI.expandPrototype(String, "frycAPI_eval", function () {
+	return eval(this);
+});
+frycAPI.expandPrototype(Number, "frycAPI_add", function (num) {
+	return this + num;
+});
+frycAPI.expandPrototype(Number, "frycAPI_sub", function (num) {
+	return this - num;
+});
+frycAPI.expandPrototype(Number, "frycAPI_mult", function (num) {
+	return this * num;
+});
+frycAPI.expandPrototype(Number, "frycAPI_div", function (num) {
+	return this / num;
+});
+frycAPI.expandPrototype(Number, "frycAPI_pow", function (num) {
+	return this ** num;
+});
+frycAPI.expandPrototype(Number, "frycAPI_minus", function (num) {
+	return -this;
+});
+
 // frycAPI.expandPrototype(Template, "frycAPI_name", function () {
 // });
 // #region //* Prototypy 3
@@ -3928,6 +3991,10 @@ else if (1 && frycAPI.host("css-tricks.com")) {
 				margin: 1rem 0 1rem;
 			}
 		}
+
+		.top-banner.visible {
+			display: none;
+		}
 	`);
 } else if (0 && frycAPI.host("diep.io")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -5873,6 +5940,10 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		.usos-ui .autoscroll:has(table.wrnav) {
 			overflow: visible;
 		}
+
+		.zapeł-div {
+			display: inline-block;
+		}
 	`);
 
 	(frycAPI.beforeLoad = function () {
@@ -6128,31 +6199,38 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			// #region //* Sortowanie tabel rejestracji
 			if (true) {
 				const daUrl = new URL(window.location.href);
-				if (daUrl.pathname === "/kontroler.php" && daUrl.searchParams.get("_action") === "katalog2/przedmioty/szukajPrzedmiotu") {
-					const tab = document.querySelector(`.usos-ui > div > table.wrnav`);
+				if (daUrl.pathname === "/kontroler.php" && daUrl.searchParams.get("_action").frycAPI_equalAny(["katalog2/przedmioty/szukajPrzedmiotu", "dla_stud/rejestracja/brdg2/wyborPrzedmiotu"])) {
+					const tab = document.querySelector(`.usos-ui > div > table.wrnav, table.grey > tbody.autostrong`);
 					if (tab !== null) {
-						const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row`));
+						const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row, :scope > tr`));
 						const lastElem = rows[0].parentElement.lastElementChild;
 						const możRej = row => { // możliwość rejestracji
-							if (row.frycAPI_querySelOk("img[src*='zarejestrowany.svg']")) return -1;
-							if (row.frycAPI_querySelOk("img[src*='wyrejestruj.svg']")) return 0;
-							if (row.frycAPI_querySelOk("img[src*='zarejestruj.svg']")) return 1;
-							if (row.frycAPI_querySelOk("img[src*='brak_uprawnien.svg']")) return 2;
-							if (row.frycAPI_querySelOk("img[src*='brak_miejsc.svg']")) return 3;
-							return 4;
+							/* eslint-disable */
+							if (row.hasOwnProperty("możRej")) return row.możRej;
+							if (row.frycAPI_querySelOk("img[src*='zarejestrowany.svg']")) return row.możRej = 0;
+							if (row.frycAPI_querySelOk("img[src*='wyrejestruj.svg']"   )) return row.możRej = 1;
+							if (row.frycAPI_querySelOk("img[src*='zarejestruj.svg']"   )) return row.możRej = 2;
+							if (row.frycAPI_querySelOk("img[src*='brak_uprawnien.svg']")) return row.możRej = 3;
+							if (row.frycAPI_querySelOk("img[src*='brak_miejsc.svg']"   )) return row.możRej = 4;
+							return row.możRej = 5;
+							/* eslint-enable */
 						};
 						const nazwJedn = row => { // nazwa jednostki
-							return row.querySelector(`td:nth-child(2)`).firstElementChild.innerText;
+							return row?.nazwJedn ?? (row.nazwJedn = row.querySelector(`td:nth-child(2)`)?.firstElementChild?.innerText ?? "");
 						};
 						const nazwPrzed = row => { // nazwa przedmiotu
-							return row.querySelector(`td:nth-child(2)`).lastElementChild.innerText;
+							return row?.nazwPrzed ?? (row.nazwPrzed = row.querySelector(`td:nth-child(2)`)?.lastElementChild?.innerText ?? row.firstElementChild?.firstElementChild?.innerText ?? "");
 						};
 						const zapełnienie = row => { // zapełnienie grup
-							const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);
-							if (smartyTip === null) return 1;
-							const div = smartyTip.querySelector(`div > div`);
-							if (div === null) return 1;
-							return -Number(div.style.width.replace("px", ""));
+							// const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);
+							// if (smartyTip === null) return 1;
+							// const div = smartyTip.querySelector(`div > div`);
+
+							// const div = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona > div > div`);
+							// if (div === null) return 1;
+							// return -Number(div.style.width.replace("px", ""));
+
+							return row?.zapełnienie ?? (row.zapełnienie = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona + .screen-reader-only`)?.firstElementChild?.nextElementSibling?.innerText?.frycAPI_eval()?.frycAPI_minus() ?? 0);
 						};
 						rows.frycAPI_sortValues(
 							możRej,
@@ -6162,6 +6240,11 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 						);
 						rows.forEach(row => {
 							lastElem.insertAdjacentElement("beforebegin", row);
+						});
+						rows.forEach(row => {
+							const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);
+							if (smartyTip === null) return;
+							smartyTip.insertAdjacentElement("afterend", frycAPI.div().text(smartyTip.nextElementSibling.firstElementChild.nextElementSibling.innerText).class("zapeł-div")._);
 						});
 					}
 				}
@@ -6610,7 +6693,7 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 		// #endregion
 		// #region //* Sprawdzenie które posty mają Text jako pierwszy Node
 		frycAPI.forEach(`.postbody .content`, (daElem, daI, daArr) => {
-			if (daElem.firstChild.frycAPI_isText()) {
+			if (daElem.firstChild.frycAPI_isText) {
 				daElem.frycAPI_addClass("pierwszy-node-to-text");
 			}
 		});
@@ -7249,6 +7332,8 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	const iconWidth = `.x1mqs8db`;
 	const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy`;
 	const conversationTime = `span.html-span.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1hl2dhg.x16tdsg8.x1vvkbs`;
+	const personTyping = `.x9f619.x1n2onr6.x1ja2u2z.__fb-dark-mode`;
+	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -7402,6 +7487,13 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 
 		${timeTooltip} {
 			margin-top: -33px;
+		}
+
+		body:has(${messageList} > ${personTyping}) ${nameElem}::after {
+			content: "Is typing...";
+		}
+		${messageList} > ${personTyping} {
+			display: none;
 		}
 	`);
 
