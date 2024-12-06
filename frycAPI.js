@@ -703,22 +703,24 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	printDateForFileName(date, dateFormatter) { // przyjmuje obiekt typu Date
 		return frycAPI.printDateIntl(date, dateFormatter ?? frycAPI.dateFormatterForFileName).replaceAll(":", "꞉");
 	}, // frycAPI.printDateForFileName(new Date());
-	expandPrototype(proto, name, func, writable = false, czyGet = false) {
-		try {
-			Object.defineProperty(proto.prototype, name,
-				czyGet ? {
-					get: func,
-				} : {
-					value: func,
-					writable: writable,
-				}
-			);
-			// loguj(name);
-		} catch (error) {
-			console.log(error);
+	expandPrototype(proto, name, func, writable = false, czyGet = false, active = true) {
+		if (active) {
 			try {
-				proto.prototype[name] = func;
-			} catch (err) {}
+				Object.defineProperty(proto.prototype, name,
+					czyGet ? {
+						get: func,
+					} : {
+						value: func,
+						writable: writable,
+					}
+				);
+				// loguj(name);
+			} catch (error) {
+				console.log(error);
+				try {
+					proto.prototype[name] = func;
+				} catch (err) {}
+			}
 		}
 	},
 	roughSizeOfObject(object) {
@@ -1534,6 +1536,22 @@ frycAPI.dateOptsNoTime = { printDate: frycAPI.getDateFormatter({ year: "numeric"
 // #endregion
 
 // #region //* Prototypy 1
+frycAPI.expandPrototype(String, "frycAPI_equalAny", function (strList) {
+	for (const daElem of strList) {
+		if (this === daElem) {
+			return true;
+		}
+	}
+	return false;
+});
+frycAPI.expandPrototype(String, "frycAPI_includesAny", function (strList) {
+	for (const daElem of strList) {
+		if (this.includes(daElem)) {
+			return true;
+		}
+	}
+	return false;
+});
 frycAPI.expandPrototype(Array, "frycAPI_shuffle", function () {
 	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	let currentIndex = this.length, randomIndex;
@@ -1643,20 +1661,12 @@ frycAPI.expandPrototype(Element, "frycAPI_appendHTML", function (htmlString) { /
 frycAPI.expandPrototype(Element, "frycAPI_insertHTML", function (position, htmlString) { // tylko jeżeli root zawiera pojedynczy element
 	return this.insertAdjacentElement(position, frycAPI.elemFromHTML(htmlString));
 });
-frycAPI.expandPrototype(String, "frycAPI_includesAny", function (strList) {
-	for (const daElem of strList) {
-		if (this.includes(daElem)) {
-			return true;
-		}
-	}
-	return false;
-});
 // #endregion
 // #region //* Prototypy 2
 frycAPI.expandPrototype(Object, "frycAPI_log", function () {
 	console.log(this);
 	return this;
-}, true, true);
+}, true, true, !frycAPI.host("www.youtube.com"));
 frycAPI.expandPrototype(DOMTokenList, "notContains", function (daClass) {
 	return !this.contains(daClass);
 });
@@ -1665,14 +1675,6 @@ frycAPI.expandPrototype(Element, "frycAPI_querySelNull", function (selector) {
 });
 frycAPI.expandPrototype(Element, "frycAPI_querySelOk", function (selector) {
 	return this.querySelector(selector) !== null;
-});
-frycAPI.expandPrototype(String, "frycAPI_equalAny", function (strList) {
-	for (const daElem of strList) {
-		if (this === daElem) {
-			return true;
-		}
-	}
-	return false;
 });
 frycAPI.expandPrototype(Node, "frycAPI_isText", function () {
 	return this.nodeType === Node.TEXT_NODE;
@@ -7234,7 +7236,7 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 				if (document.body !== null) {
 					frycAPI.createMutObs((mutRecArr, mutObs) => {
 						frycAPI.setDefaultDate(`.question-ask-date, .answered-date, .comment-date, .commented-edit-date, .answered-edit-date`, {
-							getDate: elem => elem.innerText.replace("on ", ""),
+							getDate: elem => elem.innerText.replace("on ", "").replace("at ", ""),
 							setDate: (elem, data) => {
 								elem.innerText = "- ";
 								return frycAPI.appendDefaultDateText(elem, data, frycAPI.dateOptsNoTime);
@@ -7244,9 +7246,9 @@ else if (1 && frycAPI.host("www.enpassant.dk")) {
 							getDate: elem => {
 								const nod = elem.lastChild;
 								nod.remove();
-								elem.span = elem.appendChild(document.createElement("span"));
+								elem.span = elem.appendChild(frycAPI.elem("span", 0));
 								elem.span.innerText = "- ";
-								return nod.textContent.trim().replace("on ", "");
+								return nod.textContent.trim().replace("on ", "").replace("at ", "");
 							},
 							setDate: (elem, data) => {
 								return frycAPI.appendDefaultDateText(elem.span, data, frycAPI.dateOptsNoTime);
