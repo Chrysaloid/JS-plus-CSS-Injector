@@ -7336,7 +7336,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	const editCSS = `[aria-label="Edytuj"][role="menuitem"]`;
 	const mojaWiadomość = `.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x78zum5.x15zctf7`;
 	const iconWidth = `.x1mqs8db`;
-	const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy`;
+	const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy:not(:has(.xjpr12u.x1is9kpn))`;
 	const conversationTime = `span.html-span.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1hl2dhg.x16tdsg8.x1vvkbs`;
 	const personTyping = `.x9f619.x1n2onr6.x1ja2u2z.__fb-dark-mode`;
 	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
@@ -10432,6 +10432,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 			} */
 		}
 	`);
+
 	frycAPI.onLoadSetter(function () {
 		// #region //* Naprawa wyświetlania info w lewym górnym
 		const br = document.querySelector(`.column.is-4:not(.has-text-centered, .has-text-right) > br`);
