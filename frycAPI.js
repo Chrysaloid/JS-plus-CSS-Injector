@@ -417,11 +417,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		frycAPI.styleOpts = opts;
 	},
 	injectStyle(style, opts) { // wkleja styl do strony
-		//// WAŻNE: jeżeli potrzebujemy dodać selektor odwołujący się do elementu html to należy to koniecznie robić przez :root i musi on być pierwszym tokenem w selektorze
-		//// wszystkie selektory z :root muszą być w nowych liniach
 		if ((style = style.trim()).length) {
 			const id = opts?.id ?? "frycAPI_styleNormal" + ++frycAPI.injectStyleNormalNum;
-			// const css = `:is(:root, :host):not(.${id}) {\n${frycAPI.minifyCSS(style).replaceAll(/^:root/gm, "&:root")}\n}`; // .frycAPI_log
 			const css = frycAPI.minifyCSS(style); // .frycAPI_log
 			let styleElem;
 			const elevated = opts?.elevated;
@@ -435,7 +432,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			} else {
 				styleElem = document.createElement("style").frycAPI_setAttribute("id", id);
 				if (opts?.state === false) styleElem.disabled = true;
-				styleElem.innerHTML = frycAPI.createHTML(css);
+				styleElem.textContent = css;
 				const elem = opts?.elem;
 				if (elem instanceof Node) {
 					elem.appendChild(styleElem);
