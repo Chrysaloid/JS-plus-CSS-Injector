@@ -3707,7 +3707,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 		frycAPI.forEach(`img[src="copy.png"], img[src="download.png"]`, (daElem, daI, daArr) => {
 			daElem.frycAPI_addClass("copy-buttons");
 		});
-		const tab = document.querySelector(`body>table:first-of-type>tbody`);
+		const tab = document.querySelector(`body>table:first-of-type>tbody:has(tr>td:nth-child(1)>b)`);
 		if (tab !== null) {
 			tab.querySelector(`tr>td:nth-child(1)>b`).innerHTML = document.querySelector(`input[name="desca"]`).value;
 			tab.querySelector(`tr>td:nth-child(2)>b`).innerHTML = document.querySelector(`input[name="descb"]`).value;
