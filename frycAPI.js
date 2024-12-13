@@ -3704,22 +3704,30 @@ if (1 && frycAPI.host("192.168.1.1")) {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		frycAPI.forEach(`img[src="copy.png"], img[src="download.png"]`, (daElem, daI, daArr) => {
-			daElem.frycAPI_addClass("copy-buttons");
-		});
-		const tab = document.querySelector(`body>table:first-of-type>tbody:has(tr>td:nth-child(1)>b)`);
-		if (tab !== null) {
-			tab.querySelector(`tr>td:nth-child(1)>b`).innerHTML = document.querySelector(`input[name="desca"]`).value;
-			tab.querySelector(`tr>td:nth-child(2)>b`).innerHTML = document.querySelector(`input[name="descb"]`).value;
-			const myTr = tab.appendChild(document.createElement("tr"));
-			[3, 4, 5].forEach(tr => {
-				const daElem = document.querySelector(`body>table:nth-of-type(2)>tbody>tr:nth-child(${tr})`);
-				const myTd = myTr.appendChild(document.createElement("td")).appendChild(document.createElement("div").frycAPI_addClass("myDiv"));
-				[1, 2, 5, 6].forEach(n => {
-					myTd.appendChild(document.createElement("div")).innerHTML = daElem.querySelector(`td:nth-child(${n})`).innerText;
-				});
+		let myTr;
+		const myTdArr = new Array(3);
+		frycAPI.createMutObs((mutRecArr, mutObs) => {
+			frycAPI.forEach(`img[src="copy.png"], img[src="download.png"]`, (daElem, daI, daArr) => {
+				daElem.frycAPI_addClass("copy-buttons");
 			});
-		}
+			const tab = document.querySelector(`body>table:first-of-type>tbody:has(tr>td:nth-child(1)>b)`);
+			if (tab !== null) {
+				tab.querySelector(`tr>td:nth-child(1)>b`).innerHTML = document.querySelector(`input[name="desca"]`).value;
+				tab.querySelector(`tr>td:nth-child(2)>b`).innerHTML = document.querySelector(`input[name="descb"]`).value;
+				myTr ??= tab.appendChild(document.createElement("tr"));
+				[3, 4, 5].forEach((tr, idx) => {
+					const daElem = document.querySelector(`body>table:nth-of-type(2)>tbody>tr:nth-child(${tr})`);
+					if (myTdArr[idx] === undefined) {
+						myTdArr[idx] = myTr.appendChild(document.createElement("td")).appendChild(document.createElement("div").frycAPI_addClass("myDiv"));
+					} else {
+						myTdArr[idx].frycAPI_removeChildren();
+					}
+					[1, 2, 5, 6].forEach(n => {
+						myTdArr[idx].appendChild(document.createElement("div")).innerHTML = daElem.querySelector(`td:nth-child(${n})`).innerText;
+					});
+				});
+			}
+		});
 	});
 
 	frycAPI.createManualFunctions("Toggle copy buttons", {
@@ -7551,33 +7559,33 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 								});
 							}));
 							container.append(del.cloneNode(1).frycAPI_addEventListener("click", () => {
-								container.querySelector(moreCSS).click();
-								frycAPI.sleep(10).then(() => document.querySelector(delCSS).click());
+								container.querySelector(moreCSS)?.click();
+								frycAPI.sleep(10).then(() => document.querySelector(delCSS)?.click());
 							}));
 							container.append(share.cloneNode(1).frycAPI_addEventListener("click", () => {
 								const shareButt = container.querySelector(shareCSS);
 								if (shareButt !== null) {
 									shareButt.click();
 								} else {
-									container.querySelector(moreCSS).click();
-									frycAPI.sleep(10).then(() => document.querySelector(shareItemCSS).click());
+									container.querySelector(moreCSS)?.click();
+									frycAPI.sleep(10).then(() => document.querySelector(shareItemCSS)?.click());
 								}
 							}));
 							container.append(react.cloneNode(1).frycAPI_addEventListener("click", () => {
-								container.querySelector(reactCSS).click();
+								container.querySelector(reactCSS)?.click();
 							}));
 							container.append(reply.cloneNode(1).frycAPI_addEventListener("click", () => {
 								const replyButt = container.querySelector(replyCSS);
 								if (replyButt !== null) {
 									replyButt.click();
 								} else {
-									container.querySelector(moreCSS).click();
-									frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS).click());
+									container.querySelector(moreCSS)?.click();
+									frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS)?.click());
 								}
 							}));
 						});
-						const text = document.querySelector(`[role="gridcell"] > [aria-current="page"] ${conversationTime}`).innerText;
-						document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
+						const text = document.querySelector(`[role="gridcell"] > [aria-current="page"] ${conversationTime}`)?.innerText;
+						text ?? document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
 
 						// if (oldHref !== window.location.href) {
 						// 	oldHref = window.location.href;
