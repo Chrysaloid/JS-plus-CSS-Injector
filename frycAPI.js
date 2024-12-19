@@ -1663,7 +1663,7 @@ frycAPI.expandPrototype(Element, "frycAPI_insertHTML", function (position, htmlS
 frycAPI.expandPrototype(Object, "frycAPI_log", function () {
 	console.log(this);
 	return this;
-}, true, true, !frycAPI.host("www.youtube.com"));
+}, true, true, !frycAPI.host("www.youtube.com", "www.desmos.com"));
 frycAPI.expandPrototype(DOMTokenList, "notContains", function (daClass) {
 	return !this.contains(daClass);
 });
@@ -7585,7 +7585,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 							}));
 						});
 						const text = document.querySelector(`[role="gridcell"] > [aria-current="page"] ${conversationTime}`)?.innerText;
-						text ?? document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
+						if (text !== undefined) document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
 
 						// if (oldHref !== window.location.href) {
 						// 	oldHref = window.location.href;
