@@ -679,7 +679,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.printRelTime(new Date);
 	printDateIntl(time, dateFormatter) {
 		return dateFormatter.format(time);
-	},
+	}, // const str = frycAPI.printDateIntl(new Date, dtFrmter);
 	dateLocales: "af",
 	getDateFormatter(options, locales) {
 		const defaultUndef = options?.hasOwnProperty("defaultUndef");
@@ -693,13 +693,13 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			second: options?.hasOwnProperty("second") ? options.second : ( defaultUndef ? undefined : "2-digit"),
 			/* eslint-enable */
 		});
-	}, // frycAPI.getDateFormatter({ year: "2-digit" });
+	}, // const dtFrmter = frycAPI.getDateFormatter({ year: "2-digit" });
 	printDate(date, dateFormatter) { // przyjmuje obiekt typu Date
 		return frycAPI.printDateIntl(date, dateFormatter ?? frycAPI.dateFormatter).replace(" ", ", ");
-	}, // frycAPI.printDate(new Date());
+	}, // const str = frycAPI.printDate(new Date());
 	printDateForFileName(date, dateFormatter) { // przyjmuje obiekt typu Date
 		return frycAPI.printDateIntl(date, dateFormatter ?? frycAPI.dateFormatterForFileName).replaceAll(":", "꞉");
-	}, // frycAPI.printDateForFileName(new Date());
+	}, // const fileName = frycAPI.printDateForFileName(new Date());
 	expandPrototype(proto, name, func, writable = false, czyGet = false, active = true) {
 		if (active) {
 			try {
@@ -3001,7 +3001,7 @@ if (1 && frycAPI.host("192.168.1.1")) {
 		}
 		/* CERTIFIED BRUH MOMENT
 			div.post blockquote.postMessage {
-			overflow: auto;
+				overflow: auto;
 			}
 			div.post div.file.image-expanded a.fileThumb {
 				margin-right: 0px;
@@ -3089,8 +3089,14 @@ if (1 && frycAPI.host("192.168.1.1")) {
 		}
 		span.dateTime {
 			margin-left: 3px;
-			font-family: Source Code Fryc;
-			font-size: 13px;
+			/* font-family: Source Code Fryc; */
+			/* font-size: 13px; */
+		}
+		span.dateTime > span {
+			display: none;
+		}
+		body.show-weekday span.dateTime > span {
+			display: inline;
 		}
 		div.post div.postInfo span.subject {
 			margin-right: 3px;
@@ -3433,10 +3439,22 @@ if (1 && frycAPI.host("192.168.1.1")) {
 			document.querySelector("div.post.op .file").insertAdjacentElement("beforebegin", document.querySelector("div.post.op .postInfo.desktop"));
 			// document.getElementById("bl_39814357").appendChild(document.getElementById("bl_39814357").firstChild.cloneNode(1))
 
+			const dtFrmt = Intl.DateTimeFormat(frycAPI.dateLocales, {
+				year  : "numeric",
+				month : "2-digit",
+				day   : "2-digit",
+				hour  : "2-digit",
+				minute: "2-digit",
+				// second: "2-digit",
+				timeZone: "America/New_York",
+			});
+			const dayFrmt = Intl.DateTimeFormat("en-GB", {
+				weekday: "short",
+				timeZone: "America/New_York",
+			});
 			frycAPI.forEach(".desktop span.dateTime", function (daElem, daI, daArr) {
 				const d = new Date(Number(daElem.getAttribute("data-utc")) * 1000);
-				daElem.innerHTML = d.toLocaleString("pl-PL", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" }).replace(", ",
-					"|" + d.toLocaleString("en-GB", { weekday: "short", timeZone: "America/New_York" }) + "|");
+				daElem.innerHTML = dtFrmt.format(d).replace(" ", "<span>, " + dayFrmt.format(d) + "</span>, ");
 			});
 
 			{ // Ukrywanie postów
@@ -3538,6 +3556,21 @@ if (1 && frycAPI.host("192.168.1.1")) {
 				navDiv.appendChild(redDiv).appendChild(redSpan);
 				navDiv.append("]");
 			}
+		});
+
+		frycAPI.createManualFunctions("4chan", {
+			funcArr: [
+				(name = "Toogle weekdays", type = frycAPI_PureState) => {
+					const f = new type({
+						name: name,
+						stateDesc: ["Weekdays Off", "Weekdays On"],
+					});
+					f.callBack = function (obj) {
+						document.body.classList.toggle("show-weekday");
+					};
+					return f;
+				},
+			],
 		});
 
 		loguj("4chan done!");
