@@ -7797,9 +7797,6 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 			color: hsl(219deg 80% 50%);
 		}
 		shreddit-post a[slot="title"] {
-			/* display: flex;
-			gap: 5px;
-			align-items: center; */
 			shreddit-post-flair>faceplate-tracker>a.no-decoration {
 				font-size: 10px;
 				>span {
@@ -7812,6 +7809,13 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		shreddit-comment-tree-ad {
 			display: none;
 		}
+
+		/* article:has(> shreddit-post[permalink^="/r/greentext"]) {
+			display: none !important;
+			& + hr {
+				display: none !important;
+			}
+		} */
 	`);
 	// var timeSum = 0;
 	frycAPI.onLoadSetter(function () {

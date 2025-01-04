@@ -62,7 +62,7 @@ function setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows) {
 }
 async function main(frycAPI0) {
 	// #region //* Wstęp
-	// const t0 = performance.now();
+	if ((await chrome.tabs.query({ active: true, currentWindow: true }))[0].url.startsWith("chrome://")) return;
 	frycAPI0 ??= await runOnPage(() => frycAPI, []);
 	const mainCont = document.getElementById("mainCont");
 	mainCont.textContent = "";
@@ -213,7 +213,8 @@ async function main(frycAPI0) {
 			}
 		});
 	});
-	// const t1 = performance.now(); console.log(`${(t1 - t0).toFixed(1)} ms`);
 }
 
+// const t0 = performance.now();
 main();
+// const t1 = performance.now(); console.log(`${(t1 - t0).toFixed(1)} ms`);
