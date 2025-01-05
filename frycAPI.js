@@ -226,9 +226,7 @@ class frycAPI_FuncGroup extends Object {
 		this.name = name;
 		this.style = obj.style;
 		this.funcArr = obj.funcArr;
-		this.funcArr.forEach((funcFunc, funcNum) => {
-			this.funcArr[funcNum] = funcFunc();
-		});
+		this.funcArr = this.funcArr.map(funcFunc => funcFunc());
 		this.funcArr.forEach((funcObj, funcNum) => {
 			funcObj.funcGroup = this;
 			funcObj.num = funcNum;
@@ -404,6 +402,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	createMutObsLicznik: 0,
 	path: window.location.pathname,
 	onLoadArr: [[], [], []],
+	UUID: null,
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -496,7 +495,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	zaokrl(val, decimals) {
 		return Number(Math.round(Number(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
 	},
-	clean(node) { // do usuwania komentarzy
+	clean(node = document.body) { // do usuwania komentarzy
 		for (let n = 0; n < node.childNodes.length; n++) {
 			const child = node.childNodes[n];
 			if (child.nodeType === 8) {
@@ -506,7 +505,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				frycAPI.clean(child);
 			}
 		}
-	}, // frycAPI.clean(document.body);
+	}, // frycAPI.clean();
 	makeTableSortable(tabElem, trSel = "tr:not(:first-child)", tdSel = "td", thSel = "th") { // Podaj referencję do tablicy
 		if (tabElem === null) return;
 		const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
@@ -1250,9 +1249,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	setDefaultDateEnum: {
 		/* eslint-disable */
 		mode: {
-			relatywnyCzas(elem) { return frycAPI.setDefaultDateEnumFunc1(elem, "relatywnyCzas", 0) },
-			absolutnyCzas(elem) { return frycAPI.setDefaultDateEnumFunc1(elem, "absolutnyCzas", 1) },
-			oba(elem)           { return frycAPI.setDefaultDateEnumFunc1(elem, "oba"          , 2) },
+			relatywnyCzas(elem, setStorage) { return frycAPI.setDefaultDateEnumFunc1(elem, "relatywnyCzas", 0, setStorage) },
+			absolutnyCzas(elem, setStorage) { return frycAPI.setDefaultDateEnumFunc1(elem, "absolutnyCzas", 1, setStorage) },
+			oba          (elem, setStorage) { return frycAPI.setDefaultDateEnumFunc1(elem, "oba"          , 2, setStorage) },
+		},
+		modeEnum: {
+			relatywnyCzas: 0,
+			absolutnyCzas: 1,
+			oba          : 2,
 		},
 		style: {
 			toolTipTop    (elem) { return frycAPI.setDefaultDateEnumFunc2(elem, "toolTip-top"   ) },
@@ -1268,11 +1272,27 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		},
 		/* eslint-enable */
 		manualFuncRef: null,
+		defaultDateMode: null,
+		modeIter: 0,
 	}, // frycAPI.setDefaultDateEnum.relatywnyCzas();
-	setDefaultDateEnumFunc1(elem, val, state) {
+	setDefaultDateEnumFunc1(elem, val, state, setStorage = false) {
 		if (elem === undefined) {
-			document.body.setAttribute("lepszyCzas", val);
-			frycAPI.setDefaultDateEnum.manualFuncRef?.setState(state);
+			const iter = ++frycAPI.setDefaultDateEnum.modeIter;
+			(async () => {
+				if (iter < frycAPI.setDefaultDateEnum.modeIter) return; // a newer mode setting was applied so don't apply the old setting
+				if (setStorage) {
+					frycAPI.setStorage("defaultDateMode", val);
+				} else {
+					frycAPI.setDefaultDateEnum.defaultDateMode = state;
+					const mode = await frycAPI.getStorage("defaultDateMode");
+					if (mode !== undefined) {
+						val = mode;
+						state = frycAPI.setDefaultDateEnum.modeEnum[mode]; // eslint-disable-line require-atomic-updates
+					}
+				}
+				document.body.setAttribute("lepszyCzas", val);
+				frycAPI.setDefaultDateEnum.manualFuncRef?.setState(state);
+			})();
 		} else if (elem.classList.contains("lepszyCzas")) {
 			elem.setAttribute("lepszyCzas", val);
 		} else {
@@ -1372,8 +1392,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	isFunc(value) {
 		return typeof value === "function";
 	},
-	perf(t1, t2, suffix = "") {
-		console.log(`${suffix}${(t2 - t1).toFixed(1)} ms`);
+	perf(t1, t2, prefix = "") {
+		console.log(`${prefix}${(t2 - t1).toFixed(1)} ms`);
 	},
 	elemFromHTML(htmlString) { // tylko jeżeli root zawiera pojedynczy element
 		const t = document.createElement("template");
@@ -1420,8 +1440,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		};
 	}, // document.addEventListener("mousemove", frycAPI.throttleDebounce(handleMouseMove, 4));
 	sendEventToBackground(name, data) {
-		return chrome.runtime.sendMessage(frycAPI.id, { name, data }); // returns a Promise
-	}, // const result = await frycAPI.sendEventToBackground();
+		return chrome.runtime.sendMessage(frycAPI.id, { name, data }).then(response => {
+			if (response.error) {
+				console.error(response.errObj.stack);
+				throw new Error(response.errObj.message);
+			} else {
+				return response.data;
+			}
+		}); // returns a Promise
+	}, // const result = await frycAPI.sendEventToBackground("name", "data");
 	async isWebpAnimated(resp) {
 		const buffer = new Uint8Array(await resp.arrayBuffer());
 		if (new TextDecoder().decode(buffer.subarray(12, 16)) === "VP8X") {
@@ -1511,6 +1538,22 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // const elem = frycAPI.elem()._; const elem = frycAPI.elem(0); const elem = frycAPI.elem("span");
 	template() {
 	}, // frycAPI.template();
+	setStorage(key, val) {
+		if (frycAPI.UUID === null) return;
+		return frycAPI.sendEventToBackground("setStorage", { UUID: frycAPI.UUID, obj: { [key]: val } }); // throws error if setting failed
+	}, // frycAPI.setStorage("key", "val");
+	setStorages(obj) {
+		if (frycAPI.UUID === null) return;
+		return frycAPI.sendEventToBackground("setStorage", { UUID: frycAPI.UUID, obj: obj }); // throws error if setting failed
+	}, // frycAPI.setStorages({ "key": "val" });
+	getStorage(key) {
+		if (frycAPI.UUID === null) return;
+		return frycAPI.sendEventToBackground("getStorage", { UUID: frycAPI.UUID, keys: [key] }).then(result => result[key]);
+	}, // const val = await frycAPI.getStorage("key");
+	getStorages(keys) {
+		if (frycAPI.UUID === null) return;
+		return frycAPI.sendEventToBackground("getStorage", { UUID: frycAPI.UUID, keys: keys });
+	}, // const vals = await frycAPI.getStorages(["key"]);
 	// #region //* Funkcje 5
 	// #endregion
 	// #endregion
@@ -1975,13 +2018,13 @@ if (1) { //* Globalne funkcje
 				f.setNumCols(2);
 				f.setStateDesc(["Relative", "Absolute", "Both"]);
 				f.setState(0);
+				f.nameClickable = 1;
 				frycAPI.setDefaultDateEnum.manualFuncRef = f;
 				f.callBack = function (obj) {
-					switch (obj.state) {
-						default:
-						case 0: return frycAPI.setDefaultDateEnum.mode.relatywnyCzas();
-						case 1: return frycAPI.setDefaultDateEnum.mode.absolutnyCzas();
-						case 2: return frycAPI.setDefaultDateEnum.mode.oba();
+					switch (obj.state ?? frycAPI.setDefaultDateEnum.defaultDateMode) {
+						case 0: return frycAPI.setDefaultDateEnum.mode.relatywnyCzas(undefined, true);
+						case 1: return frycAPI.setDefaultDateEnum.mode.absolutnyCzas(undefined, true);
+						case 2: return frycAPI.setDefaultDateEnum.mode.oba(undefined, true);
 					}
 				};
 				return f;
@@ -9862,10 +9905,10 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 		}
 
 		.ukryj-opinie-bez-zdjęć {
-			& [itemprop="review"]:not(:has(> [data-analytics-view-label="reviewsGallery"])) {
+			& [itemprop="review"]:not(:has(> :is([data-analytics-view-label="reviewsGallery"], [data-analytics-view-label="reviewGallery"]))) {
 				display: none;
 			}
-			& [itemprop="review"]:not(:has(> [data-analytics-view-label="reviewsGallery"])) + hr {
+			& [itemprop="review"]:not(:has(> :is([data-analytics-view-label="reviewsGallery"], [data-analytics-view-label="reviewGallery"]))) + hr {
 				display: none;
 			}
 		}
@@ -10272,6 +10315,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 		${frycAPI.simpleFontChange}
 	`);
 } else if (frycAPI.host("web.dev", "developers.google.com", "developer.chrome.com")) {
+	frycAPI.UUID = "2025-01-05 23:13";
 	frycAPI.injectStyleOnLoad(/*css*/`
 		*:not(devsite-code, devsite-code *, code, code *, .material-icons, a.devsite-nav-toggle) {
 			font-family: "IBM Plex Sans Condensed";
