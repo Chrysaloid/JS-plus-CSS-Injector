@@ -1,3 +1,4 @@
+/* eslint-disable no-extra-semi */
 "use strict";
 
 const log = console.log;
@@ -51,7 +52,7 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 						}
 					});
 					return;
-				}
+				};
 				case "downloadURL": return void chrome.downloads.download({ url: data });
 				case "injectStyle": return chrome.scripting.insertCSS(defineStyle(data, sender));
 				case "defineStyle": return void defineStyle(data, sender);
@@ -88,7 +89,7 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 				case "test": {
 					log(data);
 					return data;
-				}
+				};
 				default: return log(`Nie ma eventu o nazwie "${name}". Otrzymano dane:`, data);
 			}
 		})();
