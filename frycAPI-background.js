@@ -90,7 +90,7 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 					log(data);
 					return data;
 				};
-				default: return log(`Nie ma eventu o nazwie "${name}". Otrzymano dane:`, data);
+				default: throw new Error(`There is no event of name "${name}". Received data: ${data}`);
 			}
 		})();
 		sendResp({ error: false, data: dataOut });
