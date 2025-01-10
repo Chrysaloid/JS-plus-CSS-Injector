@@ -6383,12 +6383,30 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 	`);
 } else if (1 && frycAPI.host("wutwaw-my.sharepoint.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		svg image {
+		/* svg image {
 			-webkit-filter: none !important;
 			filter: none !important;
-		}
+		} */
 	`);
-} else if (1 && frycAPI.host("wutwaw.sharepoint.com")) {
+	frycAPI.onLoadSetter(function () {
+		frycAPI.createMutObs(() => {
+			let folderName = document.querySelector(`[class^="breadcrumbNonNavigableItem"][data-automationid="breadcrumb-crumb"]`);
+			if (folderName === null) folderName = document.querySelector(`li[class^="navLink"][class*="navLinkSelected"]`);
+			if (folderName !== null) {
+				if (document.title !== folderName.textContent) {
+					document.title = folderName.textContent;
+					loguj("Change");
+					return;
+				}
+			} else if (document.title !== "OneDrive") {
+				document.title = "OneDrive";
+				loguj("Change");
+				return;
+			}
+			loguj("Mut");
+		});
+	});
+} else if (0 && frycAPI.host("wutwaw.sharepoint.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
 			filter: invert(1);
@@ -9055,6 +9073,7 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 			.diff-number, #reset-graph {
 				cursor: pointer;
 				display: inline;
+				font-weight: bold;
 			}
 			:is(.diff-number, #reset-graph):hover, .diff-sel {
 				background-color: hsla(0, 0%, 100%, 20%);
