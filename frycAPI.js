@@ -6395,15 +6395,10 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 			if (folderName !== null) {
 				if (document.title !== folderName.textContent) {
 					document.title = folderName.textContent;
-					loguj("Change");
-					return;
 				}
 			} else if (document.title !== "OneDrive") {
 				document.title = "OneDrive";
-				loguj("Change");
-				return;
 			}
-			loguj("Mut");
 		});
 	});
 } else if (0 && frycAPI.host("wutwaw.sharepoint.com")) {
