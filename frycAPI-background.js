@@ -61,10 +61,13 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 				case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
 					const obj = result[data.UUID];
 					if (obj !== undefined) {
+						let objChanged = false;
 						for (const [key, value] of Object.entries(data.obj)) {
+							// hasOwnProperty is necessary to catch possibility of defining a new key with value undefined
+							if (obj[key] !== value || !obj.hasOwnProperty(key)) objChanged = true;
 							obj[key] = value;
 						}
-						chrome.storage.sync.set({ [data.UUID]: obj });
+						if (objChanged) chrome.storage.sync.set({ [data.UUID]: obj });
 					} else {
 						chrome.storage.sync.set({ [data.UUID]: data.obj });
 					}
