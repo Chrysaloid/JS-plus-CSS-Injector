@@ -1558,6 +1558,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 		return obj;
 	}, // const objPars = frycAPI.searchParamsToObj("");
+	querySelList(list, root = document) {
+		if (this instanceof Element) root = this;
+		let elem;
+		for (const query of list) {
+			elem = root.querySelector(query);
+			if (elem !== null) return elem;
+		}
+		return null;
+	}, // const elem = frycAPI.querySelList([``]);
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -1725,6 +1734,7 @@ frycAPI.expandPrototype(Element, "frycAPI_querySelNull", function (selector) {
 frycAPI.expandPrototype(Element, "frycAPI_querySelOk", function (selector) {
 	return this.querySelector(selector) !== null;
 });
+frycAPI.expandPrototype(Element, "frycAPI_querySelList", frycAPI.querySelList);
 frycAPI.expandPrototype(Node, "frycAPI_isText", function () {
 	return this.nodeType === Node.TEXT_NODE;
 }, true);
@@ -6338,8 +6348,11 @@ else if (1 && frycAPI.host("translate.google.com", "translate.google.pl")) {
 	`);
 	frycAPI.onLoadSetter(function () {
 		frycAPI.createMutObs(() => {
-			let folderName = document.querySelector(`[class^="breadcrumbNonNavigableItem"][data-automationid="breadcrumb-crumb"]`);
-			if (folderName === null) folderName = document.querySelector(`li[class^="navLink"][class*="navLinkSelected"]`);
+			const folderName = frycAPI.querySelList([
+				`[class^="breadcrumbNonNavigableItem"][data-automationid="breadcrumb-crumb"]`,
+				`li.ms-Breadcrumb-listItem:last-child .ms-TooltipHost [id^="tooltip"]`,
+				`li[class^="navLink"][class*="navLinkSelected"]`,
+			]);
 			if (folderName !== null) {
 				if (document.title !== folderName.textContent) {
 					document.title = folderName.textContent;
