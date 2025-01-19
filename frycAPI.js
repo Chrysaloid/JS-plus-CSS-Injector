@@ -10220,7 +10220,7 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 			}
 
 			const post0 = document.querySelector(`#posts .copy > span.smallcopy`);
-			post0?.frycAPI_setInnerHTML(post0.innerHTML
+			post0?.frycAPI_setInnerHTML?.(post0.innerHTML
 			.replace(/users? marked this as a favorite/, `<span style="font-family: sans-serif !important;">&#x2764;&#xFE0F;</span>`)
 			.replace(/(answers|comments) total/, `<span style="font-family: sans-serif !important;">&#x21A9;&#xFE0F;</span>`)
 			);
@@ -10274,7 +10274,6 @@ else if (1 && frycAPI.host("knucklecracker.com")) {
 				const data = new Date(regMatch[2]);
 				if (frycAPI.isValidDate(data)) {
 					daElem.innerHTML = daElem.innerHTML.replace(regMatch[0], ` at ${frycAPI.getDefaultDateText(data)} - `);
-					frycAPI.setDefaultDateTitle(daElem, data);
 				} else {
 					daElem.innerHTML = daElem.innerHTML.replace(regMatch[0], ` at ${frycAPI.time12To24(regMatch[2])} - `);
 				}
