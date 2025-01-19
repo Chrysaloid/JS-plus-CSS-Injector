@@ -7548,6 +7548,7 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 
 		${timeTooltip} {
 			margin-top: -33px;
+			pointer-events: none;
 		}
 
 		body:has(${messageList} > ${personTyping}) ${nameElem}::after {
@@ -7555,6 +7556,10 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 		}
 		${messageList} > ${personTyping} {
 			display: none;
+		}
+
+		html {
+			overflow-y: hidden !important;
 		}
 	`);
 
@@ -9658,14 +9663,14 @@ else if (frycAPI.host("www.fakrosno.pl")) {
 	});
 } else if (frycAPI.host("support.google.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-
 	`);
 
 	frycAPI.onLoadSetter(() => {
 		frycAPI.forEach(`sc-tailwind-thread-post_header-post-date`, (daElem, daI, daArr) => {
-			const data = new Date((htmlBlob = daElem.querySelector(`html-blob`)).innerText);
+			const htmlBlob = daElem.querySelector(`html-blob`);
+			const data = new Date(htmlBlob.innerText);
 			daElem.querySelector(`.scTailwindThreadPost_headerPostdateroot`).innerHTML = frycAPI.printRelTime(data);
-			htmlBlob.innerHTML = frycAPI.printDate(data);
+			htmlBlob.innerText = frycAPI.printDate(data);
 		});
 	});
 } else if (frycAPI.host("okazja-hurtownia.pl")) {
