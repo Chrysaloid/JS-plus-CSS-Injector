@@ -7391,15 +7391,18 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 	const editCSS = `[aria-label="Edytuj"][role="menuitem"]`;
 	const mojaWiadomość = `.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x78zum5.x15zctf7`;
 	const iconWidth = `.x1mqs8db`;
-	const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy:not(:has(.xjpr12u.x1is9kpn))`;
+	const toolTipSpan = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x1ji0vk5.x18bv5gf.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x1nxh6w3.x1fcty0u.xzsf02u.x4zkp8e.x676frb.xq9mrsl`;
+	const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy:has(${toolTipSpan} > div > div:nth-child(3))`;
 	const conversationTime = `span.html-span.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1hl2dhg.x16tdsg8.x1vvkbs`;
 	const personTyping = `.x9f619.x1n2onr6.x1ja2u2z.__fb-dark-mode`;
 	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
+	const specialLinkButton = `.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.x1sur9pj.xkrqix3.x1xlr1w8`;
+	const pollUpdateMessage = `${messageList} > :has(${specialLinkButton}):not(:has([aria-label="Zmień głos"]))`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
 		*:not(code) {
-			font-family: IBM Plex Sans Condensed !important;
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 		/* ._7kpk {
 			background-color: rgba(0, 0, 0, 0.05);
@@ -7560,6 +7563,10 @@ else if (1 && frycAPI.host("www.messenger.com")) {
 
 		html {
 			overflow-y: hidden !important;
+		}
+
+		${pollUpdateMessage} {
+			display: none;
 		}
 	`);
 
