@@ -8,6 +8,7 @@
 	"icons": {"16": "icon 16.png", "32": "icon 32.png", "48": "icon 48.png", "128": "icon 128.png"},
 	"action": {"default_popup": "Popup.html", "default_title": "Injector"},
 	"content_scripts": [
+		{ "matches": ["<all_urls>"], "js": ["frycAPI-expandPrototype.js"], "run_at": "document_start", "world": "MAIN" },
 		{ "matches": ["<all_urls>"], "js": ["frycAPI-inject.js"], "run_at": "document_start" }
 	],
 	"background": {"service_worker": "frycAPI-background.js"},

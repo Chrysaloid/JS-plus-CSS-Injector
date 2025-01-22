@@ -102,3 +102,47 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 	}
 	return true; // konieczne jeśli chcemy wysłać odpowiedź za pomocą sendResp
 });
+
+function findHeader(headers, headerStr) {
+	return headers.find(header => header.name.toLowerCase() === headerStr);
+}
+// onHeadersReceived // onCompleted
+let pdf = false;
+chrome.webRequest.onHeadersReceived.addListener(details => {
+	if (details.type !== "main_frame") return; // only intercept PDFs that will be view as an entire page
+	if (!findHeader(details.responseHeaders, "content-type")?.value?.toLowerCase()?.includes("application/pdf")) return; // request is not for PDF
+	if (findHeader(details.responseHeaders, "content-disposition")?.value?.toLowerCase()?.includes("attachment")) return; // requested PDF will be downloaded so don't download it again
+	// log(details);
+	chrome.downloads.download({ url: details.url });
+	pdf = true;
+}, { urls: ["<all_urls>"] }, ["responseHeaders"]);
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	// log(changeInfo);
+	if (pdf && changeInfo.status === "loading") {
+		chrome.tabs.goBack(tabId).then(null, () => { // if going back is not possible the promise gets rejected and that means that the PDF was opened in new tab so close the tab
+			chrome.tabs.remove(tabId);
+		});
+		pdf = false;
+	}
+});
+/* // As of Manifest V3, this is only available to policy installed extensions.
+chrome.webRequest.onHeadersReceived.addListener(details => {
+	if (details.type !== "main_frame") return;
+	const contentType = details.responseHeaders.find(header => header.name.toLowerCase() === "content-type");
+	if (contentType === undefined || !contentType.value.toLowerCase().includes("application/pdf")) return; // request is not for PDF
+	// log(details);
+	const contDispIdx = details.responseHeaders.findIndex(header => header.name.toLowerCase() === "content-disposition");
+	if (contDispIdx !== -1) { // content-disposition header is present on the response
+		const oldVal = details.responseHeaders[contDispIdx].value.toLowerCase();
+		if (oldVal.includes("attachment")) {
+			return;
+		} else {
+			details.responseHeaders[contDispIdx].value = "attachment";
+		}
+	} else {
+		details.responseHeaders.push({ name: "content-disposition", value: "attachment" });
+	}
+	return { responseHeaders: details.responseHeaders };
+}, { urls: ["<all_urls>"] }, ["blocking", "responseHeaders"]);
+ */
