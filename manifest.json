@@ -16,6 +16,9 @@
 		{ "matches": ["<all_urls>"], "resources": ["frycAPI.js", "resources/*"] }
 	],
 	"externally_connectable": { "matches": ["<all_urls>"] },
-	"permissions": ["nativeMessaging", "scripting", "activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage"],
-	"host_permissions": ["<all_urls>"]
+	"permissions": ["nativeMessaging", "scripting", "activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage", "declarativeNetRequest", "declarativeNetRequestFeedback"],
+	"host_permissions": ["<all_urls>"],
+	"declarative_net_request": {
+		"rule_resources": [ {"id": "pdf", "enabled": true, "path": "PDF-download-rule.json"} ]
+	}
 }

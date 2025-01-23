@@ -3470,7 +3470,7 @@ if (1 && frycAPI_host("192.168.1.1")) {
 		*:not(code, code *) {
 			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
-		body {
+		/* body {
 			--my-width: 360px;
 			.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary:first-child {
 				width: var(--my-width) !important;
@@ -3481,7 +3481,7 @@ if (1 && frycAPI_host("192.168.1.1")) {
 			.fixed.left-0.z-40 {
 				transform: translateX(var(--my-width)) translateY(-50%) rotate(0deg) translateZ(0px) !important;
 			}
-		}
+		} */
 	`);
 
 	/* frycAPI.onLoadSetter(function () {

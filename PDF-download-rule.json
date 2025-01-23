@@ -1,0 +1,32 @@
+﻿[
+	{
+		"id": 1,
+		"priority": 1,
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"header": "Content-Disposition",
+					"operation": "set",
+					"value": "attachment"
+				}
+			]
+		},
+		"condition": {
+			"urlFilter": "*",
+			"resourceTypes": ["main_frame"],
+			"responseHeaders": [
+				{
+					"header": "Content-Type",
+					"values": ["*application/pdf*"]
+				}
+			],
+			"excludedResponseHeaders": [
+				{
+					"header": "Content-Disposition",
+					"values": ["*attachment*"]
+				}
+			]
+		}
+	}
+]

@@ -103,6 +103,7 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 	return true; // konieczne jeśli chcemy wysłać odpowiedź za pomocą sendResp
 });
 
+/*
 function findHeader(headers, headerStr) {
 	return headers.find(header => header.name.toLowerCase() === headerStr);
 }
@@ -125,7 +126,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 		});
 		pdf = false;
 	}
-});
+}); */
 /* // As of Manifest V3, this is only available to policy installed extensions.
 chrome.webRequest.onHeadersReceived.addListener(details => {
 	if (details.type !== "main_frame") return;
@@ -145,4 +146,4 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 	}
 	return { responseHeaders: details.responseHeaders };
 }, { urls: ["<all_urls>"] }, ["blocking", "responseHeaders"]);
- */
+*/
