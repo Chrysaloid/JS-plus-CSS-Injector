@@ -1,5 +1,6 @@
 ﻿// #region //* Początek
 /* 0 eslint no-implicit-globals: ["warn", {"lexicalBindings": true}] */
+/// <reference path="frycAPI-expandPrototype.js" />
 "use strict";
 const frycAPI_t1 = performance.now();
 
@@ -7415,81 +7416,93 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	});
 } else if (1 && frycAPI_host("www.meteo.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		/* body>div>div>img {
-			filter: invert(1) hue-rotate(180deg);
-		} */
 		body {
-			background-color: #181818 !important;
-			font-family: IBM Plex Sans Condensed;
+			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
-		img {
-			image-rendering: pixelated;
-		}
-		body>div:has(#meteorogram) {
-			top: 107px !important;
-			left: 14px !important;
-		}
-		body>div:has(#meteorogram) img {
-			/* filter: invert(1) hue-rotate(180deg); */
-			filter: brightness(0.8);
-		}
-		:has(>#wtg_meteorogram_top),
-		:has(>#wtg_meteorogram_bottom){
-			display: none;
-		}
-
-		.myButt {
-			position: absolute;
-			right: calc(100% + 15px);
-			top: 0px;
-			padding: 5px;
-			height: 74px;
-			width: 160px;
-			cursor: pointer;
-			/* background: radial-gradient(#00000000, #EDC379); */
-			background: #EDC379;
-			border: none;
-			font-family: IBM Plex sans;
-			font-size: 22px;
-			font-weight: 500;
-			color: #0000;
-			text-shadow: 0px 0px 0px black;
-			transition: all .3s ease-in-out;
-		}
-		.myButt:hover {
-			background-color: #eec986;
-			box-shadow: 0px 0px 0px 2px #000000;
-			/*background: radial-gradient(#0000004a, #EDC379);*/
-			/* border: 2px solid #e3e3e3; */
-			/* border-radius: 5px; */
-		}
-
 	`);
+	if (frycAPI.path.startsWith("/um/")) {
+		frycAPI.injectStyleOnLoad(/*css*/`
+			/* body>div>div>img {
+				filter: invert(1) hue-rotate(180deg);
+			} */
+			body {
+				background-color: #181818 !important;
+			}
+			img {
+				image-rendering: pixelated;
+			}
+			body>div:has(#meteorogram) {
+				top: 107px !important;
+				left: 14px !important;
+			}
+			body>div:has(#meteorogram) img {
+				/* filter: invert(1) hue-rotate(180deg); */
+				filter: brightness(0.8);
+			}
+			:has(>#wtg_meteorogram_top),
+			:has(>#wtg_meteorogram_bottom){
+				display: none;
+			}
+	
+			.myButt {
+				position: absolute;
+				right: calc(100% + 15px);
+				top: 0px;
+				padding: 5px;
+				height: 74px;
+				width: 160px;
+				cursor: pointer;
+				/* background: radial-gradient(#00000000, #EDC379); */
+				background: #EDC379;
+				border: none;
+				font-family: IBM Plex sans;
+				font-size: 22px;
+				font-weight: 500;
+				color: #0000;
+				text-shadow: 0px 0px 0px black;
+				transition: all .3s ease-in-out;
+			}
+			.myButt:hover {
+				background-color: #eec986;
+				box-shadow: 0px 0px 0px 2px #000000;
+				/*background: radial-gradient(#0000004a, #EDC379);*/
+				/* border: 2px solid #e3e3e3; */
+				/* border-radius: 5px; */
+			}
+		`);
 
-	frycAPI.onLoadSetter(() => {
-		// https://www.meteo.pl/um/php/meteorogramlet
-		document.head.insertAdjacentHTML("afterbegin", `<meta charset="UTF-8 BOM">`);
-		frycAPI.changeFaviconRes("meteo_pl.png");
+		frycAPI.onLoadSetter(() => {
+			// https://www.meteo.pl/um/php/meteorogramlet
+			document.head.insertAdjacentHTML("afterbegin", `<meta charset="UTF-8 BOM">`);
+			frycAPI.changeFaviconRes("meteo_pl.png");
 
-		const fontElem = document.querySelector("#model_napis font");
-		if (fontElem !== null) {
-			document.title = fontElem
-			.innerText
-			.match(/^([^,])+/gu)[0]
-			.trim() + " - meteo.pl";
-		} else {
-			document.title = document
-			.querySelector("#napis_xy_ne")
-			.innerText
-			.replaceAll(/[\s\u00A0]+/gmu, " ")
-			.trim() + " - meteo.pl";
-		}
-		const butt = document.createElement("button");
-		butt.classList.add("myButt");
-		butt.innerText = "Odśwież stronę";
-		butt.setAttribute("onclick", "location.reload();");
-		document.querySelector('[href="javascript:print_this()"]').insertAdjacentElement("afterend", butt);
-	});
+			const fontElem = document.querySelector("#model_napis font");
+			if (fontElem !== null) {
+				document.title = fontElem
+				.innerText
+				.match(/^([^,])+/gu)[0]
+				.trim() + " - meteo.pl";
+			} else {
+				document.title = document
+				.querySelector("#napis_xy_ne")
+				?.innerText
+				?.replaceAll(/[\s\u00A0]+/gmu, " ")
+				?.trim()
+				?.concat(" - meteo.pl") ?? document.title;
+			}
+			const butt = document.createElement("button");
+			butt.classList.add("myButt");
+			butt.innerText = "Odśwież stronę";
+			butt.setAttribute("onclick", "location.reload();");
+			document.querySelector('[href="javascript:print_this()"]')?.insertAdjacentElement("afterend", butt);
+		});
+	} else if (frycAPI.path.startsWith("/meteogramy")) {
+		frycAPI.injectStyleOnLoad(/*css*/`
+			.col-12:has(> .archives__advertisement) {
+				display: none;
+			}
+		`);
+	}
 } else if (0 && frycAPI_host("www.minecraftskins.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
