@@ -7314,7 +7314,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			display: none;
 		}
 
-		html {
+		html#facebook { /* [class][class][class][class][class] */
 			overflow-y: hidden !important;
 		}
 
