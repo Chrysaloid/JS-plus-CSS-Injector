@@ -907,20 +907,20 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			return dom;
 		}
 	}, // await frycAPI.parseXML(someXMLStr)
-	createMutObs(callBack, objOpts) { // Mutation Observer
+	createMutObs(callBack, objOpts = {}) { // Mutation Observer
 		// runCallBack = true, elem = document.body, options = { childList: true, subtree: true } // Old
 		const options = {
-			childList            : objOpts?.options?.childList             ?? true,
-			subtree              : objOpts?.options?.subtree               ?? true,
-			attributes           : objOpts?.options?.attributes            ?? false,
-			attributeFilter      : objOpts?.options?.attributeFilter       ?? undefined,
-			attributeOldValue    : objOpts?.options?.attributeOldValue     ?? false,
-			characterData        : objOpts?.options?.characterData         ?? false,
-			characterDataOldValue: objOpts?.options?.characterDataOldValue ?? false,
+			childList            : objOpts.options?.childList             ?? true,
+			subtree              : objOpts.options?.subtree               ?? true,
+			attributes           : objOpts.options?.attributes            ?? false,
+			attributeFilter      : objOpts.options?.attributeFilter       ?? undefined,
+			attributeOldValue    : objOpts.options?.attributeOldValue     ?? false,
+			characterData        : objOpts.options?.characterData         ?? false,
+			characterDataOldValue: objOpts.options?.characterDataOldValue ?? false,
 		};
-		const elem = objOpts?.elem ?? document.body;
-		const runCallBack = objOpts?.runCallBack ?? true;
-		const asyncCallBack = objOpts?.async ?? false;
+		const elem = objOpts.elem ?? document.body;
+		const runCallBack = objOpts.runCallBack ?? true;
+		const asyncCallBack = objOpts.async ?? false;
 
 		let mut;
 		if (asyncCallBack) {
@@ -7501,7 +7501,42 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			.col-12:has(> .archives__advertisement) {
 				display: none;
 			}
+			.forecast-box .date::after {
+				content: attr(relTime);
+				font-size: 12px;
+				line-height: 1;
+			}
 		`);
+
+		frycAPI.onLoadSetter(() => {
+			frycAPI.createMutObs(() => {
+				const boxes = document.querySelectorAll(`.forecast-box`);
+				if (boxes.length > 0) {
+					boxes.forEach(forecastBox => {
+						frycAPI.createMutObs(() => {
+							if (forecastBox.frycAPI_hasClass("forecast-box--visible")) {
+								const hourElem = forecastBox.frycAPI_elemByClass("date__bigger");
+								const dayElem = forecastBox.getElementsByClassName("date__classic")[1];
+								if (!(hourElem && dayElem)) return;
+								const now = new Date();
+								const [hour, minute] = hourElem.textContent.split(":").map(Number);
+								const [day, month] = dayElem.textContent.split(".").map(Number);
+								const then = new Date(now.getFullYear(), month - 1, day, hour, minute);
+								let diff = then.getTime() - now.getTime();
+								const diffSign = Math.sign(then.getTime() - now.getTime());
+								diff = Math.abs(diff);
+								const diffHours = Math.floor(diff / 1000 / 60 / 60);
+								const diffMinutes = Math.floor(diff / 1000 / 60 - diffHours * 60);
+								const diffStr = `${diffHours} h ${diffMinutes} m`;
+								// loguj(diffStr);
+								forecastBox.firstElementChild.firstElementChild.firstElementChild.setAttribute("relTime", diffSign > 0 ? `- za ${diffStr}` : `- ${diffStr} temu`);
+							}
+						}, { runCallBack: true, elem: forecastBox, options: { characterData: true, subtree: true } });
+					});
+					return true;
+				}
+			});
+		});
 	}
 } else if (0 && frycAPI_host("www.minecraftskins.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
