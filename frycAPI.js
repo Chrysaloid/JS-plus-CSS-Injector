@@ -494,7 +494,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	clean(node = document.body) { // do usuwania komentarzy
 		const childNodes = node.childNodes;
-		for (let n = childNodes.length; n >= 0; n--) {
+		for (let n = childNodes.length - 1; n >= 0; n--) {
 			const child = childNodes[n];
 			if (child.nodeType === 8) {
 				node.removeChild(child);
@@ -3471,7 +3471,7 @@ if (1 && frycAPI_host("192.168.1.1")) {
 		.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary {
 			overflow: visible;
 		} */
-		*:not(code, code *) {
+		*:not(code, code *, #codemirror *) {
 			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 		/* body {
