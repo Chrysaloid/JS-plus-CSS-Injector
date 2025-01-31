@@ -493,11 +493,11 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return Number(Math.round(Number(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
 	},
 	clean(node = document.body) { // do usuwania komentarzy
-		for (let n = 0; n < node.childNodes.length; n++) {
-			const child = node.childNodes[n];
+		const childNodes = node.childNodes;
+		for (let n = childNodes.length; n >= 0; n--) {
+			const child = childNodes[n];
 			if (child.nodeType === 8) {
 				node.removeChild(child);
-				n--;
 			} else if (child.nodeType === 1) {
 				frycAPI.clean(child);
 			}
@@ -1447,15 +1447,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		};
 		if (root.attributes?.length !== 0) {
 			obj.attributes = {};
-			for (const attrib of root.attributes) {
+			root.attributes.forEach(attrib => {
 				obj.attributes[attrib.name] = attrib.value;
-			}
+			});
 		}
 		if (root.childElementCount !== 0) {
 			obj.children = [];
-			for (const node of root.children) {
+			root.children.forEach(node => {
 				obj.children.push(frycAPI.xmlObjToJsObj(node));
-			}
+			});
 		} else {
 			obj.text = root.innerText ?? root.textContent;
 		}
@@ -1478,12 +1478,12 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				attributes: {},
 				children: [],
 			};
-			for (const attrib of root.attributes) {
+			root.attributes.forEach(attrib => {
 				obj.attributes[attrib.name] = attrib.value;
-			}
-			for (const node of root.childNodes) {
+			});
+			root.childNodes.forEach(node => {
 				obj.children.push(frycAPI.xmlObjToJsObjNode(node));
-			}
+			});
 			return obj;
 		} else if (root.nodeType === Node.TEXT_NODE) {
 			return root.textContent;
@@ -1551,6 +1551,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	checkChromeVersion() {
 		loguj(navigator.appVersion.match(/.*Chrome\/([0-9.]+)/)[1]);
 	}, // frycAPI.checkChromeVersion();
+	VSC_Go_To_Line(host = frycAPI_host()) {
+		const code = `
+			#Requires AutoHotkey <2.0
+			#Include C:\\Users\\Fryderyk\\Desktop\\AutoHotKey\\VSC_Go_To_Line_Base.ahk
+			openVSCode("${host}")
+		`;
+		frycAPI.downloadTxt(frycAPI.minifyCodeSimple(code), "VSC_Go_To_Line.ahk");
+	}, // frycAPI.VSC_Go_To_Line();
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -1780,12 +1788,7 @@ if (1) { //* Globalne funkcje
 			(name = "Edit Script", type = frycAPI_Normal) => {
 				const f = new type({ name });
 				f.callBack = function (obj) {
-					const str = `
-						#Requires AutoHotkey <2.0
-						#Include C:\\Users\\Fryderyk\\Desktop\\AutoHotKey\\VSC_Go_To_Line_Base.ahk
-						openVSCode("${frycAPI_host()}")
-					`;
-					frycAPI.downloadTxt(frycAPI.minifyCodeSimple(str), "VSC_Go_To_Line.ahk");
+					frycAPI.VSC_Go_To_Line();
 				};
 				return f;
 			},
@@ -7151,7 +7154,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const personTyping = `.x9f619.x1n2onr6.x1ja2u2z.__fb-dark-mode`;
 	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
 	const specialLinkButton = `.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.x1sur9pj.xkrqix3.x1xlr1w8`;
-	const pollUpdateMessage = `${messageList} > :has(${specialLinkButton}):not(:has([aria-label="Zmień głos"]))`;
+	const pollUpdateMessage = `${messageList} > :has(${specialLinkButton}):not(:has([aria-label="Głosuj"],[aria-label="Zmień głos"]))`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/

@@ -18,6 +18,7 @@
 	"externally_connectable": { "matches": ["<all_urls>"] },
 	"permissions": ["nativeMessaging", "scripting", "activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage", "declarativeNetRequest", "declarativeNetRequestFeedback"],
 	"host_permissions": ["<all_urls>"],
+	"devtools_page": "DevTools.html",
 	"declarative_net_request": {
 		"rule_resources": [ {"id": "pdf", "enabled": true, "path": "PDF-download-rule.json"} ]
 	}

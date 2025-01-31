@@ -2,7 +2,7 @@
 async function getActiveTarget() {
 	return { tabId: (await chrome.tabs.query({ active: true, currentWindow: true }))[0].id };
 } // const tabID = await getActiveTarget();
-async function runOnPage(daFunc, args) {
+async function runOnPage(daFunc, args = []) {
 	const [{ result }] = await chrome.scripting.executeScript({
 		world: "MAIN",
 		target: await getActiveTarget(),
@@ -63,7 +63,7 @@ function setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows) {
 async function main(frycAPI0) {
 	// #region //* Wstęp
 	if ((await chrome.tabs.query({ active: true, currentWindow: true }))[0].url.startsWith("chrome://")) return;
-	frycAPI0 ??= await runOnPage(() => frycAPI, []);
+	frycAPI0 ??= await runOnPage(() => frycAPI);
 	const mainCont = document.getElementById("mainCont");
 	mainCont.textContent = "";
 	if (frycAPI0 === undefined) {
