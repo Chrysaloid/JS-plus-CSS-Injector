@@ -7136,6 +7136,8 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 // #region //* IFy  7
 else if (1 && frycAPI_host("www.messenger.com")) {
 	const messageContainer = ".x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x193iq5w.xeuugli.xs83m0k.xjhlixk.xgyuaek";
+	const messageBody = ".html-div.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1gslohp.x11i5rnm.x12nagc.x1mh8g0r.x1yc453h.x126k92a.x18lvrbx";
+	const myMessageBody = ".html-div.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1gslohp.x11i5rnm.x12nagc.x1mh8g0r.x1yc453h.x126k92a.xyk4ms5";
 	const messageList = ".x78zum5.xdt5ytf.x1iyjqo2.x2lah0s.xl56j7k.x121v3j4";
 	const buttonContainer = ".html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x6s0dn4.xl5lk40.x78zum5.x1mqs8db";
 	const reactCSS = `[aria-label="Zareaguj"]`;
@@ -7324,6 +7326,10 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 
 		${pollUpdateMessage} {
 			display: none;
+		}
+
+		${messageBody}::first-letter { /* ${myMessageBody} */
+			text-transform: uppercase;
 		}
 	`);
 
@@ -10108,7 +10114,13 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 } else if (frycAPI_host("web.dev", "developers.google.com", "developer.chrome.com")) {
 	frycAPI.UUID = "2025-01-05 23:13";
 	frycAPI.injectStyleOnLoad(/*css*/`
-		*:not(devsite-code, devsite-code *, code, code *, .material-icons, a.devsite-nav-toggle) {
+		*:not(
+			devsite-code, devsite-code *,
+			code, code *, .material-icons,
+			.material-symbols-outlined, .material-symbols,
+			input,
+			a.devsite-nav-toggle
+		), input[type="text"] {
 			font-family: "IBM Plex Sans Condensed";
 		}
 		devsite-content-footer.nocontent > p:last-of-type {
