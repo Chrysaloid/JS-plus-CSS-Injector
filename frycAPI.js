@@ -10390,6 +10390,37 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 
 	// frycAPI.onLoadSetter(function () {
 	// });
+} else if (frycAPI_host("png2pdf.netlify.app", "pdf2png.netlify.app")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		body {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 10px;
+			margin: 0 auto;
+			max-width: 960px;
+		}
+		input[type="file"] {
+			height: 50px;
+		}
+		input[type="file"]::-webkit-file-upload-button {
+			height: 50px;
+		}
+		button {
+			height: 50px;
+		}
+	`);
+
+	if (frycAPI_host("png2pdf.netlify.app")) {
+		frycAPI.changeFaviconRes("IMG to PDF cropped.png");
+		document.title = "IMG to PDF";
+	} else {
+		frycAPI.changeFaviconRes("PDF to IMG cropped.png");
+		document.title = "PDF to IMG";
+	}
 }
 // Code-Lens-Action insert-snippet IF template
 
