@@ -3930,6 +3930,7 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 				border: 1px solid white;
 				border-radius: 12px;
 				z-index: 10;
+				pointer-events: none;
 			}
 		}
 	`);
