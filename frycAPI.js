@@ -3916,6 +3916,22 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 			filter: brightness(0.5) contrast(14.2) brightness(2);
 		}
 		*/
+
+		.docos-docoview-active > .docos-anchoreddocoview-internal {
+			/* border: 1px solid white !important; */
+			/* Setting border on this element resizes it so it is bad so we have to use heleper before element */
+			position: relative;
+			&::before {
+				content: "";
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				box-sizing: border-box;
+				border: 1px solid white;
+				border-radius: 12px;
+				z-index: 10;
+			}
+		}
 	`);
 
 	// (frycAPI.beforeLoad = function () {
