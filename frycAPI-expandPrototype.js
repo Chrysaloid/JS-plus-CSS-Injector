@@ -274,6 +274,10 @@ frycAPI_expandPrototype(Number, "frycAPI_lt", function (num) {
 frycAPI_expandPrototype(Number, "frycAPI_le", function (num) {
 	return this <= num;
 });
+frycAPI_expandPrototype(NodeList, "map", Array.prototype.map);
+frycAPI_expandPrototype(HTMLCollection, "map", Array.prototype.map);
+frycAPI_expandPrototype(NodeList, "forEach", Array.prototype.forEach);
+frycAPI_expandPrototype(HTMLCollection, "forEach", Array.prototype.forEach);
 // frycAPI_expandPrototype(Template, "frycAPI_name", function () {
 // });
 

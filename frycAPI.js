@@ -489,6 +489,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 		document.body.removeChild(textArea);
 	},
+	copyTxt(txt) {
+		navigator.clipboard.writeText(txt);
+	},
 	zaokrl(val, decimals) {
 		return Number(Math.round(Number(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
 	},
@@ -580,12 +583,10 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	onLoadSetter(callBack, when = 1) { // 0 = document DOMContentLoaded, 1 = window DOMContentLoaded, 2 = window load
 		if (frycAPI.onLoadArr[when].push(callBack) === 1) { // new length === 1 | This means that the first element was just added
 			/* eslint-disable */
-			if        (when === 0) {
-				document.addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
-			} else if (when === 1) {
-				window  .addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
-			} else if (when === 2) {
-				window  .addEventListener("load",             () => frycAPI.onLoadArr[when].frycAPI_run());
+			switch (when) {
+				case 0: return document.addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
+				case 1: return window  .addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
+				case 2: return window  .addEventListener("load",             () => frycAPI.onLoadArr[when].frycAPI_run());
 			}
 			/* eslint-enable */
 		}
@@ -1559,6 +1560,13 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		`;
 		frycAPI.downloadTxt(frycAPI.minifyCodeSimple(code), "VSC_Go_To_Line.ahk");
 	}, // frycAPI.VSC_Go_To_Line();
+	retryIf(condition, interval, action) { // function, time [ms], function | Should be read as "Retry if condition fails"
+		if (condition()) {
+			action();
+		} else { // retry after a delay
+			frycAPI.sleep(interval).then(frycAPI.retryIf.bind(null, condition, interval, action));
+		}
+	}, // frycAPI.retryIf(() => a > b, 50, () => {});
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -1600,6 +1608,7 @@ if (1) { //* Globalne funkcje
 		new MutationObserver((mutRec, docObs) => {
 			if (frycAPI.colorSchemeDark) {
 				docObs.disconnect();
+				document.getElementById("frycAPI-color-scheme-only-light")?.remove?.();
 				return;
 			}
 			if (document.head) {
@@ -1608,6 +1617,7 @@ if (1) { //* Globalne funkcje
 						document.createElement("meta")
 						.frycAPI_setAttribute("name", "color-scheme")
 						.frycAPI_setAttribute("content", "only light")
+						.frycAPI_setAttribute("id", "frycAPI-color-scheme-only-light")
 					);
 				}
 				docObs.disconnect();
@@ -3934,6 +3944,16 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 			}
 		}
 	`);
+	if (frycAPI.path.startsWith("/spreadsheets")) {
+		frycAPI.injectStyleOnLoad(/*css*/`
+			#docs-editor [id*="grid-table-container"] > canvas {
+				filter: invert(0) hue-rotate(0) !important;
+			}
+			/* #docs-editor [id="0-grid-table-container"] {
+				filter: invert(0) hue-rotate(0) !important;
+			} */
+		`);
+	}
 
 	// (frycAPI.beforeLoad = function () {
 	// 	// frycAPI.colorSchemeDark = 1;
@@ -4269,6 +4289,10 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 			filter: invert(1) hue-rotate(180deg);
 		}
 		*/
+
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
+		}
 	`);
 } else if (1 && frycAPI_host("mat-fiz-samouczek.pw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -9527,6 +9551,14 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				opacity: 100%;
 			}
 		}
+
+		[class^="es--deliveryWrap"] {
+			display: flex;
+			flex-direction: column;
+			> span {
+				margin: 0 !important;
+			}
+		}
 	`);
 } else if (frycAPI_host("www.crazytime.pl")) { // Jeżeli strona często zmienia tytuł (aby zwrócić twoją uwagę bez powodu) zastosuj ten kod
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -10438,6 +10470,78 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		frycAPI.changeFaviconRes("PDF to IMG cropped.png");
 		document.title = "PDF to IMG";
 	}
+} else if (frycAPI_host("imagemagick.org", "www.imagemagick.org") && frycAPI.path.startsWith("/discourse-server")) {
+	frycAPI.colorSchemeDark = true;
+} else if (frycAPI_hostIncludes("wiki.gg")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		#wikigg-showcase-header {
+			display: none;
+		}
+		#wikigg-showcase-sidebar {
+			display: none;
+		}
+	`);
+	frycAPI.onLoadSetter(function () {
+		frycAPI.forEach(`h2 > span.mw-headline`, span => {
+			span.innerHTML = `<a href="${window.location.origin + window.location.pathname + "#" + span.id}">${span.innerText}</a>`;
+		});
+	});
+	if (frycAPI_host("helldivers.wiki.gg")) {
+		frycAPI.injectStyleOnLoad(/*css*/`
+			.myButton {
+				display: flex;
+				gap: 5px;
+				/* width: 110px; */
+				font-size: smaller;
+				.copyButton {
+					cursor: pointer;
+				}
+				.copyButton:hover {
+					color: var(--wiki-accent-color);
+				}
+			}
+		`);
+		frycAPI.onLoadSetter(function () {
+			if (frycAPI.path === "/wiki/Stratagems") { // https://helldivers.wiki.gg/wiki/Stratagems
+				const mybuttTemp = frycAPI.elemFromHTML(`<td><div class="myButton"></div></td>`);
+				const buttTemp = frycAPI.elemFromHTML(`<div class="copyButton"></div>`);
+				const arrowToWASD = {
+					"Up Arrow.png": "w",
+					"Left Arrow.png": "a",
+					"Down Arrow.png": "s",
+					"Right Arrow.png": "d",
+				};
+				frycAPI.retryIf(() => frycAPI.querySelOk(`.wikitable thead > tr`), 50, () => {
+					frycAPI.forEach(`.wikitable`, table => {
+						table.querySelector(`thead > tr`).appendChild(table.querySelector(`th:last-child`).cloneNode(1))
+						.frycAPI_setAttribute("width", "30%")
+						.frycAPI_setInnerText("Copy");
+
+						table.frycAPI_elemByTag("tbody").rows.forEach(row => {
+							let firstChild = row.firstElementChild;
+							if (firstChild.tagName === "TH") firstChild = firstChild.nextElementSibling;
+							const secondChild = firstChild.nextElementSibling;
+							const thirdChild = secondChild.nextElementSibling;
+							const myButton = row.appendChild(mybuttTemp.cloneNode(1)).firstElementChild;
+							myButton.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Image URL")).addEventListener("click", () => {
+								frycAPI.copyTxt(firstChild.firstElementChild.firstElementChild.src.match(/.+?\.png/)[0].replace("/thumb", ""));
+							});
+							myButton.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("AHK code")).addEventListener("click", () => {
+								frycAPI.copyTxt(`helld2("${thirdChild.querySelectorAll("img").map(e => arrowToWASD[e.alt]).join("")}",0) ; ${secondChild.innerText}`);
+							});
+						});
+					});
+				});
+			}
+		}, 2);
+	}
+} else if (frycAPI_host("www.icoconverter.com")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
+		}
+	`);
+	frycAPI.changeFaviconRes("IMG to ICO rounded corners.png");
 }
 // Code-Lens-Action insert-snippet IF template
 
