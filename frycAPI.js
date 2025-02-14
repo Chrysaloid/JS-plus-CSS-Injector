@@ -1537,7 +1537,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		if (frycAPI.UUID === null) return;
 		return frycAPI.sendEventToBackground("getStorage", { UUID: frycAPI.UUID, keys: keys });
 	}, // const vals = await frycAPI.getStorages(["key"]);
-	searchParamsToObj(url) {
+	searchParamsToObj(url = window.location.href) {
 		if (url instanceof URL === false) {
 			url = new URL(url);
 		}
@@ -1546,7 +1546,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			obj[key] = value;
 		}
 		return obj;
-	}, // const objPars = frycAPI.searchParamsToObj("");
+	}, // const objPars = frycAPI.searchParamsToObj();
 	querySelList: Element.prototype.frycAPI_querySelList,
 	// const elem = frycAPI.querySelList([``]);
 	checkChromeVersion() {
@@ -7179,6 +7179,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const messageContainer = ".x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x193iq5w.xeuugli.xs83m0k.xjhlixk.xgyuaek";
 	const messageBody = ".html-div.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1gslohp.x11i5rnm.x12nagc.x1mh8g0r.x1yc453h.x126k92a.x18lvrbx";
 	const myMessageBody = ".html-div.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1gslohp.x11i5rnm.x12nagc.x1mh8g0r.x1yc453h.x126k92a.xyk4ms5";
+	const myMessageContainer = `[role="none"] > .html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x6ikm8r.x10wlt62 > .html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.x14ctfv`;
 	const messageList = ".x78zum5.xdt5ytf.x1iyjqo2.x2lah0s.xl56j7k.x121v3j4";
 	const buttonContainer = ".html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x6s0dn4.xl5lk40.x78zum5.x1mqs8db";
 	const reactCSS = `[aria-label="Zareaguj"]`;
@@ -7371,6 +7372,11 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 
 		${messageBody}::first-letter { /* ${myMessageBody} */
 			text-transform: uppercase;
+		}
+
+		${myMessageContainer} {
+			/* background-color: hsl(0, 0%, 5%); */
+			background-color: #616161;
 		}
 	`);
 
@@ -10488,7 +10494,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	});
 	if (frycAPI_host("helldivers.wiki.gg")) {
 		frycAPI.injectStyleOnLoad(/*css*/`
-			.myButton {
+			.myButtonWrapper {
 				display: flex;
 				gap: 5px;
 				/* width: 110px; */
@@ -10503,7 +10509,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		`);
 		frycAPI.onLoadSetter(function () {
 			if (frycAPI.path === "/wiki/Stratagems") { // https://helldivers.wiki.gg/wiki/Stratagems
-				const mybuttTemp = frycAPI.elemFromHTML(`<td><div class="myButton"></div></td>`);
+				const myButtWrapTemp = frycAPI.elemFromHTML(`<td><div class="myButtonWrapper"></div></td>`);
 				const buttTemp = frycAPI.elemFromHTML(`<div class="copyButton"></div>`);
 				const arrowToWASD = {
 					"Up Arrow.png": "w",
@@ -10522,12 +10528,15 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 							if (firstChild.tagName === "TH") firstChild = firstChild.nextElementSibling;
 							const secondChild = firstChild.nextElementSibling;
 							const thirdChild = secondChild.nextElementSibling;
-							const myButton = row.appendChild(mybuttTemp.cloneNode(1)).firstElementChild;
-							myButton.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Image URL")).addEventListener("click", () => {
+							const myButtWrap = row.appendChild(myButtWrapTemp.cloneNode(1)).firstElementChild;
+							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Image URL")).addEventListener("click", () => {
 								frycAPI.copyTxt(firstChild.firstElementChild.firstElementChild.src.match(/.+?\.png/)[0].replace("/thumb", ""));
 							});
-							myButton.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("AHK code")).addEventListener("click", () => {
+							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("AHK code")).addEventListener("click", () => {
 								frycAPI.copyTxt(`helld2("${thirdChild.querySelectorAll("img").map(e => arrowToWASD[e.alt]).join("")}",0) ; ${secondChild.innerText}`);
+							});
+							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Delete row")).addEventListener("click", () => {
+								row.remove();
 							});
 						});
 					});
@@ -10542,6 +10551,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}
 	`);
 	frycAPI.changeFaviconRes("IMG to ICO rounded corners.png");
+} else if (frycAPI_host("www.sumatrapdfreader.org")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		*:not(code, code *) {
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
