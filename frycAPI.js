@@ -5979,9 +5979,9 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		});
 
 		frycAPI.forEach("td > div > form > label:first-of-type + br", daElem => daElem.remove());
-		["info-box", "success-box", "notice-box"].forEach(daEl => {
-			document.querySelectorAll(daEl, function (daElem, daI, daArr) {
-				daElem.shadowRoot.querySelector("div").classList.add(daEl, "moj-box");
+		["info-box", "success-box", "notice-box"].forEach(box => {
+			document.querySelectorAll(box, daElem => {
+				daElem.shadowRoot.querySelector("div").classList.add(box, "moj-box");
 			});
 		});
 
@@ -7194,7 +7194,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const iconWidth = `.x1mqs8db`;
 	const toolTipSpan = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x1ji0vk5.x18bv5gf.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x1nxh6w3.x1fcty0u.xzsf02u.x4zkp8e.x676frb.xq9mrsl`;
 	const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy:has(${toolTipSpan} > div > div:nth-child(3))`;
-	const conversationTime = `span.html-span.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1hl2dhg.x16tdsg8.x1vvkbs`;
+	// const conversationTime = `span.html-span.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1hl2dhg.x16tdsg8.x1vvkbs`;
 	const personTyping = `.x9f619.x1n2onr6.x1ja2u2z.__fb-dark-mode`;
 	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
 	const specialLinkButton = `.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.x1sur9pj.xkrqix3.x1xlr1w8`;
@@ -7456,7 +7456,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 								}
 							}));
 						});
-						const text = document.querySelector(`[role="gridcell"] > [aria-current="page"] ${conversationTime}`)?.innerText;
+						const text = document.querySelector(`[aria-current="page"] abbr[aria-label] > span`)?.innerText;
 						if (text !== undefined) document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
 
 						// if (oldHref !== window.location.href) {
