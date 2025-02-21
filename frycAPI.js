@@ -6046,23 +6046,22 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 				const tab = document.querySelector(`.usos-ui > div > table.wrnav, table.grey > tbody.autostrong`);
 				if (tab !== null) {
 					const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row, :scope > tr`));
-					const lastElem = rows[0].parentElement.lastElementChild;
 					const możRej = row => { // możliwość rejestracji
 						/* eslint-disable */
-							if (row.hasOwnProperty("możRej")) return row.możRej;
-							if (row.frycAPI_querySelOk("img[src*='zarejestrowany.svg']")) return row.możRej = 0;
-							if (row.frycAPI_querySelOk("img[src*='wyrejestruj.svg']"   )) return row.możRej = 1;
-							if (row.frycAPI_querySelOk("img[src*='zarejestruj.svg']"   )) return row.możRej = 2;
-							if (row.frycAPI_querySelOk("img[src*='brak_uprawnien.svg']")) return row.możRej = 3;
-							if (row.frycAPI_querySelOk("img[src*='brak_miejsc.svg']"   )) return row.możRej = 4;
-							return row.możRej = 5;
-							/* eslint-enable */
+						if (row.hasOwnProperty("możRej")) return row.możRej;
+						if (row.frycAPI_querySelOk("img[src*='zarejestrowany.svg']")) return row.możRej = 0;
+						if (row.frycAPI_querySelOk("img[src*='wyrejestruj.svg']"   )) return row.możRej = 1;
+						if (row.frycAPI_querySelOk("img[src*='zarejestruj.svg']"   )) return row.możRej = 2;
+						if (row.frycAPI_querySelOk("img[src*='brak_uprawnien.svg']")) return row.możRej = 3;
+						if (row.frycAPI_querySelOk("img[src*='brak_miejsc.svg']"   )) return row.możRej = 4;
+						return row.możRej = 5;
+						/* eslint-enable */
 					};
 					const nazwJedn = row => { // nazwa jednostki
-						return row?.nazwJedn ?? (row.nazwJedn = row.querySelector(`td:nth-child(2)`)?.firstElementChild?.innerText ?? "");
+						return (row.nazwJedn ??= row.querySelector(`td:nth-child(2)`)?.firstElementChild?.innerText ?? "");
 					};
 					const nazwPrzed = row => { // nazwa przedmiotu
-						return row?.nazwPrzed ?? (row.nazwPrzed = row.querySelector(`td:nth-child(2)`)?.lastElementChild?.innerText ?? row.firstElementChild?.firstElementChild?.innerText ?? "");
+						return (row.nazwPrzed ??= row.querySelector(`td:nth-child(2)`)?.lastElementChild?.innerText ?? row.firstElementChild?.firstElementChild?.innerText ?? "");
 					};
 					const zapełnienie = row => { // zapełnienie grup
 						// const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);
@@ -6073,7 +6072,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 						// if (div === null) return 1;
 						// return -Number(div.style.width.replace("px", ""));
 
-						return row?.zapełnienie ?? (row.zapełnienie = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona + .screen-reader-only`)?.firstElementChild?.nextElementSibling?.innerText?.frycAPI_eval()?.frycAPI_minus() ?? 0);
+						return (row.zapełnienie ??= (row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona + .screen-reader-only`)?.firstElementChild?.nextElementSibling ?? row.querySelector(`.zapeł-div`))?.innerText?.frycAPI_eval?.()?.frycAPI_minus?.() ?? 0);
 					};
 					rows.frycAPI_sortValues(
 						możRej,
@@ -6081,8 +6080,9 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 						nazwJedn,
 						nazwPrzed,
 					);
+					const parent = rows[0].parentElement;
 					rows.forEach(row => {
-						lastElem.insertAdjacentElement("beforebegin", row);
+						parent.appendChild(row);
 					});
 					rows.forEach(row => {
 						const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);
@@ -9564,6 +9564,10 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			> span {
 				margin: 0 !important;
 			}
+		}
+		
+		body, html {
+			height: fit-content !important;
 		}
 	`);
 } else if (frycAPI_host("www.crazytime.pl")) { // Jeżeli strona często zmienia tytuł (aby zwrócić twoją uwagę bez powodu) zastosuj ten kod

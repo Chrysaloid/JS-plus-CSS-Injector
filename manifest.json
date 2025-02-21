@@ -16,7 +16,7 @@
 		{ "matches": ["<all_urls>"], "resources": ["frycAPI.js", "resources/*"] }
 	],
 	"externally_connectable": { "matches": ["<all_urls>"] },
-	"permissions": ["nativeMessaging", "scripting", "activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage", "declarativeNetRequest", "declarativeNetRequestFeedback"],
+	"permissions": ["nativeMessaging", "scripting", "activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage", "declarativeNetRequest", "declarativeNetRequestFeedback", "windows"],
 	"host_permissions": ["<all_urls>"],
 	"devtools_page": "DevTools.html",
 	"declarative_net_request": {
