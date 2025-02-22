@@ -6047,15 +6047,14 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 				if (tab !== null) {
 					const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row, :scope > tr`));
 					const możRej = row => { // możliwość rejestracji
-						/* eslint-disable */
-						if (row.hasOwnProperty("możRej")) return row.możRej;
-						if (row.frycAPI_querySelOk("img[src*='zarejestrowany.svg']")) return row.możRej = 0;
-						if (row.frycAPI_querySelOk("img[src*='wyrejestruj.svg']"   )) return row.możRej = 1;
-						if (row.frycAPI_querySelOk("img[src*='zarejestruj.svg']"   )) return row.możRej = 2;
-						if (row.frycAPI_querySelOk("img[src*='brak_uprawnien.svg']")) return row.możRej = 3;
-						if (row.frycAPI_querySelOk("img[src*='brak_miejsc.svg']"   )) return row.możRej = 4;
-						return row.możRej = 5;
-						/* eslint-enable */
+						return (row.możRej ??= [ // assigning value to custom property so the next call will be faster
+							"img[src*='zarejestrowany.svg']",
+							"img[src*='wyrejestruj.svg']",
+							"img[src*='zarejestruj.svg']",
+							"img[src*='brak_miejsc.svg']",
+							"img[src*='brak_uprawnien.svg']",
+							"*", // if this (any elem selector) was not present findIndex would return -1 if the registration button had some other image not present in the list
+						].findIndex(el => row.frycAPI_querySelOk(el)));
 					};
 					const nazwJedn = row => { // nazwa jednostki
 						return (row.nazwJedn ??= row.querySelector(`td:nth-child(2)`)?.firstElementChild?.innerText ?? "");
