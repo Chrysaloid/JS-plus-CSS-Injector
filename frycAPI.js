@@ -1567,6 +1567,17 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			frycAPI.sleep(interval).then(frycAPI.retryIf.bind(null, condition, interval, action));
 		}
 	}, // frycAPI.retryIf(() => a > b, 50, () => {});
+	mockMarkup(inStr) {
+		let outStr = "";
+		for (let i = 0; i < inStr.length; i++) {
+			if (i % 2 === 0) {
+				outStr += inStr[i].toLowerCase();
+			} else {
+				outStr += inStr[i].toUpperCase();
+			}
+		}
+		loguj(outStr);
+	}, // frycAPI.mockMarkup("Test");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -6094,7 +6105,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		// #endregion
 
 		const t2 = performance.now(); frycAPI.perf(t1, t2, "USOS: ");
-	});
+	}, 2);
 } else if (1 && frycAPI_host("viewer.shapez.io")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		canvas#result {
