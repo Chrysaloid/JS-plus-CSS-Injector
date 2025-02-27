@@ -7391,6 +7391,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	`);
 
 	frycAPI.onLoadSetter(function () {
+		frycAPI.changeFaviconRes("Messenger icon new 256.png");
 		// #region //* Zmiana tytułu
 		frycAPI.createMutObs((mutRecArr, mutObs) => {
 			if (document.title !== "Messenger") {
@@ -10571,6 +10572,19 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 	`);
+} else if (frycAPI_host("www.crocs.pl")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.single-desktop-image {
+			background-color: #cdcdcd !important;
+		}
+		.banner-show-container {
+			display: none;
+		}
+	`);
+
+	(frycAPI.beforeLoad = function () {
+		frycAPI.colorSchemeDark = 1;
+	})();
 }
 // Code-Lens-Action insert-snippet IF template
 
