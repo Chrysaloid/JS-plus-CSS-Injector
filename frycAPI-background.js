@@ -53,7 +53,7 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 					});
 					return;
 				};
-				case "downloadURL": return void chrome.downloads.download({ url: data });
+				case "downloadURL": return void chrome.downloads.download({ url: data.url, filename: data.filename });
 				case "injectStyle": return chrome.scripting.insertCSS(defineStyle(data, sender));
 				case "defineStyle": return void defineStyle(data, sender);
 				case "injectStyleAgain": return chrome.scripting.insertCSS(injectedStyles[data.id]);

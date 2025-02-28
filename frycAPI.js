@@ -404,6 +404,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	path: window.location.pathname,
 	onLoadArr: [[], [], []],
 	UUID: null,
+	mimeTypes: null,
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -696,7 +697,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // const str = frycAPI.printDate(new Date());
 	printDateForFileName(date, dateFormatter) { // przyjmuje obiekt typu Date
 		return frycAPI.printDateIntl(date, dateFormatter ?? frycAPI.dateFormatterForFileName).replaceAll(":", "꞉");
-	}, // const fileName = frycAPI.printDateForFileName(new Date());
+	}, // const filename = frycAPI.printDateForFileName(new Date());
 	roughSizeOfObject(object) {
 		// https://stackoverflow.com/a/11900218/12035658
 		const objectList = [];
@@ -732,12 +733,12 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 
 		return bytes;
 	},
-	downloadHelper(href, fileName) {
+	downloadHelper(href, filename) {
 		/* Old
 		const a = document.createElement("a");
 		a.href = href;
 		a.target = "_blank";
-		a.download = fileName;
+		a.download = filename;
 		a.style.display = "none";
 		document.body.append(a);
 		a.click();
@@ -745,15 +746,32 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		*/
 		const a = document.createElement("a");
 		a.href = href;
-		a.download = fileName;
+		a.download = filename;
 		a.click();
 	},
-	downloadTxt(text, fileName) {
+	downloadTxt(text, filename) {
 		// a.href = 'data:attachment/text;charset=utf-8,' + encodeURI(text);
-		frycAPI.downloadHelper(URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" })), fileName);
+		frycAPI.downloadHelper(URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" })), filename);
 	}, // frycAPI.downloadTxt("Test", "Test.txt");
-	redownloadImg(img, fileName) {
-		frycAPI.downloadHelper(img.src, fileName);
+	async getMimeType(filename) {
+		const pos = filename.lastIndexOf(".");
+		if (pos === -1) return "text/plain"; // dot not found
+		const fileExt = filename.slice(pos + 1).toLowerCase(); // extract after dot
+		if (frycAPI.mimeTypes === null) {
+			frycAPI.mimeTypes = {};
+			const mime = await frycAPI.getResData("mime_types.txt");
+			for (const line of mime.split("\n")) {
+				const [ext, mimeType] = line.split(" ");
+				frycAPI.mimeTypes[ext] = mimeType;
+			}
+		}
+		return frycAPI.mimeTypes[fileExt] ?? "text/plain";
+	}, // const mimeType = frycAPI.getMimeType("Test.txt");
+	async downloadTxtBackground(text, filename) {
+		return frycAPI.sendEventToBackground("downloadURL", { url: URL.createObjectURL(new Blob(["\ufeff" + text], { type: `${await frycAPI.getMimeType(filename)};charset=utf-8` })), filename: filename });
+	}, // frycAPI.downloadTxtBackground("Test", "Test.txt");
+	redownloadImg(img, filename) {
+		frycAPI.downloadHelper(img.src, filename);
 	},
 	determineFileName(FR_Result, img, alt) {
 		const nazwa = (() => {
@@ -790,12 +808,12 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 
 		return nazwa + ext;
 	},
-	downloadImgOld(img, fileName, alt) {
+	downloadImgOld(img, filename, alt) {
 		const httpRequest = new XMLHttpRequest();
 		httpRequest.onload = function () {
 			const fileReader = new FileReader();
 			fileReader.onloadend = function () {
-				frycAPI.downloadHelper(fileReader.result, fileName === undefined ? frycAPI.determineFileName(fileReader.result, img, alt) : fileName);
+				frycAPI.downloadHelper(fileReader.result, filename === undefined ? frycAPI.determineFileName(fileReader.result, img, alt) : filename);
 			};
 			fileReader.readAsDataURL(httpRequest.response);
 		};
@@ -804,7 +822,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		httpRequest.setRequestHeader("Access-Control-Allow-Origin", "*");
 		httpRequest.send();
 	},
-	downloadImg(img, fileName, alt, urlParamBool) {
+	downloadImg(img, filename, alt, urlParamBool) {
 		/*
 		fetch(img.src, { // "https://cors-anywhere.herokuapp.com/"
 			cache: "only-if-cached",
@@ -823,7 +841,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return fetch(imgSrc)
 		.then(resp => resp.blob())
 		.then(frycAPI.blobToBase64)
-		.then(dataUrl => frycAPI.downloadHelper(dataUrl, fileName === undefined ? frycAPI.determineFileName(dataUrl, img, alt) : fileName))
+		.then(dataUrl => frycAPI.downloadHelper(dataUrl, filename === undefined ? frycAPI.determineFileName(dataUrl, img, alt) : filename))
 		.catch(err => { // eslint-disable-line handle-callback-err
 			// console.warn(err);
 			const url = new URL(imgSrc);
@@ -831,7 +849,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			frycAPI.downloadHelper(url.href, "");
 		});
 	},
-	downloadImgRaw(img, fileName) {
+	downloadImgRaw(img, filename) {
 		const canvas = document.createElement("canvas");
 		canvas.height = img.naturalHeight;
 		canvas.width = img.naturalWidth;
@@ -840,7 +858,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		// img.setAttribute("origin", "anonymous");
 		canvas.getContext("2d").drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
 
-		frycAPI.downloadHelper(canvas.toDataURL(), fileName);
+		frycAPI.downloadHelper(canvas.toDataURL(), filename);
 	},
 	// #endregion
 	// #region //* Funkcje 3
@@ -862,19 +880,19 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		document.querySelectorAll(`link[rel~="icon"]`).forEach(daElem => daElem.remove());
 		document.head.frycAPI_appendHTML(`<link rel="icon" href="${href}">`);
 	}, // frycAPI.changeFavicon("href");
-	changeFaviconRes(fileName) {
-		frycAPI.changeFavicon(frycAPI.getResURL(fileName));
-	}, // frycAPI.changeFaviconRes("fileName");
-	getResURL(fileName) {
-		return `chrome-extension://${frycAPI.id}/resources/` + fileName;
+	changeFaviconRes(filename) {
+		frycAPI.changeFavicon(frycAPI.getResURL(filename));
+	}, // frycAPI.changeFaviconRes("filename");
+	getResURL(filename) {
+		return `chrome-extension://${frycAPI.id}/resources/` + filename;
 	}, // frycAPI.getResURL("")
-	readFile(fileName, fileType, redirect = false) {
-		return fetch(redirect ? `/redirect?url=${encodeURIComponent(fileName)}` : fileName).then(resp => {
+	readFile(filename, fileType, redirect = false) {
+		return fetch(redirect ? `/redirect?url=${encodeURIComponent(filename)}` : filename).then(resp => {
 			if (resp.ok) {
 				switch (
 					fileType ?? (() => {
-						try { return new URL(fileName).pathname } // eslint-disable-line brace-style
-						catch (err) { return fileName }
+						try { return new URL(filename).pathname } // eslint-disable-line brace-style
+						catch (err) { return filename }
 					})().split(".").pop().toLowerCase()
 				) {
 					case "json":
@@ -895,9 +913,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				resp.text().then(txt => { throw new Error(txt) });
 			}
 		}); // .catch(err => console.error(err));
-	}, // await frycAPI.readFile("url_or_fileName");
-	getResData(fileName, fileType) {
-		return frycAPI.readFile(frycAPI.getResURL(fileName), fileType);
+	}, // await frycAPI.readFile("url_or_filename");
+	getResData(filename, fileType) {
+		return frycAPI.readFile(frycAPI.getResURL(filename), fileType);
 	}, // await frycAPI.getResData("")
 	parseXML(str) {
 		const dom = new DOMParser().parseFromString(str, "text/xml");
@@ -1504,11 +1522,11 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	xmlObjToJsStrNode(xmlObj) {
 		return JSON.stringify(frycAPI.xmlObjToJsObjNode(xmlObj));
 	}, // frycAPI.xmlObjToJsStrNode(xmlObj);
-	insertImage(elem, fileName, where = "beforeend") {
-		return elem.frycAPI_insertHTML(where, `<img src="${frycAPI.getResURL(fileName)}">`);
+	insertImage(elem, filename, where = "beforeend") {
+		return elem.frycAPI_insertHTML(where, `<img src="${frycAPI.getResURL(filename)}">`);
 	}, // const img = frycAPI.insertImage(elem, "img.png");
-	insertLoadingGif(elem, where = "beforeend", fileName = "loading.gif") {
-		return elem.frycAPI_insertHTML(where, `<img class="loading-gif" src="${frycAPI.getResURL(fileName)}">`);
+	insertLoadingGif(elem, where = "beforeend", filename = "loading.gif") {
+		return elem.frycAPI_insertHTML(where, `<img class="loading-gif" src="${frycAPI.getResURL(filename)}">`);
 	}, // const img = frycAPI.insertLoadingGif(elem); // .loading-gif
 	elem(elemType = "div", elemFactory = true) {
 		if (!frycAPI.isString(elemType)) {
@@ -7209,6 +7227,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
 	const specialLinkButton = `.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.x1sur9pj.xkrqix3.x1xlr1w8`;
 	const pollUpdateMessage = `${messageList} > :has(${specialLinkButton}):not(:has([aria-label="Głosuj"],[aria-label="Zmień głos"]))`;
+	const personPhoto = ``;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/

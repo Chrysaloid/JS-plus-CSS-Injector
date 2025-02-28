@@ -66,6 +66,20 @@ frycAPI_expandPrototype(String, "frycAPI_includesAny", function (strList) {
 	}
 	return false;
 });
+const frycAPI_Object_condition = !frycAPI_host("www.youtube.com", "www.desmos.com");
+frycAPI_expandPrototype(Object, "frycAPI_log", function () {
+	console.log(this);
+	return this;
+}, true, true, frycAPI_Object_condition);
+frycAPI_expandPrototype(Object, "frycAPI_if", function (condition) {
+	return condition ? this : null;
+}, false, true, frycAPI_Object_condition);
+frycAPI_expandPrototype(Object, "frycAPI_toJSON", function () {
+	return JSON.stringify(this);
+}, false, true, frycAPI_Object_condition);
+frycAPI_expandPrototype(String, "JSON", function () {
+	return JSON.parse(this);
+}, true);
 frycAPI_expandPrototype(Array, "frycAPI_shuffle", function () {
 	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	let currentIndex = this.length, randomIndex;
@@ -175,13 +189,6 @@ frycAPI_expandPrototype(Element, "frycAPI_appendHTML", function (htmlString) { /
 frycAPI_expandPrototype(Element, "frycAPI_insertHTML", function (position, htmlString) { // tylko jeżeli root zawiera pojedynczy element
 	return this.insertAdjacentElement(position, frycAPI.elemFromHTML(htmlString));
 });
-frycAPI_expandPrototype(Object, "frycAPI_log", function () {
-	console.log(this);
-	return this;
-}, true, true, !frycAPI_host("www.youtube.com", "www.desmos.com"));
-frycAPI_expandPrototype(Object, "frycAPI_if", function (condition) {
-	return condition ? this : null;
-}, false, true, !frycAPI_host("www.youtube.com", "www.desmos.com"));
 frycAPI_expandPrototype(DOMTokenList, "notContains", function (daClass) {
 	return !this.contains(daClass);
 });
@@ -274,10 +281,49 @@ frycAPI_expandPrototype(Number, "frycAPI_lt", function (num) {
 frycAPI_expandPrototype(Number, "frycAPI_le", function (num) {
 	return this <= num;
 });
-frycAPI_expandPrototype(NodeList, "map", Array.prototype.map);
-frycAPI_expandPrototype(HTMLCollection, "map", Array.prototype.map);
-frycAPI_expandPrototype(NodeList, "forEach", Array.prototype.forEach);
+
+[
+	"at",
+	"every",
+	"filter",
+	"find",
+	"findIndex",
+	"findLast",
+	"findLastIndex",
+	// "forEach",
+	"map",
+	"reduce",
+	"reduceRight",
+	"slice",
+	"some",
+	"toReversed",
+	"toSorted",
+	"toSpliced",
+	"with",
+].forEach(str => {
+	frycAPI_expandPrototype(NodeList, str, Array.prototype[str]);
+	frycAPI_expandPrototype(HTMLCollection, str, Array.prototype[str]);
+});
 frycAPI_expandPrototype(HTMLCollection, "forEach", Array.prototype.forEach);
+
+/* This might not be usefull
+[
+	"pop",
+	"push",
+	"reverse",
+	"shift",
+	"sort",
+	"splice",
+	"unshift",
+].forEach(str => {
+	const fun = function (...params) {
+		return Array.prototype[str].call(Array.from(this), params);
+	};
+	frycAPI_expandPrototype(NodeList, str, fun);
+	frycAPI_expandPrototype(HTMLCollection, str, fun);
+});
+*/
+
 // frycAPI_expandPrototype(Template, "frycAPI_name", function () {
 // });
 
