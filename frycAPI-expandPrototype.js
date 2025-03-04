@@ -244,6 +244,28 @@ frycAPI_expandPrototype(Element, "frycAPI_elemByTag", function (tag) {
 frycAPI_expandPrototype(Element, "frycAPI_hasScroll", function () {
 	return this.scrollHeight > this.clientHeight;
 }, true);
+frycAPI_expandPrototype(Element, "prevEl", function () {
+	return this.previousElementSibling;
+}, true);
+frycAPI_expandPrototype(Element, "nextEl", function () {
+	return this.nextElementSibling;
+}, true);
+frycAPI_expandPrototype(Element, "parent", function () {
+	return this.parentElement;
+}, true);
+frycAPI_expandPrototype(Element, "firstEl", function () {
+	return this.firstElementChild;
+}, true);
+frycAPI_expandPrototype(Element, "lastEl", function () {
+	return this.lastElementChild;
+}, true);
+frycAPI_expandPrototype(Element, "nthParent", function (n = 1) {
+	let temp = this.parentElement;
+	for (let i = 2; i <= n && temp?.parentElement; i++) {
+		temp = temp.parentElement;
+	}
+	return temp;
+});
 frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (listenerType, callBack) {
 	this.addEventListener(listenerType, callBack);
 	return callBack;

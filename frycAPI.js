@@ -442,13 +442,12 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.injectStyleNormal(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true });
 	minifyCSS(style) {
 		return frycAPI.removeCommentsSimple(frycAPI.minifyCodeSimple(style));
-		// return style
 	},
 	minifyCodeSimple(code) {
 		return code.replaceAll(/^\s+|[\t\f ]+$/gmu, ""); // /(^\s+|$\s+)/gm
 	}, // frycAPI.minifyCodeSimple(code);
 	removeCommentsSimple(code) {
-		return code.replaceAll(/\/\*.*?\*\//gmu, "");
+		return code.replaceAll(/\n?\/\*.*?\*\//gs, "");
 	}, // frycAPI.removeCommentsSimple(code);
 	createManualFunctions(name, obj) {
 		const fGroup = new frycAPI_FuncGroup(name, obj);
@@ -1872,6 +1871,13 @@ if (1) { //* Globalne funkcje
 							});
 						}
 					});
+				};
+				return f;
+			},
+			(name = "Copy decoded URL", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callBack = function (obj) {
+					frycAPI.copyTxt(decodeURI(window.location.href));
 				};
 				return f;
 			},
@@ -7227,7 +7233,16 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
 	const specialLinkButton = `.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.x1sur9pj.xkrqix3.x1xlr1w8`;
 	const pollUpdateMessage = `${messageList} > :has(${specialLinkButton}):not(:has([aria-label="Głosuj"],[aria-label="Zmień głos"]))`;
-	const personPhoto = ``;
+	const topBar = `.xfpmyvw.x1u998qt.x1vjfegm`;
+	// const privateConv = `[aria-label^="Konwersacja z:"]:not([aria-label*=" i "])`; // first version
+	const privateConv = `${topBar} a[href^="https://www.facebook.com"], [aria-label="Wybrane wartości"]:not(:has(>:nth-child(2)))`; // private is opposite to group
+	const personPhoto = `[aria-hidden="true"] > span > img`;
+	const convInfo = `[aria-label="Informacje o konwersacji"]`;
+	const chatParticipants = `[aria-label="Uczestnicy czatu"]`;
+	const chatParticipantsElems = `div:has(> div > div > ${chatParticipants}) > div > [aria-labelledby] > [class]`;
+	const personSettings = `[aria-label^="Ustawienia członka dla"]`;
+	const messageItem = `[role="menu"] [aria-hidden="false"] div[role="menuitem"][aria-labelledby]`;
+	const profileItem = `[role="menu"] [aria-hidden="false"] a[role="menuitem"][aria-labelledby]`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -7300,7 +7315,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		.przerobiony {
 			width: fit-content;
 
-			& > :is(.edit, .delete, .share, .react, .reply) {
+			& > .myButt {
 				width: var(--s1);
 				height: var(--s1);
 				border-radius: 50%;
@@ -7319,35 +7334,35 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			}
 			& > .react {
 				order: 1;
-				div {
-					background-image: url("${frycAPI.getResURL("add_reaction.png")}");
-				}
+				div { background-image: url("${frycAPI.getResURL("add_reaction.png")}"); }
 			}
 			& > .reply {
 				order: 2;
-				div {
-					background-image: url("${frycAPI.getResURL("reply.png")}");
-				}
+				div { background-image: url("${frycAPI.getResURL("reply.png")}"); }
 			}
 			& > .edit {
 				display: none;
 				order: 3;
-				div {
-					background-image: url("${frycAPI.getResURL("edit.png")}");
-				}
+				div { background-image: url("${frycAPI.getResURL("edit.png")}"); }
 			}
 			& > .delete {
 				display: none;
 				order: 4;
-				div {
-					background-image: url("${frycAPI.getResURL("delete.png")}");
-				}
+				div { background-image: url("${frycAPI.getResURL("delete.png")}"); }
 			}
 			& > .share {
 				order: 5;
-				div {
-					background-image: url("${frycAPI.getResURL("share.png")}");
-				}
+				div { background-image: url("${frycAPI.getResURL("share.png")}"); }
+			}
+			& > .message {
+				/* display: none; */
+				order: 6;
+				div { background-image: url("${frycAPI.getResURL("message.png")}"); }
+			}
+			& > .profile {
+				/* display: none; */
+				order: 7;
+				div { background-image: url("${frycAPI.getResURL("profile.png")}"); }
 			}
 			& > :is(:has(${reactCSS}), :has(${replyCSS}), :has(${moreCSS}), :has(${shareCSS})) {
 				width: 0;
@@ -7357,7 +7372,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		/* body:not([devicepixelratio="1"]) .przerobiony > .delete div {
 			background-image: url("${frycAPI.getResURL("delete.png")}");
 		} */
-		${messageList} > div:not(:hover) .przerobiony > :is(.edit, .delete, .share, .react, .reply) {
+		${messageList} > div:not(:hover) .przerobiony > .myButt {
 			display: none !important;
 		}
 		${mojaWiadomość} .przerobiony > .delete {
@@ -7370,10 +7385,13 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			display: block;
 		} */
 		${iconWidth} {
-			width: calc(3 * var(--s1));
+			width: calc(5 * var(--s1));
 		}
 		${mojaWiadomość} ${iconWidth} {
 			width: calc(4 * var(--s1));
+		}
+		body:has(${privateConv}) ${iconWidth} {
+			width: calc(3 * var(--s1));
 		}
 		body[editOK="true"] ${messageList} > div:not(.noEdit, :has(~ .noEdit)) ${mojaWiadomość} ${iconWidth} {
 			width: calc(5 * var(--s1));
@@ -7419,11 +7437,38 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		}, { elem: document.querySelector("title"), options: { characterData: true } });
 		// #endregion
 		// #region //* Edycja opcji przy wiadomości
-		const edit = frycAPI.elemFromHTML(`<div class="edit"><div></div></div>`);
-		const del = frycAPI.elemFromHTML(`<div class="delete"><div></div></div>`);
-		const share = frycAPI.elemFromHTML(`<div class="share"><div></div></div>`);
-		const react = frycAPI.elemFromHTML(`<div class="react"><div></div></div>`);
-		const reply = frycAPI.elemFromHTML(`<div class="reply"><div></div></div>`);
+		const edit = frycAPI.elemFromHTML(`<div class="myButt edit"><div></div></div>`);
+		const del = frycAPI.elemFromHTML(`<div class="myButt delete"><div></div></div>`);
+		const share = frycAPI.elemFromHTML(`<div class="myButt share"><div></div></div>`);
+		const react = frycAPI.elemFromHTML(`<div class="myButt react"><div></div></div>`);
+		const reply = frycAPI.elemFromHTML(`<div class="myButt reply"><div></div></div>`);
+		const message = frycAPI.elemFromHTML(`<div class="myButt message"><div></div></div>`);
+		const profile = frycAPI.elemFromHTML(`<div class="myButt profile"><div></div></div>`);
+
+		function clickThroughSidebar(container, action) {
+			const fullName = container.nthParent(5).querySelector(personPhoto).alt;
+			frycAPI.createMutObs(() => {
+				const participants = document.querySelector(chatParticipants);
+				if (participants === null) {
+					document.querySelector(convInfo).click();
+				} else if (participants.getAttribute("aria-expanded") === "false") {
+					participants.click();
+				} else {
+					document.querySelectorAll(chatParticipantsElems)
+					.find(el => el.querySelector(`svg[aria-label]`).getAttribute("aria-label") === fullName)
+					.querySelector(personSettings)
+					.click();
+					frycAPI.createMutObs(() => {
+						const item = document.querySelector(action === "message" ? messageItem : profileItem);
+						if (item !== null) {
+							item.click();
+							return true; // disconnect mutObs
+						}
+					});
+					return true; // disconnect mutObs
+				}
+			});
+		}
 
 		// window.frycAPI_addEventListenerFun("resize", () => {
 		// 	document.body.setAttribute("devicePixelRatio", window.devicePixelRatio);
@@ -7434,7 +7479,6 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			if (frycAPI.querySelOk(messageContainer)) {
 				frycAPI.sleep(1000).then(() => {
 					frycAPI.createMutObs(() => {
-						// loguj("MutObs");
 						frycAPI.forEach(`${buttonContainer} > ${buttonContainer}:not(.przerobiony)`, container => {
 							// loguj("buttonContainer");
 							container.frycAPI_addClass("przerobiony");
@@ -7452,11 +7496,6 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 											elem = elem.parentElement;
 										}
 										elem.frycAPI_addClass("noEdit");
-										// let prev = elem.previousElementSibling;
-										// while (prev !== null && prev.frycAPI_hasNotClass("noEdit")) {
-										// 	prev.frycAPI_addClass("noEdit");
-										// 	prev = prev.previousElementSibling;
-										// }
 									}
 								});
 							}));
@@ -7485,6 +7524,14 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 									frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS)?.click());
 								}
 							}));
+							if (frycAPI.querySelNull(privateConv) && !container.matches(mojaWiadomość)) { // current conversation is a group and we are in other person's message
+								container.append(message.cloneNode(1).frycAPI_addEventListener("click", function () {
+									clickThroughSidebar(container, "message");
+								}));
+								container.append(profile.cloneNode(1).frycAPI_addEventListener("click", function () {
+									clickThroughSidebar(container, "profile");
+								}));
+							}
 						});
 						const text = document.querySelector(`[aria-current="page"] abbr[aria-label] > span`)?.innerText;
 						if (text !== undefined) document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
