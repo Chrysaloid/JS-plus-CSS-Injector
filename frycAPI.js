@@ -7445,26 +7445,47 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		const message = frycAPI.elemFromHTML(`<div class="myButt message"><div></div></div>`);
 		const profile = frycAPI.elemFromHTML(`<div class="myButt profile"><div></div></div>`);
 
-		function clickThroughSidebar(container, action) {
-			const fullName = container.nthParent(5).querySelector(personPhoto).alt;
+		function clickThroughSidebar(container, action, messageButt, profileButt) {
+			let fullName = container.nthParent(5).querySelector(personPhoto)?.alt;
+			if (!fullName) {
+				// debugger;
+				let messageEl = container.parent;
+				while (messageEl.parent.notMatches(messageList)) { // go up until messageEl is a topmost message container
+					messageEl = messageEl.parent;
+				}
+				while (!(fullName = messageEl.querySelector(personPhoto)?.alt)) { // go to the next message untile photo with alt attribute is found
+					messageEl = messageEl.nextEl;
+				}
+			}
+			let convInfoButton;
 			frycAPI.createMutObs(() => {
 				const participants = document.querySelector(chatParticipants);
-				if (participants === null) {
-					document.querySelector(convInfo).click();
-				} else if (participants.getAttribute("aria-expanded") === "false") {
+				if (!participants) { // side panel with conversation info is closed so open it
+					(convInfoButton = document.querySelector(convInfo)).click();
+				} else if (participants.getAttribute("aria-expanded") === "false") { // conversation participants list is collapsed so expand it
 					participants.click();
 				} else {
-					document.querySelectorAll(chatParticipantsElems)
-					.find(el => el.querySelector(`svg[aria-label]`).getAttribute("aria-label") === fullName)
-					.querySelector(personSettings)
-					.click();
-					frycAPI.createMutObs(() => {
-						const item = document.querySelector(action === "message" ? messageItem : profileItem);
-						if (item !== null) {
-							item.click();
-							return true; // disconnect mutObs
-						}
-					});
+					const thePerson = document.querySelectorAll(chatParticipantsElems)
+					.find(el => el.querySelector(`svg[aria-label]`).getAttribute("aria-label") === fullName);
+					if (thePerson) {
+						thePerson.querySelector(personSettings).click();
+						frycAPI.createMutObs(() => {
+							const item = document.querySelector(action === "message" ? messageItem : profileItem);
+							if (item) {
+								item.click();
+								convInfoButton?.click?.(); // if the side panel was open before convInfoButton will be undefined. If the panel was closed convInfoButton won't be undefined and will be clicked to close the panel
+								return true; // disconnect mutObs
+							}
+						});
+					} else { // thePerson was not found (they've probably left the group) so delete both personal buttons
+						messageButt.remove();
+						profileButt.remove();
+						frycAPI.copyTxt(fullName);
+						frycAPI.sleep(50).then(() => { // display alert asynchronously to let the mutation obesrver get disconected first
+							alert("The person you tried to message or view profile of, left the group. Their full name was copied to clipboard.");
+						});
+						convInfoButton?.click?.();
+					}
 					return true; // disconnect mutObs
 				}
 			});
@@ -7524,12 +7545,13 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 									frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS)?.click());
 								}
 							}));
-							if (frycAPI.querySelNull(privateConv) && !container.matches(mojaWiadomość)) { // current conversation is a group and we are in other person's message
-								container.append(message.cloneNode(1).frycAPI_addEventListener("click", function () {
-									clickThroughSidebar(container, "message");
+							if (frycAPI.querySelNull(privateConv) && container.notMatches(mojaWiadomość)) { // current conversation is a group and we are in other person's message
+								let messageButt, profileButt;
+								container.append(messageButt = message.cloneNode(1).frycAPI_addEventListener("click", function () {
+									clickThroughSidebar(container, "message", messageButt, profileButt);
 								}));
-								container.append(profile.cloneNode(1).frycAPI_addEventListener("click", function () {
-									clickThroughSidebar(container, "profile");
+								container.append(profileButt = profile.cloneNode(1).frycAPI_addEventListener("click", function () {
+									clickThroughSidebar(container, "profile", messageButt, profileButt);
 								}));
 							}
 						});

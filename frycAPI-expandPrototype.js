@@ -259,6 +259,9 @@ frycAPI_expandPrototype(Element, "firstEl", function () {
 frycAPI_expandPrototype(Element, "lastEl", function () {
 	return this.lastElementChild;
 }, true);
+frycAPI_expandPrototype(Element, "notMatches", function (selectors) {
+	return !this.matches(selectors);
+});
 frycAPI_expandPrototype(Element, "nthParent", function (n = 1) {
 	let temp = this.parentElement;
 	for (let i = 2; i <= n && temp?.parentElement; i++) {
