@@ -9,17 +9,36 @@
 	"action": {"default_popup": "Popup.html", "default_title": "Injector"},
 	"content_scripts": [
 		{ "matches": ["<all_urls>"], "js": ["frycAPI-expandPrototype.js"], "run_at": "document_start", "world": "MAIN" },
-		{ "matches": ["<all_urls>"], "js": ["frycAPI-inject.js"], "run_at": "document_start" }
+		{ "matches": ["<all_urls>"], "js": ["frycAPI-inject.js"         ], "run_at": "document_start"                  }
 	],
 	"background": {"service_worker": "frycAPI-background.js"},
 	"web_accessible_resources": [
 		{ "matches": ["<all_urls>"], "resources": ["frycAPI.js", "resources/*"] }
 	],
 	"externally_connectable": { "matches": ["<all_urls>"] },
-	"permissions": ["nativeMessaging", "scripting", "activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage", "declarativeNetRequest", "declarativeNetRequestFeedback", "windows"],
+	"permissions": [
+		"nativeMessaging",
+		"scripting",
+		"activeTab",
+		"tabs",
+		"downloads",
+		"webRequest",
+		"storage",
+		"unlimitedStorage",
+		"declarativeNetRequest",
+		"declarativeNetRequestFeedback",
+		"windows"
+	],
 	"host_permissions": ["<all_urls>"],
 	"devtools_page": "DevTools.html",
 	"declarative_net_request": {
-		"rule_resources": [ {"id": "pdf", "enabled": true, "path": "PDF-download-rule.json"} ]
+		"rule_resources": [
+			{
+				"//": "This method breaks on this URL http://www.ee.ic.ac.uk/pcheung/teaching/DE1_EE/stores/sg90_datasheet.pdf",
+				"id": "pdf",
+				"enabled": false,
+				"path": "PDF-download-rule.json"
+			}
+		]
 	}
 }

@@ -103,31 +103,30 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 	return true; // konieczne jeśli chcemy wysłać odpowiedź za pomocą sendResp
 });
 
-/*
+
 function findHeader(headers, headerStr) {
 	return headers.find(header => header.name.toLowerCase() === headerStr);
 }
-// onHeadersReceived // onCompleted
-let pdf = false;
 chrome.webRequest.onHeadersReceived.addListener(details => {
+	// This method breaks when server marks quickly repeated requests as a bot behavior
 	if (details.type !== "main_frame") return; // only intercept PDFs that will be view as an entire page
-	if (!findHeader(details.responseHeaders, "content-type")?.value?.toLowerCase()?.includes("application/pdf")) return; // request is not for PDF
-	if (findHeader(details.responseHeaders, "content-disposition")?.value?.toLowerCase()?.includes("attachment")) return; // requested PDF will be downloaded so don't download it again
+	if (!findHeader(details.responseHeaders, "content-type")?.value?.toLowerCase?.()?.includes?.("application/pdf")) return; // request is not for PDF
+	if (findHeader(details.responseHeaders, "content-disposition")?.value?.toLowerCase?.()?.includes?.("attachment")) return; // requested PDF will be downloaded so don't download it again
 	// log(details);
 	chrome.downloads.download({ url: details.url });
-	pdf = true;
+	chrome.tabs.onUpdated.addListener(function tabsOnUpdated(tabId, changeInfo, tab) { // addlistener to close the tab or go back
+		// log(changeInfo);
+		if (changeInfo.status === "loading") {
+			chrome.tabs.goBack(tabId).then(null, () => { // if going back is not possible the promise gets rejected and that means that the PDF was opened in new tab so close the tab
+				chrome.tabs.remove(tabId);
+			});
+			chrome.tabs.onUpdated.removeListener(tabsOnUpdated);
+		}
+	});
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-	// log(changeInfo);
-	if (pdf && changeInfo.status === "loading") {
-		chrome.tabs.goBack(tabId).then(null, () => { // if going back is not possible the promise gets rejected and that means that the PDF was opened in new tab so close the tab
-			chrome.tabs.remove(tabId);
-		});
-		pdf = false;
-	}
-}); */
 /* // As of Manifest V3, this is only available to policy installed extensions.
+//* This method breaks on this URL http://www.ee.ic.ac.uk/pcheung/teaching/DE1_EE/stores/sg90_datasheet.pdf
 chrome.webRequest.onHeadersReceived.addListener(details => {
 	if (details.type !== "main_frame") return;
 	const contentType = details.responseHeaders.find(header => header.name.toLowerCase() === "content-type");
@@ -147,3 +146,7 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 	return { responseHeaders: details.responseHeaders };
 }, { urls: ["<all_urls>"] }, ["blocking", "responseHeaders"]);
 */
+
+// chrome.webRequest.onHeadersReceived.addListener(details => {
+// 	log(details.type);
+// }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
