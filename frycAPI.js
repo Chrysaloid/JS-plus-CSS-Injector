@@ -6251,21 +6251,23 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		} */
 	`);
 	frycAPI.onLoadSetter(function () {
-		frycAPI.createMutObs(() => {
-			const folderName = frycAPI.querySelList([
-				`[class^="breadcrumbNonNavigableItem"][data-automationid="breadcrumb-crumb"]`,
-				`li.ms-Breadcrumb-listItem:last-child .ms-TooltipHost [id^="tooltip"]`,
-				`li[class^="navLink"][class*="navLinkSelected"]`,
-			]);
-			if (folderName !== null) {
-				if (document.title !== folderName.textContent) {
-					document.title = folderName.textContent;
+		if (frycAPI.querySelOk(`#topLevelRegion #O365_AppName[aria-label="Przejdź do aplikacji OneDrive"]`)) {
+			frycAPI.createMutObs(() => {
+				const folderName = frycAPI.querySelList([
+					`[class^="breadcrumbNonNavigableItem"][data-automationid="breadcrumb-crumb"]`,
+					`li.ms-Breadcrumb-listItem:last-child .ms-TooltipHost [id^="tooltip"]`,
+					`li[class^="navLink"][class*="navLinkSelected"]`,
+				]);
+				if (folderName !== null) {
+					if (document.title !== folderName.textContent) {
+						document.title = folderName.textContent;
+					}
+				} else if (document.title !== "OneDrive") {
+					document.title = "OneDrive";
 				}
-			} else if (document.title !== "OneDrive") {
-				document.title = "OneDrive";
-			}
-		});
-	});
+			});
+		}
+	}, 2);
 } else if (0 && frycAPI_host("wutwaw.sharepoint.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
