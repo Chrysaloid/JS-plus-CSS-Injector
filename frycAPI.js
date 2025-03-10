@@ -1595,6 +1595,48 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 		loguj(outStr);
 	}, // frycAPI.mockMarkup("Test");
+	traverseIframeWindows(win = window, callback = console.log) {
+		try {
+			callback(win); // Process the current window
+		} catch (e) {
+			console.log("Access denied to window:", e);
+		}
+
+		const iframes = win.document.body?.getElementsByTagName?.("iframe");
+		if (iframes) {
+			for (const iframe of iframes) {
+				try {
+					const iframeWin = iframe.contentWindow;
+					if (iframeWin) {
+						frycAPI.traverseIframeWindows(iframeWin, callback);
+					}
+				} catch (e) {
+					console.log("Cannot access iframe content due to cross-origin restrictions:", e);
+				}
+			}
+		}
+	}, // frycAPI.traverseIframeWindows(window, win => { console.log("Found window:", win.location.href); });
+	traverseIframes(win = window, callback = console.log) {
+		const iframes = win.document.body?.getElementsByTagName?.("iframe");
+		if (iframes) {
+			for (const iframe of iframes) {
+				try {
+					callback(iframe); // Process the current iframe
+				} catch (e) {
+					console.log("Access denied to window:", e);
+				}
+
+				try {
+					const iframeWin = iframe.contentWindow;
+					if (iframeWin) {
+						frycAPI.traverseIframes(iframeWin, callback);
+					}
+				} catch (e) {
+					console.log("Cannot access iframe content due to cross-origin restrictions:", e);
+				}
+			}
+		}
+	}, // frycAPI.traverseIframes(window, iframe => { console.log("Found iframe:", iframe); });
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -1633,24 +1675,63 @@ try {
 if (1) { //* Globalne funkcje
 	(frycAPI.beforeLoad = function () {
 		// #region //* color scheme only light
-		new MutationObserver((mutRec, docObs) => {
-			if (frycAPI.colorSchemeDark) {
-				docObs.disconnect();
-				document.getElementById("frycAPI-color-scheme-only-light")?.remove?.();
-				return;
-			}
-			if (document.head) {
-				if (document.head.frycAPI_querySelNull("meta[name=color-scheme][content=dark]")) {
-					document.head.insertAdjacentElement("afterbegin",
-						document.createElement("meta")
-						.frycAPI_setAttribute("name", "color-scheme")
-						.frycAPI_setAttribute("content", "only light")
-						.frycAPI_setAttribute("id", "frycAPI-color-scheme-only-light")
-					);
+		if (frycAPI.colorSchemeDark) {
+			document.getElementById("frycAPI-color-scheme-only-light")?.remove?.();
+		} else {
+			const meta = frycAPI.elem("meta", 0).frycAPI_setAttributeBulk(
+				"name", "color-scheme",
+				"content", "only light",
+				"id", "frycAPI-color-scheme-only-light"
+			);
+			function traverseIframes(win = window, callback = console.log) {
+				const iframes = win.document.body?.getElementsByTagName?.("iframe");
+				if (iframes) {
+					for (const iframe of iframes) {
+						if (iframe.hasAttribute("frycAPI_traversed")) {
+							continue;
+						} else {
+							iframe.setAttribute("frycAPI_traversed", "");
+						}
+
+						try {
+							callback(iframe); // Process the current iframe
+						} catch (e) {
+							console.log("Access denied to window:", e);
+						}
+
+						try {
+							const iframeWin = iframe.contentWindow;
+							if (iframeWin) {
+								traverseIframes(iframeWin, callback);
+							}
+						} catch (e) {
+							console.log("Cannot access iframe content due to cross-origin restrictions:", e);
+						}
+					}
 				}
-				docObs.disconnect();
 			}
-		}).observe(document.documentElement, { childList: true });
+			function traversingFun(iframe) {
+				// loguj("Test");
+				const win = iframe.contentWindow;
+				if (win) {
+					frycAPI.createMutObs(() => {
+						if (win.document.head) {
+							if (win.document.head.querySelector("meta[name=color-scheme][content=dark]") === null) {
+								win.document.head.insertAdjacentElement("afterbegin", meta.cloneNode());
+							}
+							return true;
+						}
+					}, { elem: win.document.documentElement, options: { childList: true, subtree: false } });
+				}
+			}
+			traversingFun({ contentWindow: window });
+			frycAPI.createMutObs(() => {
+				if (document.body) {
+					frycAPI.createMutObs(traverseIframes.bind(null, window, traversingFun));
+					return true;
+				}
+			}, { elem: document.documentElement });
+		}
 		// #endregion
 		// #region //*
 
@@ -7795,10 +7876,24 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			display: none;
 		}
 
+		/* subreddit blacklist hide */
 		/* article:has(> shreddit-post[permalink^="/r/greentext"]) {
 			display: none !important;
 			& + hr {
 				display: none !important;
+			}
+		} */
+
+		/* subreddit whitelist show */
+		/* article:has(> shreddit-post[permalink]:not([permalink^="/r/discordapp"])) {
+			height: 0px !important;
+			overflow: hidden !important;
+			& + hr {
+				display: none !important;
+			}
+			& shreddit-post {
+				margin: 0 !important;
+				padding: 0 !important;
 			}
 		} */
 	`);

@@ -138,6 +138,17 @@ frycAPI_expandPrototype(Element, "frycAPI_setAttribute", function (attName, attV
 	this.setAttribute(attName, attValue);
 	return this;
 });
+frycAPI_expandPrototype(Element, "frycAPI_setAttributeBulk", function (...args) {
+	if (args.length % 2 !== 0) throw new Error("Arguments' length must be even.");
+	const max = args.length / 2;
+	let attName, attValue;
+	for (let i = 0; i < max; i += 2) {
+		attName = args[i];
+		attValue = args[i + 1];
+		this.setAttribute(attName, attValue);
+	}
+	return this;
+});
 frycAPI_expandPrototype(Element, "frycAPI_setObjKey", function (keyName, keyValue) {
 	this[keyName] = keyValue;
 	return this;
