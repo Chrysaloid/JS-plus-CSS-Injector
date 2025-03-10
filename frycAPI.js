@@ -1683,7 +1683,17 @@ if (1) { //* Globalne funkcje
 				"content", "only light",
 				"id", "frycAPI-color-scheme-only-light"
 			);
-			function traverseIframes(win = window, callback = console.log) {
+			function insertMeta(win) {
+				frycAPI.createMutObs(() => {
+					if (win.document.head) {
+						if (win.document.head.querySelector("meta[name=color-scheme][content=dark]") === null) {
+							win.document.head.insertAdjacentElement("afterbegin", meta.cloneNode());
+						}
+						return true;
+					}
+				}, { elem: win.document.documentElement, options: { childList: true, subtree: false } });
+			}
+			function traverseIframes(win = window) {
 				const iframes = win.document.body?.getElementsByTagName?.("iframe");
 				if (iframes) {
 					for (const iframe of iframes) {
@@ -1694,15 +1704,10 @@ if (1) { //* Globalne funkcje
 						}
 
 						try {
-							callback(iframe); // Process the current iframe
-						} catch (e) {
-							console.log("Access denied to window:", e);
-						}
-
-						try {
 							const iframeWin = iframe.contentWindow;
 							if (iframeWin) {
-								traverseIframes(iframeWin, callback);
+								insertMeta(iframeWin);
+								traverseIframes(iframeWin);
 							}
 						} catch (e) {
 							console.log("Cannot access iframe content due to cross-origin restrictions:", e);
@@ -1710,24 +1715,10 @@ if (1) { //* Globalne funkcje
 					}
 				}
 			}
-			function traversingFun(iframe) {
-				// loguj("Test");
-				const win = iframe.contentWindow;
-				if (win) {
-					frycAPI.createMutObs(() => {
-						if (win.document.head) {
-							if (win.document.head.querySelector("meta[name=color-scheme][content=dark]") === null) {
-								win.document.head.insertAdjacentElement("afterbegin", meta.cloneNode());
-							}
-							return true;
-						}
-					}, { elem: win.document.documentElement, options: { childList: true, subtree: false } });
-				}
-			}
-			traversingFun({ contentWindow: window });
+			insertMeta(window);
 			frycAPI.createMutObs(() => {
 				if (document.body) {
-					frycAPI.createMutObs(traverseIframes.bind(null, window, traversingFun));
+					frycAPI.createMutObs(traverseIframes.bind(null, window));
 					return true;
 				}
 			}, { elem: document.documentElement });
