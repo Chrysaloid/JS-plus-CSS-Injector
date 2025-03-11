@@ -1683,45 +1683,14 @@ if (1) { //* Globalne funkcje
 				"content", "only light",
 				"id", "frycAPI-color-scheme-only-light"
 			);
-			function insertMeta(win) {
-				frycAPI.createMutObs(() => {
-					if (win.document.head) {
-						if (win.document.head.querySelector("meta[name=color-scheme][content=dark]") === null) {
-							win.document.head.insertAdjacentElement("afterbegin", meta.cloneNode());
-						}
-						return true;
-					}
-				}, { elem: win.document.documentElement, options: { childList: true, subtree: false } });
-			}
-			function traverseIframes(win = window) {
-				const iframes = win.document.body?.getElementsByTagName?.("iframe");
-				if (iframes) {
-					for (const iframe of iframes) {
-						if (iframe.hasAttribute("frycAPI_traversed")) {
-							continue;
-						} else {
-							iframe.setAttribute("frycAPI_traversed", "");
-						}
-
-						try {
-							const iframeWin = iframe.contentWindow;
-							if (iframeWin) {
-								insertMeta(iframeWin);
-								traverseIframes(iframeWin);
-							}
-						} catch (e) {
-							console.log("Cannot access iframe content due to cross-origin restrictions:", e);
-						}
-					}
-				}
-			}
-			insertMeta(window);
 			frycAPI.createMutObs(() => {
-				if (document.body) {
-					frycAPI.createMutObs(traverseIframes.bind(null, window));
+				if (document.head) {
+					if (document.head.querySelector("meta[name=color-scheme][content=dark]") === null) {
+						document.head.insertAdjacentElement("afterbegin", meta);
+					}
 					return true;
 				}
-			}, { elem: document.documentElement });
+			}, { elem: document.documentElement, options: { childList: true, subtree: false } });
 		}
 		// #endregion
 		// #region //*
