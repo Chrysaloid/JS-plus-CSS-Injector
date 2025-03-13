@@ -37,6 +37,22 @@ const a = [
 		console.log("1");
 		console.log("1");
 		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
 	}],
 	// #endregion
 	[() => 1, () => {
