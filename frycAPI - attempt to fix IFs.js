@@ -5,6 +5,38 @@ const a = [
 	// #region //* Test
 	[() => 1, () => {
 		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
 	}],
 	// #endregion
 	[() => 1, () => {
@@ -14,6 +46,42 @@ const a = [
 		console.log("1");
 	}],
 	[() => 1, () => {
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
+		console.log("1");
 		console.log("1");
 	}],
 ].find(el => el[0]())?.[1]?.();
