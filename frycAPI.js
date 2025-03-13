@@ -9092,6 +9092,14 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				background-color: hsla(0, 0%, 100%, 10%);
 			}
 		}
+
+		form.post-search-form {
+			display: flex;
+			gap: 5px;
+		}
+		#tags {
+			flex-grow: 1;
+		}
 	`);
 
 	const pathName = frycAPI.path;
@@ -9114,8 +9122,14 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			// download.setAttribute("onclick", `location.href = '${download.getAttribute("href")}'`);
 			// download.setAttribute("href", "");
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
-			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.getElementById("search-box"));
+			document.getElementById("c-posts")?.insertAdjacentElement?.("beforebegin", document.querySelector("form.post-search-form"));
 			window.scrollTo(0, 0);
+			const search = document.querySelector(`button[type="submit"][title="Search"]`);
+			document.getElementById("tags").addEventListener("keydown", e => {
+				if (e.key === "Enter") {
+					search.click();
+				}
+			});
 		} else if (pathName.startsWith("/pools/") && !pathName.startsWith("/pools/new")) {
 			const ratArr = [
 				`<div$class="txt-col-s">Safe        `,
