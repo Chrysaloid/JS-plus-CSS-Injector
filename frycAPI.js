@@ -1,6 +1,6 @@
 ﻿// #region //* Początek
 /* 0 eslint no-implicit-globals: ["warn", {"lexicalBindings": true}] */
-/// <reference path="frycAPI-expandPrototype.js" />
+/// <reference path="frycAPI-expandPrototype.js"/>
 "use strict";
 const frycAPI_t1 = performance.now();
 
@@ -7286,6 +7286,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const personSettings = `[aria-label^="Ustawienia członka dla"]`;
 	const messageItem = `[role="menu"] [aria-hidden="false"] div[role="menuitem"][aria-labelledby]`;
 	const profileItem = `[role="menu"] [aria-hidden="false"] a[role="menuitem"][aria-labelledby]`;
+	const sidePanelUserName = `div > span.x193iq5w.xeuugli.x13faqbe.x1vvkbs.xt0psk2.x1xmvt09.x6prxxf.xk50ysn.xzsf02u.xq9mrsl`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -7467,6 +7468,10 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		${myMessageContainer} {
 			/* background-color: hsl(0, 0%, 5%); */
 			background-color: #616161;
+		}
+
+		${sidePanelUserName} {
+			user-select: all;
 		}
 	`);
 
