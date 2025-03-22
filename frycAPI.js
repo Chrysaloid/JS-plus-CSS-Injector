@@ -1693,6 +1693,9 @@ if (1) { //* Globalne funkcje
 			}, { elem: document.documentElement, options: { childList: true, subtree: false } });
 		}
 		// #endregion
+		// #region //* Esc to scroll to top
+		document.addEventListener("keydown", e => { if (e.key === "Escape") window.scrollTo(0, 0); });
+		// #endregion
 		// #region //*
 
 		// #endregion
@@ -7286,7 +7289,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const personSettings = `[aria-label^="Ustawienia członka dla"]`;
 	const messageItem = `[role="menu"] [aria-hidden="false"] div[role="menuitem"][aria-labelledby]`;
 	const profileItem = `[role="menu"] [aria-hidden="false"] a[role="menuitem"][aria-labelledby]`;
-	const sidePanelUserName = `div > span.x193iq5w.xeuugli.x13faqbe.x1vvkbs.xt0psk2.x1xmvt09.x6prxxf.xk50ysn.xzsf02u.xq9mrsl`;
+	const userName = `span.x193iq5w.xeuugli.x13faqbe.x1vvkbs.xt0psk2.x1xmvt09.x6prxxf.xk50ysn.xzsf02u.xq9mrsl`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -7470,7 +7473,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			background-color: #616161;
 		}
 
-		${sidePanelUserName} {
+		${userName} {
 			user-select: all;
 		}
 	`);
