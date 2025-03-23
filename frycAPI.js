@@ -1637,6 +1637,72 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			}
 		}
 	}, // frycAPI.traverseIframes(window, iframe => { console.log("Found iframe:", iframe); });
+	downLoadVideoFrame(videoEl, filename = frycAPI_host() + " - Video " + videoEl.currentTime.toFixed(3) + " s.png") { // downloads current video frame as png
+		const canvas = document.createElement("canvas");
+		canvas.width = videoEl.videoWidth;
+		canvas.height = videoEl.videoHeight;
+		canvas.getContext("2d").drawImage(videoEl, 0, 0);
+		canvas.toBlob(blob => {
+			if (!blob) return console.error("Failed to create blob");
+			const url = URL.createObjectURL(blob);
+			frycAPI.downloadHelper(url, filename);
+			URL.revokeObjectURL(url);
+		});
+	}, // rycAPI.downLoadVideoFrame(videoEl, "Video");
+	isElemOnScreen(elem) {
+		const rect = elem.getBoundingClientRect();
+		const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+		return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
+	}, // frycAPI.isElemOnScreen(elem);
+	traverseUntil(direction, startEl, callback) { // get first element for which callback returns true
+		const visited = "frycAPI_traverseUntil";
+		let getNextEl;
+		switch (direction) {
+			case "forward": {
+				getNextEl = baseEl => {
+					if (baseEl.hasAttribute(visited)) {
+						const nextEl = baseEl.nextEl ?? baseEl.parent;
+						return nextEl ? getNextEl(nextEl) : null;
+					} else {
+						baseEl.setAttribute(visited, "");
+					}
+					return baseEl.firstEl ?? baseEl.nextEl ?? baseEl.parent;
+				};
+				break;
+			}
+			case "backward": {
+				getNextEl = baseEl => {
+					if (baseEl.hasAttribute(visited)) {
+						const nextEl = baseEl.prevEl ?? baseEl.parent;
+						return nextEl ? getNextEl(nextEl) : null;
+					} else {
+						baseEl.setAttribute(visited, "");
+					}
+					return baseEl.lastEl ?? baseEl.prevEl ?? baseEl.parent;
+				};
+				break;
+			}
+			case "down": {
+				getNextEl = baseEl => {
+					return baseEl.getElementsByTagName("*").find(callback);
+				};
+				break;
+			}
+			case "up": {
+				getNextEl = baseEl => {
+					return baseEl.parent;
+				};
+				break;
+			}
+			default: throw new Error("Wrong direction: " + direction);
+		}
+
+		let currEl = startEl;
+		while (!callback(currEl) && (currEl = getNextEl(currEl))) {}
+
+		frycAPI.forEach(`[${visited}]`, el => el.removeAttribute(visited));
+		return currEl;
+	}, // frycAPI.traverseUntil("forward", elem, e => e.hasAttribute("attr"));
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -6121,7 +6187,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		// #region //* Sortowanie tabel rejestracji
 		if (true) {
 			const daUrl = new URL(window.location.href);
-			if (daUrl.pathname === "/kontroler.php" && daUrl.searchParams.get("_action").frycAPI_equalAny(["katalog2/przedmioty/szukajPrzedmiotu", "dla_stud/rejestracja/brdg2/wyborPrzedmiotu"])) {
+			if (daUrl.pathname === "/kontroler.php" && daUrl.searchParams.get("_action").frycAPI_equalAny("katalog2/przedmioty/szukajPrzedmiotu", "dla_stud/rejestracja/brdg2/wyborPrzedmiotu")) {
 				const tab = document.querySelector(`.usos-ui > div > table.wrnav, table.grey > tbody.autostrong`);
 				if (tab !== null) {
 					const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row, :scope > tr`));
@@ -8672,7 +8738,7 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 			.insertAdjacentElement("afterbegin", document.querySelector(".header"));
 		} catch (error) { }
 
-		if (frycAPI.path.frycAPI_includesAny(["%2Fdocs%2F", "/docs/"])) {
+		if (frycAPI.path.frycAPI_includesAny("%2Fdocs%2F", "/docs/")) {
 			frycAPI.changeFaviconRes("ORACLE.png");
 		}
 	});
@@ -10752,6 +10818,20 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	(frycAPI.beforeLoad = function () {
 		frycAPI.colorSchemeDark = 1;
 	})();
+} else if (frycAPI_host("www.patreon.com")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		document.addEventListener("keydown", e => {
+			if (e.key !== "p") return; // activation key
+			if (document.activeElement.tagName.frycAPI_equalAny("TEXTAREA", "INPUT")) return; // don't trigger when typing
+			const videoEl = document.getElementsByTagName("video").find(frycAPI.isElemOnScreen);
+			if (!videoEl) return; // don't trigger when no video is on screen
+			const filename = frycAPI.traverseUntil("forward", videoEl, el => el.tagName === "SPAN" && el.getAttribute("data-tag") === "post-title")?.firstEl?.innerText;
+			frycAPI.downLoadVideoFrame(videoEl, (filename || "Patreon Video - " + frycAPI.printDateForFileName()) + " - " + videoEl.currentTime.toFixed(3) + " s.png");
+		});
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 

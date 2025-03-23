@@ -42,15 +42,15 @@ function frycAPI_host(...str) {
 	if (str.length === 0) {
 		return window.location.hostname;
 	} else {
-		return window.location.hostname.frycAPI_equalAny(str);
+		return window.location.hostname.frycAPI_equalAny(...str);
 	}
 }
 function frycAPI_hostIncludes(...str) {
-	return window.location.hostname.frycAPI_includesAny(str);
+	return window.location.hostname.frycAPI_includesAny(...str);
 }
 
 //* Prototypy
-frycAPI_expandPrototype(String, "frycAPI_equalAny", function (strList) {
+frycAPI_expandPrototype(String, "frycAPI_equalAny", function (...strList) {
 	for (const daElem of strList) {
 		if (this === daElem) {
 			return true;
@@ -58,7 +58,7 @@ frycAPI_expandPrototype(String, "frycAPI_equalAny", function (strList) {
 	}
 	return false;
 });
-frycAPI_expandPrototype(String, "frycAPI_includesAny", function (strList) {
+frycAPI_expandPrototype(String, "frycAPI_includesAny", function (...strList) {
 	for (const daElem of strList) {
 		if (this.includes(daElem)) {
 			return true;
