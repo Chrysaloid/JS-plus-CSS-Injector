@@ -1703,6 +1703,24 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		frycAPI.forEach(`[${visited}]`, el => el.removeAttribute(visited));
 		return currEl;
 	}, // frycAPI.traverseUntil("forward", elem, e => e.hasAttribute("attr"));
+	consonantsAsFirstLetters(str = "alphabet", consonants = "bcdfghjklmnpqrstvwxz") {
+		const vowels = "aeiouy";
+		str = str.split(" ").map(word => word.trim()).filter(word => word.length).map(word => {
+			const wordLower = word.toLowerCase();
+			return {
+				word: wordLower.slice(Math.min(...vowels.map(l => {
+					const idx = wordLower.indexOf(l);
+					return idx !== -1 ? idx : Infinity;
+				}))),
+				case: word[0] === word[0].toUpperCase(),
+			};
+		});
+		let out = "";
+		consonants.forEach(c => {
+			out += str.map(obj => (obj.case ? c.toUpperCase() : c) + obj.word).join(" ") + "\n";
+		});
+		return out;
+	}, // loguj(frycAPI.consonantsAsFirstLetters("Fryc API"));
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
