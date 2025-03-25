@@ -1,2 +1,2 @@
 # JS-plus-CSS-Injector
-Code for Chrome extension
+Complex personal Chrome extension and a library in part.
