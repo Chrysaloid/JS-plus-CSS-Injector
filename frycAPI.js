@@ -6325,404 +6325,410 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		}
 	`);
 } else if (1 && frycAPI_host("www.autohotkey.com")) {
-	frycAPI.injectStyleOnLoad(/*css*/`
-		*:not(:where(
-			.inline_code, .inline_code *,
-			code, code *,
-			i.fa.fa-clock-o, i.fa.fa-clock-o *,
-			#head .h-area .h-tools, #head .h-area .h-tools *,
-			.fa-thumb-tack, .fa-thumb-tack *,
-			.glyphicon, .glyphicon *,
-			.mega-octicon, .mega-octicon *,
-			.my-special-class
-		)) {
-			font-family: "IBM Plex Sans Condensed", "Lucida Grande", Arial, sans-serif !important;
-		}
-		.my-special-class {
-			/* font-family: FontAwesome; */
-			font-family: "Glyphicons Regular", "Glyphicons";
-			a[title="Board index"] & {
-				margin-right: var(--padding);
+	const daUrl = new URL(window.location.href);
+	if (daUrl.searchParams.has("style")) {
+		daUrl.searchParams.delete("style");
+		window.location.href = daUrl.href;
+	} else {
+		frycAPI.injectStyleOnLoad(/*css*/`
+			*:not(:where(
+				.inline_code, .inline_code *,
+				code, code *,
+				i.fa.fa-clock-o, i.fa.fa-clock-o *,
+				#head .h-area .h-tools, #head .h-area .h-tools *,
+				.fa-thumb-tack, .fa-thumb-tack *,
+				.glyphicon, .glyphicon *,
+				.mega-octicon, .mega-octicon *,
+				.my-special-class
+			)) {
+				font-family: "IBM Plex Sans Condensed", "Lucida Grande", Arial, sans-serif !important;
 			}
-		}
-		.page-width:not(.inner) {
-			max-width: calc(100% - 24px);
-			width: 1125px;
-			margin: auto;
-		}
-		.navbar .inner.static > .static-inner {
-			margin: 0;
-		}
-		.postbody > div > h3 {
-			display: inline-block !important;
-		}
-		.content h2, .panel h2 {
-			font-weight: unset;
-		}
-		.logo img {
-			content: url("${frycAPI.getResURL("ahk_logo.svg")}");
-		}
-		.dspNone {
-			display: none !important;
-		}
-		#format-buttons:has(select[name="addbbcode_codeboxplus"]) {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			.smiley-control{
+			.my-special-class {
+				/* font-family: FontAwesome; */
+				font-family: "Glyphicons Regular", "Glyphicons";
+				a[title="Board index"] & {
+					margin-right: var(--padding);
+				}
+			}
+			.page-width:not(.inner) {
+				max-width: calc(100% - 24px);
+				width: 1125px;
+				margin: auto;
+			}
+			.navbar .inner.static > .static-inner {
 				margin: 0;
-				cursor: pointer;
-				color: rgb(119, 163, 196);
-				&:hover {
-					color: rgb(194, 117, 79);
-					text-decoration: underline;
-				}
 			}
-		}
-		cite > .responsive-hide {
-			display: inline;
-			margin-left: 4px;
-			color: hsl(30, 5%, 55%);
-		}
-		#topicreview {
-			padding-right: 0;
-			display: flex;
-			flex-direction: column-reverse;
-		}
-		:root {
-			--padding: 5px;
-			--padding-small: 3px;
-			--padding-big: 7px;
-		}
-		.postbody .content {
-			padding: var(--padding) 0 0 0;
-		}
-		.post > .inner {
-			/* padding: var(--padding) var(--padding-big); */
-			padding: var(--padding);
-		}
-		.content {
-			min-height: 0;
-		}
-		ul.post-buttons {
-			display: flex;
-			gap: var(--padding-small);
-			float: none;
-			> li {
-				margin-right: 0;
+			.postbody > div > h3 {
+				display: inline-block !important;
 			}
-		}
-		a.top {
-			display: none;
-		}
-		.signature {
-			margin-top: var(--padding);
-		}
-		blockquote, .codebox {
-			margin: var(--padding);
-			margin-left: 0;
-		}
-		.content:not(.pierwszy-node-to-text) :is(blockquote, .codebox):first-child {
-			margin-top: 0;
-		}
-		span.online-ribbon {
-			display: none;
-		}
-		.post:has(>.online-ribbon) .postprofile > dt > a {
-			position: relative;
-			--color: #219D55;
-			&::after {
-				content: " ";
-				display: inline-block;
-				background-color: var(--color);
-				width: 10px;
-				height: 10px;
-				border-radius: 50%;
-				margin-left: var(--padding);
+			.content h2, .panel h2 {
+				font-weight: unset;
 			}
-			&:hover::before {
-				content: "Online";
-				color: var(--color);
-				position: absolute;
-				right: calc(100% + 2 * var(--padding));
-				border-radius: 3px;
-				background-color: rgb(38, 40, 41);
-				padding: var(--padding-small) var(--padding);
+			.logo img {
+				content: url("${frycAPI.getResURL("ahk_logo.svg")}");
 			}
-		}
-		.post:has(span.icon_solved_post) {
-			border: 2px solid #008040;
-		}
-		.row dd.lastpost > span > br + br {
-			display: none;
-		}
-		span.crumb:has(a[title="Board index"]) {
-			padding-left: 0;
-			&::before {
-				content: "";
+			.dspNone {
+				display: none !important;
 			}
-		}
-		a[title="Board index"] {
-			display: inline-flex !important;
-			align-items: center;
-		}
-		.icon-home.breadcrumbs::after {
-			content: "";
-		}
-
-		.post > .inner {
-			display: flex;
-			width: 100%;
-			box-sizing: border-box;
-			.postprofile {
-				min-height: 0 !important;
-				width: auto;
-				/* padding: calc(var(--padding) - var(--padding-small)) 0 0 0; */
-				padding: 0;
-				padding-right: var(--padding);
-				/* flex-basis: 150px; */
-				> * {
-					margin-right: 0;
-				}
-				.has-avatar .avatar-container {
-					margin-bottom: var(--padding);
-				}
-				> dt {
-					margin-bottom: var(--padding);
-					padding-bottom: var(--padding);
-					/* padding-bottom: calc(var(--padding) - 1px); */
-					border: 0px solid rgb(60, 63, 66);
-					border-bottom-width: 1px;
-					> :is(a, strong) {
-						font-size: 15px;
-						line-height: 20px;
-						white-space: nowrap;
-						/* text-transform: uppercase; */
-						/* &, * {
-							font-family: "Roboto Condensed" !important;
-							font-weight: 300;
-						} */
-					}
-				}
-				.avatar {
-					max-width: none;
-				}
-			}
-			.postbody {
-				float: none;
-				margin-left: 0;
-				padding-left: var(--padding);
-				width: 100% !important;
-				> div {
-					margin-left: 0;
-					display: grid;
-					/* grid-template-columns: auto min-content min-content; */
-					grid-template-columns: 1fr auto auto;
-					grid-template-rows: auto auto;
-					column-gap: var(--padding);
-					background-color: transparent !important;
-					border-width: 0 !important;
-					padding: 0 !important;
-					> * {
-						padding: 0 !important;
-						margin: 0 !important;
-					}
-					> h3 {
-						grid-area: 1 / 1 / 2 / 2;
-						> a {
-							display: flex;
-							align-items: center;
-							gap: var(--padding);
-						}
-					}
-					> ul.post-buttons {
-						float: none;
-						max-width: none;
-						grid-area: 1 / 3 / 2 / 4;
-					}
-					> p.author {
-						float: none;
-						grid-area: 1 / 2 / 2 / 3;
-						white-space: nowrap;
-					}
-					> .content {
-						grid-area: 2 / 1 / 3 / 4;
-						margin-top: var(--padding) !important;
-						padding-top: var(--padding) !important;
-					}
-					> .signature {
-						grid-column: 1 / 4;
-						margin-top: var(--padding) !important;
-						padding-top: var(--padding) !important;
-					}
-				}
-			}
-		}
-
-		.imageset.icon_solved_post, .imageset.icon_solved_head {
-			background-image: url('${frycAPI.getResURL("Correct icon.png")}');
-			background-size: contain;
-		}
-		h2.topic-title {
-			margin: 0;
-			display: flex;
-			align-items: center;
-			gap: var(--padding);
-			> a[title="Topic is solved"] {
+			#format-buttons:has(select[name="addbbcode_codeboxplus"]) {
 				display: flex;
 				align-items: center;
+				justify-content: space-between;
+				.smiley-control{
+					margin: 0;
+					cursor: pointer;
+					color: rgb(119, 163, 196);
+					&:hover {
+						color: rgb(194, 117, 79);
+						text-decoration: underline;
+					}
+				}
 			}
-		}
-	`);
+			cite > .responsive-hide {
+				display: inline;
+				margin-left: 4px;
+				color: hsl(30, 5%, 55%);
+			}
+			#topicreview {
+				padding-right: 0;
+				display: flex;
+				flex-direction: column-reverse;
+			}
+			:root {
+				--padding: 5px;
+				--padding-small: 3px;
+				--padding-big: 7px;
+			}
+			.postbody .content {
+				padding: var(--padding) 0 0 0;
+			}
+			.post > .inner {
+				/* padding: var(--padding) var(--padding-big); */
+				padding: var(--padding);
+			}
+			.content {
+				min-height: 0;
+			}
+			ul.post-buttons {
+				display: flex;
+				gap: var(--padding-small);
+				float: none;
+				> li {
+					margin-right: 0;
+				}
+			}
+			a.top {
+				display: none;
+			}
+			.signature {
+				margin-top: var(--padding);
+			}
+			blockquote, .codebox {
+				margin: var(--padding);
+				margin-left: 0;
+			}
+			.content:not(.pierwszy-node-to-text) :is(blockquote, .codebox):first-child {
+				margin-top: 0;
+			}
+			span.online-ribbon {
+				display: none;
+			}
+			.post:has(>.online-ribbon) .postprofile > dt > a {
+				position: relative;
+				--color: #219D55;
+				&::after {
+					content: " ";
+					display: inline-block;
+					background-color: var(--color);
+					width: 10px;
+					height: 10px;
+					border-radius: 50%;
+					margin-left: var(--padding);
+				}
+				&:hover::before {
+					content: "Online";
+					color: var(--color);
+					position: absolute;
+					right: calc(100% + 2 * var(--padding));
+					border-radius: 3px;
+					background-color: rgb(38, 40, 41);
+					padding: var(--padding-small) var(--padding);
+				}
+			}
+			.post:has(span.icon_solved_post) {
+				border: 2px solid #008040;
+			}
+			.row dd.lastpost > span > br + br {
+				display: none;
+			}
+			span.crumb:has(a[title="Board index"]) {
+				padding-left: 0;
+				&::before {
+					content: "";
+				}
+			}
+			a[title="Board index"] {
+				display: inline-flex !important;
+				align-items: center;
+			}
+			.icon-home.breadcrumbs::after {
+				content: "";
+			}
+	
+			.post > .inner {
+				display: flex;
+				width: 100%;
+				box-sizing: border-box;
+				.postprofile {
+					min-height: 0 !important;
+					width: auto;
+					/* padding: calc(var(--padding) - var(--padding-small)) 0 0 0; */
+					padding: 0;
+					padding-right: var(--padding);
+					/* flex-basis: 150px; */
+					> * {
+						margin-right: 0;
+					}
+					.has-avatar .avatar-container {
+						margin-bottom: var(--padding);
+					}
+					> dt {
+						margin-bottom: var(--padding);
+						padding-bottom: var(--padding);
+						/* padding-bottom: calc(var(--padding) - 1px); */
+						border: 0px solid rgb(60, 63, 66);
+						border-bottom-width: 1px;
+						> :is(a, strong) {
+							font-size: 15px;
+							line-height: 20px;
+							white-space: nowrap;
+							/* text-transform: uppercase; */
+							/* &, * {
+								font-family: "Roboto Condensed" !important;
+								font-weight: 300;
+							} */
+						}
+					}
+					.avatar {
+						max-width: none;
+					}
+				}
+				.postbody {
+					float: none;
+					margin-left: 0;
+					padding-left: var(--padding);
+					width: 100% !important;
+					> div {
+						margin-left: 0;
+						display: grid;
+						/* grid-template-columns: auto min-content min-content; */
+						grid-template-columns: 1fr auto auto;
+						grid-template-rows: auto auto;
+						column-gap: var(--padding);
+						background-color: transparent !important;
+						border-width: 0 !important;
+						padding: 0 !important;
+						> * {
+							padding: 0 !important;
+							margin: 0 !important;
+						}
+						> h3 {
+							grid-area: 1 / 1 / 2 / 2;
+							> a {
+								display: flex;
+								align-items: center;
+								gap: var(--padding);
+							}
+						}
+						> ul.post-buttons {
+							float: none;
+							max-width: none;
+							grid-area: 1 / 3 / 2 / 4;
+						}
+						> p.author {
+							float: none;
+							grid-area: 1 / 2 / 2 / 3;
+							white-space: nowrap;
+						}
+						> .content {
+							grid-area: 2 / 1 / 3 / 4;
+							margin-top: var(--padding) !important;
+							padding-top: var(--padding) !important;
+						}
+						> .signature {
+							grid-column: 1 / 4;
+							margin-top: var(--padding) !important;
+							padding-top: var(--padding) !important;
+						}
+					}
+				}
+			}
+	
+			.imageset.icon_solved_post, .imageset.icon_solved_head {
+				background-image: url('${frycAPI.getResURL("Correct icon.png")}');
+				background-size: contain;
+			}
+			h2.topic-title {
+				margin: 0;
+				display: flex;
+				align-items: center;
+				gap: var(--padding);
+				> a[title="Topic is solved"] {
+					display: flex;
+					align-items: center;
+				}
+			}
+		`);
 
-	frycAPI.onLoadSetter(() => {
-		// const t1 = performance.now();
-		// #region //* Favicon
-		if (frycAPI.path.startsWith("/boards")) {
-			frycAPI.changeFaviconRes("AHK_Blue.png");
-		} else {
-			frycAPI.changeFaviconRes("AHK_Better.png");
-		}
-		// #endregion
-		// #region //* Naprawa dat
-		/* Test wydajności
-		const posts = document.querySelectorAll(`.post`);
-		const pierwszy = posts[0].cloneNode(1);
-		posts.forEach(el => el.remove());
-		const pageBody = document.getElementById("page-body");
-		for (let i = 0; i < 250; i++) {
-			pageBody.appendChild(pierwszy.cloneNode(1));
-		}
-		*/
-		// const t1 = performance.now();
-		const opts = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
-		frycAPI.setDefaultDate(`
-			.postbody p.author > a,
-			cite > .responsive-hide,
-			p.notification-time,
-			.column2 dl.details > dd:nth-of-type(1), .column2 dl.details > dd:nth-of-type(2)
-		`, { getDate: "txt" });
-		frycAPI.setDefaultDate("_" + frycAPI.arrayToTemplate([2, 3, 4, 5, 6, 7], temₚ`,table:has(thead th:nth-child(${0}).joined) td:nth-child(${0})`), {
-			getDate: "txt",
-			dateOpts: { printRelTime: { compact: 2, ago: false } },
-		});
-		frycAPI.setDefaultDate(`.postprofile > .profile-joined`, {
-			getDate: elem => elem.innerText.replace("Joined: ", ""),
-			setDate: (elem, data) => elem.frycAPI_setInnerHTML(
-				"<strong>Joined: </strong>" + frycAPI.getDefaultDateText(data, opts)
-			),
-			dateEnumMode: frycAPI.setDefaultDateEnum.mode.relatywnyCzas,
-			dateEnumStyle: frycAPI.setDefaultDateEnum.style.floatLeft,
-			customStyle: `cursor: none;`,
-		}); // .mode.absolutnyCzas().floatLeft();
-		frycAPI.setDefaultDate(`.postbody-inner > p.author > strong`, {
-			getDate: elem => elem.nextSibling.textContent.replace("»", "").trim(),
-			setDate: (elem, data) => {
-				// const txtNode = elem.nextSibling;
-				elem.nextSibling.textContent = " » ";
-				return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data));
-			},
-		});
-		frycAPI.setDefaultDate(`.list-inner > .responsive-hide > a:first-of-type`, {
-			getDate: elem => elem.nextSibling.textContent.replaceAll("»", "").replace("in", "").trim(),
-			setDate: (elem, data) => {
-				const txtNode = elem.nextSibling;
-				const containsIn = txtNode.textContent.lastIndexOf("in") !== -1;
-				txtNode.textContent = " » ";
-				const lepCzas = txtNode.frycAPI_insertAfter(frycAPI.elemFromHTML(frycAPI.getDefaultDateText(data, opts)));
-				containsIn && lepCzas.frycAPI_insertAfter(document.createTextNode(" » in "));
-				return lepCzas;
-			},
-		});
-		frycAPI.setDefaultDate(`.row dd.lastpost > span > br`, {
-			getDate: elem => elem.nextSibling.textContent.trim(),
-			setDate: (elem, data) => {
-				// const txtNode = elem.nextSibling;
-				elem.nextSibling.remove();
-				return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, opts));
-			},
-		});
-		const zegar = document.querySelector(`a.dropdown-trigger.time.dropdown-toggle`);
-		zegar?.setAttribute("title", "It is currently " + frycAPI.printDate(new Date(zegar.getAttribute("title").replace("It is currently ", ""))));
-		// const t2 = performance.now(); frycAPI.perf(t1, t2);
-		// #endregion
-		// #region //* Ukrycie nic nie wnoszących tytułów postów
-		const titleElem = document.querySelector(`h2.topic-title > a, h2.posting-title > a`);
-		if (titleElem !== null) {
-			const baseTitle = "Re: " + (titleElem.innerText = titleElem.innerText.trim());
-			frycAPI.forEach(`.postbody h3 > a`, (daElem, daI, daArr) => {
-				const tNode = daElem.frycAPI_getFirstTextNode();
-				if ((tNode.textContent = tNode.textContent.trim()) === baseTitle) {
-					daElem.frycAPI_addClass("dspNone");
+		frycAPI.onLoadSetter(() => {
+			// const t1 = performance.now();
+			// #region //* Favicon
+			if (frycAPI.path.startsWith("/boards")) {
+				frycAPI.changeFaviconRes("AHK_Blue.png");
+			} else {
+				frycAPI.changeFaviconRes("AHK_Better.png");
+			}
+			// #endregion
+			// #region //* Naprawa dat
+			/* Test wydajności
+			const posts = document.querySelectorAll(`.post`);
+			const pierwszy = posts[0].cloneNode(1);
+			posts.forEach(el => el.remove());
+			const pageBody = document.getElementById("page-body");
+			for (let i = 0; i < 250; i++) {
+				pageBody.appendChild(pierwszy.cloneNode(1));
+			}
+			*/
+			// const t1 = performance.now();
+			const opts = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
+			frycAPI.setDefaultDate(`
+				.postbody p.author > a,
+				cite > .responsive-hide,
+				p.notification-time,
+				.column2 dl.details > dd:nth-of-type(1), .column2 dl.details > dd:nth-of-type(2)
+			`, { getDate: "txt" });
+			frycAPI.setDefaultDate("_" + frycAPI.arrayToTemplate([2, 3, 4, 5, 6, 7], temₚ`,table:has(thead th:nth-child(${0}).joined) td:nth-child(${0})`), {
+				getDate: "txt",
+				dateOpts: { printRelTime: { compact: 2, ago: false } },
+			});
+			frycAPI.setDefaultDate(`.postprofile > .profile-joined`, {
+				getDate: elem => elem.innerText.replace("Joined: ", ""),
+				setDate: (elem, data) => elem.frycAPI_setInnerHTML(
+					"<strong>Joined: </strong>" + frycAPI.getDefaultDateText(data, opts)
+				),
+				dateEnumMode: frycAPI.setDefaultDateEnum.mode.relatywnyCzas,
+				dateEnumStyle: frycAPI.setDefaultDateEnum.style.floatLeft,
+				customStyle: `cursor: none;`,
+			}); // .mode.absolutnyCzas().floatLeft();
+			frycAPI.setDefaultDate(`.postbody-inner > p.author > strong`, {
+				getDate: elem => elem.nextSibling.textContent.replace("»", "").trim(),
+				setDate: (elem, data) => {
+					// const txtNode = elem.nextSibling;
+					elem.nextSibling.textContent = " » ";
+					return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data));
+				},
+			});
+			frycAPI.setDefaultDate(`.list-inner > .responsive-hide > a:first-of-type`, {
+				getDate: elem => elem.nextSibling.textContent.replaceAll("»", "").replace("in", "").trim(),
+				setDate: (elem, data) => {
+					const txtNode = elem.nextSibling;
+					const containsIn = txtNode.textContent.lastIndexOf("in") !== -1;
+					txtNode.textContent = " » ";
+					const lepCzas = txtNode.frycAPI_insertAfter(frycAPI.elemFromHTML(frycAPI.getDefaultDateText(data, opts)));
+					containsIn && lepCzas.frycAPI_insertAfter(document.createTextNode(" » in "));
+					return lepCzas;
+				},
+			});
+			frycAPI.setDefaultDate(`.row dd.lastpost > span > br`, {
+				getDate: elem => elem.nextSibling.textContent.trim(),
+				setDate: (elem, data) => {
+					// const txtNode = elem.nextSibling;
+					elem.nextSibling.remove();
+					return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, opts));
+				},
+			});
+			const zegar = document.querySelector(`a.dropdown-trigger.time.dropdown-toggle`);
+			zegar?.setAttribute("title", "It is currently " + frycAPI.printDate(new Date(zegar.getAttribute("title").replace("It is currently ", ""))));
+			// const t2 = performance.now(); frycAPI.perf(t1, t2);
+			// #endregion
+			// #region //* Ukrycie nic nie wnoszących tytułów postów
+			const titleElem = document.querySelector(`h2.topic-title > a, h2.posting-title > a`);
+			if (titleElem !== null) {
+				const baseTitle = "Re: " + (titleElem.innerText = titleElem.innerText.trim());
+				frycAPI.forEach(`.postbody h3 > a`, (daElem, daI, daArr) => {
+					const tNode = daElem.frycAPI_getFirstTextNode();
+					if ((tNode.textContent = tNode.textContent.trim()) === baseTitle) {
+						daElem.frycAPI_addClass("dspNone");
+					}
+				});
+			}
+			// #endregion
+			// #region //* Ukrycie panelu emoji
+			const smileyBox = document.getElementById("smiley-box");
+			if (smileyBox !== null) {
+				document.querySelector(`#format-buttons:has(select[name="addbbcode_codeboxplus"])`)?.appendChild(
+					document.createElement("div")
+					.frycAPI_addClass("smiley-control")
+					.frycAPI_setInnerHTML("Show smiles")
+					.frycAPI_addEventListener("click", function () {
+						if (smileyBox.classList.toggle("dspNone")) {
+							this.frycAPI_setInnerHTML("Show smiles");
+						} else {
+							this.frycAPI_setInnerHTML("Hide smiles");
+						}
+					})
+				);
+				smileyBox.classList.toggle("dspNone");
+			}
+			// #endregion
+			// #region //* Przeniesienie postów ponad pole tekstowe
+			const topicReview = document.getElementById("topicreview");
+			if (topicReview !== null) {
+				const review = document.getElementById("review");
+				review.querySelector(`span.right-box > a`).click();
+				review.classList.add("dspNone");
+				document.getElementById("postform").insertAdjacentElement("afterbegin", topicReview);
+				const preview = document.getElementById("preview");
+				if (preview !== null) {
+					preview.scrollIntoView();
+				} else {
+					topicReview.querySelector(`.post:not(.post ~ .post)`).scrollIntoView();
+				}
+			}
+			// #endregion
+			// #region //* Dodanie przycisku Top do Nav-Baru
+			document.querySelector(`ul.leftside > li.tab.home`)?.insertAdjacentHTML("afterend",
+				`<li class="tab top responsive-cloned-item" data-responsive-class="small-icon" title="top"><a class="nav-link" href="#top" data-navbar-reference="Top">Top</a></li>`
+			);
+			// #endregion
+			// #region //* Sprawdzenie które posty mają Text jako pierwszy Node
+			frycAPI.forEach(`.postbody .content`, (daElem, daI, daArr) => {
+				if (daElem.firstChild.frycAPI_isText) {
+					daElem.frycAPI_addClass("pierwszy-node-to-text");
 				}
 			});
-		}
-		// #endregion
-		// #region //* Ukrycie panelu emoji
-		const smileyBox = document.getElementById("smiley-box");
-		if (smileyBox !== null) {
-			document.querySelector(`#format-buttons:has(select[name="addbbcode_codeboxplus"])`)?.appendChild(
-				document.createElement("div")
-				.frycAPI_addClass("smiley-control")
-				.frycAPI_setInnerHTML("Show smiles")
-				.frycAPI_addEventListener("click", function () {
-					if (smileyBox.classList.toggle("dspNone")) {
-						this.frycAPI_setInnerHTML("Show smiles");
-					} else {
-						this.frycAPI_setInnerHTML("Hide smiles");
-					}
-				})
-			);
-			smileyBox.classList.toggle("dspNone");
-		}
-		// #endregion
-		// #region //* Przeniesienie postów ponad pole tekstowe
-		const topicReview = document.getElementById("topicreview");
-		if (topicReview !== null) {
-			const review = document.getElementById("review");
-			review.querySelector(`span.right-box > a`).click();
-			review.classList.add("dspNone");
-			document.getElementById("postform").insertAdjacentElement("afterbegin", topicReview);
-			const preview = document.getElementById("preview");
-			if (preview !== null) {
-				preview.scrollIntoView();
-			} else {
-				topicReview.querySelector(`.post:not(.post ~ .post)`).scrollIntoView();
-			}
-		}
-		// #endregion
-		// #region //* Dodanie przycisku Top do Nav-Baru
-		document.querySelector(`ul.leftside > li.tab.home`)?.insertAdjacentHTML("afterend",
-			`<li class="tab top responsive-cloned-item" data-responsive-class="small-icon" title="top"><a class="nav-link" href="#top" data-navbar-reference="Top">Top</a></li>`
-		);
-		// #endregion
-		// #region //* Sprawdzenie które posty mają Text jako pierwszy Node
-		frycAPI.forEach(`.postbody .content`, (daElem, daI, daArr) => {
-			if (daElem.firstChild.frycAPI_isText) {
-				daElem.frycAPI_addClass("pierwszy-node-to-text");
-			}
+			// #endregion
+			// #region //* Przypisanie konkrentych wymiarów obrazom profilowym
+			frycAPI.forEach(`img.avatar`, (daElem, daI, daArr) => {
+				daElem.style.width = daElem.getAttribute("width") + "px !important";
+				daElem.style.height = daElem.getAttribute("height") + "px !important";
+			});
+			// #endregion
+			// #region //* Sortowanie tabeli
+			// frycAPI.forEach(`table:has(tr > th):has(tr > td)`, (daElem, daI, daArr) => {
+			// 	daElem.querySelector(`th.posts`).setAttribute("krytSort", "numeric");
+			// 	frycAPI.makeTableSortable(daElem);
+			// });
+			// #endregion
+			// #region //* Poprawienie linka Board index
+			const bIdx = document.querySelector(`a[title="Board index"]`);
+			bIdx && (bIdx.innerHTML = `<span class="my-special-class">&#xE021;</span><span>Board index</span>`); // + bIdx.innerHTML
+			// #endregion
+			// #region //*
+			// #endregion
+			// const t2 = performance.now(); frycAPI.perf(t1, t2);
 		});
-		// #endregion
-		// #region //* Przypisanie konkrentych wymiarów obrazom profilowym
-		frycAPI.forEach(`img.avatar`, (daElem, daI, daArr) => {
-			daElem.style.width = daElem.getAttribute("width") + "px !important";
-			daElem.style.height = daElem.getAttribute("height") + "px !important";
-		});
-		// #endregion
-		// #region //* Sortowanie tabeli
-		// frycAPI.forEach(`table:has(tr > th):has(tr > td)`, (daElem, daI, daArr) => {
-		// 	daElem.querySelector(`th.posts`).setAttribute("krytSort", "numeric");
-		// 	frycAPI.makeTableSortable(daElem);
-		// });
-		// #endregion
-		// #region //* Poprawienie linka Board index
-		const bIdx = document.querySelector(`a[title="Board index"]`);
-		bIdx && (bIdx.innerHTML = `<span class="my-special-class">&#xE021;</span><span>Board index</span>`); // + bIdx.innerHTML
-		// #endregion
-		// #region //*
-		// #endregion
-		// const t2 = performance.now(); frycAPI.perf(t1, t2);
-	});
+	}
 } else if (1 && frycAPI_host("www.calculator.net")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.rightresult svg g[style="paint-order: stroke;stroke: #fff;stroke-width: 2px;"] {

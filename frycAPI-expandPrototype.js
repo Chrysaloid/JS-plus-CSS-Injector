@@ -341,6 +341,21 @@ frycAPI_expandPrototype(Number, "frycAPI_le", function (num) {
 	frycAPI_expandPrototype(HTMLCollection, str, Array.prototype[str]);
 });
 frycAPI_expandPrototype(HTMLCollection, "forEach", Array.prototype.forEach);
+[
+	"every",
+	"filter",
+	"forEach",
+	"map",
+	"reduce",
+	"reduceRight",
+	"some",
+	"toReversed",
+	"toSorted",
+	"toSpliced",
+	"with",
+].forEach(str => {
+	frycAPI_expandPrototype(String, str, Array.prototype[str]);
+});
 
 /* This might not be usefull
 [
