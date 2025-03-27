@@ -1575,7 +1575,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			#Include C:\\Users\\Fryderyk\\Desktop\\AutoHotKey\\VSC_Go_To_Line_Base.ahk
 			openVSCode("${host}")
 		`;
-		frycAPI.downloadTxt(frycAPI.minifyCodeSimple(code), "VSC_Go_To_Line.ahk");
+		frycAPI.downloadTxt(frycAPI.minifyCodeSimple(code), "VSC_Go_To_Line.ahk_frycAPI");
 	}, // frycAPI.VSC_Go_To_Line();
 	retryIf(condition, interval, action) { // function, time [ms], function | Should be read as "Retry if condition fails"
 		if (condition()) {
@@ -6492,7 +6492,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 			.icon-home.breadcrumbs::after {
 				content: "";
 			}
-	
+
 			.post > .inner {
 				display: flex;
 				width: 100%;
@@ -6581,7 +6581,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 					}
 				}
 			}
-	
+
 			.imageset.icon_solved_post, .imageset.icon_solved_head {
 				background-image: url('${frycAPI.getResURL("Correct icon.png")}');
 				background-size: contain;
@@ -7739,7 +7739,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			:has(>#wtg_meteorogram_bottom){
 				display: none;
 			}
-	
+
 			.myButt {
 				position: absolute;
 				right: calc(100% + 15px);
@@ -9833,7 +9833,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				margin: 0 !important;
 			}
 		}
-		
+
 		body, html {
 			height: fit-content !important;
 		}
