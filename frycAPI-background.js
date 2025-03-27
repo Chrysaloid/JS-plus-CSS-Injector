@@ -56,8 +56,8 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 				case "downloadURL": return void chrome.downloads.download({ url: data.url, filename: data.filename });
 				case "injectStyle": return chrome.scripting.insertCSS(defineStyle(data, sender));
 				case "defineStyle": return void defineStyle(data, sender);
-				case "injectStyleAgain": return chrome.scripting.insertCSS(injectedStyles[data.id]);
-				case "removeStyle": return chrome.scripting.removeCSS(injectedStyles[data.id]);
+				case "injectStyleAgain": return injectedStyles.hasOwnProperty(data.id) && chrome.scripting.insertCSS(injectedStyles[data.id]);
+				case "removeStyle": return injectedStyles.hasOwnProperty(data.id) && chrome.scripting.removeCSS(injectedStyles[data.id]);
 				case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
 					const obj = result[data.UUID];
 					if (obj !== undefined) {

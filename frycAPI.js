@@ -423,9 +423,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			const css = frycAPI.minifyCSS(style); // .frycAPI_log
 			let styleElem;
 			const elevated = opts?.elevated;
-			if (elevated === true) {
+			if (elevated) {
 				// ta opcja potrafi obejść błąd: Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self'"
-				frycAPI.sendEventToBackground(opts?.state === false ? "defineStyle" : "injectStyle", { style: css, id: id });
+				frycAPI.sendEventToBackground(!opts?.state ? "defineStyle" : "injectStyle", { style: css, id: id });
 			} else {
 				styleElem = frycAPI.elem("style").attr("id", id)._;
 				styleElem.textContent = css;
@@ -435,11 +435,11 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				} else {
 					document.documentElement.appendChild(styleElem);
 				}
-				if (opts?.state === false) styleElem.disabled = true; // for some reason setting disabled to true disables the style only when it is in the DOM, so we have to set it AFTER we instert it
+				if (!opts?.state) styleElem.disabled = true; // for some reason setting disabled to true disables the style only when it is in the DOM, so we have to set it AFTER we instert it
 			}
 			return new frycAPI_StyleState({ id, styleElem, state: opts?.state, elevated }); // eslint-disable-line object-shorthand
 		}
-	}, // frycAPI.injectStyleNormal(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true });
+	}, // frycAPI.injectStyle(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true });
 	minifyCSS(style) {
 		return frycAPI.removeCommentsSimple(frycAPI.minifyCodeSimple(style));
 	},
@@ -7380,6 +7380,8 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const messageItem = `[role="menu"] [aria-hidden="false"] div[role="menuitem"][aria-labelledby]`;
 	const profileItem = `[role="menu"] [aria-hidden="false"] a[role="menuitem"][aria-labelledby]`;
 	const userName = `span.x193iq5w.xeuugli.x13faqbe.x1vvkbs.xt0psk2.x1xmvt09.x6prxxf.xk50ysn.xzsf02u.xq9mrsl`;
+	const threadList = `[aria-label="Lista wątków"]`;
+	const sidePanelTopLevel = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x1qjc9v5.xozqiw3.x1q0g3np.xexx8yu.x85a59c > .x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x1iyjqo2.xs83m0k.x8mqhxd.x6ikm8r.x10wlt62.xcrg951.xm0m39n.xzhurro.x6gs93r.xpyiiip.x88v6c3.x1qpj6lr.xdhzj85.x1bc3s5a.xczebs5.x4pn7vq.xe95u6g`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -7565,6 +7567,14 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 
 		${userName} {
 			user-select: all;
+		}
+
+		/* Mirrored Messenger */
+		${sidePanelTopLevel} {
+			order: -1;
+		}
+		${threadList} {
+			order: 2;
 		}
 	`);
 
