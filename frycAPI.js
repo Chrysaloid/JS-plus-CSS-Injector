@@ -417,27 +417,27 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		frycAPI.styleStr += style.trim() + "\n";
 		frycAPI.styleOpts = opts;
 	},
-	injectStyle(style, opts) { // wkleja styl do strony
+	injectStyle(style, opts = {}) { // wkleja styl do strony
 		if ((style = style.trim()).length) {
-			const id = opts?.id ?? "frycAPI_styleNormal" + ++frycAPI.injectStyleNormalNum;
+			opts.id ??= "frycAPI_styleNormal" + (++frycAPI.injectStyleNormalNum);
+			opts.elevated ??= false;
+			opts.state ??= true;
 			const css = frycAPI.minifyCSS(style); // .frycAPI_log
 			let styleElem;
-			const elevated = opts?.elevated;
-			if (elevated) {
+			if (opts.elevated) {
 				// ta opcja potrafi obejść błąd: Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self'"
-				frycAPI.sendEventToBackground(!opts?.state ? "defineStyle" : "injectStyle", { style: css, id: id });
+				frycAPI.sendEventToBackground(opts.state ? "injectStyle" : "defineStyle", { style: css, id: opts.id });
 			} else {
-				styleElem = frycAPI.elem("style").attr("id", id)._;
+				styleElem = frycAPI.elem("style").attr("id", opts.id)._;
 				styleElem.textContent = css;
-				const elem = opts?.elem;
-				if (elem instanceof Node) {
-					elem.appendChild(styleElem);
+				if (opts.elem instanceof Node) {
+					opts.elem.appendChild(styleElem);
 				} else {
 					document.documentElement.appendChild(styleElem);
 				}
-				if (!opts?.state) styleElem.disabled = true; // for some reason setting disabled to true disables the style only when it is in the DOM, so we have to set it AFTER we instert it
+				if (!opts.state) styleElem.disabled = true; // for some reason setting disabled to true disables the style only when it is in the DOM, so we have to set it AFTER we instert it
 			}
-			return new frycAPI_StyleState({ id, styleElem, state: opts?.state, elevated }); // eslint-disable-line object-shorthand
+			return new frycAPI_StyleState({ id: opts.id, styleElem: styleElem, state: opts.state, elevated: opts.elevated });
 		}
 	}, // frycAPI.injectStyle(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true });
 	minifyCSS(style) {
@@ -10866,6 +10866,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			frycAPI.downLoadVideoFrame(videoEl, (filename || "Patreon Video - " + frycAPI.printDateForFileName()) + " - " + videoEl.currentTime.toFixed(3) + " s.png");
 		});
 	});
+} else if (frycAPI_host("pypi.org")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+	`, { elevated: true });
 }
 // Code-Lens-Action insert-snippet IF template
 
