@@ -1757,6 +1757,12 @@ try {
 
 // #region //* IFy  1
 if (1) { //* Globalne funkcje
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			tab-size: 3 !important;
+		}
+	`);
+
 	(frycAPI.beforeLoad = function () {
 		// #region //* color scheme only light
 		if (frycAPI.colorSchemeDark) {
