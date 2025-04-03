@@ -3100,11 +3100,13 @@ if (1 && frycAPI_host("192.168.1.1")) {
 		}
 		div.post div.postInfo span.postNum {
 			margin-left: 3px;
+			white-space: nowrap;
 		}
 		span.dateTime {
 			margin-left: 3px;
 			/* font-family: Source Code Fryc; */
 			/* font-size: 13px; */
+			white-space: nowrap;
 		}
 		span.dateTime > span {
 			display: none;
@@ -9765,6 +9767,23 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				transparent calc(100% - var(--off-set))
 			);
 		}
+
+		/* Indentation lines attempt
+		.react-file-line.html-div {
+			--initial-color: hsl(0, 0%, 30%);
+			--color: var(--borderColor-default, var(--color-border-default, #30363d));
+			--period: 20px;
+			overflow: hidden;
+			> span:first-child::before {
+				content: " ";
+				color: transparent;
+				position: absolute;
+				background: repeating-linear-gradient(to left, transparent 0px, transparent calc(var(--period) - 1px), var(--color) calc(var(--period) - 1px), var(--color) var(--period));
+				width: 300px;
+				transform: translateX(-100%);
+			}
+		}
+		*/
 	`);
 
 	frycAPI.onLoadSetter(() => {

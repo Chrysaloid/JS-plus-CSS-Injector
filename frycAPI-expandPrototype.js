@@ -80,6 +80,9 @@ frycAPI_expandPrototype(Object, "frycAPI_toJSON", function () {
 frycAPI_expandPrototype(String, "JSON", function () {
 	return JSON.parse(this);
 }, true);
+frycAPI_expandPrototype(String, "specialTrim", function () {
+	return this.replaceAll(/^[\x00-\x20\x7F-\xA0]+|[\x00-\x20\x7F-\xA0]+$/g, "");
+});
 frycAPI_expandPrototype(Array, "frycAPI_shuffle", function () {
 	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	let currentIndex = this.length, randomIndex;
