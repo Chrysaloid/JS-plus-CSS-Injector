@@ -1674,24 +1674,24 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			case "forward": {
 				getNextEl = baseEl => {
 					if (baseEl.hasAttribute(visited)) {
-						const nextEl = baseEl.nextEl ?? baseEl.parent;
+						const nextEl = baseEl.nextEl ?? baseEl.parentElement;
 						return nextEl ? getNextEl(nextEl) : null;
 					} else {
 						baseEl.setAttribute(visited, "");
 					}
-					return baseEl.firstEl ?? baseEl.nextEl ?? baseEl.parent;
+					return baseEl.firstEl ?? baseEl.nextEl ?? baseEl.parentElement;
 				};
 				break;
 			}
 			case "backward": {
 				getNextEl = baseEl => {
 					if (baseEl.hasAttribute(visited)) {
-						const nextEl = baseEl.prevEl ?? baseEl.parent;
+						const nextEl = baseEl.prevEl ?? baseEl.parentElement;
 						return nextEl ? getNextEl(nextEl) : null;
 					} else {
 						baseEl.setAttribute(visited, "");
 					}
-					return baseEl.lastEl ?? baseEl.prevEl ?? baseEl.parent;
+					return baseEl.lastEl ?? baseEl.prevEl ?? baseEl.parentElement;
 				};
 				break;
 			}
@@ -1703,7 +1703,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			}
 			case "up": {
 				getNextEl = baseEl => {
-					return baseEl.parent;
+					return baseEl.parentElement;
 				};
 				break;
 			}
@@ -7621,9 +7621,9 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			let fullName = container.nthParent(5).querySelector(personPhoto)?.alt;
 			if (!fullName) {
 				// debugger;
-				let messageEl = container.parent;
-				while (messageEl.parent.notMatches(messageList)) { // Go up until messageEl is a topmost message container
-					messageEl = messageEl.parent;
+				let messageEl = container.parentElement;
+				while (messageEl.parentElement.notMatches(messageList)) { // Go up until messageEl is a topmost message container
+					messageEl = messageEl.parentElement;
 				}
 				while (!(fullName = messageEl.querySelector(personPhoto)?.alt)) { // Go to the next message untile photo with alt attribute is found
 					messageEl = messageEl.nextEl;

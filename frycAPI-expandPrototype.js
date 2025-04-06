@@ -264,9 +264,6 @@ frycAPI_expandPrototype(Element, "prevEl", function () {
 frycAPI_expandPrototype(Element, "nextEl", function () {
 	return this.nextElementSibling;
 }, true);
-frycAPI_expandPrototype(Element, "parent", function () {
-	return this.parentElement;
-}, true);
 frycAPI_expandPrototype(Element, "firstEl", function () {
 	return this.firstElementChild;
 }, true);
