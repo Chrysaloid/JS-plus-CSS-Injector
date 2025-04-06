@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 async function getActiveTarget() {
 	return { tabId: (await chrome.tabs.query({ active: true, currentWindow: true }))[0].id };
 } // const tabID = await getActiveTarget();

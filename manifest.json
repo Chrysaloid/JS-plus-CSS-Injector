@@ -1,4 +1,4 @@
-{
+﻿{
 	"manifest_version": 3,
 	"name": "JS + CSS Injector",
 	"version": "1.0.0",
@@ -27,6 +27,7 @@
 		"unlimitedStorage",
 		"declarativeNetRequest",
 		"declarativeNetRequestFeedback",
+		"offscreen",
 		"windows"
 	],
 	"host_permissions": ["<all_urls>"],

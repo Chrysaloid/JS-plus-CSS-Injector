@@ -368,7 +368,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	myStyleState: null,
 	myStyleManualFunc: null,
 	styleStr: "",
-	styleOpts: undefined,
+	styleOpts: {},
 	// #endregion
 	id: document.currentScript.getAttribute("script-id"),
 	funcGroupArr: [],
@@ -413,7 +413,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	sleep(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms)); // eslint-disable-line no-promise-executor-return
 	}, // await frycAPI.sleep(1);
-	injectStyleOnLoad(style, opts) { // wkleja styl do strony w momencie w którym pojawi się element body strony
+	injectStyleOnLoad(style, opts = {}) { // wkleja styl do strony w momencie w którym pojawi się element body strony
 		frycAPI.styleStr += style.trim() + "\n";
 		frycAPI.styleOpts = opts;
 	},
@@ -634,14 +634,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	removeLast(str, N) {
 		return str.slice(0, -N);
 	}, // str = frycAPI.removeLast(str, N);
-	printRelTime(epoch_ms, obj) {
-		const czyDiff   = obj?.czyDiff   ?? true;
-		const lang      = obj?.lang      ?? "ang";
-		const compact   = obj?.compact   ?? 0;
-		const space     = (obj?.space    ?? true) ? " " : "";
-		const ago       = obj?.ago       ?? true;
-		const leftAlign = obj?.leftAlign ?? false;
-		const prec      = obj?.prec      ?? undefined;
+	printRelTime(epoch_ms, obj = {}) {
+		const czyDiff   = obj.czyDiff   ?? true;
+		const lang      = obj.lang      ?? "ang";
+		const compact   = obj.compact   ?? 0;
+		const space     = (obj.space    ?? true) ? " " : "";
+		const ago       = obj.ago       ?? true;
+		const leftAlign = obj.leftAlign ?? false;
+		const prec      = obj.prec      ?? undefined;
 
 		let czas = (czyDiff ? (Date.now() - epoch_ms) : epoch_ms);
 		const znak = Math.sign(czas) === -1 ? "-" : "";
@@ -678,16 +678,16 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return dateFormatter.format(time);
 	}, // const str = frycAPI.printDateIntl(new Date, dtFrmter);
 	dateLocales: "af",
-	getDateFormatter(options, locales) {
-		const defaultUndef = options?.hasOwnProperty("defaultUndef");
+	getDateFormatter(options = {}, locales) {
+		const defaultUndef = options.hasOwnProperty("defaultUndef");
 		return Intl.DateTimeFormat(locales ?? frycAPI.dateLocales, {
 			/* eslint-disable */
-			year  : options?.hasOwnProperty("year"  ) ? options.year   : ( defaultUndef ? undefined : "numeric"),
-			month : options?.hasOwnProperty("month" ) ? options.month  : ( defaultUndef ? undefined : "2-digit"),
-			day   : options?.hasOwnProperty("day"   ) ? options.day    : ( defaultUndef ? undefined : "2-digit"),
-			hour  : options?.hasOwnProperty("hour"  ) ? options.hour   : ( defaultUndef ? undefined : "2-digit"),
-			minute: options?.hasOwnProperty("minute") ? options.minute : ( defaultUndef ? undefined : "2-digit"),
-			second: options?.hasOwnProperty("second") ? options.second : ( defaultUndef ? undefined : "2-digit"),
+			year  : options.hasOwnProperty("year"  ) ? options.year   : ( defaultUndef ? undefined : "numeric"),
+			month : options.hasOwnProperty("month" ) ? options.month  : ( defaultUndef ? undefined : "2-digit"),
+			day   : options.hasOwnProperty("day"   ) ? options.day    : ( defaultUndef ? undefined : "2-digit"),
+			hour  : options.hasOwnProperty("hour"  ) ? options.hour   : ( defaultUndef ? undefined : "2-digit"),
+			minute: options.hasOwnProperty("minute") ? options.minute : ( defaultUndef ? undefined : "2-digit"),
+			second: options.hasOwnProperty("second") ? options.second : ( defaultUndef ? undefined : "2-digit"),
 			/* eslint-enable */
 		});
 	}, // const dtFrmter = frycAPI.getDateFormatter({ year: "2-digit" });
@@ -926,19 +926,19 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 	}, // await frycAPI.parseXML(someXMLStr)
 	createMutObs(callBack, objOpts = {}) { // Mutation Observer
-		// runCallBack = true, elem = document.body, options = { childList: true, subtree: true } // Old
+		const opts = objOpts.options ?? {};
 		const options = {
-			childList            : objOpts.options?.childList             ?? true,
-			subtree              : objOpts.options?.subtree               ?? true,
-			attributes           : objOpts.options?.attributes            ?? false,
-			attributeFilter      : objOpts.options?.attributeFilter       ?? undefined,
-			attributeOldValue    : objOpts.options?.attributeOldValue     ?? false,
-			characterData        : objOpts.options?.characterData         ?? false,
-			characterDataOldValue: objOpts.options?.characterDataOldValue ?? false,
+			childList            : opts.childList             ?? true,
+			subtree              : opts.subtree               ?? true,
+			attributes           : opts.attributes            ?? false,
+			attributeFilter      : opts.attributeFilter       ?? undefined,
+			attributeOldValue    : opts.attributeOldValue     ?? false,
+			characterData        : opts.characterData         ?? false,
+			characterDataOldValue: opts.characterDataOldValue ?? false,
 		};
-		const elem = objOpts.elem ?? document.body;
-		const runCallBack = objOpts.runCallBack ?? true;
-		const asyncCallBack = objOpts.async ?? false;
+		const elem          = objOpts.elem        ?? document.body;
+		const runCallBack   = objOpts.runCallBack ?? true;
+		const asyncCallBack = objOpts.async       ?? false;
 
 		let mut;
 		if (asyncCallBack) {
@@ -964,27 +964,28 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		} else {
 			mut.observe(elem, options);
 		}
+
 		return mut;
 	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runCallBack: true, elem: document.body, options: { childList: true, subtree: true } });
-	setDefaultDate(selector, options) { // { getDate: 111, setDate: 111, dateTitle: 111 }
+	setDefaultDate(selector, options = {}) { // { getDate: 111, setDate: 111, dateTitle: 111 }
 		// flagowe zastosowanie w www.autohotkey.com
 		const sel = document.querySelectorAll(`:is(${selector.trim()}):not(.lepszyCzasParent)`);
 		if (sel.length) {
 			const getDate = (() => {
-				switch (options?.getDate) {
+				switch (options.getDate) {
 					case "txt": return elem => elem.innerText;
 					case "html": return elem => elem.innerHTML;
 					case "content": return elem => elem.textContent;
 					case "attr":
 					case undefined: return elem => elem.getAttribute("datetime");
-					default: return options?.getDate;
+					default: return options.getDate;
 				}
 			})();
-			const setDate = options?.setDate ?? frycAPI.setDefaultDateText;
-			const dateEnumMode = options?.dateEnumMode;
-			const dateEnumStyle = options?.dateEnumStyle;
-			const customStyle = options?.customStyle ?? "";
-			const dateOpts = options?.dateOpts;
+			const setDate = options.setDate ?? frycAPI.setDefaultDateText;
+			const dateEnumMode = options.dateEnumMode;
+			const dateEnumStyle = options.dateEnumStyle;
+			const customStyle = options.customStyle ?? "";
+			const dateOpts = options.dateOpts;
 			sel.forEach(daElem => {
 				const data = new Date(getDate(daElem));
 				if (frycAPI.isValidDate(data)) {
@@ -1025,8 +1026,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	insertDefaultDateText(elem, position, data, dateOpts) {
 		return elem.frycAPI_insertHTML(position, frycAPI.getDefaultDateText(data, dateOpts));
 	},
-	getDefaultDateText(data, dateOpts) {
-		return frycAPI.getDefaultDateHTML(frycAPI.printDate(data, dateOpts?.printDate), frycAPI.printRelTime(data, dateOpts?.printRelTime));
+	getDefaultDateText(data, dateOpts = {}) {
+		return frycAPI.getDefaultDateHTML(frycAPI.printDate(data, dateOpts.printDate), frycAPI.printRelTime(data, dateOpts.printRelTime));
 	},
 	getDefaultDateHTML(absCzas, relCzas) {
 		return /*html*/`<span class="lepszyCzas"><span class="abs-czas">${absCzas}</span><span class="myślnik-czas"> - </span><span class="rel-czas">${relCzas}</span></span>`;
@@ -1463,13 +1464,13 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const obj = {
 			name: root.nodeName,
 		};
-		if (root.attributes?.length !== 0) {
+		if (root.attributes?.length) {
 			obj.attributes = {};
 			root.attributes.forEach(attrib => {
 				obj.attributes[attrib.name] = attrib.value;
 			});
 		}
-		if (root.childElementCount !== 0) {
+		if (root.childElementCount) {
 			obj.children = [];
 			root.children.forEach(node => {
 				obj.children.push(frycAPI.xmlObjToJsObj(node));
@@ -1587,10 +1588,10 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	mockMarkup(inStr) {
 		let outStr = "";
 		for (let i = 0; i < inStr.length; i++) {
-			if (i % 2 === 0) {
-				outStr += inStr[i].toLowerCase();
-			} else {
+			if (i % 2) {
 				outStr += inStr[i].toUpperCase();
+			} else {
+				outStr += inStr[i].toLowerCase();
 			}
 		}
 		loguj(outStr);
@@ -1740,7 +1741,7 @@ frycAPI.dateFormatterForFileName = frycAPI.getDateFormatter();
 frycAPI.dateOptsNoTime = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
 // #region //* frycAPI.createHTML
 try {
-	if (!frycAPI_host("teams.microsoft.com") && window?.trustedTypes?.createPolicy) {
+	if (!frycAPI_host("teams.microsoft.com", "vscode.dev") && window?.trustedTypes?.createPolicy) {
 		frycAPI.escapeHTMLPolicy = trustedTypes.createPolicy("safeInnerHtml", {
 			createHTML: str => str,
 		});
@@ -6626,7 +6627,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 			}
 			*/
 			// const t1 = performance.now();
-			const opts = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
+			const opts = frycAPI.dateOptsNoTime;
 			frycAPI.setDefaultDate(`
 				.postbody p.author > a,
 				cite > .responsive-hide,
@@ -10735,7 +10736,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			height: 1200px !important;
 		}
 	`);
-} else if (1 && frycAPI_host("store.steampowered.com")) {
+} else if (0 && frycAPI_host("store.steampowered.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 	`);
 
@@ -10907,12 +10908,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 // #region //* Koniec
 if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // dodanie stylu z aktywnego ifa
 	frycAPI.createMutObs(() => {
-		if (document.body !== null) {
-			const state = frycAPI.styleOpts?.state;
+		if (document.body) {
+			const state = frycAPI.styleOpts.state;
 			frycAPI.myStyleState = frycAPI.injectStyle(frycAPI.styleStr, {
 				id: "frycAPI_myStyle",
-				elevated: frycAPI.styleOpts?.elevated,
-				elem: frycAPI.styleOpts?.elem,
+				elevated: frycAPI.styleOpts.elevated,
+				elem: frycAPI.styleOpts.elem,
 				state: state,
 			});
 			if (state === false) frycAPI.myStyleManualFunc.setState(0);

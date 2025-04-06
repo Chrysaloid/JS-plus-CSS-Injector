@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 /* // Creating code snippets for VSC
 const STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
