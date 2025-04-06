@@ -243,9 +243,9 @@ class frycAPI_StyleState extends Object {
 		const me = this;
 		me.state = Boolean(obj.state ?? true);
 		me.id = obj.id;
-		me.eventObj = { style: obj.style, allFrames: obj.allFrames };
 
 		if (obj.elevated === true) {
+			me.eventObj = { style: obj.style, allFrames: obj.allFrames };
 			me.on = async function () {
 				if (me.state !== true) {
 					await frycAPI.sendEventToBackground("injectStyle", me.eventObj); // eslint-disable-line no-use-before-define
@@ -451,7 +451,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				allFrames: opts.allFrames,
 			});
 		}
-	}, // frycAPI.injectStyle(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true });
+	}, // frycAPI.injectStyle(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true, allFrames: false });
 	minifyCSS(style) {
 		return frycAPI.removeCommentsSimple(frycAPI.minifyCodeSimple(style));
 	},
@@ -1774,7 +1774,7 @@ if (1) { //* Globalne funkcje
 		* {
 			tab-size: 3 !important;
 		}
-	`);
+	`, { elevated: true, allFrames: true });
 
 	(frycAPI.beforeLoad = function () {
 		// #region //* color scheme only light
