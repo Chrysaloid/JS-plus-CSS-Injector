@@ -1,8 +1,10 @@
-﻿/* eslint-disable no-extra-semi, require-atomic-updates */
+﻿/* eslint-disable no-extra-semi */
 "use strict";
 
 const log = console.log;
 
+// #region Unused chrome.storage.session wrapper
+/* // This someday might be useful...
 const varDefaults = { // Global persistent variables. Can't be null or undefined
 	injectedStyles: {},
 	test: 0,
@@ -39,7 +41,9 @@ async function getSetVar(name, callback) { // callback will get value and should
 	readWrite = null;
 	return newVal;
 }
+*/
 
+/* // Left as a example usage of getSetVar
 function defineStyle(data, sender) {
 	const CSSInjection = {
 		css: data.style,
@@ -50,6 +54,20 @@ function defineStyle(data, sender) {
 		return injectedStyles;
 	});
 	return CSSInjection;
+}
+*/
+
+/* // Left as a example usage of getVar
+case "injectStyleAgain": return chrome.scripting.insertCSS((await getVar("injectedStyles"))[data.id]); // happens second
+case "removeStyle": return chrome.scripting.removeCSS((await getVar("injectedStyles"))[data.id]);      // happens second
+*/
+// #endregion
+
+function CSSInjection(data = {}, sender) {
+	return {
+		css: data.style,
+		target: { tabId: sender.tab.id, allFrames: data.allFrames },
+	};
 }
 chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sender, sendResp) {
 	// log(name);
@@ -69,10 +87,8 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 				return;
 			};
 			case "downloadURL": return void chrome.downloads.download({ url: data.url, filename: data.filename });
-			case "injectStyle": return chrome.scripting.insertCSS(defineStyle(data, sender));                      // happens first
-			case "defineStyle": return void defineStyle(data, sender);                                             // happens first
-			case "injectStyleAgain": return chrome.scripting.insertCSS((await getVar("injectedStyles"))[data.id]); // happens second
-			case "removeStyle": return chrome.scripting.removeCSS((await getVar("injectedStyles"))[data.id]);      // happens second
+			case "injectStyle": return chrome.scripting.insertCSS(CSSInjection(data, sender));
+			case "removeStyle": return chrome.scripting.removeCSS(CSSInjection(data, sender));
 			case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
 				const obj = result[data.UUID];
 				if (obj) {
@@ -108,16 +124,13 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 				log(data);
 				return data;
 			};
-			case "test2": {
-				return getSetVar("test", test => test + 1);
-			};
 			default: throw new Error(`There is no event with name "${name}". Received data: ${data}`);
 		}})(); // eslint-disable-line brace-style
 		sendResp({ error: false, data: dataOut });
 	} catch (err) {
 		sendResp({ error: true, errObj: { message: err.message, stack: err.stack } });
 	}
-	return true; // konieczne jeśli chcemy wysłać odpowiedź za pomocą sendResp
+	return true; // Necessary if we want to send a response using sendResp
 });
 
 function findHeader(headers, headerStr) {
@@ -141,6 +154,7 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 	});
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
 
+// #region Unused
 /* // As of Manifest V3, this is only available to policy installed extensions.
 //* This method breaks on this URL http://www.ee.ic.ac.uk/pcheung/teaching/DE1_EE/stores/sg90_datasheet.pdf
 chrome.webRequest.onHeadersReceived.addListener(details => {
@@ -172,3 +186,4 @@ async function getActiveTarget() {
 	return { tabId: (await chrome.tabs.query({ active: true, currentWindow: true }))[0].id };
 } // const tabID = await getActiveTarget();
 */
+// #endregion

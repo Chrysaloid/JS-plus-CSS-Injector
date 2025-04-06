@@ -48,7 +48,7 @@ class frycAPI_Normal extends frycAPI_ManualFunc {
 }
 class frycAPI_State extends frycAPI_ManualFunc {
 	stateDesc; numStates; state;
-	prevState; // poprzedni w czasie
+	prevState; // Previous in time
 	constructor(obj) {
 		super(obj);
 		this.__setStateDescBase(obj.stateDesc);
@@ -62,7 +62,7 @@ class frycAPI_State extends frycAPI_ManualFunc {
 	nextState(jump = 1) {
 		return this.setState(this.state + jump);
 	}
-	setPrevState(jump = 1) { // poprzedni na liście
+	setPrevState(jump = 1) { // Previous on the list
 		return this.setState(this.state - jump);
 	}
 	/* There was an attempt
@@ -78,7 +78,7 @@ class frycAPI_State extends frycAPI_ManualFunc {
 		return this.state;
 	}
 	*/
-	__setStateDescBase(desc) { // underscores necessary to indicate that this is a protected method, not intended to be used outside class definition
+	__setStateDescBase(desc) { // Underscores necessary to indicate that this is a protected method, not intended to be used outside class definition
 		this.stateDesc = desc?.length?.frycAPI_ge(2) ? desc : [this.name + ": off", this.name + ": on"];
 		this.numStates = this.stateDesc.length;
 	}
@@ -237,31 +237,33 @@ class frycAPI_FuncGroup extends Object {
 	}
 }
 class frycAPI_StyleState extends Object {
-	id; state; styleElem; on; off; toggle;
+	id; state; styleElem; on; off; toggle; eventObj;
 	constructor(obj) {
 		super();
 		const me = this;
 		me.state = Boolean(obj.state ?? true);
 		me.id = obj.id;
+		me.eventObj = { style: obj.style, allFrames: obj.allFrames };
+
 		if (obj.elevated === true) {
 			me.on = async function () {
 				if (me.state !== true) {
-					await frycAPI.sendEventToBackground("injectStyleAgain", { id: me.id }); // eslint-disable-line no-use-before-define
+					await frycAPI.sendEventToBackground("injectStyle", me.eventObj); // eslint-disable-line no-use-before-define
 					me.state = true; // eslint-disable-line require-atomic-updates
 				}
 			};
 			me.off = async function () {
 				if (me.state !== false) {
-					await frycAPI.sendEventToBackground("removeStyle", { id: me.id }); // eslint-disable-line no-use-before-define
+					await frycAPI.sendEventToBackground("removeStyle", me.eventObj); // eslint-disable-line no-use-before-define
 					me.state = false; // eslint-disable-line require-atomic-updates
 				}
 			};
 			me.toggle = async function () {
 				if (me.state !== true) {
-					await frycAPI.sendEventToBackground("injectStyleAgain", { id: me.id }); // eslint-disable-line no-use-before-define
+					await frycAPI.sendEventToBackground("injectStyle", me.eventObj); // eslint-disable-line no-use-before-define
 					me.state = true; // eslint-disable-line require-atomic-updates
 				} else {
-					await frycAPI.sendEventToBackground("removeStyle", { id: me.id }); // eslint-disable-line no-use-before-define
+					await frycAPI.sendEventToBackground("removeStyle", me.eventObj); // eslint-disable-line no-use-before-define
 					me.state = false; // eslint-disable-line require-atomic-updates
 				}
 			};
@@ -339,7 +341,7 @@ class frycAPI_Elem extends Object {
 function loguj(...tekst) {
 	console.log(...tekst);
 }
-function temₚ(strings, ...values) { // extract contents of string template literal
+function temₚ(strings, ...values) { // Extract contents of string template literal
 	return [strings, values];
 }
 
@@ -396,7 +398,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				this.setState(0);
 			}
 		},
-		// fixGeneralStateRadioCombo(obj) { // była próba ale metody choć podobne to niestety się różnią
+		// fixGeneralStateRadioCombo(obj) { // There was an attempt but the methods though similar unfortunately are different
 		// },
 	},
 	script: document.currentScript,
@@ -413,20 +415,22 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	sleep(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms)); // eslint-disable-line no-promise-executor-return
 	}, // await frycAPI.sleep(1);
-	injectStyleOnLoad(style, opts = {}) { // wkleja styl do strony w momencie w którym pojawi się element body strony
+	injectStyleOnLoad(style, opts = {}) { // Injects style to the page at the moment when body element is created
 		frycAPI.styleStr += style.trim() + "\n";
 		frycAPI.styleOpts = opts;
 	},
-	injectStyle(style, opts = {}) { // wkleja styl do strony
+	injectStyle(style, opts = {}) { // Injects style to the page
 		if ((style = style.trim()).length) {
 			opts.id ??= "frycAPI_styleNormal" + (++frycAPI.injectStyleNormalNum);
 			opts.elevated ??= false;
 			opts.state ??= true;
+			opts.allFrames ??= false;
 			const css = frycAPI.minifyCSS(style); // .frycAPI_log
 			let styleElem;
-			if (opts.elevated) {
-				// ta opcja potrafi obejść błąd: Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self'"
-				frycAPI.sendEventToBackground(opts.state ? "injectStyle" : "defineStyle", { style: css, id: opts.id });
+
+			if (opts.elevated && opts.state) {
+				// This option is able to workaround this error: Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self'"
+				frycAPI.sendEventToBackground("injectStyle", { style: css, allFrames: opts.allFrames });
 			} else {
 				styleElem = frycAPI.elem("style").attr("id", opts.id)._;
 				styleElem.textContent = css;
@@ -435,9 +439,17 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				} else {
 					document.documentElement.appendChild(styleElem);
 				}
-				if (!opts.state) styleElem.disabled = true; // for some reason setting disabled to true disables the style only when it is in the DOM, so we have to set it AFTER we instert it
+				if (!opts.state) styleElem.disabled = true; // For some reason setting disabled to true disables the style only when it is in the DOM, so we have to set it AFTER we instert it
 			}
-			return new frycAPI_StyleState({ id: opts.id, styleElem: styleElem, state: opts.state, elevated: opts.elevated });
+
+			return new frycAPI_StyleState({
+				id: opts.id,
+				styleElem: styleElem,
+				state: opts.state,
+				elevated: opts.elevated,
+				style: css,
+				allFrames: opts.allFrames,
+			});
 		}
 	}, // frycAPI.injectStyle(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true });
 	minifyCSS(style) {
@@ -495,7 +507,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	zaokrl(val, decimals) {
 		return Number(Math.round(Number(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
 	},
-	clean(node = document.body) { // do usuwania komentarzy
+	clean(node = document.body) { // To delete comment nodes
 		const childNodes = node.childNodes;
 		for (let n = childNodes.length - 1; n >= 0; n--) {
 			const child = childNodes[n];
@@ -506,7 +518,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			}
 		}
 	}, // frycAPI.clean();
-	makeTableSortable(tabElem, trSel = "tr:not(:first-child)", tdSel = "td", thSel = "th") { // Podaj referencję do tablicy
+	makeTableSortable(tabElem, trSel = "tr:not(:first-child)", tdSel = "td", thSel = "th") { // Pass reference to the table element
 		if (tabElem === null) return;
 		const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
 		const sortObj = {
@@ -624,7 +636,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	// #endregion
 	// #region //* Funkcje 2
-	getWorkerURL(myWorkerFun) { // podaj funkcję do tej funkcji
+	getWorkerURL(myWorkerFun = () => {}) {
 		const str = myWorkerFun.toString();
 		return URL.createObjectURL(new Blob([str.substring(
 			str.indexOf("{") + 1,
@@ -691,10 +703,10 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			/* eslint-enable */
 		});
 	}, // const dtFrmter = frycAPI.getDateFormatter({ year: "2-digit" });
-	printDate(date, dateFormatter) { // przyjmuje obiekt typu Date
+	printDate(date = new Date(), dateFormatter) {
 		return frycAPI.printDateIntl(date, dateFormatter ?? frycAPI.dateFormatter).replace(" ", ", ");
 	}, // const str = frycAPI.printDate(new Date());
-	printDateForFileName(date, dateFormatter) { // przyjmuje obiekt typu Date
+	printDateForFileName(date = new Date(), dateFormatter) {
 		return frycAPI.printDateIntl(date, dateFormatter ?? frycAPI.dateFormatterForFileName).replaceAll(":", "꞉");
 	}, // const filename = frycAPI.printDateForFileName(new Date());
 	roughSizeOfObject(object) {
@@ -754,8 +766,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.downloadTxt("Test", "Test.txt");
 	async getMimeType(filename) {
 		const pos = filename.lastIndexOf(".");
-		if (pos === -1) return "text/plain"; // dot not found
-		const fileExt = filename.slice(pos + 1).toLowerCase(); // extract after dot
+		if (pos === -1) return "text/plain"; // Dot not found
+		const fileExt = filename.slice(pos + 1).toLowerCase(); // Extract after dot
 		if (frycAPI.mimeTypes === null) {
 			frycAPI.mimeTypes = {};
 			const mime = await frycAPI.getResData("mime_types.txt");
@@ -861,12 +873,12 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	// #endregion
 	// #region //* Funkcje 3
-	gDriveLinkToImgSrc(link) { // converts Google drive open link to download link which is possible to be src of an img etc.
+	gDriveLinkToImgSrc(link) { // Converts Google drive open link to download link which is possible to be src of an img etc.
 		// return `https://drive.usercontent.google.com/u/0/uc?id=${new URL(link).searchParams.get("id")}&export=download`; // Old
 		// return `drive.google.com/thumbnail?sz=w1000&id=${new URL(link).searchParams.get("id")}`; // Old poprawione
 		return frycAPI.gDriveIdToImgSrc(new URL(link).pathname.replace("/file/d/", "").replace("/view", ""));
 	},
-	gDriveIdToImgSrc(id, width = 1000) { // converts Google drive image id to download link which is possible to be src of an img etc.
+	gDriveIdToImgSrc(id, width = 1000) { // Converts Google drive image id to download link which is possible to be src of an img etc.
 		return `drive.google.com/thumbnail?sz=w${width}&id=${id}`;
 	},
 	isValidDate(d) {
@@ -968,7 +980,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return mut;
 	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runCallBack: true, elem: document.body, options: { childList: true, subtree: true } });
 	setDefaultDate(selector, options = {}) { // { getDate: 111, setDate: 111, dateTitle: 111 }
-		// flagowe zastosowanie w www.autohotkey.com
+		// Flag usage on www.autohotkey.com
 		const sel = document.querySelectorAll(`:is(${selector.trim()}):not(.lepszyCzasParent)`);
 		if (sel.length) {
 			const getDate = (() => {
@@ -1008,7 +1020,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	setDefaultDateText(elem, data, dateOpts) {
 		elem.frycAPI_setInnerHTML(frycAPI.getDefaultDateText(data, dateOpts));
 		return elem.firstElementChild;
-		/* Próba ulepszenia
+		/* Upgrade attempt
 		// https://web.dev/articles/avoid-large-complex-layouts-and-layout-thrashing?utm_source=devtools#avoid-forced-synchronous-layouts
 		elem.textContent = "";
 		const lepCzs = document.createElement("span");
@@ -1292,7 +1304,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		if (elem === undefined) {
 			const iter = ++frycAPI.setDefaultDateEnum.modeIter;
 			(async () => {
-				if (iter < frycAPI.setDefaultDateEnum.modeIter) return; // a newer mode setting was applied so don't apply the old setting
+				if (iter < frycAPI.setDefaultDateEnum.modeIter) return; // A newer mode setting was applied so don't apply the old setting
 				if (setStorage) {
 					frycAPI.setStorage("defaultDateMode", val);
 				} else {
@@ -1398,7 +1410,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	perf(t1, t2, prefix = "") {
 		console.log(`${prefix}${(t2 - t1).toFixed(1)} ms`);
 	},
-	elemFromHTML(htmlString) { // tylko jeżeli root zawiera pojedynczy element
+	elemFromHTML(htmlString) { // Only when root contains only one element
 		const t = document.createElement("template");
 		t.innerHTML = frycAPI.createHTML(htmlString);
 		return t.content.firstElementChild;
@@ -1545,7 +1557,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.setStorage("key", "val");
 	setStorages(obj) {
 		if (frycAPI.UUID === null) return;
-		return frycAPI.sendEventToBackground("setStorage", { UUID: frycAPI.UUID, obj: obj }); // throws error if setting failed
+		return frycAPI.sendEventToBackground("setStorage", { UUID: frycAPI.UUID, obj: obj }); // Throws error if setting failed
 	}, // frycAPI.setStorages({ "key": "val" });
 	getStorage(key) {
 		if (frycAPI.UUID === null) return;
@@ -1581,7 +1593,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	retryIf(condition, interval, action) { // function, time [ms], function | Should be read as "Retry if condition fails"
 		if (condition()) {
 			action();
-		} else { // retry after a delay
+		} else { // Retry after a delay
 			frycAPI.sleep(interval).then(frycAPI.retryIf.bind(null, condition, interval, action));
 		}
 	}, // frycAPI.retryIf(() => a > b, 50, () => {});
@@ -1638,7 +1650,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			}
 		}
 	}, // frycAPI.traverseIframes(window, iframe => { console.log("Found iframe:", iframe); });
-	downLoadVideoFrame(videoEl, filename = frycAPI_host() + " - Video " + videoEl.currentTime.toFixed(3) + " s.png") { // downloads current video frame as png
+	downLoadVideoFrame(videoEl, filename = frycAPI_host() + " - Video " + videoEl.currentTime.toFixed(3) + " s.png") { // Downloads current video frame as png
 		const canvas = document.createElement("canvas");
 		canvas.width = videoEl.videoWidth;
 		canvas.height = videoEl.videoHeight;
@@ -1655,7 +1667,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
 		return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
 	}, // frycAPI.isElemOnScreen(elem);
-	traverseUntil(direction, startEl, callback) { // get first element for which callback returns true
+	traverseUntil(direction, startEl, callback) { // Get first element for which callback returns true
 		const visited = "frycAPI_traverseUntil";
 		let getNextEl;
 		switch (direction) {
@@ -3474,7 +3486,7 @@ if (1 && frycAPI_host("192.168.1.1")) {
 				daElem.innerHTML = dtFrmt.format(d).replace(" ", "<span>, " + dayFrmt.format(d) + "</span>, ");
 			});
 
-			{ // Ukrywanie postów
+			{ // Hiding posts
 				frycAPI.hidePost = function (daElem) {
 					daElem.parentNode.parentNode.parentNode.classList.toggle("ukryty");
 				};
@@ -5180,7 +5192,7 @@ else if (1 && frycAPI_host("pl.wikipedia.org")) {
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		frycAPI.forEach(".user-info:has(.user-gravatar32)", function (daElem) { // Ulepszenie wyglądu awatarów
+		frycAPI.forEach(".user-info:has(.user-gravatar32)", function (daElem) { // Better avatar design
 			const myDiv = document.createElement("div");
 			myDiv.classList.add("myDiv");
 			daElem.querySelector(".user-action-time").insertAdjacentElement("afterend", myDiv);
@@ -5188,7 +5200,7 @@ else if (1 && frycAPI_host("pl.wikipedia.org")) {
 			el = daElem.querySelector(".user-gravatar32"); if (el !== null) myDiv.appendChild(el);
 			el = daElem.querySelector(".user-details");    if (el !== null) myDiv.appendChild(el);
 		});
-		frycAPI.forEach("span.s-badge__staff, span.mod-flair, span.s-badge__moderator, .s-badge.s-badge__xs", function (daElem) { // Przeniesienie znacznika staff/moderator/bot do nazwy użytkownika
+		frycAPI.forEach("span.s-badge__staff, span.mod-flair, span.s-badge__moderator, .s-badge.s-badge__xs", function (daElem) { // Moved staff/moderator/bot indicator to user name
 			daElem.previousElementSibling?.appendChild(daElem);
 		});
 
@@ -5201,7 +5213,7 @@ else if (1 && frycAPI_host("pl.wikipedia.org")) {
 			rep.remove();
 		}
 
-		// Lepsza data
+		// Better date
 		frycAPI.setDefaultDateStyle().mode.relatywnyCzas().floatLeft();
 		const getDate = elem => {
 			const title = elem.title;
@@ -5228,7 +5240,7 @@ else if (1 && frycAPI_host("pl.wikipedia.org")) {
 			frycAPI.setDefaultDate(`.ai-center:has(.owner) + span.comment-date .relativetime-clean`, { getDate, customStyle: `--tt-y: 1px;` }); // eslint-disable-line object-shorthand
 			frycAPI.setDefaultDate(`:is(.relativetime-clean, .relativetime)`, { getDate });
 			// #endregion
-			// #region //* Przesunięcie nazwy użytkownika na początek komentarza
+			// #region //* Moved user name to the beginning of the comment
 			frycAPI.forEach(`.comment-body:not(.zmieniona-kolejność)`, (daElem, daI, daArr) => {
 				daElem.classList.add("zmieniona-kolejność");
 				const author = daElem.querySelector(`:scope > .ai-center`);
@@ -7263,7 +7275,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 	`);
 
 	(frycAPI.beforeLoad = function () {
-		if (frycAPI.path.startsWith("/matlabcentral/answers/")) { // Zmiana dat w odpowiedziach
+		if (frycAPI.path.startsWith("/matlabcentral/answers/")) { // Changing dates in replies
 			frycAPI.createMutObs((mutRecArr0, mutObs0) => {
 				if (document.body !== null) {
 					frycAPI.createMutObs((mutRecArr, mutObs) => {
@@ -7294,13 +7306,13 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 	})();
 
 	frycAPI.onLoadSetter(() => {
-		if (frycAPI.path === "/support/search.html") { // Usuwanie podświetlenia z wyników wyszukiwania
+		if (frycAPI.path === "/support/search.html") { // Deleting highlighting of the search result terms
 			frycAPI.createMutObs((mutRecArr, mutObs) => {
 				frycAPI.forEach(`p.search_result_title a`, (daElem, daI, daArr) => {
 					daElem.href = daElem.href.replace(/\?(.*)/u, "");
 				});
 			});
-		} else if (frycAPI.path === "/support/bugreports/") { // Zmiana dat w bugreportach
+		} else if (frycAPI.path === "/support/bugreports/") { // Bug report's date change
 			// frycAPI.createMutObs((mutRecArr, mutObs) => {
 			// });
 			frycAPI.setDefaultDate(`.bug_description > p > em`, {
@@ -7379,8 +7391,8 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const specialLinkButton = `.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.x1sur9pj.xkrqix3.x1xlr1w8`;
 	const pollUpdateMessage = `${messageList} > :has(${specialLinkButton}):not(:has([aria-label="Głosuj"],[aria-label="Zmień głos"]))`;
 	const topBar = `.xfpmyvw.x1u998qt.x1vjfegm`;
-	// const privateConv = `[aria-label^="Konwersacja z:"]:not([aria-label*=" i "])`; // first version
-	const privateConv = `${topBar} a[href^="https://www.facebook.com"], [aria-label="Wybrane wartości"]:not(:has(>:nth-child(2)))`; // private is opposite to group
+	// const privateConv = `[aria-label^="Konwersacja z:"]:not([aria-label*=" i "])`; // First version
+	const privateConv = `${topBar} a[href^="https://www.facebook.com"], [aria-label="Wybrane wartości"]:not(:has(>:nth-child(2)))`; // Private is opposite to group
 	const personPhoto = `[aria-hidden="true"] > span > img`;
 	const convInfo = `[aria-label="Informacje o konwersacji"]`;
 	const chatParticipants = `[aria-label="Uczestnicy czatu"]`;
@@ -7610,19 +7622,19 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			if (!fullName) {
 				// debugger;
 				let messageEl = container.parent;
-				while (messageEl.parent.notMatches(messageList)) { // go up until messageEl is a topmost message container
+				while (messageEl.parent.notMatches(messageList)) { // Go up until messageEl is a topmost message container
 					messageEl = messageEl.parent;
 				}
-				while (!(fullName = messageEl.querySelector(personPhoto)?.alt)) { // go to the next message untile photo with alt attribute is found
+				while (!(fullName = messageEl.querySelector(personPhoto)?.alt)) { // Go to the next message untile photo with alt attribute is found
 					messageEl = messageEl.nextEl;
 				}
 			}
 			let convInfoButton;
 			frycAPI.createMutObs(() => {
 				const participants = document.querySelector(chatParticipants);
-				if (!participants) { // side panel with conversation info is closed so open it
+				if (!participants) { // Side panel with conversation info is closed so open it
 					(convInfoButton = document.querySelector(convInfo)).click();
-				} else if (participants.getAttribute("aria-expanded") === "false") { // conversation participants list is collapsed so expand it
+				} else if (participants.getAttribute("aria-expanded") === "false") { // Conversation participants list is collapsed so expand it
 					participants.click();
 				} else {
 					const thePerson = document.querySelectorAll(chatParticipantsElems)
@@ -7633,20 +7645,20 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 							const item = document.querySelector(action === "message" ? messageItem : profileItem);
 							if (item) {
 								item.click();
-								convInfoButton?.click?.(); // if the side panel was open before convInfoButton will be undefined. If the panel was closed convInfoButton won't be undefined and will be clicked to close the panel
-								return true; // disconnect mutObs
+								convInfoButton?.click?.(); // If the side panel was open before convInfoButton will be undefined. If the panel was closed convInfoButton won't be undefined and will be clicked to close the panel
+								return true; // Disconnect mutObs
 							}
 						});
 					} else { // thePerson was not found (they've probably left the group) so delete both personal buttons
 						messageButt.remove();
 						profileButt.remove();
 						frycAPI.copyTxt(fullName);
-						frycAPI.sleep(50).then(() => { // display alert asynchronously to let the mutation obesrver get disconected first
+						frycAPI.sleep(50).then(() => { // Display alert asynchronously to let the mutation obesrver get disconected first
 							alert("The person you tried to message or view profile of, left the group. Their full name was copied to clipboard.");
 						});
 						convInfoButton?.click?.();
 					}
-					return true; // disconnect mutObs
+					return true; // Disconnect mutObs
 				}
 			});
 		}
@@ -7705,7 +7717,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 									frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS)?.click());
 								}
 							}));
-							if (frycAPI.querySelNull(privateConv) && container.notMatches(mojaWiadomość)) { // current conversation is a group and we are in other person's message
+							if (frycAPI.querySelNull(privateConv) && container.notMatches(mojaWiadomość)) { // Current conversation is a group and we are in other person's message
 								let messageButt, profileButt;
 								container.append(messageButt = message.cloneNode(1).frycAPI_addEventListener("click", function () {
 									clickThroughSidebar(container, "message", messageButt, profileButt);
@@ -8612,7 +8624,7 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 		// document.querySelector("frame[name='ContentViewFrame']").contentDocument
 		// if ((frameDoc !== null) && ((myh1 = frameDoc.querySelector("div.header>h1.title")) !== null) && (myh1.innerHTML === "Class DefaultCodeFormatterConstants")) {
 		if (frameDoc !== null && frameDoc.querySelector("div.header>h1.title")?.innerHTML === "Class DefaultCodeFormatterConstants") {
-			// konkretnie dla strony: https://help.eclipse.org/latest/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2Fformatter%2FDefaultCodeFormatterConstants.html
+			// Specifically for this website: https://help.eclipse.org/latest/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2Fformatter%2FDefaultCodeFormatterConstants.html
 			frycAPI.injectStyle(/*css*/`
 				#field-summary > .summary-table {
 					/* display: block;
@@ -9322,7 +9334,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					return false;
 				};
 				e621_get_pool_dates = async function (pocz, kon) {
-					// np. https://e621.net/pools/35222
+					// I.E. https://e621.net/pools/35222
 					if (arguments.length === 0) {
 						pocz = 0;
 					} else if (arguments.length === 2 && pocz > kon) {
@@ -9339,7 +9351,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 						datArr ??= (
 							posts.map(elem => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
 							.map((daElem, daI) => {
-								// Numery postów chronologicznie
+								// Post numbers chronologically
 								// document.getElementById("post_" + daElem[1])?.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
 								return daElem[0];
 							})
@@ -9349,7 +9361,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					}
 					const ostatniaData = datArr.at(-1);
 
-					/* Numery postów wedle kolejności na stronie + daty z informacji na stronie
+					/* Post numbers by order in the page + dates from information on the page
 					// var datArr = [];
 					document.querySelectorAll("#posts-container>article").forEach(function (daElem, daI, daArr) {
 						daElem.querySelector(".post-score").insertAdjacentElement("afterbegin",document.createElement("span")).innerHTML = "#" + (daI + 1);
@@ -9874,7 +9886,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			height: fit-content !important;
 		}
 	`);
-} else if (frycAPI_host("www.crazytime.pl")) { // Jeżeli strona często zmienia tytuł (aby zwrócić twoją uwagę bez powodu) zastosuj ten kod
+} else if (frycAPI_host("www.crazytime.pl")) { // If the page frequently changes its title (to draw your attention) use this code
 	frycAPI.injectStyleOnLoad(/*css*/`
 
 	`);
@@ -10884,10 +10896,10 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 
 	frycAPI.onLoadSetter(function () {
 		document.addEventListener("keydown", e => {
-			if (e.key !== "p") return; // activation key
-			if (document.activeElement.tagName.frycAPI_equalAny("TEXTAREA", "INPUT")) return; // don't trigger when typing
+			if (e.key !== "p") return; // Activation key
+			if (document.activeElement.tagName.frycAPI_equalAny("TEXTAREA", "INPUT")) return; // Don't trigger when typing
 			const videoEl = document.getElementsByTagName("video").find(frycAPI.isElemOnScreen);
-			if (!videoEl) return; // don't trigger when no video is on screen
+			if (!videoEl) return; // Don't trigger when no video is on screen
 			const filename = frycAPI.traverseUntil("forward", videoEl, el => el.tagName === "SPAN" && el.getAttribute("data-tag") === "post-title")?.firstEl?.innerText;
 			frycAPI.downLoadVideoFrame(videoEl, (filename || "Patreon Video - " + frycAPI.printDateForFileName()) + " - " + videoEl.currentTime.toFixed(3) + " s.png");
 		});
@@ -10906,7 +10918,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 // #endregion
 
 // #region //* Koniec
-if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // dodanie stylu z aktywnego ifa
+if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // Adding style from the active IF block
 	frycAPI.createMutObs(() => {
 		if (document.body) {
 			const state = frycAPI.styleOpts.state;
