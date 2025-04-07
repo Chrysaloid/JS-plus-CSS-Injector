@@ -7383,7 +7383,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const editCSS = `[aria-label="Edytuj"][role="menuitem"]`;
 	const mojaWiadomość = `.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x78zum5.x15zctf7`;
 	const iconWidth = `.x1mqs8db`;
-	const toolTipSpan = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x1ji0vk5.x18bv5gf.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x1nxh6w3.x1fcty0u.xzsf02u.x4zkp8e.x676frb.xq9mrsl`;
+	const toolTipSpan = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x1ji0vk5.x18bv5gf.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x1nxh6w3.x1fcty0u.xw2npq5.x4zkp8e.x676frb.xq9mrsl`;
 	const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy:has(${toolTipSpan} > div > div:nth-child(3))`;
 	// const conversationTime = `span.html-span.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1hl2dhg.x16tdsg8.x1vvkbs`;
 	const personTyping = `.x9f619.x1n2onr6.x1ja2u2z.__fb-dark-mode`;
