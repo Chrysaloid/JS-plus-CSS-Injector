@@ -66,7 +66,7 @@ frycAPI_expandPrototype(String, "frycAPI_includesAny", function (...strList) {
 	}
 	return false;
 });
-const frycAPI_Object_condition = !frycAPI_host("www.youtube.com", "www.desmos.com", "studio.youtube.com");
+const frycAPI_Object_condition = !frycAPI_host("www.youtube.com", "www.desmos.com", "studio.youtube.com", "android-review.googlesource.com");
 frycAPI_expandPrototype(Object, "frycAPI_log", function () {
 	console.log(this);
 	return this;

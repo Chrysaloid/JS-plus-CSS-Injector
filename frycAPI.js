@@ -10496,7 +10496,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			input,
 			a.devsite-nav-toggle
 		), input[type="text"] {
-			font-family: "IBM Plex Sans Condensed";
+			font-family: "IBM Plex Sans Condensed", "Google Sans", sans-serif;
 		}
 		devsite-content-footer.nocontent > p:last-of-type {
 			display: none;
