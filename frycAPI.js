@@ -888,11 +888,11 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return !frycAPI.isValidDate(d);
 	},
 	changeFavicon(href) {
-		document.querySelectorAll(`link[rel~="icon"]`).forEach(daElem => daElem.remove());
-		document.head.frycAPI_appendHTML(`<link rel="icon" href="${href}">`);
+		document.head.querySelectorAll(`link[rel~="icon"]`).forEach(daElem => daElem.remove());
+		return document.head.frycAPI_appendHTML(`<link rel="icon" href="${href}">`);
 	}, // frycAPI.changeFavicon("href");
 	changeFaviconRes(filename) {
-		frycAPI.changeFavicon(frycAPI.getResURL(filename));
+		return frycAPI.changeFavicon(frycAPI.getResURL(filename));
 	}, // frycAPI.changeFaviconRes("filename");
 	getResURL(filename) {
 		return `chrome-extension://${frycAPI.id}/resources/` + filename;
@@ -7403,6 +7403,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const userName = `span.x193iq5w.xeuugli.x13faqbe.x1vvkbs.xt0psk2.x1xmvt09.x6prxxf.xk50ysn.xzsf02u.xq9mrsl`;
 	const threadList = `[aria-label="Lista wątków"]`;
 	const sidePanelTopLevel = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x1qjc9v5.xozqiw3.x1q0g3np.xexx8yu.x85a59c > .x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x1iyjqo2.xs83m0k.x8mqhxd.x6ikm8r.x10wlt62.xcrg951.xm0m39n.xzhurro.x6gs93r.xpyiiip.x88v6c3.x1qpj6lr.xdhzj85.x1bc3s5a.xczebs5.x4pn7vq.xe95u6g`;
+	const unreadMessage = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x1ji0vk5.x18bv5gf.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x6prxxf.x1s688f.xw2npq5.x1yc453h.xudqn12.x3x7a5m.xq9mrsl`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -7600,15 +7601,15 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	`);
 
 	frycAPI.onLoadSetter(function () {
-		frycAPI.changeFaviconRes("Messenger icon new 256.png");
-		// #region //* Zmiana tytułu
+		const iconElem = frycAPI.changeFaviconRes("Messenger icon new 256.png");
+		// #region //* Change of title
 		frycAPI.createMutObs((mutRecArr, mutObs) => {
 			if (document.title !== "Messenger") {
 				document.title = "Messenger";
 			}
 		}, { elem: document.querySelector("title"), options: { characterData: true } });
 		// #endregion
-		// #region //* Edycja opcji przy wiadomości
+		// #region //* Edit of options next to the messages
 		const edit = frycAPI.elemFromHTML(`<div class="myButt edit"><div></div></div>`);
 		const del = frycAPI.elemFromHTML(`<div class="myButt delete"><div></div></div>`);
 		const share = frycAPI.elemFromHTML(`<div class="myButt share"><div></div></div>`);
@@ -7737,6 +7738,15 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 					}, { elem: document.querySelector(messageContainer), options: { childList: true, subtree: true } });
 				});
 				return true;
+			}
+		});
+		// #endregion
+		// #region //* Changing favicon when there are unread messages
+		frycAPI.createMutObs(() => {
+			if (frycAPI.querySelOk(unreadMessage)) {
+				iconElem.href = frycAPI.getResURL("Messenger icon new 256 yellow.png");
+			} else {
+				iconElem.href = frycAPI.getResURL("Messenger icon new 256.png");
 			}
 		});
 		// #endregion
@@ -10527,7 +10537,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 				}
 				const dataCont = document.querySelector(`devsite-content-footer.nocontent > p:last-child`);
 				if (autors !== null && dataCont !== null) {
-					const [y, m, d] = dataCont.innerText.replace("Last updated ", "").replace("Ostatnia aktualizacja: ", "").replace(" UTC.", "").split("-").map(e => Number(e));
+					const [y, m, d] = dataCont.innerText.match(/\d+/g).map(e => Number(e));
 					const htmlStr = `<p style="margin: 0 0 16px 0; color: var(--devsite-breadcrumb-link-color, var(--devsite-secondary-text-color)); font-size: 0.8em;">Last updated ${frycAPI.getDefaultDateText(new Date(Date.UTC(y, m - 1, d)), frycAPI.dateOptsNoTime)}</p>`;
 					autors.insertAdjacentHTML(pos, htmlStr);
 				}
