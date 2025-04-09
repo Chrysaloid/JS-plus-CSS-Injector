@@ -7388,7 +7388,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	// const conversationTime = `span.html-span.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1hl2dhg.x16tdsg8.x1vvkbs`;
 	const personTyping = `.x9f619.x1n2onr6.x1ja2u2z.__fb-dark-mode`;
 	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
-	const specialLinkButton = `.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.x1sur9pj.xkrqix3.x1xlr1w8`;
+	const specialLinkButton = `.x1i10hfl.xjbqb8w.x1ejq31n.xd10rxx.x1sy0etr.x17r0tee.x972fbf.xcfux6l.x1qhh985.xm0m39n.x9f619.x1ypdohk.xt0psk2.xe8uvvx.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz.x1heor9g.x1sur9pj.xkrqix3.x1s688f`;
 	const pollUpdateMessage = `${messageList} > :has(${specialLinkButton}):not(:has([aria-label="Głosuj"],[aria-label="Zmień głos"]))`;
 	const topBar = `.xfpmyvw.x1u998qt.x1vjfegm`;
 	// const privateConv = `[aria-label^="Konwersacja z:"]:not([aria-label*=" i "])`; // First version
@@ -7403,7 +7403,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const userName = `span.x193iq5w.xeuugli.x13faqbe.x1vvkbs.xt0psk2.x1xmvt09.x6prxxf.xk50ysn.xzsf02u.xq9mrsl`;
 	const threadList = `[aria-label="Lista wątków"]`;
 	const sidePanelTopLevel = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x1qjc9v5.xozqiw3.x1q0g3np.xexx8yu.x85a59c > .x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x1iyjqo2.xs83m0k.x8mqhxd.x6ikm8r.x10wlt62.xcrg951.xm0m39n.xzhurro.x6gs93r.xpyiiip.x88v6c3.x1qpj6lr.xdhzj85.x1bc3s5a.xczebs5.x4pn7vq.xe95u6g`;
-	const unreadMessage = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x1ji0vk5.x18bv5gf.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x6prxxf.x1s688f.xw2npq5.x1yc453h.xudqn12.x3x7a5m.xq9mrsl`;
+	const unreadMessage = `[aria-hidden="true"][role="button"][tabindex="-1"] > span[data-visualcompletion="ignore"]`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
