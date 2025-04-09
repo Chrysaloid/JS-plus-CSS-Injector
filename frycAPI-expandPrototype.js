@@ -76,6 +76,9 @@ frycAPI_expandPrototype(Object, "frycAPI_if", function (condition) {
 }, false, true, frycAPI_Object_condition);
 frycAPI_expandPrototype(Object, "frycAPI_toJSON", function () {
 	return JSON.stringify(this);
+}, true, true, frycAPI_Object_condition);
+frycAPI_expandPrototype(Object, "frycAPI_then", function (callback) {
+	return callback(this);
 }, false, true, frycAPI_Object_condition);
 frycAPI_expandPrototype(String, "JSON", function () {
 	return JSON.parse(this);

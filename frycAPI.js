@@ -4227,16 +4227,6 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 			text-decoration: underline;
 		}
 	`);
-} else if (1 && frycAPI_host("en.wikipedia.org")) {
-	frycAPI.injectStyleOnLoad(/*css*/`
-		img.thumbimage[src*=".png"],
-		img.thumbimage[src*=".gif"]
-		/* a.image:has(img[src*=".png"]) */
-		{
-			filter: invert(1) hue-rotate(180deg);
-			background-color: #c9c9c9;
-		}
-	`);
 } else if (1 && frycAPI_host("epodreczniki.open.agh.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
@@ -4691,15 +4681,68 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 } // eslint-disable-line brace-style
 // #endregion
 // #region //* IFy  4
-else if (1 && frycAPI_host("pl.wikipedia.org")) {
+else if (1 && frycAPI_hostIncludes("wikipedia.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
-		img.thumbimage[src*=".png"]
-		/* a.image:has(img[src*=".png"]) */
+		img.thumbimage[src*=".png"],
+		img.thumbimage[src*=".gif"]
 		{
 			filter: invert(1) hue-rotate(180deg);
 			background-color: #c9c9c9;
 		}
+
+		.relative-date-loading::after {
+			content: "";
+			height: 12px;
+			width:  12px;
+			display: inline-block;
+			background: url("${frycAPI.getResURL("loading small.gif")}");
+			background-size: contain;
+			background-repeat: no-repeat;
+		}
 	`);
+
+	frycAPI.onLoadSetter(function () {
+		// #region //* Get relative date on hover
+		const footer = document.getElementById("footer-info-lastmod");
+		if (footer) {
+			footer.innerText = footer.innerText.trim().replace(".", "");
+			footer.appendChild(frycAPI.elem("span").text(" - Hover to get relative date.")._).addEventListener("mouseenter", async e => {
+				const me = e.target;
+				try {
+					const dataObjElem = document.querySelector(`script[type="application/ld+json"]`);
+					if (!dataObjElem) throw new Error("Could not find dataObjElem.");
+					const pageName = dataObjElem.innerText.JSON.name;
+					if (!pageName?.length) throw new Error("Could not get pageName.");
+
+					me.frycAPI_addClass("relative-date-loading");
+					me.innerHTML = " -&nbsp;";
+					const response = await fetch(`https://${window.location.hostname}/api/rest_v1/page/summary/${pageName}`);
+					if (!response.ok) {
+						throw new Error(`Response was not OK. Status: ${response.status}. Status text: ${response.statusText}. Page name: ${pageName}`);
+					}
+
+					const obj = await response.json();
+					const timestamp = obj.timestamp;
+					if (!timestamp?.length) {
+						loguj(obj);
+						throw new Error(`Timestamp was not present on the response object. The object was logged to console.`);
+					}
+
+					me.innerText = ` - ${frycAPI.printRelTime(new Date(timestamp).getTime())}.`;
+				} catch (err) {
+					console.error(err);
+					me.innerText = " - Something went wrong. Check console for errors.";
+				}
+
+				me.frycAPI_removeClass("relative-date-loading");
+			}, { once: true });
+		}
+		/* // Interesting concept
+		document.getElementById("footer-info-lastmod")?.frycAPI_then?.(footer => {
+		});
+		*/
+		// #endregion
+	});
 } else if (1 && frycAPI_host("pl.wikisource.org")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.mwe-math-fallback-image-inline {
