@@ -208,9 +208,7 @@ class frycAPI_Input extends frycAPI_ManualFunc {
 	}
 	fixGeneralState(obj) {
 		this.prevState = this.state;
-		if (obj.type === "name") {
-			this.state = "";
-		} else if (obj.type === "elem") {
+		if (obj.type === "elem") {
 			this.state = obj.state;
 		}
 		this.stateChanged = this.prevState !== this.state;
@@ -502,7 +500,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		document.body.removeChild(textArea);
 	},
 	copyTxt(txt) {
-		navigator.clipboard.writeText(txt);
+		return navigator.clipboard.writeText(txt);
 	},
 	zaokrl(val, decimals) {
 		return Number(Math.round(Number(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
@@ -6986,6 +6984,21 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 			display: block;
 		}
 	`);
+	frycAPI.createManualFunctions("GeoGebra", {
+		funcArr: [
+			(name = "Copy variable", type = frycAPI_Input) => {
+				const f = new type({ name });
+				f.displayName = 1;
+				f.nameClickable = 1;
+				f.callBack = function (obj) {
+					if (obj.type === "name") {
+						frycAPI.copyTxt(ggbApplet.getLaTeXString(f.state));
+					}
+				};
+				return f;
+			},
+		],
+	});
 } else if (1 && frycAPI_host("www.google.pl", "www.google.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.hm60ue {
