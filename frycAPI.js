@@ -10976,6 +10976,13 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`, { elevated: true });
+} else if (frycAPI_host("x.com", "twitter.com")) {
+	frycAPI.onLoadSetter(function () {
+		frycAPI.setDefaultDateStyle().mode.relatywnyCzas().toolTipRight();
+		frycAPI.createMutObs(() => {
+			frycAPI.setDefaultDate("time");
+		});
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 
