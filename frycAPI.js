@@ -758,6 +758,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		a.download = filename;
 		a.click();
 	},
+	downloadUrl(url, filename) {
+		return frycAPI.sendEventToBackground("downloadURL", { url, filename });
+	}, // frycAPI.downloadUrl(url, "Test.txt");
 	downloadTxt(text, filename) {
 		// a.href = 'data:attachment/text;charset=utf-8,' + encodeURI(text);
 		frycAPI.downloadHelper(URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" })), filename);
@@ -4321,6 +4324,72 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 			margin-left: 15px;
 		}
 	`);
+
+	let questionElems;
+	function getQuestionsAsArr() {
+		const out = [];
+		questionElems = frycAPI.forEach(`[data-automation-id="questionItem"]`, question => {
+			out.push({
+				title: question.querySelector(`.text-format-content`).innerText.trim().replaceAll(/\s\s+/g, " "),
+				options: question.querySelectorAll(`[data-automation-id="choiceItem"]`).map(choice => ({
+					text: choice.querySelector(`[id^="QuestionChoiceOption"]`).innerText.trim().replaceAll(/\s\s+/g, " "),
+					selected: choice.getAttribute("class").includes("choice-selected") ? true : undefined,
+				})),
+			});
+		});
+		return out;
+	}
+	function getFormTitle() {
+		return document.querySelector(`[data-automation-id="formTitle"]`).innerText.trim();
+	}
+
+	frycAPI.createManualFunctions("MS Forms", {
+		funcArr: [
+			(name = "Download questions as JSON", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callBack = function () {
+					frycAPI.downloadTxt(
+						getQuestionsAsArr().frycAPI_toJSON,
+						getFormTitle() + ".json"
+					);
+				};
+				return f;
+			},
+			(name = "Download questions as HTML", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callBack = function () {
+					const title = getFormTitle();
+					const div = frycAPI.elem("div", 0);
+					div.appendChild(frycAPI.elem("h1").text(title)._);
+					const ol = div.appendChild(frycAPI.elem("ol", 0));
+					getQuestionsAsArr().forEach((question, i) => {
+						const li = ol.appendChild(frycAPI.elem("li", 0));
+						li.innerText = question.title;
+						const img = questionElems[i].frycAPI_elemByTag("img");
+						if (img) {
+							li.appendChild(
+								frycAPI.elem("img")
+								.attr("src", (i + 1) + ".png")
+								.attr("i", i)
+								.attr("onerror", `const i = parseInt(this.getAttribute('i')); if (i < imgExt.length) { this.src = '${i + 1}.' + imgExt[i]; this.setAttribute('i', i + 1); } else { this.onerror = ''; }`)
+								._
+							);
+							frycAPI.downloadUrl(img.src, i + ".png");
+						}
+						const ol1 = li.appendChild(frycAPI.elem("ol", 0));
+						question.options.sort((a, b) => (a.selected ? 1 : 0) - (b.selected ? 1 : 0)).forEach(option => {
+							ol1.appendChild(frycAPI.elem("li").text(option.text).attr("type", "a")._);
+						});
+					});
+					frycAPI.downloadTxt(
+						`<html><head><style>body{font-family: sans-serif} img{display: block}</style><script>const imgExt = ["jpg","webp","gif","bmp","tiff","avif"];</script></head><body>${div.innerHTML}</body></html>`,
+						title + ".html"
+					);
+				};
+				return f;
+			},
+		],
+	});
 } else if (1 && frycAPI_host("forum.videohelp.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
