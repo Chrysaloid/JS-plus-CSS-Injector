@@ -10205,6 +10205,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		}
 	});
 } else if (frycAPI_host("allegro.pl")) {
+	// frycAPI.UUID = "2025-04-21 11:48";
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/* *, .mp0t_0a, .l8c4v, .mp0t_ji, .b1vwg, .oyynn, .t1szo { */
 		* {
@@ -10230,8 +10231,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	`);
 
 	frycAPI.onLoadSetter(function () {
-		const path = window.location.pathname;
-		if (path.startsWith("/koszyk")) {
+		if (frycAPI.path.startsWith("/koszyk")) {
 			frycAPI.createMutObs((mutRecArr, mutObs) => {
 				frycAPI.forEach(`cart div > section`, sekcja => {
 					let suma = 0;

@@ -51,12 +51,7 @@ function frycAPI_hostIncludes(...str) {
 
 //* Prototypy
 frycAPI_expandPrototype(String, "frycAPI_equalAny", function (...strList) {
-	for (const daElem of strList) {
-		if (this === daElem) {
-			return true;
-		}
-	}
-	return false;
+	return strList.includes(this);
 });
 frycAPI_expandPrototype(String, "frycAPI_includesAny", function (...strList) {
 	for (const daElem of strList) {
