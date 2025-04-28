@@ -42,12 +42,16 @@ function frycAPI_host(...str) {
 	if (str.length === 0) {
 		return window.location.hostname;
 	} else {
-		return window.location.hostname.frycAPI_equalAny(...str);
+		return str.includes(window.location.hostname);
 	}
 }
 function frycAPI_hostIncludes(...str) {
 	return window.location.hostname.frycAPI_includesAny(...str);
 }
+// I can't believe I have to do this...
+// Some sites (https://rapidsave.com/) overwrite chrome.runtime.sendMessage
+// So I have to store it before they do that
+const frycAPI_chrome_runtime_sendMessage = chrome.runtime.sendMessage;
 
 //* Prototypy
 frycAPI_expandPrototype(String, "frycAPI_equalAny", function (...strList) {
@@ -62,7 +66,7 @@ frycAPI_expandPrototype(String, "frycAPI_includesAny", function (...strList) {
 	return false;
 });
 const frycAPI_Object_condition = !(frycAPI_host("www.youtube.com", "www.desmos.com", "studio.youtube.com") || frycAPI_hostIncludes("googlesource.com"));
-frycAPI_expandPrototype(Object, "frycAPI_log", function () {
+frycAPI_expandPrototype(Object, "lóg", function () {
 	console.log(this);
 	return this;
 }, true, true, frycAPI_Object_condition);

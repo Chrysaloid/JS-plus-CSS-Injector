@@ -139,8 +139,8 @@ function findHeader(headers, headerStr) {
 chrome.webRequest.onHeadersReceived.addListener(details => {
 	// This method breaks when server marks quickly repeated requests as a bot behavior
 	if (details.type !== "main_frame") return; // only intercept PDFs that will be view as an entire page
-	if (!findHeader(details.responseHeaders, "content-type")?.value?.toLowerCase?.()?.includes?.("application/pdf")) return; // request is not for PDF
-	if (findHeader(details.responseHeaders, "content-disposition")?.value?.toLowerCase?.()?.includes?.("attachment")) return; // requested PDF will be downloaded so don't download it again
+	if (!findHeader(details.responseHeaders, "content-type")?.value.toLowerCase().includes("application/pdf")) return; // request is not for PDF
+	if (findHeader(details.responseHeaders, "content-disposition")?.value.toLowerCase().includes("attachment")) return; // requested PDF will be downloaded so don't download it again
 	// log(details);
 	chrome.downloads.download({ url: details.url });
 	chrome.tabs.onUpdated.addListener(function tabsOnUpdated(tabId, changeInfo, tab) { // addlistener to close the tab or go back
