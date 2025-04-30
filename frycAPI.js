@@ -6167,6 +6167,10 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		.zapeł-div {
 			display: inline-block;
 		}
+
+		td.strong:has(.rejestracja-ikona) > * {
+			display: inline;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
