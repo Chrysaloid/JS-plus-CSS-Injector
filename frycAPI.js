@@ -6360,10 +6360,10 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 						].findIndex(el => row.frycAPI_querySelOk(el)));
 					};
 					const nazwJedn = row => { // nazwa jednostki
-						return (row.nazwJedn ??= row.querySelector(`td:nth-child(2)`)?.firstElementChild.innerText ?? "");
+						return (row.nazwJedn ??= row.querySelector(`td:nth-child(2)`)?.firstElementChild?.innerText ?? "");
 					};
 					const nazwPrzed = row => { // nazwa przedmiotu
-						return (row.nazwPrzed ??= row.querySelector(`td:nth-child(2)`)?.lastElementChild.innerText ?? row.firstElementChild?.firstElementChild.innerText ?? "");
+						return (row.nazwPrzed ??= row.querySelector(`td:nth-child(2)`)?.lastElementChild?.innerText ?? row.firstElementChild?.firstElementChild?.innerText ?? "");
 					};
 					const zapełnienie = row => { // zapełnienie grup
 						// const smartyTip = row.querySelector(`span.smarty-tip-wrapper.rejestracja-ikona`);

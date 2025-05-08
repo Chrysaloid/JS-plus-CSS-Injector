@@ -54,6 +54,13 @@ function frycAPI_hostIncludes(...str) {
 const frycAPI_chrome_runtime_sendMessage = chrome.runtime.sendMessage;
 
 //* Prototypy
+// #region Example of defining intellisense for expanded prototype
+// /** @typedef {Array & { greet: () => void }} MyArray */
+// Array.prototype.greet = function () {};
+// /** @type {MyArray} */
+// const ar = [];
+// ar.greet();
+// #endregion
 frycAPI_expandPrototype(String, "frycAPI_equalAny", function (...strList) {
 	return strList.includes(this);
 });
@@ -123,9 +130,7 @@ frycAPI_expandPrototype(Array, "frycAPI_run", function (...args) {
 	this.forEach(fun => fun(...args));
 });
 frycAPI_expandPrototype(Array, "frycAPI_runReturn", function (...args) {
-	const retArr = [];
-	this.forEach(fun => retArr.push(fun(...args)));
-	return retArr;
+	return this.map(fun => fun(...args));
 });
 frycAPI_expandPrototype(Element, "frycAPI_addClass", function (...classNames) {
 	this.classList.add(...classNames);
