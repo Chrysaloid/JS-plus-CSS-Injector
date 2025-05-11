@@ -1578,8 +1578,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 		return obj;
 	}, // const objPars = frycAPI.searchParamsToObj();
-	querySelList: Element.prototype.frycAPI_querySelList,
-	// const elem = frycAPI.querySelList([``]);
+	qSelList: Element.prototype.frycAPI_qSelList,
+	// const elem = frycAPI.qSelList([``]);
 	checkChromeVersion() {
 		loguj(navigator.appVersion.match(/.*Chrome\/([0-9.]+)/)[1]);
 	}, // frycAPI.checkChromeVersion();
@@ -1740,6 +1740,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	qSel(query) {
 		return document.querySelector(query);
 	}, // frycAPI.qSel(query);
+	qSelAll(query) {
+		return document.querySelectorAll(query);
+	}, // frycAPI.qSelAll(query);
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -4354,7 +4357,7 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 				const f = new type({ name });
 				f.callBack = function () {
 					frycAPI.downloadTxt(
-						getQuestionsAsArr().frycAPI_toJSON,
+						getQuestionsAsArr().jsón,
 						getFormTitle() + ".json"
 					);
 				};
@@ -4783,7 +4786,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 				try {
 					const dataObjElem = document.querySelector(`script[type="application/ld+json"]`);
 					if (!dataObjElem) throw new Error("Could not find dataObjElem.");
-					const pageName = dataObjElem.innerText.JSON.name;
+					const pageName = dataObjElem.innerText.jsón.name;
 					if (!pageName) throw new Error("Could not get pageName.");
 
 					me.frycAPI_addClass("relative-date-loading");
@@ -6357,7 +6360,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 							"img[src*='brak_miejsc.svg']",
 							"img[src*='brak_uprawnien.svg']",
 							"*", // if this (any elem selector) was not present findIndex would return -1 if the registration button had some other image not present in the list
-						].findIndex(el => row.frycAPI_querySelOk(el)));
+						].findIndex(el => row.frycAPI_qSelOk(el)));
 					};
 					const nazwJedn = row => { // nazwa jednostki
 						return (row.nazwJedn ??= row.querySelector(`td:nth-child(2)`)?.firstElementChild?.innerText ?? "");
@@ -6449,7 +6452,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 	frycAPI.onLoadSetter(function () {
 		if (frycAPI.querySelOk(`#topLevelRegion #O365_AppName[aria-label="Przejdź do aplikacji OneDrive"]`)) {
 			frycAPI.createMutObs(() => {
-				const folderName = frycAPI.querySelList([
+				const folderName = frycAPI.qSelList([
 					`[class^="breadcrumbNonNavigableItem"][data-automationid="breadcrumb-crumb"]`,
 					`li.ms-Breadcrumb-listItem:last-child .ms-TooltipHost [id^="tooltip"]`,
 					`li[class^="navLink"][class*="navLinkSelected"]`,
@@ -11078,6 +11081,72 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.onLoadSetter(function () {
 		frycAPI.qSel(`.loginbtn-btn`)?.click();
 	}, 2);
+} else if (frycAPI_host("keep.google.com")) {
+	frycAPI.createManualFunctions("Google Keep", {
+		funcArr: [
+			(name = "Download expanded note", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callBack = function (obj) {
+					// frycAPI.traverseUntil("forward", frycAPI.qSel(`[role="tooltip"]`).nextEl, el => getComputedStyle(el).display !== "none")
+					const outerParent = frycAPI.qSel(`[role="tooltip"] + * + * [role="button"][data-tooltip-text*="Zaznacz"] + *`);
+					if (outerParent) {
+						const title = outerParent.querySelector(`[contenteditable="true"]`);
+						const titleText = title.innerText.trim();
+						const noteObj = {
+							title: titleText,
+							// lastEdited: "",
+							type: "",
+							content: [],
+						};
+						const listNotesContainer = title.nextEl.firstEl;
+						if (listNotesContainer) {
+							noteObj.type = "list";
+							const tempArr = [];
+							listNotesContainer.children.forEach(child => {
+								if (child.frycAPI_qSelOk(`[dir="ltr"]`) && child.children.length === 1) {
+									const elemObj = {};
+									elemObj.level = getComputedStyle(child.firstEl).marginLeft === "0px" ? 0 : 1;
+									elemObj.text = child.innerText.trim();
+									elemObj.checked = child.frycAPI_qSelOk(`[aria-checked="true"]`);
+									// elemObj.id = child.querySelector(`[id]`).id;
+									tempArr.push(elemObj);
+								}
+							});
+							let curr0LevelChildren;
+							tempArr.forEach(elemObj => {
+								if (elemObj.checked === false) {
+									if (elemObj.level === 0) {
+										curr0LevelChildren = elemObj.children = [];
+										noteObj.content.push(elemObj);
+									} else {
+										curr0LevelChildren.push(elemObj);
+									}
+								} else {
+									if (elemObj.level === 0) { // eslint-disable-line no-lonely-if
+										curr0LevelChildren = noteObj.content.find(el => el.text === elemObj.text)?.children;
+										if (!curr0LevelChildren) {
+											noteObj.content.push(elemObj);
+											curr0LevelChildren = elemObj.children = [];
+										}
+									} else {
+										curr0LevelChildren.push(elemObj);
+									}
+								}
+								delete elemObj.level;
+							});
+						} else {
+							noteObj.type = "text";
+							noteObj.content = title.parentElement.nextEl?.firstEl.innerText;
+						}
+						frycAPI.downloadTxt(noteObj.jsón, titleText + ".json");
+					} else {
+						alert("No note is expanded");
+					}
+				};
+				return f;
+			},
+		],
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 

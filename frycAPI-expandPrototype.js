@@ -80,13 +80,13 @@ frycAPI_expandPrototype(Object, "lóg", function () {
 frycAPI_expandPrototype(Object, "frycAPI_if", function (condition) {
 	return condition ? this : null;
 }, false, true, frycAPI_Object_condition);
-frycAPI_expandPrototype(Object, "frycAPI_toJSON", function () {
+frycAPI_expandPrototype(Object, "jsón", function () {
 	return JSON.stringify(this);
 }, true, true, frycAPI_Object_condition);
 frycAPI_expandPrototype(Object, "frycAPI_then", function (callback) {
 	return callback(this);
 }, false, true, frycAPI_Object_condition);
-frycAPI_expandPrototype(String, "JSON", function () {
+frycAPI_expandPrototype(String, "jsón", function () {
 	return JSON.parse(this);
 }, true);
 frycAPI_expandPrototype(String, "specialTrim", function () {
@@ -213,13 +213,13 @@ frycAPI_expandPrototype(Element, "frycAPI_insertHTML", function (position, htmlS
 frycAPI_expandPrototype(DOMTokenList, "notContains", function (daClass) {
 	return !this.contains(daClass);
 });
-frycAPI_expandPrototype(Element, "frycAPI_querySelNull", function (selector) {
+frycAPI_expandPrototype(Element, "frycAPI_qSelNull", function (selector) {
 	return this.querySelector(selector) === null;
 });
-frycAPI_expandPrototype(Element, "frycAPI_querySelOk", function (selector) {
+frycAPI_expandPrototype(Element, "frycAPI_qSelOk", function (selector) {
 	return this.querySelector(selector) !== null;
 });
-frycAPI_expandPrototype(Element, "frycAPI_querySelList", function (list, root = document) {
+frycAPI_expandPrototype(Element, "frycAPI_qSelList", function (list, root = document) {
 	if (this instanceof Element) root = this;
 	let elem;
 	for (const query of list) {
