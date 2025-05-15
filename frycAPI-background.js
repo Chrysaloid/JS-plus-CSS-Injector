@@ -2,6 +2,12 @@
 "use strict";
 
 const log = console.log;
+Object.defineProperty(Object.prototype, "log", {
+	get() {
+		log(this);
+		return this;
+	},
+});
 
 // #region Unused chrome.storage.session wrapper
 /* // This someday might be useful...
@@ -69,6 +75,16 @@ function CSSInjection(data = {}, sender) {
 		target: { tabId: sender.tab.id, allFrames: data.allFrames },
 	};
 }
+function blobToBase64(blob) {
+	const reader = new FileReader();
+	reader.readAsDataURL(blob);
+	return new Promise(resolve => {
+		reader.onloadend = () => {
+			resolve(reader.result);
+		};
+	});
+}
+// data:image/jpeg;
 chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sender, sendResp) {
 	// log(name);
 	// log(data);
@@ -87,6 +103,7 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 				return;
 			};
 			case "downloadURL": return void chrome.downloads.download({ url: data.url, filename: data.filename });
+			case "getImgAsDataUrl": return fetch(data).then(res => res.blob()).then(async blob => "data:" + blob.type + ";" + (await blobToBase64(blob)));
 			case "injectStyle": return chrome.scripting.insertCSS(CSSInjection(data, sender));
 			case "removeStyle": return chrome.scripting.removeCSS(CSSInjection(data, sender));
 			case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {

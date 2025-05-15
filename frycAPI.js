@@ -872,6 +872,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 
 		frycAPI.downloadHelper(canvas.toDataURL(), filename);
 	},
+	getImgAsDataUrl(imgUrl) {
+		return frycAPI.sendEventToBackground("getImgAsDataUrl", imgUrl);
+	},
 	// #endregion
 	// #region //* Funkcje 3
 	gDriveLinkToImgSrc(link) { // Converts Google drive open link to download link which is possible to be src of an img etc.
@@ -1591,7 +1594,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		`;
 		frycAPI.downloadTxt(frycAPI.minifyCodeSimple(code), "VSC_Go_To_Line.ahk_frycAPI");
 	}, // frycAPI.VSC_Go_To_Line();
-	async retryIf(condition, interval, action) { // function, time [ms], function | Should be read as "Retry if condition fails"
+	async retryIf(condition, interval, action = () => {}) { // function, time [ms], function | Should be read as "Retry if condition fails"
 		while (true) {
 			if (condition()) return action();
 			await frycAPI.sleep(interval);
@@ -1662,7 +1665,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			URL.revokeObjectURL(url);
 		});
 	}, // rycAPI.downLoadVideoFrame(videoEl, "Video");
-	isElemOnScreen(elem) {
+	isElemOnScreen(elem) { // isElemVisible
 		const rect = elem.getBoundingClientRect();
 		const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
 		return !(rect.bottom < 0 || rect.top - viewHeight >= 0);
@@ -4341,7 +4344,7 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 				title: question.querySelector(`.text-format-content`).innerText.trim().replaceAll(/\s\s+/g, " "),
 				options: question.querySelectorAll(`[data-automation-id="choiceItem"]`).map(choice => ({
 					text: choice.querySelector(`[id^="QuestionChoiceOption"]`).innerText.trim().replaceAll(/\s\s+/g, " "),
-					selected: choice.getAttribute("class").includes("choice-selected") ? true : undefined,
+					selected: choice.getAttribute("class").includes("choice-selected") ? 1 : 0,
 				})),
 			});
 		});
@@ -4365,32 +4368,61 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 			},
 			(name = "Download questions as HTML", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function () {
+				f.callBack = async function () {
+					// const scroller = document.querySelector(`[id*="form-main-content"]`);
+					const scroller = frycAPI.byID("branding-footer");
+					scroller.scrollIntoView({ behavior: "smooth", block: "start" });
+					const interval = 500;
+					await frycAPI.sleep(interval);
+					await frycAPI.retryIf(() => frycAPI.isElemOnScreen(scroller) || scroller.scrollIntoView({ behavior: "smooth", block: "start" }), interval);
 					const title = getFormTitle();
 					const div = frycAPI.elem("div", 0);
+					div.appendChild(frycAPI.elem("button").text("Przełącz kolory").attr("onclick", "document.body.classList.toggle('kolory');")._);
 					div.appendChild(frycAPI.elem("h1").text(title)._);
-					const ol = div.appendChild(frycAPI.elem("ol", 0));
-					getQuestionsAsArr().forEach((question, i) => {
+					const ol = div.appendChild(frycAPI.elem("ol").attr("type", "1")._);
+					for (const [i, question] of Object.entries(getQuestionsAsArr())) {
 						const li = ol.appendChild(frycAPI.elem("li", 0));
 						li.innerText = question.title;
 						const img = questionElems[i].frycAPI_elemByTag("img");
 						if (img) {
 							li.appendChild(
 								frycAPI.elem("img")
-								.attr("src", (i + 1) + ".png")
-								.attr("i", i)
-								.attr("onerror", `const i = parseInt(this.getAttribute('i')); if (i < imgExt.length) { this.src = '${i + 1}.' + imgExt[i]; this.setAttribute('i', i + 1); } else { this.onerror = ''; }`)
+								.attr("src", await frycAPI.getImgAsDataUrl(img.src))
 								._
 							);
-							frycAPI.downloadUrl(img.src, i + ".png");
 						}
-						const ol1 = li.appendChild(frycAPI.elem("ol", 0));
-						question.options.sort((a, b) => (a.selected ? 1 : 0) - (b.selected ? 1 : 0)).forEach(option => {
-							ol1.appendChild(frycAPI.elem("li").text(option.text).attr("type", "a")._);
+						const ol1 = li.appendChild(frycAPI.elem("ol").attr("type", "a")._);
+						question.options.sort((a, b) => b.selected - a.selected).forEach(option => {
+							ol1.appendChild(frycAPI.elem("li").text(option.text).class(option.selected ? "dobra" : "zła")._);
 						});
-					});
+					}
 					frycAPI.downloadTxt(
-						`<html><head><style>body{font-family: sans-serif} img{display: block}</style><script>const imgExt = ["jpg","webp","gif","bmp","tiff","avif"];</script></head><body>${div.innerHTML}</body></html>`,
+						frycAPI.minifyCodeSimple(`<html>
+							<head>
+								<style>
+									body{
+										font-family: sans-serif;
+										width: 1000px;
+										max-width: 100%;
+										margin: auto;
+										padding: 10px;
+										box-sizing: border-box;
+									}
+									img{
+										display: block;
+										max-width: 100%;
+										max-height: 100vh;
+									}
+									.kolory .dobra{color: #38761d}
+									.kolory .zła{color: #cc0000}
+									li::marker{font-weight: bold;}
+								</style>
+								<script>
+									const imgExt = ["jpg","webp","gif","bmp","tiff","avif"];
+								</script>
+							</head>
+							<body class="kolory">${div.innerHTML}</body>
+						</html>`),
 						title + ".html"
 					);
 				};
@@ -5636,7 +5668,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 	`);
 	frycAPI.onLoadSetter(() => {
 		document.querySelector("[jsname='dnDxad']").addEventListener("click", function () {
-			document.querySelector(".D5aOJc.vJwDU").click();
+			document.querySelector(`[jsname="T118cc"]`).click();
 		});
 	});
 } else if (1 && frycAPI_host("trello.com")) {
@@ -7073,7 +7105,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 				f.nameClickable = 1;
 				f.callBack = function (obj) {
 					if (obj.type === "name") {
-						frycAPI.copyTxt(ggbApplet.getLaTeXString(f.state));
+						frycAPI.ctrlC(ggbApplet.getLaTeXString(f.state));
 					}
 				};
 				return f;
@@ -7530,13 +7562,6 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const topBar = `.xfpmyvw.x1u998qt.x1vjfegm`;
 	// const privateConv = `[aria-label^="Konwersacja z:"]:not([aria-label*=" i "])`; // First version
 	const privateConv = `${topBar} a[href^="https://www.facebook.com"], [aria-label="Wybrane wartości"]:not(:has(>:nth-child(2)))`; // Private is opposite to group
-	const personPhoto = `[aria-hidden="true"] > span > img`;
-	const convInfo = `[aria-label="Informacje o konwersacji"]`;
-	const chatParticipants = `[aria-label="Uczestnicy czatu"]`;
-	const chatParticipantsElems = `div:has(> div > div > ${chatParticipants}) > div > [aria-labelledby] > [class]`;
-	const personSettings = `[aria-label^="Ustawienia członka dla"]`;
-	const messageItem = `[role="menu"] [aria-hidden="false"] div[role="menuitem"][aria-labelledby]`;
-	const profileItem = `[role="menu"] [aria-hidden="false"] a[role="menuitem"][aria-labelledby]`;
 	const userName = `span.x193iq5w.xeuugli.x13faqbe.x1vvkbs.xt0psk2.x1xmvt09.x6prxxf.xk50ysn.xzsf02u.xq9mrsl`;
 	const threadList = `[aria-label="Lista wątków"]`;
 	const sidePanelTopLevel = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x1qjc9v5.xozqiw3.x1q0g3np.xexx8yu.x85a59c > .x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x1iyjqo2.xs83m0k.x8mqhxd.x6ikm8r.x10wlt62.xcrg951.xm0m39n.xzhurro.x6gs93r.xpyiiip.x88v6c3.x1qpj6lr.xdhzj85.x1bc3s5a.xczebs5.x4pn7vq.xe95u6g`;
@@ -7752,54 +7777,6 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		const share = frycAPI.elemFromHTML(`<div class="myButt share"><div></div></div>`);
 		const react = frycAPI.elemFromHTML(`<div class="myButt react"><div></div></div>`);
 		const reply = frycAPI.elemFromHTML(`<div class="myButt reply"><div></div></div>`);
-		const message = frycAPI.elemFromHTML(`<div class="myButt message"><div></div></div>`);
-		const profile = frycAPI.elemFromHTML(`<div class="myButt profile"><div></div></div>`);
-
-		function clickThroughSidebar(container, action, messageButt, profileButt) {
-			let fullName = container.nthParent(5).querySelector(personPhoto)?.alt;
-			if (!fullName) {
-				// debugger;
-				let messageEl = container.parentElement;
-				while (messageEl.parentElement.notMatches(messageList)) { // Go up until messageEl is a topmost message container
-					messageEl = messageEl.parentElement;
-				}
-				while (!(fullName = messageEl.querySelector(personPhoto)?.alt)) { // Go to the next message untile photo with alt attribute is found
-					messageEl = messageEl.nextEl;
-				}
-			}
-			let convInfoButton;
-			frycAPI.createMutObs(() => {
-				const participants = document.querySelector(chatParticipants);
-				if (!participants) { // Side panel with conversation info is closed so open it
-					(convInfoButton = document.querySelector(convInfo)).click();
-				} else if (participants.getAttribute("aria-expanded") === "false") { // Conversation participants list is collapsed so expand it
-					participants.click();
-				} else {
-					const thePerson = document.querySelectorAll(chatParticipantsElems)
-					.find(el => el.querySelector(`svg[aria-label]`).getAttribute("aria-label") === fullName);
-					if (thePerson) {
-						thePerson.querySelector(personSettings).click();
-						frycAPI.createMutObs(() => {
-							const item = document.querySelector(action === "message" ? messageItem : profileItem);
-							if (item) {
-								item.click();
-								convInfoButton?.click(); // If the side panel was open before convInfoButton will be undefined. If the panel was closed convInfoButton won't be undefined and will be clicked to close the panel
-								return true; // Disconnect mutObs
-							}
-						});
-					} else { // thePerson was not found (they've probably left the group) so delete both personal buttons
-						messageButt.remove();
-						profileButt.remove();
-						frycAPI.copyTxt(fullName);
-						frycAPI.sleep(50).then(() => { // Display alert asynchronously to let the mutation obesrver get disconected first
-							alert("The person you tried to message or view profile of, left the group. Their full name was copied to clipboard.");
-						});
-						convInfoButton?.click();
-					}
-					return true; // Disconnect mutObs
-				}
-			});
-		}
 
 		// window.frycAPI_addEventListenerFun("resize", () => {
 		// 	document.body.setAttribute("devicePixelRatio", window.devicePixelRatio);
@@ -7855,15 +7832,6 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 									frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS)?.click());
 								}
 							}));
-							if (frycAPI.querySelNull(privateConv) && container.notMatches(mojaWiadomość)) { // Current conversation is a group and we are in other person's message
-								let messageButt, profileButt;
-								container.append(messageButt = message.cloneNode(1).frycAPI_addEventListener("click", function () {
-									clickThroughSidebar(container, "message", messageButt, profileButt);
-								}));
-								container.append(profileButt = profile.cloneNode(1).frycAPI_addEventListener("click", function () {
-									clickThroughSidebar(container, "profile", messageButt, profileButt);
-								}));
-							}
 						});
 						const text = document.querySelector(`[aria-current="page"] abbr[aria-label] > span`)?.innerText;
 						if (text !== undefined) document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
