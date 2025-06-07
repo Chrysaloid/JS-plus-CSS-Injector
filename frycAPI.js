@@ -1993,7 +1993,7 @@ if (1) { //* Globalne funkcje
 				const f = new type({ name });
 				frycAPI.myStyleManualFunc = f;
 				f.callBack = function (obj) {
-					if (frycAPI.myStyleState !== null) {
+					if (frycAPI.myStyleState) {
 						frycAPI.myStyleState.toggle();
 						frycAPI.setStorage("style", frycAPI.myStyleState.state);
 					}
@@ -5186,9 +5186,9 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			#content, ul.comments-list .comment > * {
 				border-color: var(--my-bg-accent) !important;
 			}
-			/* .s-btn.s-btn__filled {
+			.s-btn.s-btn__filled {
 				background-color: var(--my-bg-accent);
-			} */
+			}
 			body, .s-topbar, .site-footer, #content {
 				background-color: var(--my-bg);
 			}
@@ -6463,6 +6463,9 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		} */
 		:root[dir] [data-icon*="tail-"]+div {
 			box-shadow: none;
+		}
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 		/* canvas[aria-label="Scan me!"] {
 			filter: invert(1);
@@ -7746,7 +7749,11 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 
 		${myMessageContainer} {
 			/* background-color: hsl(0, 0%, 5%); */
-			background-color: #616161;
+			background-color: #616161 !important;
+			background-image: none !important;
+			* {
+				color: white !important;
+			}
 		}
 
 		${userName} {
