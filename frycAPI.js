@@ -7539,24 +7539,25 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 // #endregion
 // #region //* IFy  7
 else if (1 && frycAPI_host("www.messenger.com")) {
-	const messageContainer = ".x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x193iq5w.xeuugli.xs83m0k.xjhlixk.xgyuaek";
+	const messageContainer = `[aria-label^="Wiadomości"] > div > div[role="none"] > div`;
 	const messageBody = ".html-div.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1gslohp.x11i5rnm.x12nagc.x1mh8g0r.x1yc453h.x126k92a.x18lvrbx";
 	const myMessageBody = ".html-div.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1gslohp.x11i5rnm.x12nagc.x1mh8g0r.x1yc453h.x126k92a.xyk4ms5";
 	const myMessageContainer = `[role="none"] > .html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x6ikm8r.x10wlt62 > .html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.x14ctfv`;
 	const messageList = ".x78zum5.xdt5ytf.x1iyjqo2.x2lah0s.xl56j7k.x121v3j4";
-	const buttonContainer = ".html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x6s0dn4.xl5lk40.x78zum5.x1mqs8db";
+	const buttonContainer = `[data-release-focus-from="CLICK"] > div > .html-div:nth-child(3) [role="presentation"] [role="presentation"]`;
 	const reactCSS = `[aria-label="Zareaguj"]`;
 	const replyCSS = `[aria-label="Odpowiedz"]`;
 	const moreCSS = `[aria-label="Więcej"]`;
 	const shareCSS = `[aria-label="Prześlij"]`;
 	const shareItemCSS = `${shareCSS}[role="menuitem"]`;
 	const replyItemCSS = `${replyCSS}[role="menuitem"]`;
-	const delCSS = `[aria-label="Usuń wiadomość"][role="menuitem"]`;
+	const delCSS = `[aria-label="Cofnij wysłanie wiadomości"][role="menuitem"]`;
 	const editCSS = `[aria-label="Edytuj"][role="menuitem"]`;
-	const mojaWiadomość = `.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x78zum5.x15zctf7`;
+	const mojaWiadomość = `${messageContainer} > div:has([data-release-focus-from="CLICK"] > div > div > div > div[role="none"])`;
 	const iconWidth = `.x1mqs8db`;
-	const toolTipSpan = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x1ji0vk5.x18bv5gf.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x1nxh6w3.x1fcty0u.xw2npq5.x4zkp8e.x676frb.xq9mrsl`;
-	const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy:has(${toolTipSpan} > div > div:nth-child(3))`;
+	// const toolTipSpan = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.x1ji0vk5.x18bv5gf.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x1nxh6w3.x1fcty0u.xw2npq5.x4zkp8e.x676frb.xq9mrsl`;
+	// const timeTooltip = `.xu96u03.xm80bdy.x10l6tqk.x13vifvy:has(${toolTipSpan} > div > div:nth-child(3))`;
+	const timeTooltip = `[style*="--positionAnchor"] > [role="tooltip"]`;
 	// const conversationTime = `span.html-span.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1hl2dhg.x16tdsg8.x1vvkbs`;
 	const personTyping = `.x9f619.x1n2onr6.x1ja2u2z.__fb-dark-mode`;
 	const nameElem = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x6s0dn4.xozqiw3.x1q0g3np.xexx8yu.xykv574.xbmpl8g.x4cne27.xifccgj`;
@@ -7704,7 +7705,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		${mojaWiadomość} .przerobiony > .delete {
 			display: block;
 		}
-		body[editOK="true"] ${messageList} > div:not(.noEdit, :has(~ .noEdit)) ${mojaWiadomość} .przerobiony > .edit {
+		body[editOK="true"] ${mojaWiadomość}:not(.noEdit, :has(~ .noEdit)) .przerobiony > .edit {
 			display: block;
 		}
 		/* ${messageList}.noEdit > div:not(.noEdit, :has(~ .noEdit)) .przerobiony > .edit {
@@ -7719,12 +7720,12 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		body:has(${privateConv}) ${iconWidth} {
 			width: calc(3 * var(--s1));
 		}
-		body[editOK="true"] ${messageList} > div:not(.noEdit, :has(~ .noEdit)) ${mojaWiadomość} ${iconWidth} {
+		body[editOK="true"] ${mojaWiadomość}:not(.noEdit, :has(~ .noEdit)) ${iconWidth} {
 			width: calc(5 * var(--s1));
 		}
 
 		${timeTooltip} {
-			margin-top: -33px;
+			margin-top: -45px;
 			pointer-events: none;
 		}
 
@@ -7790,66 +7791,81 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		// })();
 
 		// let oldHref;
-		frycAPI.createMutObs(() => {
-			if (frycAPI.querySelOk(messageContainer)) {
-				frycAPI.sleep(1000).then(() => {
-					frycAPI.createMutObs(() => {
-						frycAPI.forEach(`${buttonContainer} > ${buttonContainer}:not(.przerobiony)`, container => {
-							// loguj("buttonContainer");
-							container.frycAPI_addClass("przerobiony");
-							container.append(edit.cloneNode(1).frycAPI_addEventListener("click", () => {
-								const moreButt = container.querySelector(moreCSS);
-								moreButt.click();
-								frycAPI.sleep(10).then(() => {
-									const editButt = document.querySelector(editCSS);
-									if (editButt !== null) {
-										editButt.click();
-									} else {
-										moreButt.click();
-										let elem = container.parentElement;
-										while (!elem.parentElement.matches(messageList)) {
-											elem = elem.parentElement;
-										}
-										elem.frycAPI_addClass("noEdit");
-									}
-								});
-							}));
-							container.append(del.cloneNode(1).frycAPI_addEventListener("click", () => {
-								container.querySelector(moreCSS)?.click();
-								frycAPI.sleep(10).then(() => document.querySelector(delCSS)?.click());
-							}));
-							container.append(share.cloneNode(1).frycAPI_addEventListener("click", () => {
-								const shareButt = container.querySelector(shareCSS);
-								if (shareButt !== null) {
-									shareButt.click();
-								} else {
-									container.querySelector(moreCSS)?.click();
-									frycAPI.sleep(10).then(() => document.querySelector(shareItemCSS)?.click());
-								}
-							}));
-							container.append(react.cloneNode(1).frycAPI_addEventListener("click", () => {
-								container.querySelector(reactCSS)?.click();
-							}));
-							container.append(reply.cloneNode(1).frycAPI_addEventListener("click", () => {
-								const replyButt = container.querySelector(replyCSS);
-								if (replyButt !== null) {
-									replyButt.click();
-								} else {
-									container.querySelector(moreCSS)?.click();
-									frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS)?.click());
-								}
-							}));
-						});
-						const text = document.querySelector(`[aria-current="page"] abbr[aria-label] > span`)?.innerText;
-						if (text !== undefined) document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
+		function messageContainerFun() {
+			frycAPI.forEach(`${buttonContainer}:not(.przerobiony)`, container => {
+				// loguj("buttonContainer");
+				container.frycAPI_addClass("przerobiony");
+				container.append(edit.cloneNode(1).frycAPI_addEventListener("click", () => {
+					const moreButt = container.querySelector(moreCSS);
+					moreButt.click();
+					frycAPI.sleep(10).then(() => {
+						const editButt = document.querySelector(editCSS);
+						if (editButt !== null) {
+							editButt.click();
+						} else {
+							moreButt.click();
+							let elem = container.parentElement;
+							while (!elem.parentElement.matches(messageList)) {
+								elem = elem.parentElement;
+							}
+							elem.frycAPI_addClass("noEdit");
+						}
+					});
+				}));
+				container.append(del.cloneNode(1).frycAPI_addEventListener("click", () => {
+					container.querySelector(moreCSS)?.click();
+					frycAPI.sleep(10).then(() => document.querySelector(delCSS)?.click());
+				}));
+				container.append(share.cloneNode(1).frycAPI_addEventListener("click", () => {
+					const shareButt = container.querySelector(shareCSS);
+					if (shareButt !== null) {
+						shareButt.click();
+					} else {
+						container.querySelector(moreCSS)?.click();
+						frycAPI.sleep(10).then(() => document.querySelector(shareItemCSS)?.click());
+					}
+				}));
+				container.append(react.cloneNode(1).frycAPI_addEventListener("click", () => {
+					container.querySelector(reactCSS)?.click();
+				}));
+				container.append(reply.cloneNode(1).frycAPI_addEventListener("click", () => {
+					const replyButt = container.querySelector(replyCSS);
+					if (replyButt !== null) {
+						replyButt.click();
+					} else {
+						container.querySelector(moreCSS)?.click();
+						frycAPI.sleep(10).then(() => document.querySelector(replyItemCSS)?.click());
+					}
+				}));
+			});
+			const text = document.querySelector(`[aria-current="page"] abbr[aria-label] > span`)?.innerText;
+			if (text !== undefined) document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
 
-						// if (oldHref !== window.location.href) {
-						// 	oldHref = window.location.href;
-						// 	loguj("Navigation");
-						// }
-					}, { elem: document.querySelector(messageContainer), options: { childList: true, subtree: true } });
-				});
-				return true;
+			// if (oldHref !== window.location.href) {
+			// 	oldHref = window.location.href;
+			// 	loguj("Navigation");
+			// }
+		}
+		let messageContainerElem;
+		const messageContainerOpts = () => ({ elem: messageContainerElem, options: { childList: true, subtree: true } });
+		let messageContainerObserver;
+		let firstTime = true;
+		frycAPI.createMutObs(() => {
+			// loguj("Body observer");
+			messageContainerElem ??= document.querySelector(messageContainer);
+			if (messageContainerElem) {
+				if (messageContainerElem.isConnected) {
+					if (firstTime) {
+						firstTime = false;
+						frycAPI.sleep(1000).then(() => {
+							messageContainerObserver = frycAPI.createMutObs(messageContainerFun, messageContainerOpts());
+						});
+					}
+				} else {
+					messageContainerElem = document.querySelector(messageContainer);
+					messageContainerObserver.disconnect();
+					messageContainerObserver = frycAPI.createMutObs(messageContainerFun, messageContainerOpts());
+				}
 			}
 		});
 		// #endregion
