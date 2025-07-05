@@ -4806,6 +4806,16 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			background-size: contain;
 			background-repeat: no-repeat;
 		}
+
+		html, body, * {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		.mw-body h1, .mw-body h1 *, .mw-body .mw-heading1, .mw-body-content h1, .mw-body-content .mw-heading1, .mw-body-content h2, .mw-body-content .mw-heading2 {
+			font-family: Cambria, serif !important;
+		}
+		body.skin--responsive, #menus-cover-background {
+			background-image: none !important;
+		}
 	`);
 
 	frycAPI.onLoadSetter(function () {
@@ -4825,7 +4835,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 					me.innerHTML = " -&nbsp;";
 					const response = await fetch(`https://${window.location.hostname}/api/rest_v1/page/summary/${pageName}`);
 					if (!response.ok) {
-						throw new Error(`Response was not OK. Status: ${response.status}. Status text: ${response.statusText}. Page name: ${pageName}`);
+						throw new Error(`Response was not OK.\nStatus: ${response.status}.\nStatus text: ${response.statusText}.\nPage name: ${pageName}`);
 					}
 
 					const obj = await response.json();
@@ -5282,14 +5292,17 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			filter: invert(1) hue-rotate(180deg) brightness(1.3);
 		}
 
-		.comment-body > .ai-center {
-			color: var(--theme-link-color, var(--theme-secondary-400));
-		}
-		.comment-body > :is(.ai-center, .comment-copy)::after {
-			content: "–";
-			/* content: "|"; */
-			padding-left: 3px;
-			color: #cccac6;
+		.comment-body {
+			/* display: flex; */
+			> .ai-center {
+				color: var(--theme-link-color, var(--theme-secondary-400));
+			}
+			> :is(.ai-center, .comment-copy)::after {
+				content: "–";
+				/* content: "|"; */
+				padding-left: 3px;
+				color: #cccac6;
+			}
 		}
 
 		.s-topbar .s-topbar--item:not(.s-topbar--item__unset) {
@@ -6464,7 +6477,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		:root[dir] [data-icon*="tail-"]+div {
 			box-shadow: none;
 		}
-		* {
+		*:not(code, code *) {
 			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 		/* canvas[aria-label="Scan me!"] {
