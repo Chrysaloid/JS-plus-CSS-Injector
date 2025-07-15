@@ -4915,7 +4915,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			filter: invert(1) hue-rotate(180deg);
 		}
 	`);
-} else if (1 && frycAPI_host("satisfactory.fandom.com")) {
+} else if (1 && frycAPI_host("satisfactory.fandom.com", "sanctum.fandom.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img.mwe-math-fallback-image-inline {
 			filter: invert(1) !important;
@@ -5317,6 +5317,10 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			margin-top: var(--su16) !important;
 		}
 
+		.s-user-card .s-user-card--time {
+			overflow: visible;
+		}
+
 		${frycAPI_host("puzzling.stackexchange.com") ? /*css*/`
 			.site-header .site-header--link > img {
 				filter: contrast(1.7) brightness(0.9);
@@ -5369,7 +5373,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 
 		document.querySelectorAll(`:is(.-badges, .-flair) > span.v-visible-sr`).forEach(el => el.remove());
 		const badges = document.querySelector(`.-badges`);
-		if (badges !== null) {
+		if (badges) {
 			const rep = badges.previousElementSibling;
 			badges.frycAPI_insertHTML("afterbegin", `<span class="reputation-score" title="${rep.getAttribute("title")}"><div>${rep.frycAPI_getFirstTextNodeContent()}</div></span>`);
 			badges.frycAPI_addClass("-flair");
@@ -5381,7 +5385,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 		const getDate = elem => {
 			const title = elem.title;
 			elem.title = "";
-			return title.replace(/,.*/u, "");
+			return title.replace(/,.*/, "");
 		};
 		frycAPI.createMutObs((mutRecArr, mutObs) => {
 			// #region //* Lepsza data
@@ -5402,6 +5406,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			});
 			frycAPI.setDefaultDate(`.ai-center:has(.owner) + span.comment-date .relativetime-clean`, { getDate, customStyle: `--tt-y: 1px;` }); // eslint-disable-line object-shorthand
 			frycAPI.setDefaultDate(`:is(.relativetime-clean, .relativetime)`, { getDate });
+			frycAPI.setDefaultDate(`.s-user-card .s-user-card--time`, { getDate, customStyle: `cursor: none;` }); // eslint-disable-line object-shorthand
 			// #endregion
 			// #region //* Moved user name to the beginning of the comment
 			frycAPI.forEach(`.comment-body:not(.zmieniona-kolejność)`, (daElem, daI, daArr) => {
