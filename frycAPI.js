@@ -11067,10 +11067,43 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}
 	`, { elevated: true });
 } else if (frycAPI_host("x.com", "twitter.com")) {
+	const quoteSel = `div:has(> [role="link"] [data-testid="Tweet-User-Avatar"]):has(time)`;
+	const tweetTextSel = `div:not([role="link"]) > div > div:not([role="link"]) > div > div:has(> [data-testid="tweetText"])`;
+	const quoteAndText = "quoteAndText";
+	const quoteParent = "quoteParent";
+
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
+		}
+		article ${quoteSel} {
+			order: -2;
+		}
+		article[${quoteAndText}] ${tweetTextSel} {
+			order: -1;
+			margin: 0;
+		}
+		[${quoteParent}] {
+			margin-top: 6px;
+			gap: 10px;
+		}
+	`);
+
 	frycAPI.onLoadSetter(function () {
 		frycAPI.setDefaultDateStyle().mode.relatywnyCzas().toolTipRight();
 		frycAPI.createMutObs(() => {
+			// loguj("MutObs");
 			frycAPI.setDefaultDate("time");
+
+			frycAPI.forEach(`article:not(.${quoteAndText})`, article => {
+				const quote = article.querySelector(quoteSel);
+				if (!quote) return;
+				quote.parentElement.setAttribute(quoteParent, "");
+				const tweetText = article.querySelector(tweetTextSel);
+				if (!tweetText) return;
+				quote.insertAdjacentElement("beforebegin", tweetText);
+				article.setAttribute(quoteAndText, "");
+			});
 		});
 	});
 } else if (frycAPI_host("cas.usos.pw.edu.pl")) {
