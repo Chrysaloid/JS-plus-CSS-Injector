@@ -419,9 +419,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	injectStyle(style, opts = {}) { // Injects style to the page
 		if ((style = style.trim()).length) {
-			opts.id ??= "frycAPI_styleNormal" + (++frycAPI.injectStyleNormalNum);
-			opts.elevated ??= false;
-			opts.state ??= true;
+			opts.id        ??= "frycAPI_styleNormal" + (++frycAPI.injectStyleNormalNum);
+			opts.elevated  ??= false;
+			opts.state     ??= true;
 			opts.allFrames ??= false;
 			const css = frycAPI.minifyCSS(style);
 			let styleElem;
@@ -432,11 +432,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			} else {
 				styleElem = frycAPI.elem("style").attr("id", opts.id)._;
 				styleElem.textContent = css;
-				if (opts.elem instanceof Node) {
-					opts.elem.appendChild(styleElem);
-				} else {
-					document.documentElement.appendChild(styleElem);
-				}
+				const elem = opts.elem instanceof Node ? opts.elem : document.documentElement;
+				elem.appendChild(styleElem);
 				if (!opts.state) styleElem.disabled = true; // For some reason setting disabled to true disables the style only when it is in the DOM, so we have to set it AFTER we instert it
 			}
 
@@ -985,7 +982,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runCallBack: true, elem: document.body, options: { childList: true, subtree: true } });
 	setDefaultDate(selector, options = {}) { // { getDate: 111, setDate: 111, dateTitle: 111 }
 		// Flag usage on www.autohotkey.com
-		const sel = document.querySelectorAll(`:is(${selector.trim()}):not(.lepszyCzasParent)`);
+		const rootElem = options.rootElem ?? document.body;
+		const sel = rootElem.querySelectorAll(`:is(${selector.trim()}):not(.lepszyCzasParent)`);
 		if (sel.length) {
 			const getDate = (() => {
 				switch (options.getDate) {
@@ -997,11 +995,11 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 					default: return options.getDate;
 				}
 			})();
-			const setDate = options.setDate ?? frycAPI.setDefaultDateText;
-			const dateEnumMode = options.dateEnumMode;
+			const setDate       = options.setDate ?? frycAPI.setDefaultDateText;
+			const dateEnumMode  = options.dateEnumMode;
 			const dateEnumStyle = options.dateEnumStyle;
-			const customStyle = options.customStyle ?? "";
-			const dateOpts = options.dateOpts;
+			const customStyle   = options.customStyle ?? "";
+			const dateOpts      = options.dateOpts;
 			sel.forEach(daElem => {
 				const data = new Date(getDate(daElem));
 				if (frycAPI.isValidDate(data)) {
@@ -1010,14 +1008,16 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 					daElem.removeAttribute("title");
 					dateEnumMode?.(lepszyCzas);
 					dateEnumStyle?.(lepszyCzas);
-					if (lepszyCzas.classList.contains("lepszyCzas")) {
-						lepszyCzas.setAttribute("style", customStyle);
-					} else {
-						lepszyCzas.querySelector(`.lepszyCzas`)?.setAttribute("style", customStyle);
+					if (customStyle) {
+						if (lepszyCzas.classList.contains("lepszyCzas")) {
+							lepszyCzas.setAttribute("style", customStyle);
+						} else {
+							lepszyCzas.querySelector(`.lepszyCzas`)?.setAttribute("style", customStyle);
+						}
 					}
 				}
 			});
-			frycAPI.setDefaultDateStyle();
+			frycAPI.setDefaultDateStyle(rootElem);
 		}
 		return frycAPI.setDefaultDateEnum;
 	},
@@ -1048,8 +1048,17 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	getDefaultDateHTML(absCzas, relCzas) {
 		return /*html*/`<span class="lepszyCzas"><span class="abs-czas">${absCzas}</span><span class="myślnik-czas"> - </span><span class="rel-czas">${relCzas}</span></span>`;
 	},
-	setDefaultDateStyle() {
-		if (frycAPI.querySelOk(`#frycAPI_setDefaultDate`)) return frycAPI.setDefaultDateEnum;
+	setDefaultDateStyle(rootElem = document.body) {
+		if (rootElem.frycAPI_defaultDateStyleInjected) return frycAPI.setDefaultDateEnum;
+		rootElem.frycAPI_defaultDateStyleInjected = true;
+
+		if (frycAPI.setDefaultDateEnum.dateStyleState) { // rootElem here could be a shadowRoot or body inside an iframe
+			const newStyleElem = frycAPI.setDefaultDateEnum.dateStyleState.styleElem.cloneNode(1);
+			rootElem.appendChild(newStyleElem);
+			const hostNode = rootElem instanceof ShadowRoot ? rootElem.host : rootElem;
+			frycAPI.setDefaultDateEnum.mode.oba(hostNode).floatCenter(hostNode);
+			return frycAPI.setDefaultDateEnum;
+		}
 
 		// #region //* Stringi
 		const rel = `[lepszyCzas="relatywnyCzas"]`;
@@ -1167,6 +1176,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const floatModSel = `:where([lepszyCzasStyl^="float"], [lepszyCzasStyl="toolTip-center"])`;
 		const floatModStyle = `visibility: hidden;`;
 		const bigSpec = `[lepszyCzas]`.repeat(5);
+		// let bigSpec = `[lepszyCzas]`.repeat(5);
+		// bigSpec = `${bigSpec}, :host(${bigSpec})`;
 		/* //* Próba konceptualnego ogarnięcia dlaczego ten styl działa
 			g(a,r)
 			g(t,f)
@@ -1180,7 +1191,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		*/
 		// #endregion
 
-		frycAPI.injectStyle(
+		frycAPI.setDefaultDateEnum.dateStyleState = frycAPI.injectStyle(
 			/*
 				:is([lepszyCzas="absolutnyCzas"], [lepszyCzas="relatywnyCzas"]) span.lepszyCzas {
 					cursor: none;
@@ -1223,8 +1234,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				}
 			*/
 			/*css*/`
-			${bigSpec} {
-				& :where(span.lepszyCzas) {
+				@${bigSpec}@ :where(span.lepszyCzas) {
 					overflow: visible;
 					text-decoration: inherit;
 					white-space: nowrap;
@@ -1233,44 +1243,47 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 					--tt-y: 0px;
 					--tool-tip-calc: calc(100% + var(--tool-tip-padd));
 				}
-				&:where(${abs}, ${rel}) :where(.lepszyCzas) { ${stylSpanNotOba} }
-				&:where(${abs}) :where(.lepszyCzas)         { ${stylAbs} }
-				&:where(${rel}) :where(.lepszyCzas)         { ${stylRel} }
+				@${bigSpec}:where(${abs}, ${rel})@ :where(.lepszyCzas) { ${stylSpanNotOba} }
+				@${bigSpec}:where(${abs})@ :where(.lepszyCzas)         { ${stylAbs} }
+				@${bigSpec}:where(${rel})@ :where(.lepszyCzas)         { ${stylRel} }
 
-				&:where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) ${r} {${1}}`)} }
-				&:where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) ${a} {${1}}`)} }
-				&:where(${abs}) { &${tooltipModSel} ${a} {${tooltipModStyle}} }
-				&:where(${rel}) { &${tooltipModSel} ${r} {${tooltipModStyle}} }
+				${frycAPI.arrayToTemplate(arr, temₚ` @${bigSpec}:where(${abs}${0})@ ${r} {${1}}`)}
+				${frycAPI.arrayToTemplate(arr, temₚ` @${bigSpec}:where(${rel}${0})@ ${a} {${1}}`)}
+				@${bigSpec}:where(${abs})${tooltipModSel}@ ${a} {${tooltipModStyle}}
+				@${bigSpec}:where(${rel})${tooltipModSel}@ ${r} {${tooltipModStyle}}
 
-				&:where([lepszyCzas="oba"]) :where(.lepszyCzas) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
+				@${bigSpec}:where([lepszyCzas="oba"])@ :where(.lepszyCzas) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
 
-				& {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) :where(${abs})${r} {${1}}`)} }
-				& {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0}) :where(${rel})${a} {${1}}`)} }
+				${frycAPI.arrayToTemplate(arr, temₚ` @${bigSpec}:where(${0})@ :where(${abs})${r} {${1}}`)}
+				${frycAPI.arrayToTemplate(arr, temₚ` @${bigSpec}:where(${0})@ :where(${rel})${a} {${1}}`)}
 
-				&:where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${r} {${1}}`)} }
-				&:where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${a} {${1}}`)} }
-				&:where(${abs}) { ${floatModSel}${a} {${floatModStyle}} }
-				&:where(${rel}) { ${floatModSel}${r} {${floatModStyle}} }
+				@${bigSpec}:where(${abs})@ {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${r} {${1}}`)} }
+				@${bigSpec}:where(${rel})@ {${frycAPI.arrayToTemplate(arr, temₚ` :where(${0})${a} {${1}}`)} }
+				@${bigSpec}:where(${abs})@ ${floatModSel}${a} {${floatModStyle}}
+				@${bigSpec}:where(${rel})@ ${floatModSel}${r} {${floatModStyle}}
 
-				& :where(:is(${abs}, ${rel}).lepszyCzas) { ${stylSpanNotOba} }
-				& :where(${abs}.lepszyCzas)              { ${stylAbs} }
-				& :where(${rel}.lepszyCzas)              { ${stylRel} }
+				@${bigSpec}@ :where(:is(${abs}, ${rel}).lepszyCzas) { ${stylSpanNotOba} }
+				@${bigSpec}@ :where(${abs}.lepszyCzas)              { ${stylAbs} }
+				@${bigSpec}@ :where(${rel}.lepszyCzas)              { ${stylRel} }
 
-				& { &${tooltipModSel} :where(${abs})${a} {${tooltipModStyle}} }
-				& { &${tooltipModSel} :where(${rel})${r} {${tooltipModStyle}} }
-				& :where(${abs}) { &${floatModSel}${a} {${floatModStyle}} }
-				& :where(${rel}) { &${floatModSel}${r} {${floatModStyle}} }
-				&:where(${abs}) { ${tooltipModSel}${a} {${tooltipModStyle}} }
-				&:where(${rel}) { ${tooltipModSel}${r} {${tooltipModStyle}} }
+				@${bigSpec}${tooltipModSel}@ :where(${abs})${a} {${tooltipModStyle}}
+				@${bigSpec}${tooltipModSel}@ :where(${rel})${r} {${tooltipModStyle}}
+				@${bigSpec}@ :where(${abs})${floatModSel}${a}   {${floatModStyle}}
+				@${bigSpec}@ :where(${rel})${floatModSel}${r}   {${floatModStyle}}
+				@${bigSpec}:where(${abs})@ ${tooltipModSel}${a} {${tooltipModStyle}}
+				@${bigSpec}:where(${rel})@ ${tooltipModSel}${r} {${tooltipModStyle}}
 
-				& :where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${r} {${1}}`)} }
-				& :where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${a} {${1}}`)} }
-				& :where(${abs}) { &${tooltipModSel}${a} {${tooltipModStyle}} }
-				& :where(${rel}) { &${tooltipModSel}${r} {${tooltipModStyle}} }
+				@${bigSpec}@ :where(${abs}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${r} {${1}}`)} }
+				@${bigSpec}@ :where(${rel}) {${frycAPI.arrayToTemplate(arr, temₚ` &:where(${0})${a} {${1}}`)} }
+				@${bigSpec}@ :where(${abs})${tooltipModSel}${a} {${tooltipModStyle}}
+				@${bigSpec}@ :where(${rel})${tooltipModSel}${r} {${tooltipModStyle}}
 
-				& :where(.lepszyCzas[lepszyCzas="oba"]) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
-			}
-		`.replaceAll(/  +/g, " "), { id: "frycAPI_setDefaultDate" });
+				@${bigSpec}@ :where(.lepszyCzas[lepszyCzas="oba"]) > :where(.abs-czas, .rel-czas, .myślnik-czas) { ${stylOba} }
+			`
+			.replaceAll(/  +/g, " ")
+			.replaceAll(/(@)(.*?)(@)/g, ":is($2, :host($2))"),
+			{ id: "frycAPI_setDefaultDate", elem: rootElem }
+		);
 
 		frycAPI.setDefaultDateEnum.mode.oba().floatCenter();
 		return frycAPI.setDefaultDateEnum;
@@ -1303,6 +1316,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		manualFuncRef: null,
 		defaultDateMode: null,
 		modeIter: 0,
+		dateStyleState: null,
 	}, // frycAPI.setDefaultDateEnum.relatywnyCzas();
 	setDefaultDateEnumFunc1(elem, val, state, setStorage = false) {
 		if (elem === undefined) {
@@ -1322,20 +1336,16 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				document.body.setAttribute("lepszyCzas", val);
 				frycAPI.setDefaultDateEnum.manualFuncRef?.setState(state);
 			})();
-		} else if (elem.classList.contains("lepszyCzas")) {
-			elem.setAttribute("lepszyCzas", val);
 		} else {
-			elem.querySelector(`.lepszyCzas`)?.setAttribute("lepszyCzas", val);
+			elem.setAttribute("lepszyCzas", val);
 		}
 		return frycAPI.setDefaultDateEnum.style;
 	},
 	setDefaultDateEnumFunc2(elem, val) {
 		if (elem === undefined) {
 			document.body.setAttribute("lepszyCzasStyl", val);
-		} else if (elem.classList.contains("lepszyCzas")) {
-			elem.setAttribute("lepszyCzasStyl", val);
 		} else {
-			elem.querySelector(`.lepszyCzas`)?.setAttribute("lepszyCzasStyl", val);
+			elem.setAttribute("lepszyCzasStyl", val);
 		}
 		return frycAPI.setDefaultDateEnum.mode;
 	},
@@ -1746,6 +1756,19 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	qSelAll(query) {
 		return document.querySelectorAll(query);
 	}, // frycAPI.qSelAll(query);
+	traverseShadowRoots(callback = loguj, rootElem = document.body) {
+		const stack = [rootElem];
+		let i = 0;
+
+		while (i < stack.length) {
+			const node = stack[i++];
+			if (node.shadowRoot) {
+				callback(node);
+				stack.push(...node.shadowRoot.children);
+			}
+			stack.push(...node.children);
+		}
+	}, // frycAPI.traverseShadowRoots(node => {});
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -8079,8 +8102,9 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			filter: invert(0) hue-rotate(180deg) !important;
 		}
 	`);
-} else if (1 && frycAPI_host("www.reddit.com")) {
-	frycAPI.injectStyleOnLoad(/*css*/`
+} else if (1 && frycAPI_host("www.reddit.com", "chat.reddit.com")) {
+	const chat = frycAPI_host("chat.reddit.com");
+	const style = /*css*/`
 		*:not(code, code *) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
@@ -8123,6 +8147,23 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			display: none;
 		}
 
+		.room-message.compact:hover faceplate-date {
+			display: block;
+		}
+		faceplate-date.compact-timestamp {
+			overflow: visible;
+		}
+		${chat ? /*css*/`
+		body {
+			width: 1300px;
+			max-width: 100%;
+			box-sizing: border-box;
+			border: 1px solid var(--color-tone-5);
+			border-top: 0;
+			border-bottom: 0;
+		}
+		` : ""}
+
 		/* subreddit blacklist hide */
 		/* article:has(> shreddit-post[permalink^="/r/greentext"]) {
 			display: none !important;
@@ -8143,15 +8184,49 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 				padding: 0 !important;
 			}
 		} */
-	`);
-	// var timeSum = 0;
-	frycAPI.onLoadSetter(function () {
-		frycAPI.createMutObs((mutRecArr, mutObs) => {
-			// let startTime = performance.now();
-			frycAPI.setDefaultDate(`time`, {
-				customStyle: `--tt-x: -18px; cursor: none;`,
-			}).mode.relatywnyCzas().toolTipCenter();
+	`;
+	frycAPI.injectStyleOnLoad(style);
 
+	const compactTimestampOpts = {
+		printDate: frycAPI.getDateFormatter({
+			hour  : "2-digit",
+			minute: "2-digit",
+			defaultUndef: 1,
+		}),
+	};
+	function setDateInShadows(rootElem) {
+		frycAPI.traverseShadowRoots(node => {
+			if (node.hasAttribute("lepszyCzas")) return;
+
+			frycAPI.setDefaultDateStyle(node.shadowRoot).mode.relatywnyCzas(node).toolTipCenter(node);
+			frycAPI.createMutObs(mutRecArr => {
+				const addedNodes = mutRecArr.some(mutRec => mutRec.addedNodes.length);
+				if (addedNodes || mutRecArr.length === 0) {
+					frycAPI.setDefaultDate(`faceplate-date.compact-timestamp > time`, {
+						dateEnumMode: frycAPI.setDefaultDateEnum.mode.absolutnyCzas,
+						dateEnumStyle: frycAPI.setDefaultDateEnum.style.toolTipTop,
+						customStyle: `--tt-x: 18px; cursor: none;`,
+						dateOpts: compactTimestampOpts,
+						rootElem: node.shadowRoot,
+					});
+					frycAPI.setDefaultDate(`faceplate-date > time`, {
+						dateEnumMode: frycAPI.setDefaultDateEnum.mode.oba,
+						rootElem: node.shadowRoot,
+					});
+				}
+
+				if (mutRecArr.length) {
+					setDateInShadows(node);
+				}
+			}, { elem: node.shadowRoot });
+
+			frycAPI.injectStyle(style, { id: "frycAPI_styleNormal", elem: node.shadowRoot });
+		}, rootElem);
+	}
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.setDefaultDateStyle().mode.relatywnyCzas().toolTipCenter();
+		frycAPI.createMutObs(mutRecArr => {
 			const tree = document.querySelector(`shreddit-comment-tree`);
 			if (tree && tree.shadowRoot && tree.shadowRoot.getElementById("shreddit-comment-tree-style") === null) {
 				frycAPI.injectStyle(/*css*/`
@@ -8186,11 +8261,15 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 				daElem.querySelector(`a[slot="title"]`)?.appendChild(daElem.querySelector(`shreddit-post-flair`));
 				daElem.classList.add("poprawnyPost");
 			});
-			// let endTime = performance.now();
-			// timeSum += endTime - startTime;
-			// console.log(`Time: ${timeSum.toFixed(1)} ms`);
+
+			frycAPI.setDefaultDate(`time`, { customStyle: `--tt-x: -18px; cursor: none;` });
+
+			if (chat && mutRecArr.length) {
+				setDateInShadows(document.body);
+			}
 		});
-	});
+		if (chat) setDateInShadows(document.body);
+	}, chat ? 2 : 1);
 } else if (1 && frycAPI_host("www.roblox.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.voting-panel .users-vote .vote-details .vote-container .vote-percentage {
