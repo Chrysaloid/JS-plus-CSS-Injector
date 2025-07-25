@@ -11278,6 +11278,10 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			},
 		],
 	});
+} else if (frycAPI_host("r.3v.fi")) {
+	window.alert = function (message) {
+		console.log(message);
+	};
 }
 // Code-Lens-Action insert-snippet IF template
 
