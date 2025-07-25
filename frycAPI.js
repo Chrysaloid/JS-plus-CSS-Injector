@@ -1747,15 +1747,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		});
 		return out;
 	}, // loguj(frycAPI.consonantsAsFirstLetters("Fryc API"));
-	byID(id) {
-		return document.getElementById(id);
-	}, // frycAPI.byID(id);
-	qSel(query) {
-		return document.querySelector(query);
-	}, // frycAPI.qSel(query);
-	qSelAll(query) {
-		return document.querySelectorAll(query);
-	}, // frycAPI.qSelAll(query);
+	byID(id, docOrFragment = document) {
+		return docOrFragment.getElementById(id);
+	}, // const elem = frycAPI.byID(id);
+	qSel(query, elem = document) {
+		return elem.querySelector(query);
+	}, // const elem = frycAPI.qSel(query);
+	qSelAll(query, elem = document) {
+		return elem.querySelectorAll(query);
+	}, // const elems = frycAPI.qSelAll(query);
 	traverseShadowRoots(callback = loguj, rootElem = document.body) {
 		const stack = [rootElem];
 		let i = 0;
@@ -1769,6 +1769,18 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			stack.push(...node.children);
 		}
 	}, // frycAPI.traverseShadowRoots(node => {});
+	byClass(cls, rootElem = document) {
+		return rootElem.getElementsByClassName(cls)[0]; // when class was not found it will return undefined
+	}, // const elem = frycAPI.byClass("test");
+	byClassAll(cls, rootElem = document) {
+		return rootElem.getElementsByClassName(cls);
+	}, // const elems = frycAPI.byClassAll("test");
+	byTag(cls, rootElem = document) {
+		return rootElem.getElementsByTagName(cls)[0]; // when tag was not found it will return undefined
+	}, // const elem = frycAPI.byTag("p");
+	byTagAll(cls, rootElem = document) {
+		return rootElem.getElementsByTagName(cls);
+	}, // const elems = frycAPI.byTagAll("p");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -3715,9 +3727,99 @@ if (1 && frycAPI_host("192.168.1.1")) {
 				transform: translateX(var(--my-width)) translateY(-50%) rotate(0deg) translateZ(0px) !important;
 			}
 		} */
+
+		.table-of-prompts-container {
+			display: flex;
+			gap: 5px;
+			position: absolute;
+			--top: 52px;
+			top: var(--top);
+			--right: 23px;
+			right: var(--right);
+			flex-direction: column;
+			align-items: stretch;
+			/* --offset: 1450px;
+			width: calc(100vw - var(--offset) - var(--right)); */
+			width: calc(100vw - 1140px - var(--right));
+			max-height: calc(100vh - 150px - var(--top));
+			overflow-x: hidden;
+			overflow-y: auto;
+			padding-right: 5px;
+
+			&, .title, .prompt, .refresh, .hide {
+				border-radius: 5px;
+			}
+
+			.title {
+				padding: 2px;
+				gap: 5px;
+				text-align: center;
+				/* border: 1px solid white; */
+				--background: #444444;
+				background-color: var(--background);
+				font-weight: bold;
+				display: flex;
+				position: sticky;
+				top: 0;
+				z-index: 5;
+
+				.refresh, .hide {
+					width: auto;
+					height: 24px;
+					cursor: pointer;
+				}
+				.refresh {
+					content: url(${frycAPI.getResURL("refresh.png")});
+					background-color: var(--background);
+				}
+				.text {
+					flex-grow: 1;
+				}
+				.hide {
+					content: url(${frycAPI.getResURL("visibility_on.png")});
+					background-color: var(--background);
+				}
+			}
+			:is(.refresh, .hide, .prompt):hover {
+				filter: brightness(1.3);
+			}
+
+			.prompt {
+				padding: 2px 5px;
+				display: -webkit-box;
+				background-color: #303030;
+				overflow: clip;
+				-webkit-line-clamp: 3;
+				-webkit-box-orient: vertical;
+				cursor: pointer;
+			}
+		}
+		body.table-of-prompts {
+			main article > div {
+				/* display: flex; */
+				& > div {
+					margin: 0;
+				}
+			}
+		}
+		body:not(.table-of-prompts) {
+			.table-of-prompts-container {
+				/* --offset: 1140px; */
+				.title {
+					padding-left: 5px;
+				}
+				width: fit-content;
+				.prompt, .refresh {
+					display: none;
+				}
+				.hide {
+					content: url(${frycAPI.getResURL("visibility_off.png")});
+				}
+			}
+		}
 	`);
 
-	const promptSelector = `[data-message-author-role="user"]`;
+	const promptSelector = `[data-message-author-role="user"] [data-multiline]`;
 	frycAPI.createManualFunctions("ChatGPT", {
 		funcArr: [
 			(name = "Log all prompts", type = frycAPI_Normal) => {
@@ -3727,6 +3829,41 @@ if (1 && frycAPI_host("192.168.1.1")) {
 					frycAPI.forEach(promptSelector, daElem => {
 						loguj(daElem.innerText.trim());
 					});
+				};
+				return f;
+			},
+			(name = "Table of prompts", type = frycAPI_Normal) => {
+				const f = new type({ name });
+
+				function bodyClassFun() {
+					document.body.classList.toggle("table-of-prompts");
+				}
+				let container;
+				f.callBack = function (obj) {
+					if (container) {
+						bodyClassFun();
+						return;
+					}
+
+					container = document.body.appendChild(frycAPI.elemFromHTML(`
+						<div class="table-of-prompts-container">
+							<div class="title">
+								<img class="refresh"/>
+								<div class="text">Table of prompts</div>
+								<img class="hide"/>
+							</div>
+						</div>
+					`));
+					const promptElem = frycAPI.elem("div").class("prompt").attr("title", "Click to scroll")._;
+					container.frycAPI_elemByClass("refresh").frycAPI_addEventListenerFun("click", () => {
+						container.querySelectorAll(`.prompt`).forEach(el => el.remove());
+						frycAPI.forEach(promptSelector, daElem => {
+							container.appendChild(promptElem.cloneNode(1).frycAPI_setInnerText(daElem.innerText.trim())).addEventListener("click", () => {
+								daElem.scrollIntoView();
+							});
+						});
+					})();
+					container.frycAPI_elemByClass("hide").frycAPI_addEventListenerFun("click", bodyClassFun)();
 				};
 				return f;
 			},
