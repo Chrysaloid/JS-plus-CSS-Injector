@@ -3717,23 +3717,33 @@ if (1 && frycAPI_host("192.168.1.1")) {
 		} */
 	`);
 
-	/* frycAPI.onLoadSetter(function () {
-		frycAPI.forEach(`a.flex.items-center.gap-2.p-2`, (daElem, daI, daArr) => {
-			daElem.append(`<div class="mój-tooltip">${daElem.firstChild.innerText}</div>`);
-		});
-		new MutationObserver((mutRecArr, mutObs) => {
-			if ((() => {
-				for (let i = 0; i < mutRecArr.length; i++) {
-					if (mutRecArr[i].addedNodes.length) return true;
-				}
-				return false;
-			})()) {
-				frycAPI.forEach(`a.flex.items-center.gap-2.p-2:not(:has(.mój-tooltip))`, (daElem, daI, daArr) => {
-					daElem.insertAdjacentHTML("beforeend",`<div class="mój-tooltip">${daElem.firstChild.innerText}</div>`);
-				});
-			}
-		}).observe(document.querySelector(`nav[aria-label="Chat history"]`), { childList: true, subtree: true });
-	}); */
+	const promptSelector = `[data-message-author-role="user"]`;
+	frycAPI.createManualFunctions("ChatGPT", {
+		funcArr: [
+			(name = "Log all prompts", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callBack = function (obj) {
+					console.clear();
+					frycAPI.forEach(promptSelector, daElem => {
+						loguj(daElem.innerText.trim());
+					});
+				};
+				return f;
+			},
+			(name = "Save all prompts to file", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callBack = function (obj) {
+					let txt = "";
+					const separator = `\n\n${"#".repeat(30)}\n\n`;
+					frycAPI.forEach(promptSelector, daElem => {
+						txt += daElem.innerText.trim() + separator;
+					});
+					frycAPI.downloadTxt(txt.slice(0, -separator.length), `ChatGPT prompts - ${document.title} - ${frycAPI.printDateForFileName()}.txt`);
+				};
+				return f;
+			},
+		],
+	});
 } else if (0 && frycAPI_host("cke.gov.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		h2, .h2 {
