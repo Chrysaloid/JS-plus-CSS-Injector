@@ -5,7 +5,7 @@
 const frycAPI_t1 = performance.now();
 
 class frycAPI_ManualFunc extends Object {
-	callBack; funcGroup; num; prevFunc; nextFunc; style; name; Off; displayName; nameClickable;
+	callback; funcGroup; num; prevFunc; nextFunc; style; name; Off; displayName; nameClickable;
 	constructor(obj) {
 		super();
 		this.name = obj.name;
@@ -336,6 +336,46 @@ class frycAPI_Elem extends Object {
 		return this;
 	}
 }
+class frycAPI_MutationObserver extends MutationObserver {
+	#callback; target; options; #connected;
+	constructor(callback) {
+		super(callback);
+		this.#callback = callback;
+	}
+	get callback() {
+		return this.#callback;
+	}
+	get connected() {
+		return this.#connected;
+	}
+	observe(target, options) { // TODO: Make it so that multiple targets can be observed
+		super.observe(target, options);
+		this.target = target;
+		this.options = options;
+		this.#connected = true;
+		return this;
+	}
+	disconnect() {
+		super.disconnect();
+		this.#connected = false;
+		return this;
+	}
+	reconnect(callTheCallback = false) {
+		if (this.#connected === false && (!callTheCallback || this.#callback([], this) !== true)) {
+			super.observe(this.target, this.options);
+			this.#connected = true;
+		}
+		return this;
+	}
+	toggle(callOnReconnect) {
+		if (this.#connected) {
+			this.disconnect();
+		} else {
+			this.reconnect(callOnReconnect);
+		}
+		return this;
+	}
+}
 function loguj(...tekst) {
 	console.log(...tekst);
 }
@@ -472,7 +512,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	handleManualFunction(daObj) {
 		const func = frycAPI.funcGroupArr[daObj.groupNumber].funcArr[daObj.funcNumber];
 		func.fixGeneralState?.(daObj.obj);
-		func.callBack(daObj.obj);
+		func.callback(daObj.obj);
 		return frycAPI;
 	},
 	ctrlC(text) {
@@ -580,15 +620,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			daElem.sortFun = sortFun;
 		});
 	}, // frycAPI.makeTableSortable(document.querySelector(`table`));
-	zmierzCzas(callBack) {
+	zmierzCzas(callback) {
 		const t0 = performance.now();
-		callBack();
+		callback();
 		const t1 = performance.now();
 		loguj(`Czas ${frycAPI.czasNumer}: ${frycAPI.zaokrl(t1 - t0, 2)} ms`);
 		frycAPI.czasNumer++;
 	},
-	onLoadSetter(callBack, when = 1) { // 0 = document DOMContentLoaded, 1 = window DOMContentLoaded, 2 = window load
-		if (frycAPI.onLoadArr[when].push(callBack) === 1) { // new length === 1 | This means that the first element was just added
+	onLoadSetter(callback, when = 1) { // 0 = document DOMContentLoaded, 1 = window DOMContentLoaded, 2 = window load
+		if (frycAPI.onLoadArr[when].push(callback) === 1) { // new length === 1 | This means that the first element was just added
 			/* eslint-disable */
 			switch (when) {
 				case 0: return document.addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
@@ -938,7 +978,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			return dom;
 		}
 	}, // await frycAPI.parseXML(someXMLStr)
-	createMutObs(callBack, objOpts = {}) { // Mutation Observer
+	createMutObs(callback, objOpts = {}) { // Mutation Observer
 		const opts = objOpts.options ?? {};
 		const options = {
 			childList            : opts.childList             ?? true,
@@ -950,28 +990,28 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			characterDataOldValue: opts.characterDataOldValue ?? false,
 		};
 		const elem          = objOpts.elem        ?? document.body;
-		const runCallBack   = objOpts.runCallBack ?? true;
-		const asyncCallBack = objOpts.async       ?? false;
+		const runCallback   = objOpts.runCallback ?? true;
+		const asyncCallback = objOpts.async       ?? false;
 
 		let mut;
-		if (asyncCallBack) {
-			mut = new MutationObserver(async (mutRecArr, mutObs) => {
+		if (asyncCallback) {
+			mut = new frycAPI_MutationObserver(async (mutRecArr, mutObs) => {
 				mutObs.disconnect();
-				if (await callBack(mutRecArr, mutObs) !== true) mutObs.observe(elem, options);
+				if (await callback(mutRecArr, mutObs) !== true) mutObs.observe(elem, options);
 			});
 		} else {
-			mut = new MutationObserver((mutRecArr, mutObs) => {
+			mut = new frycAPI_MutationObserver((mutRecArr, mutObs) => {
 				mutObs.disconnect();
-				if (callBack(mutRecArr, mutObs) !== true) mutObs.observe(elem, options);
+				if (callback(mutRecArr, mutObs) !== true) mutObs.observe(elem, options);
 			});
 		}
 
-		if (runCallBack) {
-			if (asyncCallBack) {
-				callBack([], mut).then(result => {
+		if (runCallback) {
+			if (asyncCallback) {
+				callback([], mut).then(result => {
 					if (result !== true) mut.observe(elem, options);
 				});
-			} else if (callBack([], mut) !== true) {
+			} else if (callback([], mut) !== true) {
 				mut.observe(elem, options);
 			}
 		} else {
@@ -979,7 +1019,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 
 		return mut;
-	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runCallBack: true, elem: document.body, options: { childList: true, subtree: true } });
+	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runCallback: true, elem: document.body, options: { childList: true, subtree: true } });
 	setDefaultDate(selector, options = {}) { // { getDate: 111, setDate: 111, dateTitle: 111 }
 		// Flag usage on www.autohotkey.com
 		const rootElem = options.rootElem ?? document.body;
@@ -1929,7 +1969,7 @@ if (1) { //* Globalne funkcje
 				f.nameClickable = 1;
 				// f.name = `<img src="${frycAPI.getResURL("ORACLE.png")}">Normal`;
 				// f.name = `<img src="${frycAPI.getResURL("sussy.gif")}">Normal<img src="${frycAPI.getResURL("sussy.gif")}">`;
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					// loguj(obj);
 					// f.nextFunc.toggle();
 					const radio = f.nextFunc;
@@ -1949,7 +1989,7 @@ if (1) { //* Globalne funkcje
 				f.nameClickable = 1;
 				f.setNumCols(3);
 				f.setStateDesc(frycAPI.arrayOneToN(12));
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					loguj(obj);
 				};
 				return f;
@@ -1958,7 +1998,7 @@ if (1) { //* Globalne funkcje
 				const f = new type({ name });
 				f.displayName = 1;
 				f.nameClickable = 1;
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					const radio = f.nextFunc;
 					if (obj.type === "name") {
 						if (radio.numStates > 2) {
@@ -1976,7 +2016,7 @@ if (1) { //* Globalne funkcje
 				f.nameClickable = 1;
 				f.setNumRows(3);
 				f.setStateDesc(frycAPI.arrayOneToN(12));
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					loguj(obj);
 				};
 				return f;
@@ -1987,7 +2027,7 @@ if (1) { //* Globalne funkcje
 				f.displayName = 1;
 				f.nameClickable = 1;
 				f.setStateDesc(["1", "2", "3"]);
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					loguj(obj);
 				};
 				return f;
@@ -1997,7 +2037,7 @@ if (1) { //* Globalne funkcje
 				f.displayName = 1;
 				f.nameClickable = 1;
 				f.setStateDesc(frycAPI.arrayOneToN(5));
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					loguj(obj);
 				};
 				return f;
@@ -2006,7 +2046,7 @@ if (1) { //* Globalne funkcje
 				const f = new type({ name });
 				f.displayName = 1;
 				f.nameClickable = 1;
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					loguj(obj);
 				};
 				return f;
@@ -2019,7 +2059,7 @@ if (1) { //* Globalne funkcje
 		funcArr: [
 			(name = "Edit Script", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					frycAPI.VSC_Go_To_Line();
 				};
 				return f;
@@ -2027,7 +2067,7 @@ if (1) { //* Globalne funkcje
 			(name = "Style", type = frycAPI_PureState) => {
 				const f = new type({ name });
 				frycAPI.myStyleManualFunc = f;
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					if (frycAPI.myStyleState) {
 						frycAPI.myStyleState.toggle();
 						frycAPI.setStorage("style", frycAPI.myStyleState.state);
@@ -2043,7 +2083,7 @@ if (1) { //* Globalne funkcje
 				f.setState(0);
 				f.nameClickable = 1;
 				frycAPI.setDefaultDateEnum.manualFuncRef = f;
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					if (!f.stateChanged) return;
 					switch (obj.state ?? frycAPI.setDefaultDateEnum.defaultDateMode) {
 						case 0: return frycAPI.setDefaultDateEnum.mode.relatywnyCzas(undefined, true);
@@ -2055,7 +2095,7 @@ if (1) { //* Globalne funkcje
 			},
 			(name = "ඞ", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					frycAPI.forEach(`*`, daElem => {
 						if (daElem.nodeName !== "STYLE" && daElem.nodeName !== "SCRIPT" && daElem.nodeName !== "NOSCRIPT") {
 							daElem.childNodes.forEach(child => {
@@ -2070,7 +2110,7 @@ if (1) { //* Globalne funkcje
 			},
 			(name = "Copy decoded URL", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					frycAPI.copyTxt(decodeURI(window.location.href));
 				};
 				return f;
@@ -3638,7 +3678,7 @@ if (1 && frycAPI_host("192.168.1.1")) {
 			funcArr: [
 				(name = "Weekdays", type = frycAPI_PureState) => {
 					const f = new type({ name });
-					f.callBack = function (obj) {
+					f.callback = function (obj) {
 						document.body.classList.toggle("show-weekday");
 					};
 					return f;
@@ -3729,102 +3769,147 @@ if (1 && frycAPI_host("192.168.1.1")) {
 		} */
 
 		.table-of-prompts-container {
+			--border: 1px solid #5f5f5f;
 			display: flex;
-			gap: 5px;
-			position: absolute;
-			--top: 52px;
-			top: var(--top);
-			--right: 23px;
-			right: var(--right);
 			flex-direction: column;
 			align-items: stretch;
-			/* --offset: 1450px;
-			width: calc(100vw - var(--offset) - var(--right)); */
-			width: calc(100vw - 1140px - var(--right));
-			max-height: calc(100vh - 150px - var(--top));
+			flex: 1;
 			overflow-x: hidden;
 			overflow-y: auto;
-			padding-right: 5px;
+			border-left: var(--border);
 
-			&, .title, .prompt, .refresh, .hide {
+			.collapse, input, .clear {
 				border-radius: 5px;
 			}
 
 			.title {
-				padding: 2px;
-				gap: 5px;
-				text-align: center;
+				/* padding: 2px; */
+				/* gap: 5px; */
 				/* border: 1px solid white; */
 				--background: #444444;
 				background-color: var(--background);
-				font-weight: bold;
 				display: flex;
+				flex-direction: column;
 				position: sticky;
 				top: 0;
 				z-index: 5;
+				border-bottom: var(--border);
 
-				.refresh, .hide {
+				.collapse, .clear {
 					width: auto;
 					height: 24px;
+				}
+				.text-outer {
+					flex-grow: 1;
+					font-weight: bold;
+					border-bottom: var(--border);
+					padding: 2px;
+					position: relative;
 					cursor: pointer;
 				}
-				.refresh {
-					content: url(${frycAPI.getResURL("refresh.png")});
-					background-color: var(--background);
-				}
 				.text {
-					flex-grow: 1;
+					text-align: center;
 				}
-				.hide {
+				.collapse {
+					visibility: visible;
+					position: absolute;
+					top: 2px;
+					right: 2px;
 					content: url(${frycAPI.getResURL("visibility_on.png")});
 					background-color: var(--background);
 				}
+				.text-outer:hover {
+					.text {
+						text-decoration: underline;
+					}
+					.collapse {
+						filter: brightness(1.3);
+					}
+				}
+				.search {
+					background-color: var(--theme-user-msg-bg);
+					padding: 5px;
+					gap: 5px;
+					display: flex;
+					align-items: center;
+
+					input {
+						padding: 0px 5px;
+						width: -webkit-fill-available;
+						background-color: var(--background);
+						color: white;
+						box-shadow: none;
+					}
+					input:focus {
+						border-color: #44B28D;
+					}
+					.clear {
+						content: url(${frycAPI.getResURL("close.png")});
+					}
+					.clear:hover {
+						filter: brightness(1.3);
+						background-color: var(--theme-user-msg-bg);
+						cursor: pointer;
+					}
+				}
 			}
-			:is(.refresh, .hide, .prompt):hover {
-				filter: brightness(1.3);
+			.prompt:hover {
+				filter: brightness(1);
+				background-color: color-mix(in srgb, var(--theme-user-msg-bg), 10% white);
 			}
 
 			.prompt {
 				padding: 2px 5px;
 				display: -webkit-box;
-				background-color: #303030;
+				background-color: var(--theme-user-msg-bg); /* rgb(47, 47, 47) */
 				overflow: clip;
 				-webkit-line-clamp: 3;
 				-webkit-box-orient: vertical;
 				cursor: pointer;
 			}
+			.prompt:not(.hide) ~ .prompt {
+				border-top: var(--border);
+			}
+			.hide {
+				display: none;
+			}
 		}
-		body.table-of-prompts {
+		/* body.table-of-prompts {
 			main article > div {
-				/* display: flex; */
 				& > div {
 					margin: 0;
 				}
 			}
-		}
+		} */
 		body:not(.table-of-prompts) {
 			.table-of-prompts-container {
-				/* --offset: 1140px; */
 				.title {
-					padding-left: 5px;
+					padding: 2px;
 				}
-				width: fit-content;
-				.prompt, .refresh {
+				.text-outer {
+					padding: 0;
+					border: 0;
+					position: unset;
+				}
+				flex-basis: fit-content;
+				flex-grow: 0;
+				.text, .prompt, .refresh, .search {
 					display: none;
 				}
-				.hide {
+				.collapse {
 					content: url(${frycAPI.getResURL("visibility_off.png")});
+					position: unset;
 				}
 			}
 		}
 	`);
 
-	const promptSelector = `[data-message-author-role="user"] [data-multiline]`;
+	const promptSelector = `[data-message-author-role="user"] .whitespace-pre-wrap`;
 	frycAPI.createManualFunctions("ChatGPT", {
 		funcArr: [
 			(name = "Log all prompts", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function () {
 					console.clear();
 					frycAPI.forEach(promptSelector, daElem => {
 						loguj(daElem.innerText.trim());
@@ -3835,41 +3920,102 @@ if (1 && frycAPI_host("192.168.1.1")) {
 			(name = "Table of prompts", type = frycAPI_Normal) => {
 				const f = new type({ name });
 
+				let mutObs;
 				function bodyClassFun() {
 					document.body.classList.toggle("table-of-prompts");
+					mutObs.toggle(1);
 				}
 				let container;
-				f.callBack = function (obj) {
-					if (container) {
+				f.callback = function () {
+					if (container?.isDescendantOf(document.body)) {
 						bodyClassFun();
 						return;
 					}
 
-					container = document.body.appendChild(frycAPI.elemFromHTML(`
+					container = frycAPI.byID("stage-slideover-sidebar").parentElement.appendChild(frycAPI.elemFromHTML(/*html*/`
 						<div class="table-of-prompts-container">
 							<div class="title">
-								<img class="refresh"/>
-								<div class="text">Table of prompts</div>
-								<img class="hide"/>
+								<div class="text-outer">
+									<div class="text">Table of prompts</div>
+									<img class="collapse"/>
+								</div>
+								<div class="search"><input type="text" placeholder="Search prompts"/><img class="clear"/></div>
 							</div>
 						</div>
 					`));
-					const promptElem = frycAPI.elem("div").class("prompt").attr("title", "Click to scroll")._;
-					container.frycAPI_elemByClass("refresh").frycAPI_addEventListenerFun("click", () => {
-						container.querySelectorAll(`.prompt`).forEach(el => el.remove());
-						frycAPI.forEach(promptSelector, daElem => {
-							container.appendChild(promptElem.cloneNode(1).frycAPI_setInnerText(daElem.innerText.trim())).addEventListener("click", () => {
-								daElem.scrollIntoView();
+					// const tableText = container.frycAPI_elemByClass("text");
+					const tableTextOuter = container.frycAPI_elemByClass("text-outer");
+					// const tableSearch = container.frycAPI_elemByClass("search");
+					// const tableTitle = container.frycAPI_elemByClass("title");
+					const tableInput = container.frycAPI_elemByTag("input");
+					const tableClear = container.frycAPI_elemByClass("clear");
+
+					const promptElemBase = frycAPI.elem("div").class("prompt")._;
+					const articles = document.getElementsByTagName("article");
+					let lastArticlesLen, lastPromptsLen, lastTitle, promptElems = [];
+					function searchPrompts() {
+						if (!promptElems.length) return;
+						const val = tableInput.value.toLowerCase().trim();
+						if (!val) {
+							promptElems.forEach(pElem => pElem.classList.remove("hide"));
+							return;
+						}
+						for (const pElem of promptElems) {
+							const prompt = pElem.prompt;
+							if (prompt.includes(val)) {
+								pElem.classList.remove("hide");
+							} else {
+								pElem.classList.add("hide");
+							}
+						}
+					}
+
+					// in case of full page wipe
+					mutObs?.disconnect(); // disconnect old observer if it exists
+					document.body.classList.remove("table-of-prompts");
+
+					mutObs = frycAPI.createMutObs(() => {
+						if (lastTitle === document.title && lastArticlesLen === articles.length) return;
+						lastArticlesLen = articles.length;
+
+						const prompts = articles.filter(a => a.getAttribute("data-turn") === "user");
+						if (lastTitle === document.title && lastPromptsLen === prompts.length) return;
+						lastPromptsLen = prompts.length;
+						lastTitle = document.title;
+
+						// disconnect in case of container removal
+						if (prompts.length === 0 && !container.isDescendantOf(document.body)) return true;
+
+						promptElems.forEach(el => el.remove());
+						const fragment = document.createDocumentFragment();
+						for (const prompt of prompts) {
+							const scrollElem = prompt.children.find(e => e.tagName === "DIV");
+							const daText = prompt.frycAPI_elemByClass("whitespace-pre-wrap").innerText.trim();
+							const promptElem = promptElemBase.cloneNode().frycAPI_setInnerText(daText).frycAPI_setAttribute("title", daText);
+							fragment.appendChild(promptElem).addEventListener("click", () => {
+								scrollElem.scrollIntoView();
 							});
-						});
-					})();
-					container.frycAPI_elemByClass("hide").frycAPI_addEventListenerFun("click", bodyClassFun)();
+							promptElem.prompt = daText.toLowerCase();
+						}
+						promptElems = Array.from(fragment.children);
+						searchPrompts();
+						container.appendChild(fragment);
+						loguj("Done");
+					}, { runCallback: false }); // do not run because it will be run in bodyClassFun
+					mutObs.disconnect(); // disconnect because it will be connected in bodyClassFun
+					tableTextOuter.frycAPI_addEventListenerFun("click", bodyClassFun)();
+					tableInput.addEventListener("input", searchPrompts);
+					tableClear.addEventListener("click", () => {
+						tableInput.value = "";
+						tableInput.select();
+						promptElems.forEach(pElem => pElem.classList.remove("hide"));
+					});
 				};
 				return f;
 			},
 			(name = "Save all prompts to file", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function () {
 					let txt = "";
 					const separator = `\n\n${"#".repeat(30)}\n\n`;
 					frycAPI.forEach(promptSelector, daElem => {
@@ -3975,7 +4121,7 @@ if (1 && frycAPI_host("192.168.1.1")) {
 		funcArr: [
 			(name = "Copy buttons", type = frycAPI_PureState) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					document.body.classList.toggle("toggle-copy-buttons");
 				};
 				return f;
@@ -4528,7 +4674,7 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 		funcArr: [
 			(name = "Download questions as JSON", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function () {
+				f.callback = function () {
 					frycAPI.downloadTxt(
 						getQuestionsAsArr().jsón,
 						getFormTitle() + ".json"
@@ -4538,7 +4684,7 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 			},
 			(name = "Download questions as HTML", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = async function () {
+				f.callback = async function () {
 					// const scroller = document.querySelector(`[id*="form-main-content"]`);
 					const scroller = frycAPI.byID("branding-footer");
 					scroller.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -5061,7 +5207,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 		funcArr: [
 			(name = "Łatwiejsze kopiowanie", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					const x = document.querySelectorAll(".mrow>.texatom>.mrow>span.msubsup>span>span>span.mn");
 					for (let i = 0; i < x.length; i++) {
 						x[i].innerHTML = "(" + x[i].innerHTML + ")";
@@ -5151,7 +5297,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 		funcArr: [
 			(name = "Get Covers From SoundCloud", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					const artwork = document.querySelectorAll(".playableTile__image>.sc-artwork>span");
 					newDiv = document.createElement("div");
 					newDiv.setAttribute("id", "mojelem");
@@ -5752,7 +5898,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 					stateDesc: ["Only specific friend: NO", "Only specific friend: YES"],
 					state: 0,
 				});
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					document.body.classList.toggle("specific-friend");
 				};
 				return f;
@@ -7294,7 +7440,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 				const f = new type({ name });
 				f.displayName = 1;
 				f.nameClickable = 1;
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					if (obj.type === "name") {
 						frycAPI.ctrlC(ggbApplet.getLaTeXString(f.state));
 					}
@@ -7485,7 +7631,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 					name: name,
 					state: 0,
 				});
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					document.body.classList.toggle("google-3-column");
 				};
 				return f;
@@ -7495,7 +7641,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 					name: name,
 					state: 0,
 				});
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					document.body.classList.toggle("google-translate-buttons");
 				};
 				return f;
@@ -8184,7 +8330,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 								// loguj(diffStr);
 								forecastBox.firstElementChild.firstElementChild.firstElementChild.setAttribute("relTime", diffSign > 0 ? `- za ${diffStr}` : `- ${diffStr} temu`);
 							}
-						}, { runCallBack: true, elem: forecastBox, options: { characterData: true, subtree: true } });
+						}, { runCallback: true, elem: forecastBox, options: { characterData: true, subtree: true } });
 					});
 					return true;
 				}
@@ -8821,7 +8967,7 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 					name: name,
 					state: 0,
 				});
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					disableEndScreen.toggle();
 				};
 				return f;
@@ -9862,7 +10008,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			funcArr: [
 				(name = "Visible posts to link, click", type = frycAPI_Normal) => {
 					const f = new type({ name });
-					f.callBack = function (obj) {
+					f.callback = function (obj) {
 						document.getElementById("tags").value = getPostIDs();
 						document.querySelector(`#search-box form button`).click();
 					};
@@ -9870,7 +10016,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				},
 				(name = "Visible posts to link, copy", type = frycAPI_Normal) => {
 					const f = new type({ name });
-					f.callBack = function (obj) {
+					f.callback = function (obj) {
 						frycAPI.ctrlC("https://e621.net/posts?tags=" + encodeURIComponent(getPostIDs().replaceAll(/\s+/g, "+")));
 						f.name = "Copied!";
 					};
@@ -10510,7 +10656,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					stateDesc: ["Opinie bez zdjęć: WIDOCZNE", "Opinie bez zdjęć: UKRYTE"],
 					state: 0,
 				});
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					document.body.classList.toggle("ukryj-opinie-bez-zdjęć");
 				};
 				return f;
@@ -11354,7 +11500,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		funcArr: [
 			(name = "Download expanded note", type = frycAPI_Normal) => {
 				const f = new type({ name });
-				f.callBack = function (obj) {
+				f.callback = function (obj) {
 					// frycAPI.traverseUntil("forward", frycAPI.qSel(`[role="tooltip"]`).nextEl, el => getComputedStyle(el).display !== "none")
 					const outerParent = frycAPI.qSel(`[role="tooltip"] + * + * [role="button"][data-tooltip-text*="Zaznacz"] + *`);
 					if (outerParent) {

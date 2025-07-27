@@ -175,8 +175,8 @@ frycAPI_expandPrototype(Element, "frycAPI_insertAdjacentElement", function (wher
 	this.insertAdjacentElement(where, elem);
 	return this;
 });
-frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListener", function (listenerType, callBack) {
-	this.addEventListener(listenerType, callBack);
+frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListener", function (listenerType, callback) {
+	this.addEventListener(listenerType, callback);
 	return this;
 });
 frycAPI_expandPrototype(Element, "frycAPI_shuffleChildren", function () {
@@ -287,9 +287,23 @@ frycAPI_expandPrototype(Element, "nthParent", function (n = 1) {
 	}
 	return temp;
 });
-frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (listenerType, callBack) {
-	this.addEventListener(listenerType, callBack);
-	return callBack;
+// frycAPI_expandPrototype(Element, "isInDocument", function () {
+// 	let parElem = this.parentElement;
+// 	while (parElem && parElem !== document.documentElement) {
+// 		parElem = parElem.parentElement;
+// 	}
+// 	return parElem === document.documentElement;
+// }, true);
+frycAPI_expandPrototype(Element, "isDescendantOf", function (elem) {
+	let parElem = this.parentElement;
+	while (parElem && parElem !== elem) {
+		parElem = parElem.parentElement;
+	}
+	return parElem === elem;
+});
+frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (listenerType, callback) {
+	this.addEventListener(listenerType, callback);
+	return callback;
 });
 frycAPI_expandPrototype(String, "frycAPI_eval", function () {
 	return eval(this);
