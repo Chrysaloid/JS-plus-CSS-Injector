@@ -3900,6 +3900,12 @@ if (1 && frycAPI_host("192.168.1.1")) {
 					content: url(${frycAPI.getResURL("visibility_off.png")});
 					position: unset;
 				}
+				&:hover {
+					cursor: pointer;
+					.collapse {
+						filter: brightness(1.3);
+					}
+				}
 			}
 		}
 	`);
@@ -3920,17 +3926,21 @@ if (1 && frycAPI_host("192.168.1.1")) {
 			(name = "Table of prompts", type = frycAPI_Normal) => {
 				const f = new type({ name });
 
-				let mutObs;
-				function bodyClassFun() {
+				let mutObs, container;
+				function bodyClassFun(event) {
+					event?.stopPropagation();
 					document.body.classList.toggle("table-of-prompts");
-					mutObs.toggle(1);
+					if (mutObs.toggle(1).connected) {
+						container.removeEventListener("click", bodyClassFun);
+					} else {
+						container.addEventListener("click", bodyClassFun);
+					}
 				}
-				let container;
 				f.callback = function () {
 					if (container?.isDescendantOf(document.body)) {
 						bodyClassFun();
 						return;
-					}
+					} // first call or page wipe
 
 					container = frycAPI.byID("stage-slideover-sidebar").parentElement.appendChild(frycAPI.elemFromHTML(/*html*/`
 						<div class="table-of-prompts-container">
@@ -3970,7 +3980,7 @@ if (1 && frycAPI_host("192.168.1.1")) {
 						}
 					}
 
-					// in case of full page wipe
+					// in case of major page wipe
 					mutObs?.disconnect(); // disconnect old observer if it exists
 					document.body.classList.remove("table-of-prompts");
 
@@ -4000,10 +4010,11 @@ if (1 && frycAPI_host("192.168.1.1")) {
 						promptElems = Array.from(fragment.children);
 						searchPrompts();
 						container.appendChild(fragment);
-						loguj("Done");
+						// loguj("Done");
 					}, { runCallback: false }); // do not run because it will be run in bodyClassFun
 					mutObs.disconnect(); // disconnect because it will be connected in bodyClassFun
-					tableTextOuter.frycAPI_addEventListenerFun("click", bodyClassFun)();
+					bodyClassFun();
+					tableTextOuter.addEventListener("click", bodyClassFun);
 					tableInput.addEventListener("input", searchPrompts);
 					tableClear.addEventListener("click", () => {
 						tableInput.value = "";
