@@ -1770,7 +1770,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return currEl;
 	}, // frycAPI.traverseUntil("forward", elem, e => e.hasAttribute("attr"));
 	consonantsAsFirstLetters(str = "alphabet", consonants = "bcdfghjklmnpqrstvwxz") {
-		const vowels = "aeiouy";
+		const vowels = "aąeęioóuy";
 		str = str.split(" ").map(word => word.trim()).filter(word => word.length).map(word => {
 			const wordLower = word.toLowerCase();
 			return {
