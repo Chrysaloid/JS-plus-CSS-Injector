@@ -11583,6 +11583,19 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			top: 78px;
 		}
 	`);
+} else if (frycAPI_host("steam.tools")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		#container {
+			background: black;
+			color: white;
+		}
+		span.add-on {
+			color: black;
+		}
+		body {
+			background: #000000;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
