@@ -11576,6 +11576,13 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	window.alert = function (message) {
 		console.log(message);
 	};
+} else if (frycAPI_host("iformatki.pl")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		#visualization_1 {
+			position: sticky;
+			top: 78px;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
