@@ -11596,6 +11596,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			background: #000000;
 		}
 	`);
+} else if (frycAPI_host().startsWith("obsidian.nick-lab")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		::selection {
+			background: #1640A0;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
