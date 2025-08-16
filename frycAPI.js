@@ -4902,6 +4902,16 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 	`);
+
+	/*
+	frycAPI.onLoadSetter(function () {
+		frycAPI.setDefaultDateStyle().mode.oba();
+		frycAPI.createMutObs(() => {
+			// loguj("MutObs");
+			frycAPI.setDefaultDate(`span[id][class][title][alt][role][tabindex="-1"]`, { getDate: elem => elem.getAttribute("title") });
+		});
+	});
+	*/
 } else if (1 && frycAPI_host("mat-fiz-samouczek.pw.edu.pl")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img.teximage {
