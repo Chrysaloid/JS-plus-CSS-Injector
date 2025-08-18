@@ -11612,6 +11612,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			background: #1640A0;
 		}
 	`);
+} else if (frycAPI_host("tvn24.pl")) {
+	frycAPI.injectStyleOnLoad(/*css*/`
+		ad-placeholder {
+			display: none !important;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
