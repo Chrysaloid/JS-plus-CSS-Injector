@@ -792,7 +792,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		*/
 		const a = document.createElement("a");
 		a.href = href;
-		a.download = filename;
+		if (filename !== false) {
+			a.download = filename;
+		}
 		a.click();
 	},
 	downloadUrl(url, filename) {
@@ -1821,6 +1823,39 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	byTagAll(cls, rootElem = document) {
 		return rootElem.getElementsByTagName(cls);
 	}, // const elems = frycAPI.byTagAll("p");
+	atomicAwait(promiseFunc, obj, propName) {
+		if (obj.hasOwnProperty(propName)) {
+			return obj[propName];
+		} else {
+			if (typeof promiseFunc !== "function") {
+				throw new TypeError("atomicAwait expects a function that returns a promise");
+			}
+			return (obj[propName] = promiseFunc().then(value => {
+				obj[propName] = value; // overwrite with resolved value
+				return value;
+			}));
+		}
+	}, // const value = await frycAPI.atomicAwait(() => promiseFunc("with", "params"), someObject, "propName");
+	async sendMessageToVSCode(name, data) {
+		const uriFuncObjs = await frycAPI.atomicAwait(() => frycAPI.getResData("frycAPI_VSCode_uriFuncObjs.json", "json"), frycAPI.sendMessageToVSCode, "uriFuncObjs");
+		const funcObj = uriFuncObjs[name];
+		if (!funcObj) throw new Error(`Incorrect message name: "${name}"`);
+		for (const [key, value] of Object.entries(funcObj)) {
+			if (!data.hasOwnProperty(key)) {
+				if (value === null) { // if it does not have key but it must have had it
+					throw new Error(`Missing mandatory "${key}" property on the data parameter`);
+				} else { // if it does not have key but it mustn't have had it
+					data[key] = value;
+				}
+			}
+		}
+		const url = new URL("vscode://fryderyk-kukowski.fryc-api/");
+		url.pathname = name;
+		for (const [key, value] of Object.entries(data)) {
+			url.searchParams.append(key, value);
+		}
+		frycAPI.downloadHelper(url.href, false);
+	}, // frycAPI.sendMessageToVSCode("notify", { text: "Test" });
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -2060,7 +2095,14 @@ if (1) { //* Globalne funkcje
 			(name = "Edit Script", type = frycAPI_Normal) => {
 				const f = new type({ name });
 				f.callback = function (obj) {
-					frycAPI.VSC_Go_To_Line();
+					frycAPI.sendMessageToVSCode("openOnLineMatching", {
+						file: btoa("G:/Biblioteki Windows/Dokumenty/1. Mój Folder/!HTML stuff/!Chrome Extensions/JS + CSS Injector/frycAPI.js"),
+						fileBase64: true,
+						regex: btoa(`(^if \\(|^} else if \\(|^else if \\().*"${RegExp.escape(frycAPI_host())}"`),
+						regexBase64: true,
+						clipboard: btoa(frycAPI_host()),
+						clipboardBase64: true,
+					});
 				};
 				return f;
 			},
@@ -4402,7 +4444,7 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 			}
 		}
 
-		.top-banner { /* .top-banner.visible */
+		.top-banner, .page-layout__banner { /* .top-banner.visible */
 			display: none;
 		}
 
@@ -11349,12 +11391,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.colorSchemeDark = true;
 } else if (frycAPI_hostIncludes("wiki.gg")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
+		#wikigg-showcase-sidebar,
+		#wikigg-sl-header,
 		#wikigg-showcase-header {
 			display: none;
 		}
-		#wikigg-showcase-sidebar {
-			display: none;
-		}
+
 	`);
 	frycAPI.onLoadSetter(function () {
 		frycAPI.forEach(`h2 > span.mw-headline`, span => {
