@@ -2096,13 +2096,10 @@ if (1) { //* Globalne funkcje
 			(name = "Edit Script", type = frycAPI_Normal) => {
 				const f = new type({ name });
 				f.callback = function (obj) {
-					frycAPI.sendMessageToVSCode("openOnLineMatching", {
+					frycAPI.sendMessageToVSCode("open", {
 						file: btoa("G:/Biblioteki Windows/Dokumenty/1. Mój Folder/!HTML stuff/!Chrome Extensions/JS + CSS Injector/frycAPI.js"),
-						fileBase64: true,
-						regex: btoa(`(^if \\(|^} else if \\(|^else if \\().*"${RegExp.escape(frycAPI_host())}"`),
-						regexBase64: true,
-						clipboard: btoa(frycAPI_host()),
-						clipboardBase64: true,
+						fileBase64: true, // necessary because of problems during communication (the problematic "+" in file path)
+						line: frycAPI.line ?? "9999999999", // the line or end of the document
 					});
 				};
 				return f;
