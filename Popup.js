@@ -19,12 +19,17 @@ class ManualFuncTypes {
 	static COMBO    = "COMBO";
 	static INPUT    = "INPUT";
 }
-function addDaListener(elem, daObj, type = "click") {
+function addDaListener(elem, daObj, additionalAction = () => true, type = "click") {
 	const newObj = structuredClone(daObj);
 	// newObj.type = elem.type;
-	elem.addEventListener(type, async function (e) {
+	elem.addEventListener(type, function (e) {
 		if (e.target.value !== undefined) newObj.obj.state = e.target.value;
-		main(await runOnPage(daObj => frycAPI.handleManualFunction(daObj), [newObj])); // eslint-disable-line no-shadow, no-use-before-define
+		runOnPage(newDaObj => frycAPI.handleManualFunction(newDaObj), [newObj])
+		.then(frycAPI0 => {
+			if (additionalAction()) {
+				main(frycAPI0); // eslint-disable-line no-use-before-define
+			}
+		});
 	});
 }
 function handleColsAndRows(funcObj, elCont) {
@@ -60,6 +65,9 @@ function setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows) {
 		if (col === numCols) funcEl.classList.add("lastCol");
 	}
 }
+const additionalActions = {
+	close: data => window.close(),
+};
 async function main(frycAPI0) {
 	// #region //* Wstęp
 	if ((await chrome.tabs.query({ active: true, currentWindow: true }))[0].url.startsWith("chrome://")) return;
@@ -101,6 +109,7 @@ async function main(frycAPI0) {
 			daObj.groupNumber = groupNum;
 			daObj.funcNumber = funcNum;
 			daObj.obj = {};
+			const additionalAction = (additionalActions[funcObj.additionalAction.name] ?? (() => true)).bind(null, funcObj.additionalAction.data);
 
 			const funcName = document.createElement("div");
 			funcName.classList.add("funcName");
@@ -109,7 +118,7 @@ async function main(frycAPI0) {
 			if (funcObj.displayName === false) funcName.classList.add("dspNone");
 			if (funcObj.nameClickable) {
 				funcName.classList.add("nameClickable");
-				addDaListener(funcName, daObj);
+				addDaListener(funcName, daObj, additionalAction);
 			}
 			funcDiv.appendChild(funcName);
 
@@ -120,7 +129,7 @@ async function main(frycAPI0) {
 					const funcEl = document.createElement("div");
 					funcEl.classList.add("funcEl");
 					funcEl.innerHTML = funcObj.name;
-					if (!funcObj.Off) addDaListener(funcEl, daObj);
+					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
 					funcDiv.appendChild(funcEl);
 					break;
 				}
@@ -128,7 +137,7 @@ async function main(frycAPI0) {
 					const funcEl = document.createElement("div");
 					funcEl.classList.add("funcEl");
 					funcEl.innerHTML = funcObj.stateDesc[funcObj.state];
-					if (!funcObj.Off) addDaListener(funcEl, daObj);
+					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
 					funcDiv.appendChild(funcEl);
 					break;
 				}
@@ -144,7 +153,7 @@ async function main(frycAPI0) {
 						funcEl.innerHTML = desc;
 						daObj.obj.state = i;
 						if (funcObj.state === i) funcEl.classList.add("choice");
-						if (!funcObj.Off) addDaListener(funcEl, daObj);
+						if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
 						setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows);
 						elCont.appendChild(funcEl);
 					});
@@ -155,7 +164,7 @@ async function main(frycAPI0) {
 					elCont.classList.add("funcEl");
 					funcDiv.appendChild(elCont);
 					if (!funcObj.Off) {
-						addDaListener(elCont, daObj, "change");
+						addDaListener(elCont, daObj, additionalAction, "change");
 						elCont.addEventListener("wheel", e => {
 							e.preventDefault();
 							if (e.deltaY > 0 && funcObj.state < funcObj.numStates - 1) {
@@ -189,7 +198,7 @@ async function main(frycAPI0) {
 						funcEl.innerHTML = desc;
 						daObj.obj.index = i;
 						if (funcObj.state[i]) funcEl.classList.add("choice");
-						if (!funcObj.Off) addDaListener(funcEl, daObj);
+						if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
 						setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows);
 						elCont.appendChild(funcEl);
 					});
@@ -199,7 +208,7 @@ async function main(frycAPI0) {
 					const funcEl = document.createElement("input");
 					funcEl.classList.add("funcEl");
 					funcEl.setAttribute("value", funcObj.state);
-					if (!funcObj.Off) addDaListener(funcEl, daObj, "change");
+					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction, "change");
 					funcDiv.appendChild(funcEl);
 					if (funcObj.attributes !== undefined) {
 						Object.entries(funcObj.attributes).forEach(([key, value]) => {
