@@ -5819,7 +5819,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		frycAPI.forEach(".user-info:has(.user-gravatar32)", function (daElem) { // Better avatar design
+		frycAPI.forEach(".user-info:has(.user-gravatar32)", daElem => { // Better avatar design
 			const myDiv = document.createElement("div");
 			myDiv.classList.add("myDiv");
 			daElem.querySelector(".user-action-time").insertAdjacentElement("afterend", myDiv);
@@ -5827,7 +5827,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			el = daElem.querySelector(".user-gravatar32"); if (el !== null) myDiv.appendChild(el);
 			el = daElem.querySelector(".user-details");    if (el !== null) myDiv.appendChild(el);
 		});
-		frycAPI.forEach("span.s-badge__staff, span.mod-flair, span.s-badge__moderator, .s-badge.s-badge__xs", function (daElem) { // Moved staff/moderator/bot indicator to user name
+		frycAPI.forEach("span.s-badge__staff, span.mod-flair, span.s-badge__moderator, .s-badge.s-badge__xs", daElem => { // Moved staff/moderator/bot indicator to user name
 			daElem.previousElementSibling?.appendChild(daElem);
 		});
 
@@ -5869,7 +5869,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			frycAPI.setDefaultDate(`.s-user-card .s-user-card--time`, { getDate, customStyle: `cursor: none;` }); // eslint-disable-line object-shorthand
 			// #endregion
 			// #region //* Move user name to the beginning of the comment
-			frycAPI.forEach(`.comment-body:not(.zmieniona-kolejność)`, (daElem, daI, daArr) => {
+			frycAPI.forEach(`.comment-body:not(.zmieniona-kolejność)`, daElem => {
 				daElem.classList.add("zmieniona-kolejność");
 				const author = daElem.querySelector(`:scope > .ai-center`);
 				author.frycAPI_getFirstTextNode().remove();
