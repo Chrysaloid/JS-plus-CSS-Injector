@@ -7,21 +7,23 @@ function logObj(obj) {
 	chrome.devtools.inspectedWindow.eval(`console.log(JSON.parse('${JSON.stringify(obj)}'))`);
 } // logObj({ a: [1, 2, 3] });
 
+function focusPage() {
+	return chrome.tabs.get(chrome.devtools.inspectedWindow.tabId).then(tab => {
+		if (!tab) throw new Error("Tab not found");
+		chrome.tabs.update(tab.id, { active: true });
+		return chrome.windows.get(tab.windowId);
+	}).then(window => {
+		return chrome.windows.update(window.id, { focused: true });
+	}).catch(error => log("Error: ", error));
+}
+
 chrome.devtools.panels.create("Edit frycAPI", "", "Empty.html", panel => {
 	panel.onShown.addListener(() => {
-		chrome.devtools.inspectedWindow.eval("frycAPI.VSC_Go_To_Line()");
+		focusPage().then(() => {
+			chrome.devtools.inspectedWindow.eval(`frycAPI.sendMessageToAHK("open-frycAPI.js", frycAPI.line ?? "999999999")`);
+		});
 	});
 });
 chrome.devtools.panels.create("Focus page", "", "Empty.html", panel => {
-	panel.onShown.addListener(() => {
-		chrome.tabs.get(chrome.devtools.inspectedWindow.tabId).then(tab => {
-			if (!tab) throw new Error("Tab not found");
-			chrome.tabs.update(tab.id, { active: true });
-			return chrome.windows.get(tab.windowId);
-		}).then(window => {
-			if (window.state === "minimized") {
-				return chrome.windows.update(window.id, { focused: true });
-			}
-		}).catch(error => log("Error: ", error));
-	});
+	panel.onShown.addListener(focusPage);
 });
