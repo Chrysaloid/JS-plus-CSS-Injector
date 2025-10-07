@@ -716,11 +716,10 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		czas = Math.abs(czas);
 		let czytCzas, timeNames, agoStr;
 
-		/* eslint-disable */
 		try {
-			const [agoStrBase, timeNamesArr] = frycAPI.timeNamesDict[lang]
-			timeNames = timeNamesArr[compact]
-			agoStr = agoStrBase
+			const [agoStrBase, timeNamesArr] = frycAPI.timeNamesDict[lang];
+			timeNames = timeNamesArr[compact];
+			agoStr = agoStrBase;
 		} catch {
 			throw new Error("Language not supported");
 		}
@@ -730,6 +729,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			timeNames = timeNames.map(elem => elem.padEnd(maxLen));
 		}
 
+		/* eslint-disable */
 		if (czas < frycAPI.minute) { czytCzas =                                                                               (czas / frycAPI.second).toFixed(prec ?? 0 ) + space + timeNames[0] } else
 		if (czas < frycAPI.hour  ) { czytCzas = (czas <= frycAPI.minute * 9.95 ? (czas / frycAPI.minute).toFixed(prec ?? 1) : (czas / frycAPI.minute).toFixed(prec ?? 0)) + space + timeNames[1] } else
 		if (czas < frycAPI.day   ) { czytCzas = (czas <= frycAPI.hour   * 9.95 ? (czas / frycAPI.hour  ).toFixed(prec ?? 1) : (czas / frycAPI.hour  ).toFixed(prec ?? 0)) + space + timeNames[2] } else
