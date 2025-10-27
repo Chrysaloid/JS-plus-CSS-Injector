@@ -11328,6 +11328,10 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		h2:has(+ div > :first-child .dcc-tag-pill) {
 			margin-bottom: 0;
 		}
+		h2:has(+ .dcc-reference .dcc-tag-pill), h2 + .dcc-reference:has(.dcc-tag-pill) {
+			width: fit-content;
+			display: inline-block;
+		}
 		h3 {
 			overflow: visible;
 			margin: 16px 0 8px;
@@ -11539,21 +11543,21 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		});
 	}, 2);
 } else if (frycAPI_host("miro.com")) {
-	frycAPI.line = /*<line-number>*/11542/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11546/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.c-cFaYiI {
 			background-color: #e9e9e9;
 		}
 	`);
 } else if (frycAPI_host("marciniwuc.com")) {
-	frycAPI.line = /*<line-number>*/11549/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11553/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		*:not(.fa, .far, .fas), .main-navigation .primary-menu-container > ul li.menu-item > a {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
 } else if (frycAPI_host("bolero-napoje.pl")) {
-	frycAPI.line = /*<line-number>*/11556/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11560/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 
 	`);
@@ -11563,7 +11567,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		frycAPI.makeTableSortable(tab, `tbody tr.cart_item`);
 	});
 } else if (frycAPI_host("cesium.com")) {
-	frycAPI.line = /*<line-number>*/11566/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11570/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.nameContainer	{
 			*:where(:not(.optional)) {
@@ -11612,7 +11616,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		document.querySelector(`.container-overview > .nameContainer`)?.frycAPI_removeClass("collapse-me");
 	});
 } else if (frycAPI_host("archived.moe")) {
-	frycAPI.line = /*<line-number>*/11615/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11619/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.show-me {
 			display: block !important;
@@ -11637,14 +11641,14 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		container?.addEventListener("click", hide);
 	});
 } else if (frycAPI_host("www.oddschecker.com")) {
-	frycAPI.line = /*<line-number>*/11640/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11644/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.onLoadSetter(function () {
 		frycAPI.forEach(`td.bc`, daElem => {
 			daElem.firstElementChild.innerText = eval(daElem.firstElementChild.innerText).toFixed(2).replace(".00", "");
 		});
 	});
 } else if (frycAPI_host("math.hws.edu") && frycAPI.path === "/graphicsbook/demos/c2/rgb-hsv.html") {
-	frycAPI.line = /*<line-number>*/11647/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11651/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
@@ -11680,7 +11684,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}, { runOnLoad: false, elem: canv, options: { attributes: true, childList: false, subtree: false } });
 	});
 } else if (frycAPI_host("ponepaste.org")) {
-	frycAPI.line = /*<line-number>*/11683/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11687/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
@@ -11749,21 +11753,21 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		// #endregion
 	});
 } else if (frycAPI_host("thepiratebay.org")) {
-	frycAPI.line = /*<line-number>*/11752/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11756/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
 } else if (window.location.href === "https://www.elka.pw.edu.pl/Aktualnosci/Kalendarz-akademicki") {
-	frycAPI.line = /*<line-number>*/11759/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11763/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		iframe#external {
 			height: 1200px !important;
 		}
 	`);
 } else if (0 && frycAPI_host("store.steampowered.com")) {
-	frycAPI.line = /*<line-number>*/11766/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11770/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 	`);
 
@@ -11781,7 +11785,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	// frycAPI.onLoadSetter(function () {
 	// });
 } else if (frycAPI_host("png2pdf.netlify.app", "pdf2png.netlify.app")) {
-	frycAPI.line = /*<line-number>*/11784/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11788/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
@@ -11813,10 +11817,10 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		document.title = "PDF to IMG";
 	}
 } else if (frycAPI_host("imagemagick.org", "www.imagemagick.org") && frycAPI.path.startsWith("/discourse-server")) {
-	frycAPI.line = /*<line-number>*/11816/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11820/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.colorSchemeDark = true;
 } else if (frycAPI_hostIncludes("wiki.gg")) {
-	frycAPI.line = /*<line-number>*/11819/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11823/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#wikigg-showcase-sidebar,
 		#wikigg-sl-header,
@@ -11883,7 +11887,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}, 2);
 	}
 } else if (frycAPI_host("www.icoconverter.com")) {
-	frycAPI.line = /*<line-number>*/11886/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11890/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
 			font-family: "IBM Plex Sans Condensed", sans-serif !important;
@@ -11891,14 +11895,14 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	`);
 	frycAPI.changeFaviconRes("IMG to ICO rounded corners.png");
 } else if (frycAPI_host("www.sumatrapdfreader.org")) {
-	frycAPI.line = /*<line-number>*/11894/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11898/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		*:not(code, code *) {
 			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 	`);
 } else if (frycAPI_host("www.crocs.pl")) {
-	frycAPI.line = /*<line-number>*/11901/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11905/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		.single-desktop-image {
 			background-color: #cdcdcd !important;
@@ -11912,7 +11916,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		frycAPI.colorSchemeDark = 1;
 	})();
 } else if (frycAPI_host("www.patreon.com")) {
-	frycAPI.line = /*<line-number>*/11915/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11919/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 	`);
 
@@ -11927,14 +11931,14 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		});
 	});
 } else if (frycAPI_host("pypi.org")) {
-	frycAPI.line = /*<line-number>*/11930/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11934/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`, { elevated: true });
 } else if (frycAPI_host("x.com", "twitter.com")) {
-	frycAPI.line = /*<line-number>*/11937/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11941/*</line-number>*/; // eslint-disable-line spaced-comment
 	const quoteSel = `div:has(> [role="link"] [data-testid="Tweet-User-Avatar"]):has(time)`;
 	const tweetTextSel = `div:not([role="link"]) > div > div:not([role="link"]) > div > div:has(> [data-testid="tweetText"])`;
 	const quoteAndText = "quoteAndText";
@@ -11975,7 +11979,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		});
 	});
 } else if (frycAPI_host("cas.usos.pw.edu.pl")) {
-	frycAPI.line = /*<line-number>*/11978/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11982/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 	`);
 
@@ -11989,12 +11993,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}
 	}, 2);
 } else if (frycAPI_host("leon.pw.edu.pl")) {
-	frycAPI.line = /*<line-number>*/11992/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/11996/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.onLoadSetter(function () {
 		frycAPI.qSel(`.loginbtn-btn`)?.click();
 	}, 2);
 } else if (frycAPI_host("keep.google.com")) {
-	frycAPI.line = /*<line-number>*/11997/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/12001/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.createManualFunctions("Google Keep", {
 		funcArr: [
 			(name = "Download expanded note", type = frycAPI_Normal) => {
@@ -12061,12 +12065,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		],
 	});
 } else if (frycAPI_host("r.3v.fi")) {
-	frycAPI.line = /*<line-number>*/12064/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/12068/*</line-number>*/; // eslint-disable-line spaced-comment
 	window.alert = function (message) {
 		console.log(message);
 	};
 } else if (frycAPI_host("iformatki.pl")) {
-	frycAPI.line = /*<line-number>*/12069/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/12073/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#visualization_1 {
 			position: sticky;
@@ -12074,7 +12078,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}
 	`);
 } else if (frycAPI_host("steam.tools")) {
-	frycAPI.line = /*<line-number>*/12077/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/12081/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#container {
 			background: black;
@@ -12088,14 +12092,14 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}
 	`);
 } else if (frycAPI_host().startsWith("obsidian.nick-lab")) {
-	frycAPI.line = /*<line-number>*/12091/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/12095/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		::selection {
 			background: #1640A0;
 		}
 	`);
 } else if (frycAPI_host("tvn24.pl")) {
-	frycAPI.line = /*<line-number>*/12098/*</line-number>*/; // eslint-disable-line spaced-comment
+	frycAPI.line = /*<line-number>*/12102/*</line-number>*/; // eslint-disable-line spaced-comment
 	frycAPI.injectStyleOnLoad(/*css*/`
 		ad-placeholder {
 			display: none !important;
