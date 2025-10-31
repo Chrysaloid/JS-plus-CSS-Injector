@@ -12124,6 +12124,19 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			display: none !important;
 		}
 	`);
+} else if (frycAPI_host("onedrive.live.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.createMutObs(() => {
+			frycAPI.setDefaultDate(`[data-automationid="field-Modified"]`, {
+				// Match up to the first ( and append correct time zone
+				getDate: elem => elem.getAttribute("title").match(/^.+?(?=\()/)?.[0].concat("-0700"),
+			});
+		});
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 
