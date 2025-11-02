@@ -12126,8 +12126,6 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	`);
 } else if (frycAPI_host("onedrive.live.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
-	frycAPI.injectStyleOnLoad(/*css*/`
-	`);
 
 	frycAPI.onLoadSetter(function () {
 		frycAPI.createMutObs(() => {
@@ -12136,6 +12134,36 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 				getDate: elem => elem.getAttribute("title").match(/^.+?(?=\()/)?.[0].concat("-0700"),
 			});
 		});
+	});
+
+	frycAPI.createManualFunctions("OneDrive", {
+		funcArr: [
+			(name = "Copy selected item's path", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = async function (obj) {
+					let elemPath = "";
+					frycAPI.traverseIframeWindows(window, win => {
+						if (!elemPath) {
+							const elems = win.document.querySelectorAll(`.InfoPaneSection-information-path`);
+							if (elems.length) {
+								elems.forEach(daElem => {
+									elemPath += "/" + daElem.innerText.trim();
+								});
+							}
+						}
+					});
+					if (elemPath) {
+						frycAPI.ctrlC(elemPath);
+						f.name = "Copied!";
+					} else {
+						f.name = "No path found";
+					}
+					await frycAPI.sleep(1000);
+					f.name = name;
+				};
+				return f;
+			},
+		],
 	});
 }
 // Code-Lens-Action insert-snippet IF template
