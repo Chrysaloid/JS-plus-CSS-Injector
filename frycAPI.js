@@ -12187,6 +12187,14 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			margin: auto;
 		}
 	`);
+} else if (frycAPI_host("man.freebsd.org")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		#content, #footer {
+			width: fit-content;
+			margin: auto;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
