@@ -1877,12 +1877,12 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.sendMessageToVSCode("notify", { text: "Test" });
 	sendMessageToAHK(name, value = "") {
 		return new Promise(resolve => {
-			const originalTile = document.title;
+			const originalTitle = document.title;
 			frycAPI.enforceTitle.mutObs?.disconnect();
 			document.title = `${frycAPI.specialStringAHK}${name}|${value}|`;
 			function waitForSpecialKeys(e) {
 				if (e.code === "NumpadEnter" && e.altKey && e.ctrlKey && e.shiftKey) {
-					document.title = originalTile;
+					document.title = originalTitle;
 					frycAPI.enforceTitle.mutObs?.reconnect();
 					document.removeEventListener("keydown", waitForSpecialKeys);
 					// loguj("Test");
@@ -2086,7 +2086,7 @@ if (1) { //* Globalne funkcje
 				const f = new type({ name });
 				f.additionalAction = { name: "close" };
 				f.callback = function (obj) {
-					frycAPI.sendMessageToAHK("open-frycAPI.js", frycAPI.line ?? "999999999");
+					frycAPI.sendMessageToAHK("open-frycAPI.js", (frycAPI.line ?? "999999999") + " " + frycAPI_host());
 				};
 				return f;
 			},
@@ -12165,6 +12165,28 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			},
 		],
 	});
+} else if (frycAPI_host(
+	"www.openssh.org", "www.openbsd.org", "www.openntpd.org", "man.openbsd.org", "www.openbgpd.org",
+	"www.rpki-client.org", "www.opensmtpd.org", "www.openiked.org", "mandoc.bsd.lv", "www.libressl.org"
+)) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		html {
+			max-width: unset !important;
+			max-height: unset !important;
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			max-width: 1000px !important;
+			margin: auto !important;
+			padding: 10px;
+		}
+		pre {
+			width: fit-content;
+			margin: auto;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
