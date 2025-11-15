@@ -9765,6 +9765,10 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	`);
 } else if (frycAPI_host("e621.net", "e926.net")) {
 	frycAPI.line = frycAPI.getLineNumber();
+
+	const searchButton = `button[type="submit"][title="Search"]`;
+	const poolTileDesc = `section.posts-container article`;
+
 	frycAPI.injectStyleOnLoad(/*css*/`
 		*:not(i) {
 			font-family: "IBM Plex Sans Condensed" !important;
@@ -9970,6 +9974,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			--f-size: 12px;
 			font-size: var(--f-size);
 			line-height: var(--f-size);
+
 			&, & * {
 				font-family: "Source Code Fryc" !important;
 			}
@@ -10001,29 +10006,40 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			#reset-graph {
 			}
 		}
-		.desc .pool-diff-graph {
+		${poolTileDesc} .pool-diff-graph {
 			padding: 1px;
 			padding-top: 0;
 		}
 		.loading-gif {
 			filter: invert(1);
 		}
-		div.paginator + .loading-gif {
+		nav.paginator + .loading-gif {
 			width: 100px;
 		}
-		.desc .loading-gif {
+		${poolTileDesc} .loading-gif {
 			height: 30px;
+			width: auto;
 			border: none !important;
 			display: block;
+			margin: auto;
 		}
 		.pokaż-wykres {
 			width: fit-content;
 		}
 		.pokaż-info {
 			cursor: pointer;
+			border-radius: .25rem;
+			padding: .25rem;
+			margin-top: .25rem;
+			background: var(--color-section-lighten-5);
+			text-align: center;
+
 			&:hover {
 				background-color: hsla(0, 0%, 100%, 10%);
 			}
+		}
+		article.thumbnail {
+			align-items: stretch;
 		}
 
 		form.post-search-form {
@@ -10042,8 +10058,6 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			const defaultScroll = () => {
 				window.scrollTo(0, document.documentElement.scrollTop + (document.getElementById("nav-links-top") ?? document.getElementById("image")).getBoundingClientRect().y - 1);
 			};
-			document.querySelector(`a.next[rel="next"]`)?.setAttribute("accesskey", "a");
-			document.querySelector(`a.prev[rel="prev"]`)?.setAttribute("accesskey", "b");
 			(document.body.appendChild(document.createElement("div"))
 			.frycAPI_setAttribute("id", "mojScroll")
 			.frycAPI_setInnerHTML("Deafult scroll")
@@ -10057,7 +10071,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.querySelector("form.post-search-form"));
 			window.scrollTo(0, 0);
-			const search = document.querySelector(`button[type="submit"][title="Search"]`);
+			const search = document.querySelector(searchButton);
 			document.getElementById("tags").addEventListener("keydown", e => {
 				if (e.key === "Enter") {
 					search.click();
@@ -10065,7 +10079,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			});
 		} else if (pathName.startsWith("/pools/") && !pathName.startsWith("/pools/new")) {
 			const ratArr = [
-				`<div$class="txt-col-s">Safe        `,
+				`<div$class="txt-col-s">Safe        `, // $ is intentional, it's later replaced
 				`<div$class="txt-col-q">Questionable`,
 				`<div$class="txt-col-e">Explicit    `,
 			];
@@ -10085,21 +10099,21 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				ratCount.forEach((rat, i) => {
 					rStr += `${ratArr[i]} : ${ratCount[i].toString().padStart(ratPadd)} | ${(ratCount[i] / psts.length * 100).toFixed(1).padStart(5)} %</div>`;
 				});
-				rStr += `<div$class="txt-col-ś">Średni wynik ↑: ${(score / psts.length).toFixed(1)}</div>`;
+				rStr += `<div$class="txt-col-ś">Średni wynik ↑: ${(score / psts.length).toFixed(1).padEnd(15 + ratPadd + 3 + 5 + 2 - 16)}</div>`;
 				return rStr;
 			};
 			let posts, datArr, ratStr = "", poolGraph, e621_get_pool_dates, left, right;
 
 			if (pathName.startsWith("/pools/gallery")) {
-				const info = frycAPI.elemFromHTML(`<div class="pokaż-info">Info</div>`);
-				frycAPI.forEach(`article.post-preview .desc`, desc => {
-					desc.appendChild(info.cloneNode(1)).addEventListener("click", function (e) {
-						this.remove();
-						const img = frycAPI.insertLoadingGif(desc);
-						const poolID = desc.firstElementChild.getAttribute("href").replace("/pools/", "");
-						frycAPI.readFile(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`).then(resp => {
-							desc.frycAPI_appendHTML(`<div class="pool-diff-graph">${
-								`Liczba postów: ${resp.posts.length >= 320 ? `<b>${resp.posts.length}</b>` : resp.posts.length} | 100.0 %<br>${getRatStr(resp.posts)}`
+				const info = frycAPI.elemFromHTML(`<div class="pokaż-info">Get info</div>`);
+				frycAPI.forEach(poolTileDesc, article => {
+					article.appendChild(info.cloneNode(1)).addEventListener("click", function (e) {
+						this.innerHTML = "";
+						const img = frycAPI.insertLoadingGif(this);
+						const poolID = article.firstElementChild.getAttribute("href").replace("/pools/", "");
+						frycAPI.readFile(`${location.origin}/posts.json?tags=pool:${poolID}&limit=1000`).then(resp => {
+							this.frycAPI_appendHTML(`<div class="pool-diff-graph">${
+								`<div>Liczba postów: ${resp.posts.length >= 320 ? `<b>${resp.posts.length}</b>` : resp.posts.length} | 100.0 %</div>${getRatStr(resp.posts)}`
 								.replaceAll(" ", "&nbsp").replaceAll("$", " ")
 							}</div>`);
 							img.remove();
@@ -10119,7 +10133,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					minute: "2-digit",
 					second: "2-digit",
 				};
-				const paginator = document.querySelector(`div.paginator`);
+				const cPools = document.getElementById("c-pools");
 				const poolID = pathName.split("/").slice(-1);
 				const handleClick = function (e) {
 					e.preventDefault();
@@ -10150,8 +10164,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					}
 
 					if (posts === undefined) {
-						const img = frycAPI.insertLoadingGif(paginator, "afterend");
-						posts = (await frycAPI.readFile(`https://e621.net/posts.json?tags=pool:${poolID}&limit=1000`)).posts; // eslint-disable-line require-atomic-updates
+						const img = frycAPI.insertLoadingGif(cPools, "beforeend");
+						posts = (await frycAPI.readFile(`${location.origin}/posts.json?tags=pool:${poolID}&limit=1000`)).posts; // eslint-disable-line require-atomic-updates
 						datArr ??= (
 							posts.map(elem => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
 							.map((daElem, daI) => {
@@ -10204,7 +10218,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					}
 
 					// if (frycAPI.pool === undefined) {
-					// 	frycAPI.pool = await frycAPI.readFile(`https://e621.net/pools/${poolID}.json`); // eslint-disable-line require-atomic-updates
+					// 	frycAPI.pool = await frycAPI.readFile(`${location.origin}/pools/${poolID}.json`); // eslint-disable-line require-atomic-updates
 					// 	frycAPI.pool.post_ids.forEach((daElem, daI, daArr) => {
 					// 		document.getElementById("post_" + daElem)?.querySelector(".post-score").insertAdjacentElement("afterbegin", document.createElement("span")).frycAPI_setInnerHTML("#" + (daI + 1));
 					// 	});
@@ -10238,7 +10252,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					innerStr += `<br><div$id="reset-graph">Wykres</div> odległości czasowych pomiędzy kolejnymi stronami komiksu:<br>`;
 					innerStr += `${wykres}`.replaceAll(/\t/gm, "");
 					poolGraph?.remove();
-					poolGraph = paginator.frycAPI_insertHTML("afterend", `<div class="pool-diff-graph">${innerStr.replaceAll(/\n/gm, "<br>").replaceAll(" ", "&nbsp").replaceAll("$", " ")}</div>`);
+					poolGraph = cPools.frycAPI_insertHTML("beforeend", `<div class="pool-diff-graph">${innerStr.replaceAll(/\n/gm, "<br>").replaceAll(" ", "&nbsp").replaceAll("$", " ")}</div>`);
 					left = undefined;
 					right = undefined;
 
@@ -10249,13 +10263,12 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 						num.addEventListener("click", handleClick);
 						num.addEventListener("contextmenu", handleClick);
 					});
-					// loguj("OK");
 				};
 				const obserwowanePoole = [20262, 35222, 33649, 37755, 38959];
 				if (obserwowanePoole.indexOf(Number(poolID)) >= 0) {
 					e621_get_pool_dates();
 				} else {
-					paginator.frycAPI_insertHTML("afterend", `<div class="pokaż-wykres">Pokaż wykres</div>`).addEventListener("click", function (e) {
+					cPools.frycAPI_insertHTML("beforeend", `<div class="pokaż-wykres">Pokaż wykres</div>`).addEventListener("click", function (e) {
 						this.remove();
 						e621_get_pool_dates();
 					});
@@ -10270,6 +10283,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		});
 		frycAPI.setDefaultDate(`time`);
 		// #endregion
+
+		// loguj("OK");
 	});
 
 	if (pathName.startsWith("/posts")) {
@@ -10293,7 +10308,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				(name = "Visible posts to link, copy", type = frycAPI_Normal) => {
 					const f = new type({ name });
 					f.callback = function (obj) {
-						frycAPI.ctrlC("https://e621.net/posts?tags=" + encodeURIComponent(getPostIDs().replaceAll(/\s+/g, "+")));
+						frycAPI.ctrlC(`${location.origin}/posts?tags=${encodeURIComponent(getPostIDs().replaceAll(/\s+/g, "+"))}`);
 						f.name = "Copied!";
 					};
 					return f;
