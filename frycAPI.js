@@ -12195,6 +12195,13 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			margin: auto;
 		}
 	`);
+} else if (frycAPI_host("repo-2025horror.fandom.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.resizable-container {
+			max-width: 1600px;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
