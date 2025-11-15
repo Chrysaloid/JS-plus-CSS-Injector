@@ -574,8 +574,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			}
 		}
 	}, // frycAPI.clean();
-	makeTableSortable(tabElem, trSel = "tr:not(:first-child)", tdSel = "td", thSel = "th") { // Pass reference to the table element
-		if (tabElem === null) return;
+	makeTableSortable(tabElem, trSel = "tr:not(:first-child)", tdSel = "td", thSel = "th", tbodySel = "tbody") { // Pass reference to the table element
+		if (!tabElem) return;
 		const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
 		const sortObj = {
 			deafult      : (a, obj) =>        a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText,
@@ -590,7 +590,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const sortFun = function (rosnąco) {
 			const th = this;
 			const kier = typeof rosnąco === "boolean" ? !rosnąco : th.classList.contains("posortowana");
-			const tbody = tabElem.querySelector("tbody") ?? tabElem;
+			const tbody = typeof tbodySel === "string" ? (tabElem.querySelector(tbodySel) ?? tabElem) : tbodySel;
 			Array.prototype.slice.call(tabElem.querySelectorAll(`${trSel}`), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "deafult"], {
 				attrib: th.getAttribute("attribSort"),
 				myIndex: th.getAttribute("index"), // :scope>tr
@@ -11575,15 +11575,18 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
-} else if (frycAPI_host("bolero-napoje.pl")) {
+} else if (frycAPI_host("bolero-napoje.pl", "bolero.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
-
+		:is(.minus, .plus) button,
+		.header-logo .logo, img[alt="logo"] {
+			filter: invert(1);
+		}
 	`);
 
 	frycAPI.onLoadSetter(function () {
-		const tab = document.querySelector(`.woocommerce table.shop_table`);
-		frycAPI.makeTableSortable(tab, `tbody tr.cart_item`);
+		const tab = document.querySelector(`#shopping-cart-table`);
+		frycAPI.makeTableSortable(tab, "tbody.cart.item", "td", "th", tab);
 	});
 } else if (frycAPI_host("cesium.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
