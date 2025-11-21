@@ -12220,6 +12220,30 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			max-width: 1600px;
 		}
 	`);
+} else if (frycAPI_host("catbox.moe")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		body > div.image {
+			display: none;
+		}
+	`);
+
+	frycAPI.createManualFunctions("Catbox", {
+		funcArr: [
+			(name = "Export catbox name to original name map", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = function (obj) {
+					let str = "";
+					frycAPI.forEach(`.col-1-8`, daElem => {
+						str += daElem.frycAPI_elemByTag("a").innerText.trim() + "|" + daElem.frycAPI_elemByTag("small").innerText.trim().slice(1, -1) + "\n";
+					});
+					loguj(str);
+					frycAPI.ctrlC(str);
+				};
+				return f;
+			},
+		],
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 
