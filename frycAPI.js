@@ -5823,6 +5823,10 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			}
 		` : ""}
 
+		.hide {
+			display: none;
+		}
+
 		/* gaming.stackexchange.com */
 		/* .site-header .site-header--container {
 			background-image: url(img/header-foreground-image03.gif?v=330ce6fa0066), url(img/header-foreground-image01.png?v=069bf27565ea);
@@ -5908,6 +5912,13 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 				const hyphenTextElem = daElem.previousSibling;
 				if (hyphenTextElem?.textContent.trim() === "–") { // "–" !== "-"
 					hyphenTextElem.remove();
+				}
+			});
+			// #endregion
+			// #region //* Hide ads
+			frycAPI.forEach(`div:not(.hide)`, daElem => {
+				if (daElem.innerText.trim().toUpperCase() === "AD") {
+					daElem.classList.add("hide");
 				}
 			});
 			// #endregion
