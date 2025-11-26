@@ -2,16 +2,6 @@
 	{
 		"id": 1,
 		"priority": 1,
-		"action": {
-			"type": "modifyHeaders",
-			"responseHeaders": [
-				{
-					"header": "Content-Disposition",
-					"operation": "set",
-					"value": "attachment"
-				}
-			]
-		},
 		"condition": {
 			"urlFilter": "*",
 			"resourceTypes": ["main_frame"],
@@ -25,6 +15,16 @@
 				{
 					"header": "Content-Disposition",
 					"values": ["*attachment*"]
+				}
+			]
+		},
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"header": "Content-Disposition",
+					"operation": "set",
+					"value": "attachment"
 				}
 			]
 		}
