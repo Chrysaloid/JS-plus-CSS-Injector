@@ -4503,6 +4503,10 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 		/* #mdn-docs-logo .logo-text {
 			fill: red;
 		} */
+
+		mdn-placement-sidebar { /* Hide ads */
+			display: none;
+		}
 	`);
 } else if (0 && frycAPI_host("diep.io")) {
 	frycAPI.line = frycAPI.getLineNumber();
