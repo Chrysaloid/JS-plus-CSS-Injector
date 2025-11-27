@@ -799,16 +799,6 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return bytes;
 	},
 	downloadHelper(href, filename) {
-		/* Old
-		const a = document.createElement("a");
-		a.href = href;
-		a.target = "_blank";
-		a.download = filename;
-		a.style.display = "none";
-		document.body.append(a);
-		a.click();
-		a.remove();
-		*/
 		const a = document.createElement("a");
 		a.href = href;
 		if (filename !== false) {
@@ -2086,7 +2076,7 @@ if (1) { //* Globalne funkcje
 				const f = new type({ name });
 				f.additionalAction = { name: "close" };
 				f.callback = function (obj) {
-					frycAPI.sendMessageToAHK("open-frycAPI.js", (frycAPI.line ?? "999999999") + " " + frycAPI_host());
+					frycAPI.sendMessageToAHK("Open frycAPI.js", (frycAPI.line ?? "999999999") + " " + frycAPI_host());
 				};
 				return f;
 			},
