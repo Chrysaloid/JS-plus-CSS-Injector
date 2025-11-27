@@ -8733,6 +8733,10 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 				padding: 0 !important;
 			}
 		} */
+
+		/* [slot="comment"]::first-letter {
+			text-transform: uppercase;
+		} */
 	`;
 	frycAPI.injectStyleOnLoad(style);
 
@@ -12009,6 +12013,10 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			margin-top: 6px;
 			gap: 10px;
 		}
+
+		/* [data-testid="tweetText"]::first-letter {
+			text-transform: uppercase;
+		} */
 	`);
 
 	frycAPI.onLoadSetter(function () {
