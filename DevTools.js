@@ -20,7 +20,7 @@ function focusPage() {
 chrome.devtools.panels.create("Edit frycAPI", "", "Empty.html", panel => {
 	panel.onShown.addListener(() => {
 		focusPage().then(() => {
-			chrome.devtools.inspectedWindow.eval(`frycAPI.sendMessageToAHK("open-frycAPI.js", frycAPI.line ?? "999999999")`);
+			chrome.devtools.inspectedWindow.eval(`frycAPI.sendMessageToAHK("Open frycAPI.js", (frycAPI.line ?? "999999999") + " " + frycAPI_host())`);
 		});
 	});
 });

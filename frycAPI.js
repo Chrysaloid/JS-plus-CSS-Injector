@@ -8138,6 +8138,8 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const sidePanelTopLevel = `.x9f619.x1ja2u2z.x78zum5.x1n2onr6.x1r8uery.x1iyjqo2.xs83m0k.xeuugli.x1qughib.x1qjc9v5.xozqiw3.x1q0g3np.xexx8yu.x85a59c > .x9f619.x1n2onr6.x1ja2u2z.x78zum5.xdt5ytf.x1iyjqo2.xs83m0k.x8mqhxd.x6ikm8r.x10wlt62.xcrg951.xm0m39n.xzhurro.x6gs93r.xpyiiip.x88v6c3.x1qpj6lr.xdhzj85.x1bc3s5a.xczebs5.x4pn7vq.xe95u6g`;
 	const unreadMessage = `[aria-hidden="true"][role="button"][tabindex="-1"] > span[data-visualcompletion="ignore"]`;
 	const messageScroller = `.x78zum5.xdt5ytf.x1iyjqo2.x5yr21d`;
+	const kontynuujRozmowę = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.xyejjpt.x15dsfln.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x1nxh6w3.x1fcty0u.x16uf79r.x4zkp8e.x3x7a5m.xq9mrsl`;
+	const kropkaRozdzielająca = `span.x1lliihq.x1plvlek.xryxfnj.x1n2onr6.xyejjpt.x15dsfln.x193iq5w.xeuugli.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1xmvt09.x1nxh6w3.x1fcty0u.xhgddhk.x4zkp8e.x3x7a5m.xq9mrsl`;
 	frycAPI.injectStyleOnLoad(/*css*/`
 		/*hsl(200deg 100% 20%)
 		rgba(0, 161, 246, 0.7)*/
@@ -8341,6 +8343,12 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		}
 		${threadList} {
 			order: 2;
+		}
+
+		/* Delete text "Kontynuuj rozmowę?" */
+		${kropkaRozdzielająca}:has(+ * > ${kontynuujRozmowę}),
+		:has(> ${kontynuujRozmowę}) {
+			display: none;
 		}
 	`);
 
