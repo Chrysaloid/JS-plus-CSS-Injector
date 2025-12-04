@@ -9135,10 +9135,10 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 		(async () => {
 			await frycAPI.sleep(2000);
 			if (frycAPI.path.startsWith("/playlist")) {
-				const esval = '<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" class="mySVG"><path d="M11,17H9V8h2V17z M15,8h-2v9h2V8z M19,4v1h-1v16H6V5H5V4h4V3h6v1H19z M17,5H7v15h10V5z" class="style-scope yt-icon"></path></svg>';
+				const esval = frycAPI.createHTML('<svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" class="mySVG"><path d="M11,17H9V8h2V17z M15,8h-2v9h2V8z M19,4v1h-1v16H6V5H5V4h4V3h6v1H19z M17,5H7v15h10V5z" class="style-scope yt-icon"></path></svg>');
 				frycAPI.forEach(`ytd-menu-renderer.style-scope.ytd-playlist-video-renderer`, function (daElem) {
 					const trDiv = document.createElement("div");
-					trDiv.innerHTML = esval;
+					trDiv.appendChild(esval.cloneNode(1));
 					trDiv.classList.add("myDIV");
 					// trDiv.onclick = ytRemove;
 					daElem.insertAdjacentElement("afterbegin", trDiv).addEventListener("click", async function ytRemove() {
