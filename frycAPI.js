@@ -1947,34 +1947,6 @@ if (1) { //* Globalne funkcje
 	// 	}
 	// `, { elevated: true, allFrames: true });
 
-	(frycAPI.beforeLoad = function () {
-		// #region //* color scheme only light
-		if (frycAPI.colorSchemeDark) {
-			document.getElementById("frycAPI-color-scheme-only-light")?.remove();
-		} else {
-			const meta = frycAPI.elem("meta", 0).frycAPI_setAttributeBulk(
-				"name", "color-scheme",
-				"content", "only light",
-				"id", "frycAPI-color-scheme-only-light"
-			);
-			frycAPI.createMutObs(() => {
-				if (document.head) {
-					if (document.head.querySelector("meta[name=color-scheme][content=dark]") === null) {
-						document.head.insertAdjacentElement("afterbegin", meta);
-					}
-					return true;
-				}
-			}, { elem: document.documentElement, options: { childList: true, subtree: false } });
-		}
-		// #endregion
-		// #region //* Esc to scroll to top
-		document.addEventListener("keydown", e => { if (e.key === "Escape") window.scrollTo(0, 0); });
-		// #endregion
-		// #region //*
-
-		// #endregion
-	})();
-
 	/* Manual Functions Update Showcase
 	frycAPI.createManualFunctions("Testowe funkcje", {
 		funcArr: [
@@ -12271,6 +12243,32 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 // #region //* IFy 11
 // #endregion
 // #endregion
+if (1) { //* Global functions end
+	// #region //* color scheme only light
+	if (frycAPI.colorSchemeDark) {
+		document.getElementById("frycAPI-color-scheme-only-light")?.remove();
+	} else {
+		const meta = frycAPI.elem("meta", 0).frycAPI_setAttributeBulk(
+			"name", "color-scheme",
+			"content", "only light",
+			"id", "frycAPI-color-scheme-only-light"
+		);
+		frycAPI.createMutObs(() => {
+			if (document.head) {
+				if (document.head.querySelector("meta[name=color-scheme][content=dark]") === null) {
+					document.head.insertAdjacentElement("afterbegin", meta);
+				}
+				return true;
+			}
+		}, { elem: document.documentElement, options: { childList: true, subtree: false } });
+	}
+	// #endregion
+	// #region //* Esc to scroll to top
+	document.addEventListener("keydown", e => { if (e.key === "Escape") window.scrollTo(0, 0); });
+	// #endregion
+	// #region //*
+	// #endregion
+}
 
 // #region //* Koniec
 if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // Adding style from the active IF block
