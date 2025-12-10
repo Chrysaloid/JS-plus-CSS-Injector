@@ -5812,6 +5812,10 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			z-index: -300;
 			filter: invert(1) hue-rotate(180deg);
 		} */
+
+		.js-zone-container:has([id^="google_ads_iframe"]) {
+			display: none;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
