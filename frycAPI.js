@@ -520,15 +520,6 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	createManualFunctions(name, obj) {
 		const fGroup = new frycAPI_FuncGroup(name, obj);
 		fGroup.num = frycAPI.funcGroupArr.push(fGroup) - 1;
-		// if (typeof nameOrObj === "string") {
-		// 	if (funcArr.length) {
-		// 		frycAPI.funcGroupArr.push(new frycAPI_FuncGroup(nameOrObj, funcArr));
-		// 	}
-		// } else {
-		// 	if (nameOrObj.funcArr !== undefined && nameOrObj.funcArr.length) { // eslint-disable-line no-lonely-if
-		// 		frycAPI.funcGroupArr.push(new frycAPI_FuncGroup(nameOrObj));
-		// 	}
-		// }
 	},
 	handleManualFunction(daObj) {
 		const func = frycAPI.funcGroupArr[daObj.groupNumber].funcArr[daObj.funcNumber];
