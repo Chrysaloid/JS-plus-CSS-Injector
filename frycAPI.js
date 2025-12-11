@@ -12250,7 +12250,7 @@ if (1) { //* Global functions end
 		);
 		frycAPI.createMutObs(() => {
 			if (document.head) {
-				if (document.head.querySelector("meta[name=color-scheme][content=dark]") === null) {
+				if (document.head.querySelector('meta[name="color-scheme"]:is([content="dark"],[content="dark light"])') === null) {
 					document.head.insertAdjacentElement("afterbegin", meta);
 				}
 				return true;
