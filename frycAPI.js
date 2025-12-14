@@ -8704,6 +8704,11 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		/* [slot="comment"]::first-letter {
 			text-transform: uppercase;
 		} */
+
+		faceplate-tracker[noun="games_drawer"], hr:has(+ faceplate-tracker[noun="games_drawer"]),
+		faceplate-expandable-section-helper:has(summary[aria-controls="multireddits_section"]), faceplate-expandable-section-helper:has(summary[aria-controls="multireddits_section"]) + hr {
+			display: none;
+		}
 	`;
 	frycAPI.injectStyleOnLoad(style);
 
