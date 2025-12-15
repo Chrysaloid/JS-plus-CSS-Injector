@@ -9758,6 +9758,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	const searchButton = `button[type="submit"][title="Search"]`;
 	const poolTileDesc = `section.posts-container article`;
 
+	const pathName = frycAPI.path;
+
 	frycAPI.injectStyleOnLoad(/*css*/`
 		*:not(i) {
 			font-family: "IBM Plex Sans Condensed" !important;
@@ -10038,9 +10040,17 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		#tags {
 			flex-grow: 1;
 		}
-	`);
 
-	const pathName = frycAPI.path;
+		${pathName.startsWith("/db_export") ? /*css*/`
+			*:not(i) {
+				font-family: "Source Code Fryc" !important;
+			}
+			html {
+				filter: invert(1) hue-rotate(180deg);
+				background-color: white;
+			}
+		` : ""}
+	`);
 
 	frycAPI.onLoadSetter(() => {
 		if (pathName.startsWith("/posts/")) {
