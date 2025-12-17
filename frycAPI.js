@@ -10275,12 +10275,15 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			}
 		}
 
-		// #region //* Naprawa dat
+		// #region //* Fixing dates
 		frycAPI.setDefaultDate(`:is(#post-information, .post-time) time`, {
 			dateEnumMode: frycAPI.setDefaultDateEnum.mode.relatywnyCzas,
 			dateEnumStyle: frycAPI.setDefaultDateEnum.style.floatLeft,
 		});
 		frycAPI.setDefaultDate(`time`);
+		// #endregion
+		// #region //* Add tab User home
+		frycAPI.qSel(`menu.nav-help.desktop`).appendChild(frycAPI.elem("li").HTML(/*html*/`<a href="/users/home">User home</a>`)._).frycAPI_if(frycAPI.path === "/users/home")?.classList.add("current");
 		// #endregion
 
 		// loguj("OK");
@@ -10289,7 +10292,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	if (pathName.startsWith("/posts")) {
 		function getPostIDs() {
 			let str = "";
-			frycAPI.forEach(`article.post-preview`, (daElem, daI, daArr) => {
+			frycAPI.forEach(`article.thumbnail`, daElem => {
 				str += `~id:${daElem.getAttribute("data-id")} `;
 			});
 			return str.trim();
@@ -10300,7 +10303,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					const f = new type({ name });
 					f.callback = function (obj) {
 						document.getElementById("tags").value = getPostIDs();
-						document.querySelector(`#search-box form button`).click();
+						document.querySelector(`button[type="submit"][title="Search"]`).click();
 					};
 					return f;
 				},
