@@ -443,7 +443,6 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	script: document.currentScript,
 	createMutObsLicznik: 0,
 	path: window.location.pathname,
-	onLoadArr: [[], [], []],
 	UUID: null,
 	mimeTypes: null,
 	line: null,
@@ -466,6 +465,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			],
 		],
 	},
+	listMarkerCollapsed: "⮞",
+	listMarkerOpen: "⮟",
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -640,14 +641,10 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		frycAPI.czasNumer++;
 	},
 	onLoadSetter(callback, when = 1) { // 0 = document DOMContentLoaded, 1 = window DOMContentLoaded, 2 = window load
-		if (frycAPI.onLoadArr[when].push(callback) === 1) { // new length === 1 | This means that the first element was just added
-			/* eslint-disable */
-			switch (when) {
-				case 0: return document.addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
-				case 1: return window  .addEventListener("DOMContentLoaded", () => frycAPI.onLoadArr[when].frycAPI_run());
-				case 2: return window  .addEventListener("load",             () => frycAPI.onLoadArr[when].frycAPI_run());
-			}
-			/* eslint-enable */
+		switch (when) {
+			case 0: return document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", callback) : callback();
+			case 1: return document.readyState === "loading" ? window.addEventListener("DOMContentLoaded", callback) : callback();
+			case 2: return window.addEventListener("load", callback);
 		}
 	},
 	forEach(selector, callback) {
@@ -6561,12 +6558,12 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		}
 		.usos-ui h2.USOS-OK::before {
 			display: inline-block;
-			content: "⮟";
+			content: "${frycAPI.listMarkerOpen}";
 			width: 20px;
 			color: hsl(0 0% 58% / 1);
 		}
 		.usos-ui h2.USOS-OK.collapse::before {
-			content: "⮞"
+			content: "${frycAPI.listMarkerCollapsed}"
 		}
 		h2.USOS-OK.collapse + .myDiv {
 				display: none;
@@ -9879,8 +9876,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		#post-notices-top:has(#flash-shortcut-notice:only-child) {
 			display: none;
 		}
-		header#top menu.main {
-			padding-left: 0;
+		.nav-primary, .nav-secondary {
+			padding-left: 0 !important;
 		}
 		header#top menu {
 			margin-top: 0;
@@ -9908,8 +9905,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			border-top-left-radius: 0;
 		}
 		/* :not(:has(#nav-account.current)) */
-		header#top menu.main li.current > a {
-			border-radius: 6px 6px 0 0;
+		:is(.nav-primary, .nav-help) li.current > a {
+			border-radius: 6px 6px 0 0 !important;
 			position: relative;
 			&::before, &::after {
 				content: "";
@@ -9928,7 +9925,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					var(--color-foreground) calc(var(--base) + (var(--span) / 2))
 				);
 			}
-			&::before {
+			:not(#nav-artists) > &::before {
 				right: 100%;
 				--x: 0%;
 				mask-image: var(--mask-image);
@@ -9937,6 +9934,11 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				left: 100%;
 				--x: 100%;
 				mask-image: var(--mask-image);
+			}
+		}
+		.nav-primary:has(#nav-artists.current) ~ .nav-secondary {
+			&, & #quick_search_name {
+				border-top-left-radius: 0;
 			}
 		}
 		header#top menu.main:has(#nav-account.current) li.current > a::before {
@@ -10050,6 +10052,64 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				background-color: white;
 			}
 		` : ""}
+
+		textarea, input, select:not(#image-resize-selector) {
+			background-color: #222222 !important;
+			color: white !important;
+		}
+
+		.styled-dtext details summary {
+			display: block;
+			&::before {
+				content: "${frycAPI.listMarkerCollapsed}";
+				display: inline-block;
+				font-weight: bold;
+				width: 17px;
+			}
+			details[open] &::before {
+				content: "${frycAPI.listMarkerOpen}";
+			}
+		}
+
+		/* Collapsing comments */
+		#post-sections li:first-child {
+			color: var(--color-link);
+			a {
+				display: none;
+			}
+			&::before, &::after {
+				display: inline-block;
+				font-weight: bold;
+			}
+			&:hover {
+				cursor: pointer;
+				color: var(--color-link-hover);
+			}
+			&::before {
+				content: "${frycAPI.listMarkerOpen}";
+				width: 17px;
+			}
+			.content.collapsed &::before {
+				content: "${frycAPI.listMarkerCollapsed}";
+			}
+			&::after {
+				content: var(--comment-count, "Comments");
+			}
+		}
+		.content.collapsed #comments {
+			display: none;
+		}
+
+		#nav-links-top#nav-links-top {
+			display: flex;
+			flex-flow: row;
+			justify-content: space-between;
+			background-color: hsl(216, 54%, 15%);
+
+			.nav-block {
+				flex-grow: 1;
+			}
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -10067,6 +10127,17 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			// const download = document.querySelector(`#image-download-link > a.button`);
 			// download.setAttribute("onclick", `location.href = '${download.getAttribute("href")}'`);
 			// download.setAttribute("href", "");
+
+			// #region //* Uncollapse comments button
+			const content = frycAPI.qSel(`.content`);
+			content.frycAPI_addClass("collapsed");
+			frycAPI.qSel(`#post-sections li.active`).addEventListener("click", e => {
+				content.classList.toggle("collapsed");
+			});
+			const newComment = frycAPI.qSel(`.new-comment`);
+			newComment.parentElement.insertAdjacentElement("afterBegin", newComment);
+			frycAPI.byID("post-sections").style.setProperty("--comment-count", `"Comments (${frycAPI.qSelAll(`article.comment`).length})"`);
+			// #endregion
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.querySelector("form.post-search-form"));
 			window.scrollTo(0, 0);
@@ -10298,8 +10369,6 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		// #region //* Add tab User home
 		frycAPI.qSel(`menu.nav-help.desktop`).appendChild(frycAPI.elem("li").HTML(/*html*/`<a href="/users/home">User home</a>`)._).frycAPI_if(frycAPI.path === "/users/home")?.classList.add("current");
 		// #endregion
-
-		// loguj("OK");
 	});
 
 	if (pathName.startsWith("/posts")) {
