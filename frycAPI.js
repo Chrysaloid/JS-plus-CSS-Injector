@@ -10101,7 +10101,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				rStr += `<div$class="txt-col-ś">Średni wynik ↑: ${(score / psts.length).toFixed(1).padEnd(15 + ratPadd + 3 + 5 + 2 - 16)}</div>`;
 				return rStr;
 			};
-			let posts, datArr, ratStr = "", poolGraph, e621_get_pool_dates, left, right;
+			let postsPromise, posts, datArr, ratStr = "", poolGraph, e621_get_pool_dates, left, right;
 
 			if (pathName.startsWith("/pools/gallery")) {
 				const info = frycAPI.elemFromHTML(`<div class="pokaż-info">Get info</div>`);
@@ -10133,7 +10133,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					second: "2-digit",
 				};
 				const cPools = document.getElementById("c-pools");
-				const poolID = pathName.split("/").slice(-1);
+				const poolID = pathName.split("/").pop();
 				const handleClick = function (e) {
 					e.preventDefault();
 					if (e.type === "click") {
@@ -10162,9 +10162,22 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 						return;
 					}
 
-					if (posts === undefined) {
+					// The following has to be here because if it were in the else branch it would stop
+					// second fast call from seeing a promise in postsPromise - it would still be undefined
+					const e621 = await frycAPI.atomicAwait(() => frycAPI.getResData("e621.json"), e621_get_pool_dates, "e621");
+					if (postsPromise) {
+						await postsPromise;
+					} else {
 						const img = frycAPI.insertLoadingGif(cPools, "beforeend");
-						posts = (await frycAPI.readFile(`${location.origin}/posts.json?tags=pool:${poolID}&limit=1000`)).posts; // eslint-disable-line require-atomic-updates
+						const url = new URL(location.origin);
+						url.pathname = "posts.json";
+						url.searchParams.set("tags", `pool:${poolID}`);
+						url.searchParams.set("limit", "320");
+						url.searchParams.set("login", e621.login);
+						url.searchParams.set("api_key", e621.api_key);
+						url.searchParams.set("_client", `frycAPI (by ${e621.login})`);
+						postsPromise = frycAPI.readFile(url.href);
+						posts = (await postsPromise).posts;
 						datArr ??= (
 							posts.map(elem => [new Date(elem.created_at).getTime(), elem.id]).sort((a, b) => a[0] - b[0])
 							.map((daElem, daI) => {
