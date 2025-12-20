@@ -10066,9 +10066,9 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				font-weight: bold;
 				width: 17px;
 			}
-			details[open] &::before {
-				content: "${frycAPI.listMarkerOpen}";
-			}
+		}
+		details[open] > summary::before {
+			content: "${frycAPI.listMarkerOpen}";
 		}
 
 		/* Collapsing comments */
@@ -10784,10 +10784,12 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			frycAPI.forEach(`relative-time`, (daElem, daI, daArr) => { // :not(.poprawnyCzas)
 				if (daElem.shadowRoot.querySelector(`span.dspNONE`) === null) {
 					const data = new Date(daElem.getAttribute("datetime"));
-					daElem.shadowRoot.innerHTML = frycAPI.printRelTime(data) + `<span class="dspNONE"></span>`;
-					daElem.setAttribute("title", frycAPI.printDate(data));
-					// daElem.frycAPI_addClass("poprawnyCzas");
-					// relTimeCount++;
+					if (frycAPI.isValidDate(data)) {
+						daElem.shadowRoot.innerHTML = frycAPI.printRelTime(data) + `<span class="dspNONE"></span>`;
+						daElem.setAttribute("title", frycAPI.printDate(data));
+						// daElem.frycAPI_addClass("poprawnyCzas");
+						// relTimeCount++;
+					}
 				}
 			});
 
