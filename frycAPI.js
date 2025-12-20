@@ -10110,6 +10110,15 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				flex-grow: 1;
 			}
 		}
+
+		body:not(.posts-separated) .hide-duplicate-posts {
+			display: none;
+		}
+		body[hide-user-profile-pictures="1"] .avatar img[title^="Rating: e"],
+		body[hide-user-profile-pictures="2"] .avatar img:is([title^="Rating: e"],[title^="Rating: q"]),
+		body[hide-user-profile-pictures="3"] .avatar img {
+			display: none;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -10357,6 +10366,37 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					});
 				}
 			}
+		} else if (pathName.startsWith("/forum_posts") && !pathName.startsWith("/forum_posts/")) {
+			// const tab = frycAPI.qSel(`table.striped`);
+			// const container = frycAPI.elem().class("my-topic-container")._;
+			let lastTopicId;
+			frycAPI.forEach(`table.striped tbody tr`, daElem => {
+				// const topic = frycAPI.elem().class("my-topic")._;
+				// topic.appendChild(frycAPI.elem("a").attr("href", daElem)._)
+				// container.appendChild(topic)
+				const topicId = daElem.querySelector(`.forum-post-topic-title a`).href;
+				if (lastTopicId === topicId) {
+					daElem.classList.add("hide-duplicate-posts");
+				} else {
+					lastTopicId = topicId;
+				}
+			});
+			// tab.insertAdjacentElement("afterEnd", container);
+			frycAPI.createManualFunctions("e621 Forums", {
+				funcArr: [
+					(name = "Merge posts in topics", type = frycAPI_PureState) => {
+						const f = new type({
+							name: name,
+							stateDesc: ["Posts merged", "Posts separated"],
+							state: 0,
+						});
+						f.callback = function () {
+							document.body.classList.toggle("posts-separated");
+						};
+						return f;
+					},
+				],
+			});
 		}
 
 		// #region //* Fixing dates
@@ -10367,8 +10407,24 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		frycAPI.setDefaultDate(`time`);
 		// #endregion
 		// #region //* Add tab User home
-		frycAPI.qSel(`menu.nav-help.desktop`).appendChild(frycAPI.elem("li").HTML(/*html*/`<a href="/users/home">User home</a>`)._).frycAPI_if(frycAPI.path === "/users/home")?.classList.add("current");
+		frycAPI.qSel(`menu.nav-help.desktop`)?.appendChild(frycAPI.elem("li").HTML(/*html*/`<a href="/users/home">User home</a>`)._).frycAPI_if(frycAPI.path === "/users/home")?.classList.add("current");
 		// #endregion
+
+		frycAPI.createManualFunctions("e621 avatars", {
+			funcArr: [
+				(name = "Hide user profile pictures", type = frycAPI_PureState) => {
+					const f = new type({
+						name: name,
+						stateDesc: ["Profile pictures shown", "Explicit profile pictures hidden", "Questionable profile pictures hidden", "All profile pictures hidden"],
+						state: 1,
+					});
+					(f.callback = function () {
+						document.body.setAttribute("hide-user-profile-pictures", f.state);
+					})();
+					return f;
+				},
+			],
+		});
 	});
 
 	if (pathName.startsWith("/posts")) {
