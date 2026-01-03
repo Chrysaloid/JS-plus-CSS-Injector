@@ -12390,6 +12390,13 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			},
 		],
 	});
+} else if (frycAPI_host("www.autocentrum.pl")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.wrapper:has(> div > script + img + div) {
+			display: none;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
