@@ -2130,18 +2130,942 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 			},
 		],
 	});
-} else if (1 && frycAPI_host("alienswarm.fandom.com")) {
+} else if (1 && frycAPI_hostIncludes("fandom.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
-		button.mojButt {
-			position: fixed;
-			top: 65px;
-			left: 78px;
-			width: 200px;
-			height: 100px;
-			cursor: pointer;
+		.top-ads-container,
+		.top_leaderboard-odyssey-wrapper:has(> .top-ads-container) {
+			display: none;
 		}
 	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.forEach(`h2 > span.mw-headline`, span => {
+			span.innerHTML = `<a href="${window.location.origin + window.location.pathname + "#" + span.id}">${span.innerText}</a>`;
+		});
+	});
+
+	if (frycAPI_host("alienswarm.fandom.com")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		frycAPI.injectStyleOnLoad(/*css*/`
+			button.mojButt {
+				position: fixed;
+				top: 65px;
+				left: 78px;
+				width: 200px;
+				height: 100px;
+				cursor: pointer;
+			}
+		`);
+	} else if (frycAPI_host("ark.fandom.com")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		// https://ark.fandom.com/wiki/ARK_Survival_Evolved_Wiki
+		const funkcje = "ARK Wiki Powiększ obrazki";
+		frycAPI.injectStyleOnLoad(/*css*/`
+			.info-framework {
+				background-color: hsl(208 100% 94% / 1);
+			}
+			tr[style*="background"]>td {
+				filter: brightness(0);
+			}
+
+			img[src].bylem {
+				border: 1px solid red;
+			}
+			img[src].zmienione {
+				border: 1px solid green;
+			}
+
+			.theme-fandomdesktop-light .cell-green {
+				background-color: hsl(120 73% 39% / 1) !important;
+			}
+
+			.theme-fandomdesktop-light .cell-pink {
+				background-color: hsl(0 53% 43% / 1) !important;
+			}
+
+			.global-navigation span,
+			.global-navigation .global-navigation__label{
+				color: hsl(0 0% 58% / 1);
+			}
+
+			.global-navigation svg.wds-icon {
+				fill: hsl(0 0% 58% / 1);
+			}
+
+			img[alt="Aberrant Achatina"],
+			img[alt="Aberrant Anglerfish"],
+			img[alt="Aberrant Ankylosaurus"],
+			img[alt="Aberrant Araneo"],
+			img[alt="Aberrant Arthropluera"],
+			img[alt="Aberrant Baryonyx"],
+			img[alt="Aberrant Beelzebufo"],
+			img[alt="Aberrant Carbonemys"],
+			img[alt="Aberrant Carnotaurus"],
+			img[alt="Aberrant Cnidaria"],
+			img[alt="Aberrant Coelacanth"],
+			img[alt="Aberrant Dimetrodon"],
+			img[alt="Aberrant Dimorphodon"],
+			img[alt="Aberrant Diplocaulus"],
+			img[alt="Aberrant Diplodocus"],
+			img[alt="Aberrant Dire Bear"],
+			img[alt="Aberrant Dodo"],
+			img[alt="Aberrant Doedicurus"],
+			img[alt="Aberrant Dung Beetle"],
+			img[alt="Aberrant Electrophorus"],
+			img[alt="Aberrant Equus"],
+			img[alt="Aberrant Gigantopithecus"],
+			img[alt="Aberrant Iguanodon"],
+			img[alt="Aberrant Lystrosaurus"],
+			img[alt="Aberrant Manta"],
+			img[alt="Aberrant Megalania"],
+			img[alt="Aberrant Megalosaurus"],
+			img[alt="Aberrant Meganeura"],
+			img[alt="Aberrant Moschops"],
+			img[alt="Aberrant Otter"],
+			img[alt="Aberrant Ovis"],
+			img[alt="Aberrant Paraceratherium"],
+			img[alt="Aberrant Parasaur"],
+			img[alt="Aberrant Piranha"],
+			img[alt="Aberrant Pulmonoscorpius"],
+			img[alt="Aberrant Purlovia"],
+			img[alt="Aberrant Raptor"],
+			img[alt="Aberrant Salmon"],
+			img[alt="Aberrant Sarco"],
+			img[alt="Aberrant Spino"],
+			img[alt="Aberrant Stegosaurus"],
+			img[alt="Aberrant Titanoboa"],
+			img[alt="Aberrant Triceratops"],
+			img[alt="Aberrant Trilobite"],
+			img[alt="Achatina"],
+			img[alt="Archa"],
+			img[alt="Carno"],
+			img[alt="Stego"],
+			img[alt="Trike"],
+			img[alt="Turkey"],
+			img[alt="Acrocanthosaurus"],
+			img[alt="Allosaurus"],
+			img[alt="Alpha Basilisk"],
+			img[alt="Alpha Blood Crystal Wyvern"],
+			img[alt="Alpha Carnotaurus"],
+			img[alt="Alpha Corrupted Master Controller"],
+			img[alt="Alpha Creatures"],
+			img[alt="Alpha Deathworm"],
+			img[alt="Alpha Fire Wyvern"],
+			img[alt="Alpha Karkinos"],
+			img[alt="Alpha King Titan"],
+			img[alt="Alpha Leedsichthys"],
+			img[alt="Alpha Megalodon"],
+			img[alt="Alpha Moeder, Master of the Ocean"],
+			img[alt="Alpha Mosasaur"],
+			img[alt="Alpha Raptor"],
+			img[alt="Alpha Surface Reaper King"],
+			img[alt="Alpha T-Rex"],
+			img[alt="Alpha Tusoteuthis"],
+			img[alt="Alpha X-Triceratops"],
+			img[alt="Amargasaurus"],
+			img[alt="Ammonite"],
+			img[alt="Andrewsarchus"],
+			img[alt="Anglerfish"],
+			img[alt="Ankylosaurus"],
+			img[alt="Araneo"],
+			img[alt="Archaeopteryx"],
+			img[alt="Argentavis"],
+			img[alt="Argentustus"],
+			img[alt="Mod:ARK Additions/Deinotherium"],
+			img[alt="Arthropluera"],
+			img[alt="Astrocetus"],
+			img[alt="Astrodelphis"],
+			img[alt="Attack Drone"],
+			img[alt="Aurochs"],
+			img[alt="Baryonyx"],
+			img[alt="Basilisk"],
+			img[alt="Basilisk Ghost"],
+			img[alt="Basilosaurus"],
+			img[alt="Beelzebufo"],
+			img[alt="Beelzemorbus"],
+			img[alt="Beta Corrupted Master Controller"],
+			img[alt="Beta King Titan"],
+			img[alt="Beta Moeder, Master of the Ocean"],
+			img[alt="Blood Crystal Wyvern"],
+			img[alt="Bloodstalker"],
+			img[alt="Bone Fire Wyvern"],
+			img[alt="Brontosaurus"],
+			img[alt="Broodgenetrix"],
+			img[alt="Broodmother Lysrix"],
+			img[alt="Broodmother Lysrix (Alpha)"],
+			img[alt="Broodmother Lysrix (Beta)"],
+			img[alt="Broodmother Lysrix (Gamma)"],
+			img[alt="Brute Araneo"],
+			img[alt="Brute Astrocetus"],
+			img[alt="Brute Basilosaurus"],
+			img[alt="Brute Bloodstalker"],
+			img[alt="Brute Ferox"],
+			img[alt="Brute Fire Wyvern"],
+			img[alt="Brute Leedsichthys"],
+			img[alt="Brute Magmasaur"],
+			img[alt="Brute Malfunctioned Tek Giganotosaurus"],
+			img[alt="Brute Malfunctioned Tek Rex"],
+			img[alt="Brute Mammoth"],
+			img[alt="Brute Megaloceros"],
+			img[alt="Brute Plesiosaur"],
+			img[alt="Brute Reaper King"],
+			img[alt="Brute Sarco"],
+			img[alt="Brute Seeker"],
+			img[alt="Brute Tusoteuthis"],
+			img[alt="Brute X-Allosaurus"],
+			img[alt="Brute X-Megalodon"],
+			img[alt="Brute X-Mosasaurus"],
+			img[alt="Brute X-Raptor"],
+			img[alt="Brute X-Rex"],
+			img[alt="Brute X-Rock Elemental"],
+			img[alt="Brute X-Spino"],
+			img[alt="Brute X-Yutyrannus"],
+			img[alt="Bulbdog"],
+			img[alt="Bulbdog Ghost"],
+			img[alt="Bunny Dodo"],
+			img[alt="Bunny Oviraptor"],
+			img[alt="Carbonemys"],
+			img[alt="Carcharodontosaurus"],
+			img[alt="Carnotaurus"],
+			img[alt="Castoroides"],
+			img[alt="Chalicotherium"],
+			img[alt="Chalk Golem"],
+			img[alt="Cnidaria"],
+			img[alt="Coelacanth"],
+			img[alt="Compy"],
+			img[alt="Corrupted Arthropluera"],
+			img[alt="Corrupted Avatar"],
+			img[alt="Corrupted Carnotaurus"],
+			img[alt="Corrupted Chalicotherium"],
+			img[alt="Corrupted Dilophosaur"],
+			img[alt="Corrupted Dimorphodon"],
+			img[alt="Corrupted Giganotosaurus"],
+			img[alt="Corrupted Master Controller"],
+			img[alt="Corrupted Paraceratherium"],
+			img[alt="Corrupted Pteranodon"],
+			img[alt="Corrupted Raptor"],
+			img[alt="Corrupted Reaper King"],
+			img[alt="Corrupted Rex"],
+			img[alt="Corrupted Rock Drake"],
+			img[alt="Corrupted Spino"],
+			img[alt="Corrupted Stegosaurus"],
+			img[alt="Corrupted Survivor"],
+			img[alt="Corrupted Triceratops"],
+			img[alt="Corrupted Wyvern"],
+			img[alt="Crystal Wyvern"],
+			img[alt="Crystal Wyvern Queen"],
+			img[alt="Crystal Wyvern Queen (Alpha)"],
+			img[alt="Crystal Wyvern Queen (Beta)"],
+			img[alt="Crystal Wyvern Queen (Gamma)"],
+			img[alt="Cubozoa Multis"],
+			img[alt="Daeodon"],
+			img[alt="Deathworm"],
+			img[alt="Defense Unit"],
+			img[alt="Deinonychus"],
+			img[alt="Desert Titan"],
+			img[alt="Desert Titan Flock"],
+			img[alt="Desmodus"],
+			img[alt="Dilophosaur"],
+			img[alt="Dilophosaurus"],
+			img[alt="Dimetrodon"],
+			img[alt="Dimorphodon"],
+			img[alt="Dinopithecus King (Alpha)"],
+			img[alt="Dinopithecus King (Beta)"],
+			img[alt="Dinopithecus King (Gamma)"],
+			img[alt="Diplocaulus"],
+			img[alt="Diplodocus"],
+			img[alt="Dire Bear"],
+			img[alt="Dire Polar Bear"],
+			img[alt="Direwolf"],
+			img[alt="Direwolf Ghost"],
+			img[alt="Diseased Leech"],
+			img[alt="Dodo"],
+			img[alt="Dodo Wyvern"],
+			img[alt="Dodobitus"],
+			img[alt="DodoRex"],
+			img[alt="Doedicurus"],
+			img[alt="Doedicurus Vastus"],
+			img[alt="Dragon"],
+			img[alt="Dragon (Alpha)"],
+			img[alt="Dragon (Beta)"],
+			img[alt="Dragon (Gamma)"],
+			img[alt="Dung Beetle"],
+			img[alt="Dunkleosteus"],
+			img[alt="Eel Minion"],
+			img[alt="Eerie Achatina"],
+			img[alt="Eerie Allosaurus"],
+			img[alt="Eerie Alpha Carno"],
+			img[alt="Eerie Alpha Mosasaur"],
+			img[alt="Eerie Alpha Raptor"],
+			img[alt="Eerie Alpha T-Rex"],
+			img[alt="Eerie Ammonite"],
+			img[alt="Eerie Angler"],
+			img[alt="Eerie Ankylo"],
+			img[alt="Eerie Araneo"],
+			img[alt="Eerie Archaeopteryx"],
+			img[alt="Eerie Argentavis"],
+			img[alt="Eerie Arthropluera"],
+			img[alt="Eerie Baryonyx"],
+			img[alt="Eerie Basilosaurus"],
+			img[alt="Eerie Beelzebufo"],
+			img[alt="Eerie Bronto"],
+			img[alt="Eerie Carbonemys"],
+			img[alt="Eerie Carno"],
+			img[alt="Eerie Castoroides"],
+			img[alt="Eerie Chalicotherium"],
+			img[alt="Eerie Coelacanth"],
+			img[alt="Eerie Compy"],
+			img[alt="Eerie Daeodon"],
+			img[alt="Eerie Dilophosaurus"],
+			img[alt="Eerie Dimetrodon"],
+			img[alt="Eerie Dimorphodon"],
+			img[alt="Eerie Diplocaulus"],
+			img[alt="Eerie Diplodocus"],
+			img[alt="Eerie Dire Bear"],
+			img[alt="Eerie Dire Wolf"],
+			img[alt="Eerie Diseased Leech"],
+			img[alt="Eerie Dodo"],
+			img[alt="Eerie Doedicurus"],
+			img[alt="Eerie Dung Beetle"],
+			img[alt="Eerie Dunkleosteus"],
+			img[alt="Eerie Equus"],
+			img[alt="Eerie Eurypterid"],
+			img[alt="Eerie Gallimimus"],
+			img[alt="Eerie Giganotosaurus"],
+			img[alt="Eerie Gigantopithecus"],
+			img[alt="Eerie Griffin"],
+			img[alt="Eerie Ichthyosaurus"],
+			img[alt="Eerie Iguanodon"],
+			img[alt="Eerie Jerboa"],
+			img[alt="Eerie Kairuku"],
+			img[alt="Eerie Kaprosuchus"],
+			img[alt="Eerie Leech"],
+			img[alt="Eerie Leedsichthys"],
+			img[alt="Eerie Liopleurodon"],
+			img[alt="Eerie Lystrosaurus"],
+			img[alt="Eerie Mammoth"],
+			img[alt="Eerie Manta"],
+			img[alt="Eerie Megaloceros"],
+			img[alt="Eerie Megalodon"],
+			img[alt="Eerie Megalosaurus"],
+			img[alt="Eerie Meganeura"],
+			img[alt="Eerie Megapiranha"],
+			img[alt="Eerie Megatherium"],
+			img[alt="Eerie Mesopithecus"],
+			img[alt="Eerie Mosasaur"],
+			img[alt="Eerie Moschops"],
+			img[alt="Eerie Onyc"],
+			img[alt="Eerie Otter"],
+			img[alt="Eerie Oviraptor"],
+			img[alt="Eerie Pachy"],
+			img[alt="Eerie Pachyrhinosaurus"],
+			img[alt="Eerie Parasaur"],
+			img[alt="Eerie Pegomastax"],
+			img[alt="Eerie Pelagornis"],
+			img[alt="Eerie Phiomia"],
+			img[alt="Eerie Plesiosaur"],
+			img[alt="Eerie Procoptodon"],
+			img[alt="Eerie Pteranodon"],
+			img[alt="Eerie Pulmonoscorpius"],
+			img[alt="Eerie Purlovia"],
+			img[alt="Eerie Quetzal"],
+			img[alt="Eerie Raptor"],
+			img[alt="Eerie Rex"],
+			img[alt="Eerie Sabertooth"],
+			img[alt="Eerie Sabertooth Salmon"],
+			img[alt="Eerie Sarco"],
+			img[alt="Eerie Spino"],
+			img[alt="Eerie Stego"],
+			img[alt="Eerie Tapejara"],
+			img[alt="Eerie Terror Bird"],
+			img[alt="Eerie Therizinosaur"],
+			img[alt="Eerie Titanoboa"],
+			img[alt="Eerie Titanomyrma Drone"],
+			img[alt="Eerie Titanomyrma Soldier"],
+			img[alt="Eerie Titanosaur"],
+			img[alt="Eerie Triceratops"],
+			img[alt="Eerie Trilobite"],
+			img[alt="Eerie Troodon"],
+			img[alt="Eerie Tusoteuthis"],
+			img[alt="Eerie Woolly Rhinoceros"],
+			img[alt="Eerie Yeti"],
+			img[alt="Electrophorus"],
+			img[alt="Elemental Reaper King"],
+			img[alt="Ember Crystal Wyvern"],
+			img[alt="Enforcer"],
+			img[alt="Enraged Corrupted Rex"],
+			img[alt="Enraged Triceratops"],
+			img[alt="Equus"],
+			img[alt="Eurypterid"],
+			img[alt="Exo-Mek"],
+			img[alt="Experimental Giganotosaurus"],
+			img[alt="Featherlight"],
+			img[alt="Fenrir"],
+			img[alt="Ferox"],
+			img[alt="Ferox (Large)"],
+			img[alt="Fire Wyvern"],
+			img[alt="Fjordhawk"],
+			img[alt="Forest Titan"],
+			img[alt="Forest Wyvern"],
+			img[alt="Gacha"],
+			img[alt="GachaClaus"],
+			img[alt="Gallimimus"],
+			img[alt="Gamma Corrupted Master Controller"],
+			img[alt="Gamma King Titan"],
+			img[alt="Gamma Moeder, Master of the Ocean"],
+			img[alt="Gasbags"],
+			img[alt="Giant Bee"],
+			img[alt="Giant Monarch Butterfly"],
+			img[alt="Giant Queen Bee"],
+			img[alt="Giant Worker Bee"],
+			img[alt="Giganotosaurus"],
+			img[alt="Gigantopithecus"],
+			img[alt="Glowbug"],
+			img[alt="Glowtail"],
+			img[alt="Golden Striped Brute Megalodon"],
+			img[alt="Golden Striped Megalodon"],
+			img[alt="Griffin"],
+			img[alt="Gula Beetle"],
+			img[alt="Hesperornis"],
+			img[alt="Human"],
+			img[alt="Hyaenodon"],
+			img[alt="Ice Golem"],
+			img[alt="Ice Titan"],
+			img[alt="Ice Wyvern"],
+			img[alt="Iceworm Male"],
+			img[alt="Iceworm Queen"],
+			img[alt="Ichthyornis"],
+			img[alt="Ichthyosaurus"],
+			img[alt="Iguanodon"],
+			img[alt="Injured Brute Reaper King"],
+			img[alt="Insect Swarm"],
+			img[alt="Jerboa"],
+			img[alt="Jug Bug"],
+			img[alt="Kairuku"],
+			img[alt="Kaprosuchus"],
+			img[alt="Karkinos"],
+			img[alt="Kentrosaurus"],
+			img[alt="King Titan"],
+			img[alt="Lamprey"],
+			img[alt="Lava Elemental"],
+			img[alt="Leech"],
+			img[alt="Leedsichthys"],
+			img[alt="Lightning Wyvern"],
+			img[alt="Liopleurodon"],
+			img[alt="Lymantria"],
+			img[alt="Lystrosaurus"],
+			img[alt="Macro-Summoner"],
+			img[alt="Macrophage"],
+			img[alt="Maewing"],
+			img[alt="Magmasaur"],
+			img[alt="Malfunctioned Attack Drone"],
+			img[alt="Malfunctioned Defense Unit"],
+			img[alt="Malfunctioned Enforcer"],
+			img[alt="Malfunctioned Mek Knight"],
+			img[alt="Malfunctioned Tek Giganotosaurus"],
+			img[alt="Malfunctioned Tek Parasaur"],
+			img[alt="Malfunctioned Tek Quetzal"],
+			img[alt="Malfunctioned Tek Raptor"],
+			img[alt="Malfunctioned Tek Rex"],
+			img[alt="Malfunctioned Tek Stegosaurus"],
+			img[alt="Malfunctioned Tek Stryder"],
+			img[alt="Malfunctioned Tek Triceratops"],
+			img[alt="Mammoth"],
+			img[alt="Managarmr"],
+			img[alt="Manta"],
+			img[alt="Manticore"],
+			img[alt="Manticore (Alpha)"],
+			img[alt="Manticore (Beta)"],
+			img[alt="Manticore (Gamma)"],
+			img[alt="Mantis"],
+			img[alt="Mantis Ghost"],
+			img[alt="Mega Mek"],
+			img[alt="Megacerops"],
+			img[alt="Megachelon"],
+			img[alt="Megalania"],
+			img[alt="Megaloceros"],
+			img[alt="Megalodon"],
+			img[alt="Megalosaurus"],
+			img[alt="Meganeura"],
+			img[alt="Megapithecus"],
+			img[alt="Megapithecus (Alpha)"],
+			img[alt="Megapithecus (Beta)"],
+			img[alt="Megapithecus (Gamma)"],
+			img[alt="Megapithecus Pestis"],
+			img[alt="Megatherium"],
+			img[alt="Mek"],
+			img[alt="Mesopithecus"],
+			img[alt="Microraptor"],
+			img[alt="Moeder, Master of the Ocean"],
+			img[alt="Morellatops"],
+			img[alt="Mosasaurus"],
+			img[alt="Moschops"],
+			img[alt="Nameless"],
+			img[alt="Noctis"],
+			img[alt="Noglin"],
+			img[alt="Obsidioequus"],
+			img[alt="Oil Jug Bug"],
+			img[alt="Onyc"],
+			img[alt="Otter"],
+			img[alt="Overseer"],
+			img[alt="Overseer (Alpha)"],
+			img[alt="Overseer (Beta)"],
+			img[alt="Overseer (Gamma)"],
+			img[alt="Oviraptor"],
+			img[alt="Ovis"],
+			img[alt="Pachy"],
+			img[alt="Pachyrhinosaurus"],
+			img[alt="Paraceratherium"],
+			img[alt="Parakeet Fish School"],
+			img[alt="Parasaur"],
+			img[alt="Party Dodo"],
+			img[alt="Pegomastax"],
+			img[alt="Pelagornis"],
+			img[alt="Phiomia"],
+			img[alt="Phoenix"],
+			img[alt="Piranha"],
+			img[alt="Plesiosaur"],
+			img[alt="Poison Wyvern"],
+			img[alt="Polar Bear"],
+			img[alt="Polar Purlovia"],
+			img[alt="Procoptodon"],
+			img[alt="Pteranodon"],
+			img[alt="Pulmonoscorpius"],
+			img[alt="Purlovia"],
+			img[alt="Quetzal"],
+			img[alt="R-Allosaurus"],
+			img[alt="R-Brontosaurus"],
+			img[alt="R-Carbonemys"],
+			img[alt="R-Carnotaurus"],
+			img[alt="R-Daeodon"],
+			img[alt="R-Dilophosaur"],
+			img[alt="R-Direwolf"],
+			img[alt="R-Equus"],
+			img[alt="R-Gasbags"],
+			img[alt="R-Giganotosaurus"],
+			img[alt="R-Megatherium"],
+			img[alt="R-Parasaur"],
+			img[alt="R-Procoptodon"],
+			img[alt="R-Quetzal"],
+			img[alt="R-Reaper King"],
+			img[alt="R-Reaper Queen"],
+			img[alt="R-Snow Owl"],
+			img[alt="R-Thylacoleo"],
+			img[alt="R-Velonasaur"],
+			img[alt="Raptor"],
+			img[alt="Rare X-Sabertooth Salmon"],
+			img[alt="Ravager"],
+			img[alt="Reaper"],
+			img[alt="Reaper King"],
+			img[alt="Reaper Prince"],
+			img[alt="Reaper Queen"],
+			img[alt="Rex"],
+			img[alt="Rex Ghost"],
+			img[alt="Rock Drake"],
+			img[alt="Rock Elemental"],
+			img[alt="Rockwell"],
+			img[alt="Rockwell (Alpha)"],
+			img[alt="Rockwell (Beta)"],
+			img[alt="Rockwell (Gamma)"],
+			img[alt="Rockwell Node"],
+			img[alt="Rockwell Node (Alpha)"],
+			img[alt="Rockwell Node (Beta)"],
+			img[alt="Rockwell Node (Gamma)"],
+			img[alt="Rockwell Prime"],
+			img[alt="Rockwell Prime (Alpha)"],
+			img[alt="Rockwell Prime (Beta)"],
+			img[alt="Rockwell Prime (Gamma)"],
+			img[alt="Roll Rat"],
+			img[alt="Royal Griffin"],
+			img[alt="Rubble Golem"],
+			img[alt="Sabertooth"],
+			img[alt="Sabertooth Salmon"],
+			img[alt="Sarco"],
+			img[alt="Scout"],
+			img[alt="Seeker"],
+			img[alt="Shadowmane"],
+			img[alt="Shinehorn"],
+			img[alt="Skeletal Bronto"],
+			img[alt="Skeletal Carnotaurus"],
+			img[alt="Skeletal Giganotosaurus"],
+			img[alt="Skeletal Jerboa"],
+			img[alt="Skeletal Quetzal"],
+			img[alt="Skeletal Raptor"],
+			img[alt="Skeletal Rex"],
+			img[alt="Skeletal Stego"],
+			img[alt="Skeletal Trike"],
+			img[alt="Snow Owl"],
+			img[alt="Snow Owl Ghost"],
+			img[alt="Spino"],
+			img[alt="Spirit Dire Bear"],
+			img[alt="Spirit Direwolf"],
+			img[alt="Stegosaurus"],
+			img[alt="Subterranean Reaper King"],
+			img[alt="Summoner"],
+			img[alt="Super Turkey"],
+			img[alt="Surface Reaper King"],
+			img[alt="Surface Reaper King Ghost"],
+			img[alt="Tapejara"],
+			img[alt="Tek Parasaur"],
+			img[alt="Tek Quetzal"],
+			img[alt="Tek Raptor"],
+			img[alt="Tek Rex"],
+			img[alt="Tek Stegosaurus"],
+			img[alt="Tek Stryder"],
+			img[alt="Tek Triceratops"],
+			img[alt="TekRaptor"],
+			img[alt="Terror Bird"],
+			img[alt="Therizinosaur"],
+			img[alt="Thorny Dragon"],
+			img[alt="Thylacoleo"],
+			img[alt="Titanoboa"],
+			img[alt="Titanomyrma"],
+			img[alt="Titanomyrma Drone"],
+			img[alt="Titanomyrma Soldier"],
+			img[alt="Titanosaur"],
+			img[alt="Triceratops"],
+			img[alt="Trilobite"],
+			img[alt="Troodon"],
+			img[alt="Tropeognathus"],
+			img[alt="Tropical Crystal Wyvern"],
+			img[alt="Tusoteuthis"],
+			img[alt="Unicorn"],
+			img[alt="Velonasaur"],
+			img[alt="Voidwyrm"],
+			img[alt="VR Allosaurus"],
+			img[alt="VR Araneo"],
+			img[alt="VR Argentavis"],
+			img[alt="VR Astrodelphis"],
+			img[alt="VR Bloodstalker"],
+			img[alt="VR Carnotaurus"],
+			img[alt="VR Chalicotherium"],
+			img[alt="VR Dilophosaur"],
+			img[alt="VR Dimorphodon"],
+			img[alt="VR Enforcer"],
+			img[alt="VR Ferox"],
+			img[alt="VR Kaprosuchus"],
+			img[alt="VR Karkinos"],
+			img[alt="VR Lymantria"],
+			img[alt="VR Mantis"],
+			img[alt="VR Megalania"],
+			img[alt="VR Megatherium"],
+			img[alt="VR Onyc"],
+			img[alt="VR Pachy"],
+			img[alt="VR Parasaur"],
+			img[alt="VR Pulmonoscorpius"],
+			img[alt="VR Raptor"],
+			img[alt="VR Ravager"],
+			img[alt="VR Rex"],
+			img[alt="VR Shadowmane"],
+			img[alt="VR Stegosaurus"],
+			img[alt="VR Tapejara"],
+			img[alt="VR Terror Bird"],
+			img[alt="VR Titanoboa"],
+			img[alt="VR Triceratops"],
+			img[alt="VR Velonasaur"],
+			img[alt="Vulture"],
+			img[alt="Water Jug Bug"],
+			img[alt="Woolly Rhino"],
+			img[alt="Wyvern"],
+			img[alt="X-Allosaurus"],
+			img[alt="X-Ankylosaurus"],
+			img[alt="X-Argentavis"],
+			img[alt="X-Basilosaurus"],
+			img[alt="X-Dunkleosteus"],
+			img[alt="X-Ichthyosaurus"],
+			img[alt="X-Megalodon"],
+			img[alt="X-Mosasaurus"],
+			img[alt="X-Otter"],
+			img[alt="X-Paraceratherium"],
+			img[alt="X-Parasaur"],
+			img[alt="X-Raptor"],
+			img[alt="X-Rex"],
+			img[alt="X-Rock Elemental"],
+			img[alt="X-Sabertooth"],
+			img[alt="X-Sabertooth Salmon"],
+			img[alt="X-Spino"],
+			img[alt="X-Tapejara"],
+			img[alt="X-Triceratops"],
+			img[alt="X-Woolly Rhino"],
+			img[alt="X-Yutyrannus"],
+			img[alt="Yeti"],
+			img[alt="Yutyrannus"],
+			img[alt="Zombie Fire Wyvern"],
+			img[alt="Zombie Lightning Wyvern"],
+			img[alt="Zombie Poison Wyvern"],
+			img[alt="Zombie Wyvern"],
+			img[alt="Zomdodo"] {
+				filter: invert(1) hue-rotate(180deg);
+			}
+
+			.info-X1-100 img{
+				filter: none;
+			}
+		`);
+
+		(frycAPI.beforeLoad = function () {
+			// document.addEventListener("DOMContentLoaded", function (event) {
+			// 	// frycAPI.obrazekData = [];
+			// 	frycAPI.obrazekObserwer = function (myImg) {
+			// 		let myImgSrc = myImg.src;
+			// 		let myIndx = myImgSrc.indexOf(scaleStr);
+			// 		let myWidth = myImg.getAttribute("width");
+			// 		// frycAPI.obrazekData.push({myIndx: myIndx, myWidth: myWidth})
+			// 		if (myIndx !== -1 && myWidth !== null) {
+			// 			let newSrc = myImgSrc.substr(0, myIndx + scaleStr.length + 1)
+			// 				+ (myWidth * 2)
+			// 				+ myImgSrc.substr(myImgSrc.indexOf("?"));
+			// 			if (myImgSrc !== newSrc) {
+			// 				myImg.src = newSrc;
+			// 				myImg.classList.add("zmienione");
+			// 				// loguj("Zmieniam")
+			// 			}
+			// 		}
+			// 	}
+
+			// 	let scaleStr = "scale-to-width-down";
+			// 	let opcje = { attributes: true };
+			// 	let obrazekImg = new MutationObserver((mutRec) => {
+			// 		frycAPI.obrazekObserwer(mutRec[0].target);
+			// 	});
+			// 	frycAPI.forEach("img[src]",function (daElem, daI, daArr) {
+			// 		frycAPI.obrazekObserwer(daElem);
+			// 		obrazekImg.observe(daElem, opcje);
+			// 		// loguj(daI)
+			// 	});
+			// 	loguj("ARK done!")
+			// });
+
+			// frycAPI.obrazekData = [];
+
+			const scaleStr = "scale-to-width-down";
+			frycAPI.obrazekObserwer = function (myImg) {
+				const myImgSrc = myImg.src;
+				const myIndx = myImgSrc.indexOf(scaleStr);
+				const myWidth = myImg.getAttribute("width");
+				// frycAPI.obrazekData.push({myIndx: myIndx, myWidth: myWidth})
+				if (myIndx !== -1 && myWidth !== null) {
+					const newSrc = myImgSrc.substr(0, myIndx + scaleStr.length + 1) +
+						(myWidth * 2) +
+						myImgSrc.substr(myImgSrc.indexOf("?"));
+					if (myImgSrc !== newSrc) {
+						myImg.src = newSrc;
+						// myImg.classList.add("zmienione");
+						// loguj("Zmieniam")
+					}
+				}
+			};
+
+			const opcje = { attributes: true };
+			// let obrazekImg = new MutationObserver((mutRec) => {
+			// 	frycAPI.obrazekObserwer(mutRec[0].target);
+			// });
+			// frycAPI.obrazCount = {};
+			function addObserver(daElem) {
+				frycAPI.obrazekObserwer(daElem);
+				new MutationObserver(mutRec => {
+					frycAPI.obrazekObserwer(mutRec[0].target);
+				}).observe(daElem, opcje);
+				// daElem.classList.add("bylem");
+				// loguj(daI)
+			}
+			frycAPI.bodyObs = new MutationObserver(mutRec => {
+				if (!frycAPI.bodyObs.hasOwnProperty("pierwszy")) {
+					frycAPI.bodyObs.pierwszy = 1;
+					frycAPI.forEach("img[src]", function (daElem, daI, daArr) {
+						addObserver(daElem);
+					});
+				}
+				mutRec.forEach(function (daElem, daI, daArr) {
+					daElem.addedNodes.forEach(function (daElem1, daI1, daArr1) {
+						// loguj(daElem1);
+						if (daElem1.nodeName === "IMG" && daElem1.matches("img[src]")) {
+							addObserver(daElem1);
+							// loguj("Nowy obraz!");
+						}
+					});
+				});
+				// loguj("Nowa rzecz!")
+				// loguj("body img[src] = " + document.querySelectorAll("img[src]").length);
+				// if (!frycAPI.obrazCount.hasOwnProperty("b_bodyMut")) {
+				// 	frycAPI.obrazCount.b_bodyMut = document.querySelectorAll("img[src]").length;
+				// }
+			});
+
+			new MutationObserver((mutRec, docObs) => {
+				if (document.body) {
+					// loguj("documentElement img[src] = " + document.querySelectorAll("img[src]").length);
+					// frycAPI.obrazCount.a_docElem = document.querySelectorAll("img[src]").length;
+					frycAPI.bodyObs.observe(document.body, { childList: true, subtree: true });
+					docObs.disconnect();
+				}
+			}).observe(document.documentElement, { childList: true });
+
+			loguj("ARK done!");
+		})();
+
+		frycAPI.onLoadSetter(() => {
+			// loguj("load img[src] = " + document.querySelectorAll("img[src]").length);
+			frycAPI.bodyObs.disconnect();
+			// frycAPI.obrazCount.c_load = document.querySelectorAll("img[src]").length;
+			// loguj(frycAPI.obrazCount);
+		});
+	} else if (frycAPI_host("bloons.fandom.com")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		frycAPI.injectStyleOnLoad(/*css*/`
+			img.mwe-math-fallback-image-display.mwe-math-element {
+				filter: none !important;
+			}
+		`);
+	} else if (frycAPI_host("minecraft.fandom.com")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		frycAPI.injectStyleOnLoad(/*css*/`
+			#cont {
+				position: absolute;
+				z-index: 9999;
+				background-color: black;
+				padding: 10px;
+				font-family: IBM Plex Sans;
+				display: flex;
+			}
+			#cont div {
+				padding: 5px 10px;
+				border: 1px solid white;
+				border-left: 0px;
+			}
+			#licz {
+				border: 1px solid white !important;
+			}
+		`);
+	} else if (frycAPI_host("mlp.fandom.com")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		frycAPI.injectStyleOnLoad(/*css*/`
+			#ucss-code-wrapper .CodeMirror-wrap .CodeMirror-scroll {
+				filter: invert(0) hue-rotate(0deg);
+				background-color: white;
+				color: black;
+			}
+
+			.pojemnik {
+			position: absolute;
+				z-index: 99999;
+				height: 100vh;
+				overflow-y: scroll;
+				overflow-x: auto;
+				background-color: white;
+				width: 74vw;
+				display: flex;
+				flex-wrap: wrap;
+			}
+
+			.pojemnikSmall {
+				display: flex;
+				flex-direction: column;
+			}
+		`);
+	} else if (frycAPI_host("satisfactory.fandom.com", "sanctum.fandom.com")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		frycAPI.injectStyleOnLoad(/*css*/`
+			img.mwe-math-fallback-image-inline {
+				filter: invert(1) !important;
+			}
+
+			.resizable-container {
+				max-width: 100%;
+				width: calc(100% - 34px * 2);
+				margin: 0 34px;
+			}
+		`);
+	} else if (frycAPI_host("repo-2025horror.fandom.com")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		frycAPI.injectStyleOnLoad(/*css*/`
+			.resizable-container {
+				max-width: 1600px;
+			}
+		`);
+	}
+} else if (1 && frycAPI_hostIncludes("wiki.gg")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		#wikigg-showcase-sidebar,
+		#wikigg-sl-header,
+		#wikigg-showcase-header {
+			display: none;
+		}
+
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.forEach(`h2 > span.mw-headline`, span => {
+			span.innerHTML = `<a href="${window.location.origin + window.location.pathname + "#" + span.id}">${span.innerText}</a>`;
+		});
+	});
+
+	if (frycAPI_host("satisfactory.wiki.gg")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		frycAPI.injectStyleOnLoad(/*css*/`
+			/* Tymczasowe */
+			tr:has([title="Equipment Workshop"]),
+			tr:has([title="Build Gun"]),
+			tr:has(.recipe-alternate){
+				display: none;
+			}
+		`);
+	} else if (frycAPI_host("helldivers.wiki.gg")) {
+		frycAPI.line = frycAPI.getLineNumber();
+		frycAPI.injectStyleOnLoad(/*css*/`
+			.myButtonWrapper {
+				display: flex;
+				gap: 5px;
+				/* width: 110px; */
+				font-size: smaller;
+				.copyButton {
+					cursor: pointer;
+				}
+				.copyButton:hover {
+					color: var(--wiki-accent-color);
+				}
+			}
+		`);
+
+		frycAPI.onLoadSetter(function () {
+			if (frycAPI.path === "/wiki/Stratagems") { // https://helldivers.wiki.gg/wiki/Stratagems
+				const myButtWrapTemp = frycAPI.elemFromHTML(/*html*/`<td><div class="myButtonWrapper"></div></td>`);
+				const buttTemp = frycAPI.elemFromHTML(/*html*/`<div class="copyButton"></div>`);
+				const arrowToWASD = {
+					"Up Arrow.png": "w",
+					"Left Arrow.png": "a",
+					"Down Arrow.png": "s",
+					"Right Arrow.png": "d",
+				};
+				frycAPI.retryIf(() => frycAPI.querySelOk(`.wikitable thead > tr`), 50, () => {
+					frycAPI.forEach(`.wikitable`, table => {
+						table.querySelector(`thead > tr`).appendChild(table.querySelector(`th:last-child`).cloneNode(1))
+						.frycAPI_setAttribute("width", "30%")
+						.frycAPI_setInnerText("Copy");
+
+						table.frycAPI_elemByTag("tbody").rows.forEach(row => {
+							let firstChild = row.firstElementChild;
+							if (firstChild.tagName === "TH") firstChild = firstChild.nextElementSibling;
+							const secondChild = firstChild.nextElementSibling;
+							const thirdChild = secondChild.nextElementSibling;
+							const myButtWrap = row.appendChild(myButtWrapTemp.cloneNode(1)).firstElementChild;
+							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Image URL")).addEventListener("click", () => {
+								frycAPI.copyTxt(firstChild.firstElementChild.firstElementChild.src.match(/.+?\.png/)[0].replace("/thumb", ""));
+							});
+							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("AHK code")).addEventListener("click", () => {
+								frycAPI.copyTxt(`helld2("${thirdChild.querySelectorAll("img").map(e => arrowToWASD[e.alt]).join("")}",0) ; ${secondChild.innerText}`);
+							});
+							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Delete row")).addEventListener("click", () => {
+								row.remove();
+							});
+						});
+					});
+				});
+			}
+		}, 2);
+	}
 } else if (1 && frycAPI_host("apps.microsoft.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -2153,763 +3077,6 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 			stroke: #ffbf00;
 		}
 	`);
-} else if (1 && frycAPI_host("ark.fandom.com")) {
-	frycAPI.line = frycAPI.getLineNumber();
-	// https://ark.fandom.com/wiki/ARK_Survival_Evolved_Wiki
-	const funkcje = "ARK Wiki Powiększ obrazki";
-	frycAPI.injectStyleOnLoad(/*css*/`
-		.top-ads-container {
-			display: none;
-		}
-		.info-framework {
-			background-color: hsl(208 100% 94% / 1);
-		}
-		tr[style*="background"]>td {
-			filter: brightness(0);
-		}
-
-		img[src].bylem {
-			border: 1px solid red;
-		}
-		img[src].zmienione {
-			border: 1px solid green;
-		}
-
-		.theme-fandomdesktop-light .cell-green {
-			background-color: hsl(120 73% 39% / 1) !important;
-		}
-
-		.theme-fandomdesktop-light .cell-pink {
-			background-color: hsl(0 53% 43% / 1) !important;
-		}
-
-		.global-navigation span,
-		.global-navigation .global-navigation__label{
-			color: hsl(0 0% 58% / 1);
-		}
-
-		.global-navigation svg.wds-icon {
-			fill: hsl(0 0% 58% / 1);
-		}
-
-		img[alt="Aberrant Achatina"],
-		img[alt="Aberrant Anglerfish"],
-		img[alt="Aberrant Ankylosaurus"],
-		img[alt="Aberrant Araneo"],
-		img[alt="Aberrant Arthropluera"],
-		img[alt="Aberrant Baryonyx"],
-		img[alt="Aberrant Beelzebufo"],
-		img[alt="Aberrant Carbonemys"],
-		img[alt="Aberrant Carnotaurus"],
-		img[alt="Aberrant Cnidaria"],
-		img[alt="Aberrant Coelacanth"],
-		img[alt="Aberrant Dimetrodon"],
-		img[alt="Aberrant Dimorphodon"],
-		img[alt="Aberrant Diplocaulus"],
-		img[alt="Aberrant Diplodocus"],
-		img[alt="Aberrant Dire Bear"],
-		img[alt="Aberrant Dodo"],
-		img[alt="Aberrant Doedicurus"],
-		img[alt="Aberrant Dung Beetle"],
-		img[alt="Aberrant Electrophorus"],
-		img[alt="Aberrant Equus"],
-		img[alt="Aberrant Gigantopithecus"],
-		img[alt="Aberrant Iguanodon"],
-		img[alt="Aberrant Lystrosaurus"],
-		img[alt="Aberrant Manta"],
-		img[alt="Aberrant Megalania"],
-		img[alt="Aberrant Megalosaurus"],
-		img[alt="Aberrant Meganeura"],
-		img[alt="Aberrant Moschops"],
-		img[alt="Aberrant Otter"],
-		img[alt="Aberrant Ovis"],
-		img[alt="Aberrant Paraceratherium"],
-		img[alt="Aberrant Parasaur"],
-		img[alt="Aberrant Piranha"],
-		img[alt="Aberrant Pulmonoscorpius"],
-		img[alt="Aberrant Purlovia"],
-		img[alt="Aberrant Raptor"],
-		img[alt="Aberrant Salmon"],
-		img[alt="Aberrant Sarco"],
-		img[alt="Aberrant Spino"],
-		img[alt="Aberrant Stegosaurus"],
-		img[alt="Aberrant Titanoboa"],
-		img[alt="Aberrant Triceratops"],
-		img[alt="Aberrant Trilobite"],
-		img[alt="Achatina"],
-		img[alt="Archa"],
-		img[alt="Carno"],
-		img[alt="Stego"],
-		img[alt="Trike"],
-		img[alt="Turkey"],
-		img[alt="Acrocanthosaurus"],
-		img[alt="Allosaurus"],
-		img[alt="Alpha Basilisk"],
-		img[alt="Alpha Blood Crystal Wyvern"],
-		img[alt="Alpha Carnotaurus"],
-		img[alt="Alpha Corrupted Master Controller"],
-		img[alt="Alpha Creatures"],
-		img[alt="Alpha Deathworm"],
-		img[alt="Alpha Fire Wyvern"],
-		img[alt="Alpha Karkinos"],
-		img[alt="Alpha King Titan"],
-		img[alt="Alpha Leedsichthys"],
-		img[alt="Alpha Megalodon"],
-		img[alt="Alpha Moeder, Master of the Ocean"],
-		img[alt="Alpha Mosasaur"],
-		img[alt="Alpha Raptor"],
-		img[alt="Alpha Surface Reaper King"],
-		img[alt="Alpha T-Rex"],
-		img[alt="Alpha Tusoteuthis"],
-		img[alt="Alpha X-Triceratops"],
-		img[alt="Amargasaurus"],
-		img[alt="Ammonite"],
-		img[alt="Andrewsarchus"],
-		img[alt="Anglerfish"],
-		img[alt="Ankylosaurus"],
-		img[alt="Araneo"],
-		img[alt="Archaeopteryx"],
-		img[alt="Argentavis"],
-		img[alt="Argentustus"],
-		img[alt="Mod:ARK Additions/Deinotherium"],
-		img[alt="Arthropluera"],
-		img[alt="Astrocetus"],
-		img[alt="Astrodelphis"],
-		img[alt="Attack Drone"],
-		img[alt="Aurochs"],
-		img[alt="Baryonyx"],
-		img[alt="Basilisk"],
-		img[alt="Basilisk Ghost"],
-		img[alt="Basilosaurus"],
-		img[alt="Beelzebufo"],
-		img[alt="Beelzemorbus"],
-		img[alt="Beta Corrupted Master Controller"],
-		img[alt="Beta King Titan"],
-		img[alt="Beta Moeder, Master of the Ocean"],
-		img[alt="Blood Crystal Wyvern"],
-		img[alt="Bloodstalker"],
-		img[alt="Bone Fire Wyvern"],
-		img[alt="Brontosaurus"],
-		img[alt="Broodgenetrix"],
-		img[alt="Broodmother Lysrix"],
-		img[alt="Broodmother Lysrix (Alpha)"],
-		img[alt="Broodmother Lysrix (Beta)"],
-		img[alt="Broodmother Lysrix (Gamma)"],
-		img[alt="Brute Araneo"],
-		img[alt="Brute Astrocetus"],
-		img[alt="Brute Basilosaurus"],
-		img[alt="Brute Bloodstalker"],
-		img[alt="Brute Ferox"],
-		img[alt="Brute Fire Wyvern"],
-		img[alt="Brute Leedsichthys"],
-		img[alt="Brute Magmasaur"],
-		img[alt="Brute Malfunctioned Tek Giganotosaurus"],
-		img[alt="Brute Malfunctioned Tek Rex"],
-		img[alt="Brute Mammoth"],
-		img[alt="Brute Megaloceros"],
-		img[alt="Brute Plesiosaur"],
-		img[alt="Brute Reaper King"],
-		img[alt="Brute Sarco"],
-		img[alt="Brute Seeker"],
-		img[alt="Brute Tusoteuthis"],
-		img[alt="Brute X-Allosaurus"],
-		img[alt="Brute X-Megalodon"],
-		img[alt="Brute X-Mosasaurus"],
-		img[alt="Brute X-Raptor"],
-		img[alt="Brute X-Rex"],
-		img[alt="Brute X-Rock Elemental"],
-		img[alt="Brute X-Spino"],
-		img[alt="Brute X-Yutyrannus"],
-		img[alt="Bulbdog"],
-		img[alt="Bulbdog Ghost"],
-		img[alt="Bunny Dodo"],
-		img[alt="Bunny Oviraptor"],
-		img[alt="Carbonemys"],
-		img[alt="Carcharodontosaurus"],
-		img[alt="Carnotaurus"],
-		img[alt="Castoroides"],
-		img[alt="Chalicotherium"],
-		img[alt="Chalk Golem"],
-		img[alt="Cnidaria"],
-		img[alt="Coelacanth"],
-		img[alt="Compy"],
-		img[alt="Corrupted Arthropluera"],
-		img[alt="Corrupted Avatar"],
-		img[alt="Corrupted Carnotaurus"],
-		img[alt="Corrupted Chalicotherium"],
-		img[alt="Corrupted Dilophosaur"],
-		img[alt="Corrupted Dimorphodon"],
-		img[alt="Corrupted Giganotosaurus"],
-		img[alt="Corrupted Master Controller"],
-		img[alt="Corrupted Paraceratherium"],
-		img[alt="Corrupted Pteranodon"],
-		img[alt="Corrupted Raptor"],
-		img[alt="Corrupted Reaper King"],
-		img[alt="Corrupted Rex"],
-		img[alt="Corrupted Rock Drake"],
-		img[alt="Corrupted Spino"],
-		img[alt="Corrupted Stegosaurus"],
-		img[alt="Corrupted Survivor"],
-		img[alt="Corrupted Triceratops"],
-		img[alt="Corrupted Wyvern"],
-		img[alt="Crystal Wyvern"],
-		img[alt="Crystal Wyvern Queen"],
-		img[alt="Crystal Wyvern Queen (Alpha)"],
-		img[alt="Crystal Wyvern Queen (Beta)"],
-		img[alt="Crystal Wyvern Queen (Gamma)"],
-		img[alt="Cubozoa Multis"],
-		img[alt="Daeodon"],
-		img[alt="Deathworm"],
-		img[alt="Defense Unit"],
-		img[alt="Deinonychus"],
-		img[alt="Desert Titan"],
-		img[alt="Desert Titan Flock"],
-		img[alt="Desmodus"],
-		img[alt="Dilophosaur"],
-		img[alt="Dilophosaurus"],
-		img[alt="Dimetrodon"],
-		img[alt="Dimorphodon"],
-		img[alt="Dinopithecus King (Alpha)"],
-		img[alt="Dinopithecus King (Beta)"],
-		img[alt="Dinopithecus King (Gamma)"],
-		img[alt="Diplocaulus"],
-		img[alt="Diplodocus"],
-		img[alt="Dire Bear"],
-		img[alt="Dire Polar Bear"],
-		img[alt="Direwolf"],
-		img[alt="Direwolf Ghost"],
-		img[alt="Diseased Leech"],
-		img[alt="Dodo"],
-		img[alt="Dodo Wyvern"],
-		img[alt="Dodobitus"],
-		img[alt="DodoRex"],
-		img[alt="Doedicurus"],
-		img[alt="Doedicurus Vastus"],
-		img[alt="Dragon"],
-		img[alt="Dragon (Alpha)"],
-		img[alt="Dragon (Beta)"],
-		img[alt="Dragon (Gamma)"],
-		img[alt="Dung Beetle"],
-		img[alt="Dunkleosteus"],
-		img[alt="Eel Minion"],
-		img[alt="Eerie Achatina"],
-		img[alt="Eerie Allosaurus"],
-		img[alt="Eerie Alpha Carno"],
-		img[alt="Eerie Alpha Mosasaur"],
-		img[alt="Eerie Alpha Raptor"],
-		img[alt="Eerie Alpha T-Rex"],
-		img[alt="Eerie Ammonite"],
-		img[alt="Eerie Angler"],
-		img[alt="Eerie Ankylo"],
-		img[alt="Eerie Araneo"],
-		img[alt="Eerie Archaeopteryx"],
-		img[alt="Eerie Argentavis"],
-		img[alt="Eerie Arthropluera"],
-		img[alt="Eerie Baryonyx"],
-		img[alt="Eerie Basilosaurus"],
-		img[alt="Eerie Beelzebufo"],
-		img[alt="Eerie Bronto"],
-		img[alt="Eerie Carbonemys"],
-		img[alt="Eerie Carno"],
-		img[alt="Eerie Castoroides"],
-		img[alt="Eerie Chalicotherium"],
-		img[alt="Eerie Coelacanth"],
-		img[alt="Eerie Compy"],
-		img[alt="Eerie Daeodon"],
-		img[alt="Eerie Dilophosaurus"],
-		img[alt="Eerie Dimetrodon"],
-		img[alt="Eerie Dimorphodon"],
-		img[alt="Eerie Diplocaulus"],
-		img[alt="Eerie Diplodocus"],
-		img[alt="Eerie Dire Bear"],
-		img[alt="Eerie Dire Wolf"],
-		img[alt="Eerie Diseased Leech"],
-		img[alt="Eerie Dodo"],
-		img[alt="Eerie Doedicurus"],
-		img[alt="Eerie Dung Beetle"],
-		img[alt="Eerie Dunkleosteus"],
-		img[alt="Eerie Equus"],
-		img[alt="Eerie Eurypterid"],
-		img[alt="Eerie Gallimimus"],
-		img[alt="Eerie Giganotosaurus"],
-		img[alt="Eerie Gigantopithecus"],
-		img[alt="Eerie Griffin"],
-		img[alt="Eerie Ichthyosaurus"],
-		img[alt="Eerie Iguanodon"],
-		img[alt="Eerie Jerboa"],
-		img[alt="Eerie Kairuku"],
-		img[alt="Eerie Kaprosuchus"],
-		img[alt="Eerie Leech"],
-		img[alt="Eerie Leedsichthys"],
-		img[alt="Eerie Liopleurodon"],
-		img[alt="Eerie Lystrosaurus"],
-		img[alt="Eerie Mammoth"],
-		img[alt="Eerie Manta"],
-		img[alt="Eerie Megaloceros"],
-		img[alt="Eerie Megalodon"],
-		img[alt="Eerie Megalosaurus"],
-		img[alt="Eerie Meganeura"],
-		img[alt="Eerie Megapiranha"],
-		img[alt="Eerie Megatherium"],
-		img[alt="Eerie Mesopithecus"],
-		img[alt="Eerie Mosasaur"],
-		img[alt="Eerie Moschops"],
-		img[alt="Eerie Onyc"],
-		img[alt="Eerie Otter"],
-		img[alt="Eerie Oviraptor"],
-		img[alt="Eerie Pachy"],
-		img[alt="Eerie Pachyrhinosaurus"],
-		img[alt="Eerie Parasaur"],
-		img[alt="Eerie Pegomastax"],
-		img[alt="Eerie Pelagornis"],
-		img[alt="Eerie Phiomia"],
-		img[alt="Eerie Plesiosaur"],
-		img[alt="Eerie Procoptodon"],
-		img[alt="Eerie Pteranodon"],
-		img[alt="Eerie Pulmonoscorpius"],
-		img[alt="Eerie Purlovia"],
-		img[alt="Eerie Quetzal"],
-		img[alt="Eerie Raptor"],
-		img[alt="Eerie Rex"],
-		img[alt="Eerie Sabertooth"],
-		img[alt="Eerie Sabertooth Salmon"],
-		img[alt="Eerie Sarco"],
-		img[alt="Eerie Spino"],
-		img[alt="Eerie Stego"],
-		img[alt="Eerie Tapejara"],
-		img[alt="Eerie Terror Bird"],
-		img[alt="Eerie Therizinosaur"],
-		img[alt="Eerie Titanoboa"],
-		img[alt="Eerie Titanomyrma Drone"],
-		img[alt="Eerie Titanomyrma Soldier"],
-		img[alt="Eerie Titanosaur"],
-		img[alt="Eerie Triceratops"],
-		img[alt="Eerie Trilobite"],
-		img[alt="Eerie Troodon"],
-		img[alt="Eerie Tusoteuthis"],
-		img[alt="Eerie Woolly Rhinoceros"],
-		img[alt="Eerie Yeti"],
-		img[alt="Electrophorus"],
-		img[alt="Elemental Reaper King"],
-		img[alt="Ember Crystal Wyvern"],
-		img[alt="Enforcer"],
-		img[alt="Enraged Corrupted Rex"],
-		img[alt="Enraged Triceratops"],
-		img[alt="Equus"],
-		img[alt="Eurypterid"],
-		img[alt="Exo-Mek"],
-		img[alt="Experimental Giganotosaurus"],
-		img[alt="Featherlight"],
-		img[alt="Fenrir"],
-		img[alt="Ferox"],
-		img[alt="Ferox (Large)"],
-		img[alt="Fire Wyvern"],
-		img[alt="Fjordhawk"],
-		img[alt="Forest Titan"],
-		img[alt="Forest Wyvern"],
-		img[alt="Gacha"],
-		img[alt="GachaClaus"],
-		img[alt="Gallimimus"],
-		img[alt="Gamma Corrupted Master Controller"],
-		img[alt="Gamma King Titan"],
-		img[alt="Gamma Moeder, Master of the Ocean"],
-		img[alt="Gasbags"],
-		img[alt="Giant Bee"],
-		img[alt="Giant Monarch Butterfly"],
-		img[alt="Giant Queen Bee"],
-		img[alt="Giant Worker Bee"],
-		img[alt="Giganotosaurus"],
-		img[alt="Gigantopithecus"],
-		img[alt="Glowbug"],
-		img[alt="Glowtail"],
-		img[alt="Golden Striped Brute Megalodon"],
-		img[alt="Golden Striped Megalodon"],
-		img[alt="Griffin"],
-		img[alt="Gula Beetle"],
-		img[alt="Hesperornis"],
-		img[alt="Human"],
-		img[alt="Hyaenodon"],
-		img[alt="Ice Golem"],
-		img[alt="Ice Titan"],
-		img[alt="Ice Wyvern"],
-		img[alt="Iceworm Male"],
-		img[alt="Iceworm Queen"],
-		img[alt="Ichthyornis"],
-		img[alt="Ichthyosaurus"],
-		img[alt="Iguanodon"],
-		img[alt="Injured Brute Reaper King"],
-		img[alt="Insect Swarm"],
-		img[alt="Jerboa"],
-		img[alt="Jug Bug"],
-		img[alt="Kairuku"],
-		img[alt="Kaprosuchus"],
-		img[alt="Karkinos"],
-		img[alt="Kentrosaurus"],
-		img[alt="King Titan"],
-		img[alt="Lamprey"],
-		img[alt="Lava Elemental"],
-		img[alt="Leech"],
-		img[alt="Leedsichthys"],
-		img[alt="Lightning Wyvern"],
-		img[alt="Liopleurodon"],
-		img[alt="Lymantria"],
-		img[alt="Lystrosaurus"],
-		img[alt="Macro-Summoner"],
-		img[alt="Macrophage"],
-		img[alt="Maewing"],
-		img[alt="Magmasaur"],
-		img[alt="Malfunctioned Attack Drone"],
-		img[alt="Malfunctioned Defense Unit"],
-		img[alt="Malfunctioned Enforcer"],
-		img[alt="Malfunctioned Mek Knight"],
-		img[alt="Malfunctioned Tek Giganotosaurus"],
-		img[alt="Malfunctioned Tek Parasaur"],
-		img[alt="Malfunctioned Tek Quetzal"],
-		img[alt="Malfunctioned Tek Raptor"],
-		img[alt="Malfunctioned Tek Rex"],
-		img[alt="Malfunctioned Tek Stegosaurus"],
-		img[alt="Malfunctioned Tek Stryder"],
-		img[alt="Malfunctioned Tek Triceratops"],
-		img[alt="Mammoth"],
-		img[alt="Managarmr"],
-		img[alt="Manta"],
-		img[alt="Manticore"],
-		img[alt="Manticore (Alpha)"],
-		img[alt="Manticore (Beta)"],
-		img[alt="Manticore (Gamma)"],
-		img[alt="Mantis"],
-		img[alt="Mantis Ghost"],
-		img[alt="Mega Mek"],
-		img[alt="Megacerops"],
-		img[alt="Megachelon"],
-		img[alt="Megalania"],
-		img[alt="Megaloceros"],
-		img[alt="Megalodon"],
-		img[alt="Megalosaurus"],
-		img[alt="Meganeura"],
-		img[alt="Megapithecus"],
-		img[alt="Megapithecus (Alpha)"],
-		img[alt="Megapithecus (Beta)"],
-		img[alt="Megapithecus (Gamma)"],
-		img[alt="Megapithecus Pestis"],
-		img[alt="Megatherium"],
-		img[alt="Mek"],
-		img[alt="Mesopithecus"],
-		img[alt="Microraptor"],
-		img[alt="Moeder, Master of the Ocean"],
-		img[alt="Morellatops"],
-		img[alt="Mosasaurus"],
-		img[alt="Moschops"],
-		img[alt="Nameless"],
-		img[alt="Noctis"],
-		img[alt="Noglin"],
-		img[alt="Obsidioequus"],
-		img[alt="Oil Jug Bug"],
-		img[alt="Onyc"],
-		img[alt="Otter"],
-		img[alt="Overseer"],
-		img[alt="Overseer (Alpha)"],
-		img[alt="Overseer (Beta)"],
-		img[alt="Overseer (Gamma)"],
-		img[alt="Oviraptor"],
-		img[alt="Ovis"],
-		img[alt="Pachy"],
-		img[alt="Pachyrhinosaurus"],
-		img[alt="Paraceratherium"],
-		img[alt="Parakeet Fish School"],
-		img[alt="Parasaur"],
-		img[alt="Party Dodo"],
-		img[alt="Pegomastax"],
-		img[alt="Pelagornis"],
-		img[alt="Phiomia"],
-		img[alt="Phoenix"],
-		img[alt="Piranha"],
-		img[alt="Plesiosaur"],
-		img[alt="Poison Wyvern"],
-		img[alt="Polar Bear"],
-		img[alt="Polar Purlovia"],
-		img[alt="Procoptodon"],
-		img[alt="Pteranodon"],
-		img[alt="Pulmonoscorpius"],
-		img[alt="Purlovia"],
-		img[alt="Quetzal"],
-		img[alt="R-Allosaurus"],
-		img[alt="R-Brontosaurus"],
-		img[alt="R-Carbonemys"],
-		img[alt="R-Carnotaurus"],
-		img[alt="R-Daeodon"],
-		img[alt="R-Dilophosaur"],
-		img[alt="R-Direwolf"],
-		img[alt="R-Equus"],
-		img[alt="R-Gasbags"],
-		img[alt="R-Giganotosaurus"],
-		img[alt="R-Megatherium"],
-		img[alt="R-Parasaur"],
-		img[alt="R-Procoptodon"],
-		img[alt="R-Quetzal"],
-		img[alt="R-Reaper King"],
-		img[alt="R-Reaper Queen"],
-		img[alt="R-Snow Owl"],
-		img[alt="R-Thylacoleo"],
-		img[alt="R-Velonasaur"],
-		img[alt="Raptor"],
-		img[alt="Rare X-Sabertooth Salmon"],
-		img[alt="Ravager"],
-		img[alt="Reaper"],
-		img[alt="Reaper King"],
-		img[alt="Reaper Prince"],
-		img[alt="Reaper Queen"],
-		img[alt="Rex"],
-		img[alt="Rex Ghost"],
-		img[alt="Rock Drake"],
-		img[alt="Rock Elemental"],
-		img[alt="Rockwell"],
-		img[alt="Rockwell (Alpha)"],
-		img[alt="Rockwell (Beta)"],
-		img[alt="Rockwell (Gamma)"],
-		img[alt="Rockwell Node"],
-		img[alt="Rockwell Node (Alpha)"],
-		img[alt="Rockwell Node (Beta)"],
-		img[alt="Rockwell Node (Gamma)"],
-		img[alt="Rockwell Prime"],
-		img[alt="Rockwell Prime (Alpha)"],
-		img[alt="Rockwell Prime (Beta)"],
-		img[alt="Rockwell Prime (Gamma)"],
-		img[alt="Roll Rat"],
-		img[alt="Royal Griffin"],
-		img[alt="Rubble Golem"],
-		img[alt="Sabertooth"],
-		img[alt="Sabertooth Salmon"],
-		img[alt="Sarco"],
-		img[alt="Scout"],
-		img[alt="Seeker"],
-		img[alt="Shadowmane"],
-		img[alt="Shinehorn"],
-		img[alt="Skeletal Bronto"],
-		img[alt="Skeletal Carnotaurus"],
-		img[alt="Skeletal Giganotosaurus"],
-		img[alt="Skeletal Jerboa"],
-		img[alt="Skeletal Quetzal"],
-		img[alt="Skeletal Raptor"],
-		img[alt="Skeletal Rex"],
-		img[alt="Skeletal Stego"],
-		img[alt="Skeletal Trike"],
-		img[alt="Snow Owl"],
-		img[alt="Snow Owl Ghost"],
-		img[alt="Spino"],
-		img[alt="Spirit Dire Bear"],
-		img[alt="Spirit Direwolf"],
-		img[alt="Stegosaurus"],
-		img[alt="Subterranean Reaper King"],
-		img[alt="Summoner"],
-		img[alt="Super Turkey"],
-		img[alt="Surface Reaper King"],
-		img[alt="Surface Reaper King Ghost"],
-		img[alt="Tapejara"],
-		img[alt="Tek Parasaur"],
-		img[alt="Tek Quetzal"],
-		img[alt="Tek Raptor"],
-		img[alt="Tek Rex"],
-		img[alt="Tek Stegosaurus"],
-		img[alt="Tek Stryder"],
-		img[alt="Tek Triceratops"],
-		img[alt="TekRaptor"],
-		img[alt="Terror Bird"],
-		img[alt="Therizinosaur"],
-		img[alt="Thorny Dragon"],
-		img[alt="Thylacoleo"],
-		img[alt="Titanoboa"],
-		img[alt="Titanomyrma"],
-		img[alt="Titanomyrma Drone"],
-		img[alt="Titanomyrma Soldier"],
-		img[alt="Titanosaur"],
-		img[alt="Triceratops"],
-		img[alt="Trilobite"],
-		img[alt="Troodon"],
-		img[alt="Tropeognathus"],
-		img[alt="Tropical Crystal Wyvern"],
-		img[alt="Tusoteuthis"],
-		img[alt="Unicorn"],
-		img[alt="Velonasaur"],
-		img[alt="Voidwyrm"],
-		img[alt="VR Allosaurus"],
-		img[alt="VR Araneo"],
-		img[alt="VR Argentavis"],
-		img[alt="VR Astrodelphis"],
-		img[alt="VR Bloodstalker"],
-		img[alt="VR Carnotaurus"],
-		img[alt="VR Chalicotherium"],
-		img[alt="VR Dilophosaur"],
-		img[alt="VR Dimorphodon"],
-		img[alt="VR Enforcer"],
-		img[alt="VR Ferox"],
-		img[alt="VR Kaprosuchus"],
-		img[alt="VR Karkinos"],
-		img[alt="VR Lymantria"],
-		img[alt="VR Mantis"],
-		img[alt="VR Megalania"],
-		img[alt="VR Megatherium"],
-		img[alt="VR Onyc"],
-		img[alt="VR Pachy"],
-		img[alt="VR Parasaur"],
-		img[alt="VR Pulmonoscorpius"],
-		img[alt="VR Raptor"],
-		img[alt="VR Ravager"],
-		img[alt="VR Rex"],
-		img[alt="VR Shadowmane"],
-		img[alt="VR Stegosaurus"],
-		img[alt="VR Tapejara"],
-		img[alt="VR Terror Bird"],
-		img[alt="VR Titanoboa"],
-		img[alt="VR Triceratops"],
-		img[alt="VR Velonasaur"],
-		img[alt="Vulture"],
-		img[alt="Water Jug Bug"],
-		img[alt="Woolly Rhino"],
-		img[alt="Wyvern"],
-		img[alt="X-Allosaurus"],
-		img[alt="X-Ankylosaurus"],
-		img[alt="X-Argentavis"],
-		img[alt="X-Basilosaurus"],
-		img[alt="X-Dunkleosteus"],
-		img[alt="X-Ichthyosaurus"],
-		img[alt="X-Megalodon"],
-		img[alt="X-Mosasaurus"],
-		img[alt="X-Otter"],
-		img[alt="X-Paraceratherium"],
-		img[alt="X-Parasaur"],
-		img[alt="X-Raptor"],
-		img[alt="X-Rex"],
-		img[alt="X-Rock Elemental"],
-		img[alt="X-Sabertooth"],
-		img[alt="X-Sabertooth Salmon"],
-		img[alt="X-Spino"],
-		img[alt="X-Tapejara"],
-		img[alt="X-Triceratops"],
-		img[alt="X-Woolly Rhino"],
-		img[alt="X-Yutyrannus"],
-		img[alt="Yeti"],
-		img[alt="Yutyrannus"],
-		img[alt="Zombie Fire Wyvern"],
-		img[alt="Zombie Lightning Wyvern"],
-		img[alt="Zombie Poison Wyvern"],
-		img[alt="Zombie Wyvern"],
-		img[alt="Zomdodo"] {
-			filter: invert(1) hue-rotate(180deg);
-		}
-
-		.info-X1-100 img{
-			filter: none;
-		}
-	`);
-
-	(frycAPI.beforeLoad = function () {
-		// document.addEventListener("DOMContentLoaded", function (event) {
-		// 	// frycAPI.obrazekData = [];
-		// 	frycAPI.obrazekObserwer = function (myImg) {
-		// 		let myImgSrc = myImg.src;
-		// 		let myIndx = myImgSrc.indexOf(scaleStr);
-		// 		let myWidth = myImg.getAttribute("width");
-		// 		// frycAPI.obrazekData.push({myIndx: myIndx, myWidth: myWidth})
-		// 		if (myIndx !== -1 && myWidth !== null) {
-		// 			let newSrc = myImgSrc.substr(0, myIndx + scaleStr.length + 1)
-		// 				+ (myWidth * 2)
-		// 				+ myImgSrc.substr(myImgSrc.indexOf("?"));
-		// 			if (myImgSrc !== newSrc) {
-		// 				myImg.src = newSrc;
-		// 				myImg.classList.add("zmienione");
-		// 				// loguj("Zmieniam")
-		// 			}
-		// 		}
-		// 	}
-
-		// 	let scaleStr = "scale-to-width-down";
-		// 	let opcje = { attributes: true };
-		// 	let obrazekImg = new MutationObserver((mutRec) => {
-		// 		frycAPI.obrazekObserwer(mutRec[0].target);
-		// 	});
-		// 	frycAPI.forEach("img[src]",function (daElem, daI, daArr) {
-		// 		frycAPI.obrazekObserwer(daElem);
-		// 		obrazekImg.observe(daElem, opcje);
-		// 		// loguj(daI)
-		// 	});
-		// 	loguj("ARK done!")
-		// });
-
-		// frycAPI.obrazekData = [];
-
-		const scaleStr = "scale-to-width-down";
-		frycAPI.obrazekObserwer = function (myImg) {
-			const myImgSrc = myImg.src;
-			const myIndx = myImgSrc.indexOf(scaleStr);
-			const myWidth = myImg.getAttribute("width");
-			// frycAPI.obrazekData.push({myIndx: myIndx, myWidth: myWidth})
-			if (myIndx !== -1 && myWidth !== null) {
-				const newSrc = myImgSrc.substr(0, myIndx + scaleStr.length + 1) +
-					(myWidth * 2) +
-					myImgSrc.substr(myImgSrc.indexOf("?"));
-				if (myImgSrc !== newSrc) {
-					myImg.src = newSrc;
-					// myImg.classList.add("zmienione");
-					// loguj("Zmieniam")
-				}
-			}
-		};
-
-		const opcje = { attributes: true };
-		// let obrazekImg = new MutationObserver((mutRec) => {
-		// 	frycAPI.obrazekObserwer(mutRec[0].target);
-		// });
-		// frycAPI.obrazCount = {};
-		function addObserver(daElem) {
-			frycAPI.obrazekObserwer(daElem);
-			new MutationObserver(mutRec => {
-				frycAPI.obrazekObserwer(mutRec[0].target);
-			}).observe(daElem, opcje);
-			// daElem.classList.add("bylem");
-			// loguj(daI)
-		}
-		frycAPI.bodyObs = new MutationObserver(mutRec => {
-			if (!frycAPI.bodyObs.hasOwnProperty("pierwszy")) {
-				frycAPI.bodyObs.pierwszy = 1;
-				frycAPI.forEach("img[src]", function (daElem, daI, daArr) {
-					addObserver(daElem);
-				});
-			}
-			mutRec.forEach(function (daElem, daI, daArr) {
-				daElem.addedNodes.forEach(function (daElem1, daI1, daArr1) {
-					// loguj(daElem1);
-					if (daElem1.nodeName === "IMG" && daElem1.matches("img[src]")) {
-						addObserver(daElem1);
-						// loguj("Nowy obraz!");
-					}
-				});
-			});
-			// loguj("Nowa rzecz!")
-			// loguj("body img[src] = " + document.querySelectorAll("img[src]").length);
-			// if (!frycAPI.obrazCount.hasOwnProperty("b_bodyMut")) {
-			// 	frycAPI.obrazCount.b_bodyMut = document.querySelectorAll("img[src]").length;
-			// }
-		});
-
-		new MutationObserver((mutRec, docObs) => {
-			if (document.body) {
-				// loguj("documentElement img[src] = " + document.querySelectorAll("img[src]").length);
-				// frycAPI.obrazCount.a_docElem = document.querySelectorAll("img[src]").length;
-				frycAPI.bodyObs.observe(document.body, { childList: true, subtree: true });
-				docObs.disconnect();
-			}
-		}).observe(document.documentElement, { childList: true });
-
-		loguj("ARK done!");
-	})();
-
-	frycAPI.onLoadSetter(() => {
-		// loguj("load img[src] = " + document.querySelectorAll("img[src]").length);
-		frycAPI.bodyObs.disconnect();
-		// frycAPI.obrazCount.c_load = document.querySelectorAll("img[src]").length;
-		// loguj(frycAPI.obrazCount);
-	});
 } else if (1 && frycAPI_host("astronomia.zagan.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -2940,13 +3107,6 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
 		img {
-			filter: none !important;
-		}
-	`);
-} else if (1 && frycAPI_host("bloons.fandom.com")) {
-	frycAPI.line = frycAPI.getLineNumber();
-	frycAPI.injectStyleOnLoad(/*css*/`
-		img.mwe-math-fallback-image-display.mwe-math-element {
 			filter: none !important;
 		}
 	`);
@@ -5025,56 +5185,6 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 			height: 25px;
 		}
 	`);
-} else if (1 && frycAPI_host("minecraft.fandom.com")) {
-	frycAPI.line = frycAPI.getLineNumber();
-	frycAPI.injectStyleOnLoad(/*css*/`
-		#cont {
-			position: absolute;
-			z-index: 9999;
-			background-color: black;
-			padding: 10px;
-			font-family: IBM Plex Sans;
-			display: flex;
-		}
-		#cont div {
-			padding: 5px 10px;
-			border: 1px solid white;
-			border-left: 0px;
-		}
-		#licz {
-			border: 1px solid white !important;
-		}
-
-		.top-ads-container {
-			display: none;
-		}
-	`);
-} else if (1 && frycAPI_host("mlp.fandom.com")) {
-	frycAPI.line = frycAPI.getLineNumber();
-	frycAPI.injectStyleOnLoad(/*css*/`
-		#ucss-code-wrapper .CodeMirror-wrap .CodeMirror-scroll {
-			filter: invert(0) hue-rotate(0deg);
-			background-color: white;
-			color: black;
-		}
-
-		.pojemnik {
-		position: absolute;
-			z-index: 99999;
-			height: 100vh;
-			overflow-y: scroll;
-			overflow-x: auto;
-			background-color: white;
-			width: 74vw;
-			display: flex;
-			flex-wrap: wrap;
-		}
-
-		.pojemnikSmall {
-			display: flex;
-			flex-direction: column;
-		}
-	`);
 } else if (1 && frycAPI_host("oeis.org")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -5344,29 +5454,6 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 		img[src*=".gif"],
 		img[src*=".png"]{
 			filter: invert(1) hue-rotate(180deg);
-		}
-	`);
-} else if (1 && frycAPI_host("satisfactory.fandom.com", "sanctum.fandom.com")) {
-	frycAPI.line = frycAPI.getLineNumber();
-	frycAPI.injectStyleOnLoad(/*css*/`
-		img.mwe-math-fallback-image-inline {
-			filter: invert(1) !important;
-		}
-
-		.resizable-container {
-			max-width: 100%;
-			width: calc(100% - 34px * 2);
-			margin: 0 34px;
-		}
-	`);
-} else if (1 && frycAPI_host("satisfactory.wiki.gg")) {
-	frycAPI.line = frycAPI.getLineNumber();
-	frycAPI.injectStyleOnLoad(/*css*/`
-		/* Tymczasowe */
-		tr:has([title="Equipment Workshop"]),
-		tr:has([title="Build Gun"]),
-		tr:has(.recipe-alternate){
-			display: none;
 		}
 	`);
 } else if (1 && frycAPI_host("scripty.abhisheksatre.com")) {
@@ -7779,59 +7866,64 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 	// })();
 
 	frycAPI.onLoadSetter(() => {
-		if (document.querySelector("#APjFqb") && document.getElementById("searchform")) {
-			const hide01 = document.createElement("span");
-			hide01.setAttribute("class", "hide01");
-			document.body.appendChild(hide01);
-			const input01 = document.querySelector("#APjFqb");
-			function resize() {
-				hide01.textContent = input01.value;
-				hide01.style.font = window.getComputedStyle(input01).font;
-				input01.style.width = hide01.offsetWidth + 20 + "px";
+		if (frycAPI.path.startsWith("/search")) {
+			if (document.querySelector("#APjFqb") && document.getElementById("searchform")) {
+				const hide01 = document.createElement("span");
+				hide01.setAttribute("class", "hide01");
+				document.body.appendChild(hide01);
+				const input01 = document.querySelector("#APjFqb");
+				function resize() {
+					hide01.textContent = input01.value;
+					hide01.style.font = window.getComputedStyle(input01).font;
+					input01.style.width = hide01.offsetWidth + 20 + "px";
+				}
+				resize();
+				input01.addEventListener("input", () => {
+					resize();
+					// console.log("Input Listener");
+				});
+				new MutationObserver((mutRec2, docObs2) => {
+					resize();
+					// console.log("Observer");
+				}).observe(document.getElementById("searchform"), { attributeFilter: ["class"] });
 			}
-			resize();
-			input01.addEventListener("input", () => {
-				resize();
-				// console.log("Input Listener");
+			frycAPI.forEach(".nlNnsd.ApHyTb .TaA4cd:nth-child(2) .i2L09e.WHcndc", (daElem, daI, daArr) => {
+				daElem.click();
 			});
-			new MutationObserver((mutRec2, docObs2) => {
-				resize();
-				// console.log("Observer");
-			}).observe(document.getElementById("searchform"), { attributeFilter: ["class"] });
+			window.scrollTo(0, 0);
+			document.body.classList.toggle("google-translate-buttons");
 		}
-		frycAPI.forEach(".nlNnsd.ApHyTb .TaA4cd:nth-child(2) .i2L09e.WHcndc", (daElem, daI, daArr) => {
-			daElem.click();
+		if (!frycAPI.path.startsWith("/maps")) {
+			frycAPI.changeFaviconRes("Google_Logo_dark.png");
+		}
+	});
+
+	if (frycAPI.path.startsWith("/search")) {
+		frycAPI.createManualFunctions("Google", {
+			funcArr: [
+				(name = "3 column view", type = frycAPI_PureState) => {
+					const f = new type({
+						name: name,
+						state: 0,
+					});
+					f.callback = function (obj) {
+						document.body.classList.toggle("google-3-column");
+					};
+					return f;
+				},
+				(name = "Translate buttons", type = frycAPI_PureState) => {
+					const f = new type({
+						name: name,
+						state: 0,
+					});
+					f.callback = function (obj) {
+						document.body.classList.toggle("google-translate-buttons");
+					};
+					return f;
+				},
+			],
 		});
-		window.scrollTo(0, 0);
-		document.body.classList.toggle("google-translate-buttons");
-
-		frycAPI.changeFaviconRes("Google_Logo_dark.png");
-	});
-
-	frycAPI.createManualFunctions("Google", {
-		funcArr: [
-			(name = "3 column view", type = frycAPI_PureState) => {
-				const f = new type({
-					name: name,
-					state: 0,
-				});
-				f.callback = function (obj) {
-					document.body.classList.toggle("google-3-column");
-				};
-				return f;
-			},
-			(name = "Translate buttons", type = frycAPI_PureState) => {
-				const f = new type({
-					name: name,
-					state: 0,
-				});
-				f.callback = function (obj) {
-					document.body.classList.toggle("google-translate-buttons");
-				};
-				return f;
-			},
-		],
-	});
+	}
 } else if (1 && frycAPI_host("www.headspin.io")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -11998,73 +12090,6 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 } else if (frycAPI_host("imagemagick.org", "www.imagemagick.org") && frycAPI.path.startsWith("/discourse-server")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.colorSchemeDark = true;
-} else if (frycAPI_hostIncludes("wiki.gg")) {
-	frycAPI.line = frycAPI.getLineNumber();
-	frycAPI.injectStyleOnLoad(/*css*/`
-		#wikigg-showcase-sidebar,
-		#wikigg-sl-header,
-		#wikigg-showcase-header {
-			display: none;
-		}
-
-	`);
-	frycAPI.onLoadSetter(function () {
-		frycAPI.forEach(`h2 > span.mw-headline`, span => {
-			span.innerHTML = `<a href="${window.location.origin + window.location.pathname + "#" + span.id}">${span.innerText}</a>`;
-		});
-	});
-	if (frycAPI_host("helldivers.wiki.gg")) {
-		frycAPI.injectStyleOnLoad(/*css*/`
-			.myButtonWrapper {
-				display: flex;
-				gap: 5px;
-				/* width: 110px; */
-				font-size: smaller;
-				.copyButton {
-					cursor: pointer;
-				}
-				.copyButton:hover {
-					color: var(--wiki-accent-color);
-				}
-			}
-		`);
-		frycAPI.onLoadSetter(function () {
-			if (frycAPI.path === "/wiki/Stratagems") { // https://helldivers.wiki.gg/wiki/Stratagems
-				const myButtWrapTemp = frycAPI.elemFromHTML(/*html*/`<td><div class="myButtonWrapper"></div></td>`);
-				const buttTemp = frycAPI.elemFromHTML(/*html*/`<div class="copyButton"></div>`);
-				const arrowToWASD = {
-					"Up Arrow.png": "w",
-					"Left Arrow.png": "a",
-					"Down Arrow.png": "s",
-					"Right Arrow.png": "d",
-				};
-				frycAPI.retryIf(() => frycAPI.querySelOk(`.wikitable thead > tr`), 50, () => {
-					frycAPI.forEach(`.wikitable`, table => {
-						table.querySelector(`thead > tr`).appendChild(table.querySelector(`th:last-child`).cloneNode(1))
-						.frycAPI_setAttribute("width", "30%")
-						.frycAPI_setInnerText("Copy");
-
-						table.frycAPI_elemByTag("tbody").rows.forEach(row => {
-							let firstChild = row.firstElementChild;
-							if (firstChild.tagName === "TH") firstChild = firstChild.nextElementSibling;
-							const secondChild = firstChild.nextElementSibling;
-							const thirdChild = secondChild.nextElementSibling;
-							const myButtWrap = row.appendChild(myButtWrapTemp.cloneNode(1)).firstElementChild;
-							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Image URL")).addEventListener("click", () => {
-								frycAPI.copyTxt(firstChild.firstElementChild.firstElementChild.src.match(/.+?\.png/)[0].replace("/thumb", ""));
-							});
-							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("AHK code")).addEventListener("click", () => {
-								frycAPI.copyTxt(`helld2("${thirdChild.querySelectorAll("img").map(e => arrowToWASD[e.alt]).join("")}",0) ; ${secondChild.innerText}`);
-							});
-							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Delete row")).addEventListener("click", () => {
-								row.remove();
-							});
-						});
-					});
-				});
-			}
-		}, 2);
-	}
 } else if (frycAPI_host("www.icoconverter.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -12357,13 +12382,6 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		#content, #footer {
 			width: fit-content;
 			margin: auto;
-		}
-	`);
-} else if (frycAPI_host("repo-2025horror.fandom.com")) {
-	frycAPI.line = frycAPI.getLineNumber();
-	frycAPI.injectStyleOnLoad(/*css*/`
-		.resizable-container {
-			max-width: 1600px;
 		}
 	`);
 } else if (frycAPI_host("catbox.moe")) {
