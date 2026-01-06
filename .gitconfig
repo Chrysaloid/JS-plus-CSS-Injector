@@ -1,3 +1,3 @@
-﻿[diff "frycAPI"]
+[diff "frycAPI"]
 	xfuncname = "(^([ \t\\n]?\\/\\/\\ \\#region\\ \\/\\/\\*|function[ \t\\n]+[A-Za-z0-9_]+|class[ \t\\n]+[A-Za-z0-9_]+|\\}\\ else\\ if\\ \\(|else\\ if\\ \\(|\\}\\ else\\ \\{|else\\ \\{|if\\ \\(|const|let|var|[A-Za-z0-9_]+[ \t\\n]*[:=][ \t\\n]*(async[ \t\\n]*)?(function|\\([^)]*\\)[ \t\\n]*=>)).*)"
 	textconv = sed -E \"s/\\/\\*<line-number>\\*\\/[0-9]+\\/\\*<\\/line-number>\\*\\///g\"

@@ -1,4 +1,4 @@
-﻿// #region //* Początek
+// #region //* Początek
 /* 0 eslint no-implicit-globals: ["warn", {"lexicalBindings": true}] */
 /// <reference path="frycAPI-expandPrototype.js"/>
 "use strict";

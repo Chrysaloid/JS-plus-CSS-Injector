@@ -1,4 +1,4 @@
-﻿/* eslint-disable no-extra-semi */
+/* eslint-disable no-extra-semi */
 "use strict";
 
 const log = console.log;

@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 const frycAPIScript = document.createElement("script");
 frycAPIScript.src = chrome.runtime.getURL("frycAPI.js");
