@@ -294,7 +294,7 @@ frycAPI_expandPrototype(Element, "nthParent", function (n = 1) {
 // 	}
 // 	return parElem === document.documentElement;
 // }, true);
-frycAPI_expandPrototype(Element, "isDescendantOf", function (elem) {
+frycAPI_expandPrototype(Element, "isDescendantOf", function (elem = document.documentElement) {
 	let parElem = this.parentElement;
 	while (parElem && parElem !== elem) {
 		parElem = parElem.parentElement;

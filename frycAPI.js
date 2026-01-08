@@ -245,17 +245,32 @@ class frycAPI_StyleState extends Object {
 
 		if (obj.elevated === true) {
 			me.eventObj = { style: obj.style, allFrames: obj.allFrames };
+			me.setState = async function (newState) {
+				newState = Boolean(newState);
+				if (me.state !== newState) {
+					if (newState) {
+						await frycAPI.sendEventToBackground("injectStyle", me.eventObj); // eslint-disable-line no-use-before-define
+						me.state = true; // eslint-disable-line require-atomic-updates
+					} else {
+						await frycAPI.sendEventToBackground("removeStyle", me.eventObj); // eslint-disable-line no-use-before-define
+						me.state = false; // eslint-disable-line require-atomic-updates
+					}
+				}
+				return me.state;
+			};
 			me.on = async function () {
 				if (me.state !== true) {
 					await frycAPI.sendEventToBackground("injectStyle", me.eventObj); // eslint-disable-line no-use-before-define
 					me.state = true; // eslint-disable-line require-atomic-updates
 				}
+				return me.state;
 			};
 			me.off = async function () {
 				if (me.state !== false) {
 					await frycAPI.sendEventToBackground("removeStyle", me.eventObj); // eslint-disable-line no-use-before-define
 					me.state = false; // eslint-disable-line require-atomic-updates
 				}
+				return me.state;
 			};
 			me.toggle = async function () {
 				if (me.state !== true) {
@@ -265,15 +280,26 @@ class frycAPI_StyleState extends Object {
 					await frycAPI.sendEventToBackground("removeStyle", me.eventObj); // eslint-disable-line no-use-before-define
 					me.state = false; // eslint-disable-line require-atomic-updates
 				}
+				return me.state;
 			};
 		} else {
 			me.styleElem = obj.styleElem;
+			me.setState = function (newState) {
+				newState = Boolean(newState);
+				if (me.state !== newState) {
+					me.styleElem.disabled = !newState;
+					me.handleDarkreader();
+					me.state = newState;
+				}
+				return me.state;
+			};
 			me.on = function () {
 				if (me.state !== true) {
 					me.styleElem.disabled = false;
 					me.handleDarkreader();
 					me.state = true;
 				}
+				return me.state;
 			};
 			me.off = function () {
 				if (me.state !== false) {
@@ -281,6 +307,7 @@ class frycAPI_StyleState extends Object {
 					me.handleDarkreader();
 					me.state = false;
 				}
+				return me.state;
 			};
 			me.toggle = function () {
 				if (me.state !== true) {
@@ -292,6 +319,7 @@ class frycAPI_StyleState extends Object {
 					me.handleDarkreader();
 					me.state = false;
 				}
+				return me.state;
 			};
 		}
 	}
@@ -7748,9 +7776,9 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 		/* canvas.MyME0d.widget-scene-canvas, img.k48Abe, span.ita-kd-img.ita-kd-icon.ita-kd-icon-span.ita-icon-0,span.ita-kd-img.ita-kd-arrow.ita-kd-icon-span,img.bDDiq, .RGzwUc.pFz1xc,.pKQ3pb,.oGZkwf,.fd5il,.Eq03vc,.fd5il {
 			filter: invert(1) hue-rotate(180deg);
 		} */
-		.app-imagery-mode canvas.MyME0d.widget-scene-canvas {
+		/* .app-imagery-mode canvas.MyME0d.widget-scene-canvas {
 			filter: none;
-		}
+		} */
 		:root {
 			--szer: 800px;
 		}
@@ -7897,6 +7925,19 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 			frycAPI.changeFaviconRes("Google_Logo_dark.png");
 		}
 	});
+
+	if (frycAPI.path.startsWith("/maps")) {
+		const myStyle = frycAPI.injectStyle(`canvas[id][id][id][id][id][id][id][id][id][id][id][id][id][id][id][id][id] { filter: none !important; }`);
+		const isSatelliteView = () => document.body.querySelector(`[role="contentinfo"] > span`)?.innerText.startsWith("Zdjęcia");
+		frycAPI.createMutObs(() => {
+			if (document.body) {
+				frycAPI.createMutObs(() => {
+					myStyle.setState(isSatelliteView());
+				}, { elem: document.body, options: { childList: true, subtree: true, characterData: false, attributes: false } });
+				return true;
+			}
+		}, { elem: document.documentElement });
+	}
 
 	if (frycAPI.path.startsWith("/search")) {
 		frycAPI.createManualFunctions("Google", {
