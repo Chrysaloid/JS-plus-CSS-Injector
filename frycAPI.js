@@ -443,7 +443,6 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	funcGroupArr: [],
 	colorSchemeDark: false,
 	czasNumer: 1,
-	// frycAPI.urlParam: new URL(window.location.href).searchParams.getAll("frycAPI_URL_Parameter").pop(),
 	injectStyleNormalNum: 0,
 	simpleFontChange: `* { font-family: "IBM Plex Sans Condensed", sans-serif; }`, // ${frycAPI.simpleFontChange}
 	functionsForClasses: {
@@ -470,7 +469,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	script: document.currentScript,
 	createMutObsLicznik: 0,
-	path: window.location.pathname,
+	path: location.pathname,
 	UUID: null,
 	mimeTypes: null,
 	line: null,
@@ -495,6 +494,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	listMarkerCollapsed: "⮞",
 	listMarkerOpen: "⮟",
+	websiteUrl: new URL(location.href),
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -942,8 +942,6 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	// #endregion
 	// #region //* Funkcje 3
 	gDriveLinkToImgSrc(link) { // Converts Google drive open link to download link which is possible to be src of an img etc.
-		// return `https://drive.usercontent.google.com/u/0/uc?id=${new URL(link).searchParams.get("id")}&export=download`; // Old
-		// return `drive.google.com/thumbnail?sz=w1000&id=${new URL(link).searchParams.get("id")}`; // Old poprawione
 		return frycAPI.gDriveIdToImgSrc(new URL(link).pathname.replace("/file/d/", "").replace("/view", ""));
 	},
 	gDriveIdToImgSrc(id, width = 1000) { // Converts Google drive image id to download link which is possible to be src of an img etc.
@@ -1648,7 +1646,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		if (frycAPI.UUID === null) return;
 		return frycAPI.sendEventToBackground("getStorage", { UUID: frycAPI.UUID, keys: keys });
 	}, // const vals = await frycAPI.getStorages(["key"]);
-	searchParamsToObj(url = window.location.href) {
+	searchParamsToObj(url = location.href) {
 		if (url instanceof URL === false) {
 			url = new URL(url);
 		}
@@ -2115,7 +2113,7 @@ if (1) { //* Globalne funkcje
 			(name = "Copy decoded URL", type = frycAPI_Normal) => {
 				const f = new type({ name });
 				f.callback = function (obj) {
-					frycAPI.copyTxt(decodeURI(window.location.href));
+					frycAPI.copyTxt(decodeURI(location.href));
 				};
 				return f;
 			},
@@ -2169,7 +2167,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 
 	frycAPI.onLoadSetter(function () {
 		frycAPI.forEach(`h2 > span.mw-headline`, span => {
-			span.innerHTML = `<a href="${window.location.origin + window.location.pathname + "#" + span.id}">${span.innerText}</a>`;
+			span.innerHTML = `<a href="${location.origin + location.pathname + "#" + span.id}">${span.innerText}</a>`;
 		});
 	});
 
@@ -3026,7 +3024,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 
 	frycAPI.onLoadSetter(function () {
 		frycAPI.forEach(`h2 > span.mw-headline`, span => {
-			span.innerHTML = `<a href="${window.location.origin + window.location.pathname + "#" + span.id}">${span.innerText}</a>`;
+			span.innerHTML = `<a href="${location.origin + location.pathname + "#" + span.id}">${span.innerText}</a>`;
 		});
 	});
 
@@ -3630,7 +3628,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 						}
 					}
 				} else if (myRec.length > 1 && myRec[0].removedNodes.length) {
-					window.requestAnimationFrame(function () {
+					requestAnimationFrame(function () {
 						myRec[0].removedNodes[0].frycAPI_removeClass("powiekszPocz");
 					});
 				}
@@ -3678,7 +3676,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 				}
 			});
 			const mini = function (thumb, addedImg) {
-				window.requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
 					// debugger
 					thumb.style.width = addedImg.style.maxWidth;
 					thumb.style.height = addedImg.style.maxHeight;
@@ -3731,7 +3729,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 						// addedImg.style.display = "block";
 						// addedImg.style.maxWidth =  maxWidth ;
 						// addedImg.style.maxHeight = maxHeight;
-						// window.requestAnimationFrame(() => {
+						// requestAnimationFrame(() => {
 						// 	// debugger
 						// });
 						// thumb.style.display = "none";
@@ -5395,7 +5393,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 
 					me.frycAPI_addClass("relative-date-loading");
 					me.innerHTML = " -&nbsp;";
-					const response = await fetch(`https://${window.location.hostname}/api/rest_v1/page/summary/${pageName}`);
+					const response = await fetch(`https://${location.hostname}/api/rest_v1/page/summary/${pageName}`);
 					if (!response.ok) {
 						throw new Error(`Response was not OK.\nStatus: ${response.status}.\nStatus text: ${response.statusText}.\nPage name: ${pageName}`);
 					}
@@ -5420,7 +5418,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 		// #region //* Make headings clickable
 		frycAPI.forEach(`[id]:is(h1,h2,h3,h4,h5,h6)`, daElem => {
 			daElem.addEventListener("click", function (e) {
-				window.location.hash = "#" + daElem.id;
+				location.hash = "#" + daElem.id;
 			});
 		});
 		// #endregion
@@ -5537,7 +5535,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 					newDiv = document.createElement("div");
 					newDiv.setAttribute("id", "mojelem");
 					for (let i = 0; i < 184; i++) {
-						newDiv.innerHTML += window.getComputedStyle(artwork[i]).getPropertyValue("background-image");
+						newDiv.innerHTML += getComputedStyle(artwork[i]).getPropertyValue("background-image");
 						newDiv.innerHTML += "<br>";
 					}
 					document.body.insertBefore(newDiv, document.getElementById("app"));
@@ -6026,6 +6024,22 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			}
 		}
 
+		#personalAchieve > br {
+			display: none;
+		}
+		.achieveRow:has(.achieveUnlockTime) + .achieveRow:not(:has(.achieveUnlockTime)) {
+			margin-top: 60px;
+		}
+		.achieveRow:last-child {
+			margin-bottom: 0;
+		}
+		#BG_bottom {
+			padding: 12px !important;
+
+			br {
+				display: none;
+			}
+		}
 	`);
 
 	frycAPI.onLoadSetter(async () => {
@@ -6149,8 +6163,29 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			butt.innerText = "Przełącz widoczność ukończonych osiągnięć";
 			butt.setAttribute("aktywny", "");
 			document.getElementById("mainContents").insertAdjacentElement("afterbegin", butt);
+		} else if (frycAPI.path.startsWith("/profiles") && frycAPI.websiteUrl.searchParams.get("tab") === "achievements") {
+			frycAPI.setDefaultDate(`.achieveUnlockTime`, {
+				getDate(elem) {
+					let dateTxt = elem.innerText.trim().replace("Unlocked ", "");
+					if (dateTxt.includes(", 20")) {
+						dateTxt = dateTxt.replace(",", "").replace("@ ", "");
+					} else {
+						dateTxt = dateTxt.replace("@", new Date().getFullYear());
+					}
+					return new Date(dateTxt.replace("pm", " pm").replace("am", " am"));
+				},
+				setDate(elem, data, dateOpts) {
+					elem.frycAPI_setInnerHTML(/*html*/`<span>Unlocked </span>` + frycAPI.getDefaultDateText(data, dateOpts));
+					return elem.firstElementChild;
+				},
+			});
+			frycAPI.forEach("#personalAchieve > br", e => e.remove());
+			frycAPI.byID("personalAchieve").frycAPI_sortChildrenReversible([
+				[elem => elem.querySelector(".abs-czas")?.innerText ?? "", true],
+				[elem => Boolean(elem.frycAPI_elemByTag("h3")?.innerText.endsWith("hidden achievements remaining")), false],
+				[elem => elem.frycAPI_elemByTag("h3")?.innerText ?? "\uFFFF", false],
+			]);
 		}
-		// document.body.classList.toggle("specific-friend");
 	});
 
 	frycAPI.createManualFunctions("Friend Activity", {
@@ -6820,7 +6855,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 	frycAPI.onLoadSetter(() => {
 		const t1 = performance.now();
 
-		if (window.location.search.includes("statystyki")) {
+		if (location.search.includes("statystyki")) {
 			const chart = document.getElementById("chart");
 			if (chart !== null) {
 				new MutationObserver(async function USOS_Fix(mutRec, docObs) {
@@ -6948,8 +6983,8 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		if (!document.title.includes("USOSweb tymczasowo niedostępny") &&
 			// document.querySelector("[aria-label='Panel boczny'] a[href='https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz'].selected") !== null
 			(
-				window.location.href === "https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz" ||
-				window.location.href.startsWith("https://usosweb.usos.pw.edu.pl/kontroler.php?_action=news/rejestracje/rejJednostki")
+				location.href === "https://usosweb.usos.pw.edu.pl/kontroler.php?_action=dla_stud/rejestracja/kalendarz" ||
+				location.href.startsWith("https://usosweb.usos.pw.edu.pl/kontroler.php?_action=news/rejestracje/rejJednostki")
 			)
 		) {
 			const myDivBase = frycAPI.elemFromHTML(`<div class="myDiv"></div>`);
@@ -6988,8 +7023,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 		// #endregion
 		// #region //* Sortowanie tabel rejestracji
 		if (true) {
-			const daUrl = new URL(window.location.href);
-			if (daUrl.pathname === "/kontroler.php" && daUrl.searchParams.get("_action").frycAPI_equalAny("katalog2/przedmioty/szukajPrzedmiotu", "dla_stud/rejestracja/brdg2/wyborPrzedmiotu")) {
+			if (frycAPI.websiteUrl.pathname === "/kontroler.php" && frycAPI.websiteUrl.searchParams.get("_action").frycAPI_equalAny("katalog2/przedmioty/szukajPrzedmiotu", "dla_stud/rejestracja/brdg2/wyborPrzedmiotu")) {
 				const tab = document.querySelector(`.usos-ui > div > table.wrnav, table.grey > tbody.autostrong`);
 				if (tab !== null) {
 					const rows = Array.from(tab.querySelectorAll(`.odd_row, .even_row, :scope > tr`));
@@ -7139,10 +7173,9 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 	`);
 } else if (1 && frycAPI_host("www.autohotkey.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
-	const daUrl = new URL(window.location.href);
-	if (daUrl.searchParams.has("style")) {
-		daUrl.searchParams.delete("style");
-		window.location.href = daUrl.href;
+	if (frycAPI.websiteUrl.searchParams.has("style")) {
+		frycAPI.websiteUrl.searchParams.delete("style");
+		location.href = frycAPI.websiteUrl.href;
 	} else {
 		frycAPI.injectStyleOnLoad(/*css*/`
 			* {
@@ -7902,7 +7935,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 				const input01 = document.querySelector("#APjFqb");
 				function resize() {
 					hide01.textContent = input01.value;
-					hide01.style.font = window.getComputedStyle(input01).font;
+					hide01.style.font = getComputedStyle(input01).font;
 					input01.style.width = hide01.offsetWidth + 20 + "px";
 				}
 				resize();
@@ -7918,7 +7951,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 			frycAPI.forEach(".nlNnsd.ApHyTb .TaA4cd:nth-child(2) .i2L09e.WHcndc", (daElem, daI, daArr) => {
 				daElem.click();
 			});
-			window.scrollTo(0, 0);
+			scrollTo(0, 0);
 			document.body.classList.toggle("google-translate-buttons");
 		}
 		if (!frycAPI.path.startsWith("/maps")) {
@@ -7927,7 +7960,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 	});
 
 	if (frycAPI.path.startsWith("/maps")) {
-		const myStyle = frycAPI.injectStyle(`canvas[id][id][id][id][id][id][id][id][id][id][id][id][id][id][id][id][id] { filter: none !important; }`);
+		const myStyle = frycAPI.injectStyle(`canvas${"[id]".repeat(15)} { filter: none !important; }`);
 		const isSatelliteView = () => document.body.querySelector(`[role="contentinfo"] > span`)?.innerText.startsWith("Zdjęcia");
 		frycAPI.createMutObs(() => {
 			if (document.body) {
@@ -8159,7 +8192,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 	frycAPI.onLoadSetter(async () => { // Fixed weird scrolling to bottom behavior
 		if (frycAPI.path.startsWith("/matlabcentral/answers/")) {
 			await frycAPI.sleep(100);
-			window.scrollTo(0, 0);
+			scrollTo(0, 0);
 		}
 	}, 2);
 } else if (1 && frycAPI_host("www.maxongroup.com")) {
@@ -8516,8 +8549,8 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 			const text = document.querySelector(`[aria-current="page"] abbr[aria-label] > span`)?.innerText;
 			if (text !== undefined) document.body.setAttribute("editOK", text.endsWith("min") && parseInt(text.replace(" min", "")) < 15);
 
-			// if (oldHref !== window.location.href) {
-			// 	oldHref = window.location.href;
+			// if (oldHref !== location.href) {
+			// 	oldHref = location.href;
 			// 	loguj("Navigation");
 			// }
 		}
@@ -10257,7 +10290,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	frycAPI.onLoadSetter(() => {
 		if (pathName.startsWith("/posts/")) {
 			const defaultScroll = () => {
-				window.scrollTo(0, document.documentElement.scrollTop + (document.getElementById("nav-links-top") ?? document.getElementById("image")).getBoundingClientRect().y - 1);
+				scrollTo(0, document.documentElement.scrollTop + (document.getElementById("nav-links-top") ?? document.getElementById("image")).getBoundingClientRect().y - 1);
 			};
 			(document.body.appendChild(document.createElement("div"))
 			.frycAPI_setAttribute("id", "mojScroll")
@@ -10282,7 +10315,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			// #endregion
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.querySelector("form.post-search-form"));
-			window.scrollTo(0, 0);
+			scrollTo(0, 0);
 			const search = document.querySelector(searchButton);
 			document.getElementById("tags").addEventListener("keydown", e => {
 				if (e.key === "Enter") {
@@ -11493,7 +11526,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		frycAPI.setDefaultDate(`#userlist.copy > span.smallcopy`, { getDate: "txt" });
 
 		if (document.body.classList.contains("thread")) {
-			const xml = await frycAPI.readFile(window.location.origin + frycAPI.path + "/rss", "xml");
+			const xml = await frycAPI.readFile(location.origin + frycAPI.path + "/rss", "xml");
 			// xml.querySelector(`parsererror`) === null
 			// frycAPI.querySelNull(`parsererror`, xml)
 			let rss;
@@ -12071,7 +12104,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
-} else if (window.location.href === "https://www.elka.pw.edu.pl/Aktualnosci/Kalendarz-akademicki") {
+} else if (location.href === "https://www.elka.pw.edu.pl/Aktualnosci/Kalendarz-akademicki") {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
 		iframe#external {
@@ -12483,7 +12516,7 @@ if (1) { //* Global functions end
 	}
 	// #endregion
 	// #region //* Esc to scroll to top
-	document.addEventListener("keydown", e => { if (e.key === "Escape") window.scrollTo(0, 0); });
+	document.addEventListener("keydown", e => { if (e.key === "Escape") scrollTo(0, 0); });
 	// #endregion
 	// #region //*
 	// #endregion

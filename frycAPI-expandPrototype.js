@@ -48,6 +48,13 @@ function frycAPI_host(...str) {
 function frycAPI_hostIncludes(...str) {
 	return window.location.hostname.frycAPI_includesAny(...str);
 }
+function frycAPI_innerTextCompare(a, b) {
+	const a1 = a.innerText;
+	const b1 = b.innerText;
+	if (a1 < b1) return -1;
+	if (a1 > b1) return 1;
+	return 0;
+}
 // I can't believe I have to do this...
 // Some sites (https://rapidsave.com/) overwrite chrome.runtime.sendMessage
 // So I have to store it before they do that
@@ -113,15 +120,71 @@ frycAPI_expandPrototype(Array, "frycAPI_pushArr", function (elem) {
 frycAPI_expandPrototype(Array, "frycAPI_numSort", function () {
 	return this.sort((a, b) => a - b);
 });
+frycAPI_expandPrototype(Array, "frycAPI_numSortReverse", function () {
+	return this.sort((a, b) => b - a);
+});
+frycAPI_expandPrototype(Array, "frycAPI_sortValuesSimple", function (getValue = a => a) {
+	return this.sort((a, b) => {
+		const a1 = getValue(a);
+		const b1 = getValue(b);
+		if (a1 < b1) return -1;
+		if (a1 > b1) return 1;
+		return 0;
+	});
+});
+frycAPI_expandPrototype(Array, "frycAPI_sortValuesSimpleReverse", function (getValue = a => a) {
+	return this.sort((a, b) => {
+		const a1 = getValue(a);
+		const b1 = getValue(b);
+		if (a1 < b1) return 1;
+		if (a1 > b1) return -1;
+		return 0;
+	});
+});
 frycAPI_expandPrototype(Array, "frycAPI_sortValues", function (...getValues) {
-	// getValues = getValues.filter(frycAPI.isFunc);
-	// if (getValues.length === 0) return this;
 	return this.sort((a, b) => {
 		for (const getValue of getValues) {
 			const a1 = getValue(a);
 			const b1 = getValue(b);
 			if (a1 < b1) return -1;
 			if (a1 > b1) return 1;
+		}
+		return 0;
+	});
+});
+frycAPI_expandPrototype(Array, "frycAPI_sortValuesReversible", function (getValuesAndOrders) {
+	return this.sort((a, b) => {
+		for (const [getValue, reverse] of getValuesAndOrders) {
+			const a1 = getValue(a);
+			const b1 = getValue(b);
+			if (a1 < b1) return reverse ?  1 : -1;
+			if (a1 > b1) return reverse ? -1 :  1;
+		}
+		return 0;
+	});
+});
+frycAPI_expandPrototype(Array, "frycAPI_sortValuesTyped", function (...getValues) {
+	return this.sort((a, b) => {
+		for (const getValue of getValues) {
+			const a1 = getValue(a);
+			const b1 = getValue(b);
+			// if (typeof a1 !== typeof b1) throw new Error(`a1 and b1 should have the same types\na: ${a}\nb: ${b}\na1: ${a1}\ntypeof a1: ${typeof a1}\nb1: ${b1}\ntypeof b1: ${typeof b1}`);
+			if (typeof a1 !== typeof b1) continue;
+			if (a1 < b1) return -1;
+			if (a1 > b1) return 1;
+		}
+		return 0;
+	});
+});
+frycAPI_expandPrototype(Array, "frycAPI_sortValuesTypedReversible", function (getValuesAndOrders) {
+	return this.sort((a, b) => {
+		for (const [getValue, reverse] of getValuesAndOrders) {
+			const a1 = getValue(a);
+			const b1 = getValue(b);
+			// if (typeof a1 !== typeof b1) throw new Error(`a1 and b1 should have the same types\na: ${a}\nb: ${b}\na1: ${a1}\ntypeof a1: ${typeof a1}\nb1: ${b1}\ntypeof b1: ${typeof b1}`);
+			if (typeof a1 !== typeof b1) continue;
+			if (a1 < b1) return reverse ?  1 : -1;
+			if (a1 > b1) return reverse ? -1 :  1;
 		}
 		return 0;
 	});
@@ -186,10 +249,67 @@ frycAPI_expandPrototype(Element, "frycAPI_shuffleChildren", function () {
 	});
 	return me;
 });
-frycAPI_expandPrototype(Element, "frycAPI_sortChildren", function (getValue) {
+frycAPI_expandPrototype(Element, "frycAPI_sortChildrenSimple", function (getValue = a => a.innerText) {
 	const me = this;
 	const elemArr = Array.from(me.children);
-	elemArr.frycAPI_sortValues(getValue);
+	elemArr.frycAPI_sortValuesSimple(getValue);
+	elemArr.forEach(function (daElem) {
+		me.appendChild(daElem);
+	});
+});
+frycAPI_expandPrototype(Element, "frycAPI_sortChildrenSimpleReverse", function (getValue = a => a.innerText) {
+	const me = this;
+	const elemArr = Array.from(me.children);
+	elemArr.frycAPI_sortValuesSimpleReverse(getValue);
+	elemArr.forEach(function (daElem) {
+		me.appendChild(daElem);
+	});
+});
+frycAPI_expandPrototype(Element, "frycAPI_sortChildren", function (...getValues) {
+	const me = this;
+	const elemArr = Array.from(me.children);
+	if (!getValues.length) {
+		getValues = [elem => elem.innerText];
+	}
+	elemArr.frycAPI_sortValues(...getValues);
+	elemArr.forEach(function (daElem) {
+		me.appendChild(daElem);
+	});
+});
+frycAPI_expandPrototype(Element, "frycAPI_sortChildrenReversible", function (getValuesAndOrders = [[elem => elem.innerText, false]]) {
+	const me = this;
+	const elemArr = Array.from(me.children);
+	elemArr.frycAPI_sortValuesReversible(getValuesAndOrders);
+	elemArr.forEach(function (daElem) {
+		me.appendChild(daElem);
+	});
+});
+frycAPI_expandPrototype(Element, "frycAPI_sortChildrenTyped", function (...getValues) {
+	const me = this;
+	const elemArr = Array.from(me.children);
+	if (!getValues.length) {
+		getValues = [elem => elem.innerText];
+	}
+	elemArr.frycAPI_sortValuesTyped(...getValues);
+	elemArr.forEach(function (daElem) {
+		me.appendChild(daElem);
+	});
+});
+frycAPI_expandPrototype(Element, "frycAPI_sortChildrenTypedReversible", function (getValuesAndOrders = [[elem => elem.innerText, false]]) {
+	const me = this;
+	const elemArr = Array.from(me.children);
+	elemArr.frycAPI_sortValuesTypedReversible(getValuesAndOrders);
+	elemArr.forEach(function (daElem) {
+		me.appendChild(daElem);
+	});
+});
+frycAPI_expandPrototype(Element, "frycAPI_sortChildrenControl", function (sortFun = frycAPI_innerTextCompare) {
+	const me = this;
+	const elemArr = Array.from(me.children);
+	if (!getValues.length) {
+		getValues = [elem => elem.innerText];
+	}
+	elemArr.sort(sortFun);
 	elemArr.forEach(function (daElem) {
 		me.appendChild(daElem);
 	});
