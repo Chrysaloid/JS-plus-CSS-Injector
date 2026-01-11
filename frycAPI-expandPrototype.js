@@ -163,32 +163,6 @@ frycAPI_expandPrototype(Array, "frycAPI_sortValuesReversible", function (getValu
 		return 0;
 	});
 });
-frycAPI_expandPrototype(Array, "frycAPI_sortValuesTyped", function (...getValues) {
-	return this.sort((a, b) => {
-		for (const getValue of getValues) {
-			const a1 = getValue(a);
-			const b1 = getValue(b);
-			// if (typeof a1 !== typeof b1) throw new Error(`a1 and b1 should have the same types\na: ${a}\nb: ${b}\na1: ${a1}\ntypeof a1: ${typeof a1}\nb1: ${b1}\ntypeof b1: ${typeof b1}`);
-			if (typeof a1 !== typeof b1) continue;
-			if (a1 < b1) return -1;
-			if (a1 > b1) return 1;
-		}
-		return 0;
-	});
-});
-frycAPI_expandPrototype(Array, "frycAPI_sortValuesTypedReversible", function (getValuesAndOrders) {
-	return this.sort((a, b) => {
-		for (const [getValue, reverse] of getValuesAndOrders) {
-			const a1 = getValue(a);
-			const b1 = getValue(b);
-			// if (typeof a1 !== typeof b1) throw new Error(`a1 and b1 should have the same types\na: ${a}\nb: ${b}\na1: ${a1}\ntypeof a1: ${typeof a1}\nb1: ${b1}\ntypeof b1: ${typeof b1}`);
-			if (typeof a1 !== typeof b1) continue;
-			if (a1 < b1) return reverse ?  1 : -1;
-			if (a1 > b1) return reverse ? -1 :  1;
-		}
-		return 0;
-	});
-});
 frycAPI_expandPrototype(Array, "frycAPI_run", function (...args) {
 	this.forEach(fun => fun(...args));
 });
@@ -280,25 +254,6 @@ frycAPI_expandPrototype(Element, "frycAPI_sortChildrenReversible", function (get
 	const me = this;
 	const elemArr = Array.from(me.children);
 	elemArr.frycAPI_sortValuesReversible(getValuesAndOrders);
-	elemArr.forEach(function (daElem) {
-		me.appendChild(daElem);
-	});
-});
-frycAPI_expandPrototype(Element, "frycAPI_sortChildrenTyped", function (...getValues) {
-	const me = this;
-	const elemArr = Array.from(me.children);
-	if (!getValues.length) {
-		getValues = [elem => elem.innerText];
-	}
-	elemArr.frycAPI_sortValuesTyped(...getValues);
-	elemArr.forEach(function (daElem) {
-		me.appendChild(daElem);
-	});
-});
-frycAPI_expandPrototype(Element, "frycAPI_sortChildrenTypedReversible", function (getValuesAndOrders = [[elem => elem.innerText, false]]) {
-	const me = this;
-	const elemArr = Array.from(me.children);
-	elemArr.frycAPI_sortValuesTypedReversible(getValuesAndOrders);
 	elemArr.forEach(function (daElem) {
 		me.appendChild(daElem);
 	});
