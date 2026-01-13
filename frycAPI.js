@@ -1826,14 +1826,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		let i = 0;
 
 		while (i < stack.length) {
-			const node = stack[i++];
-			if (node.shadowRoot) {
-				callback(node);
-				stack.push(...node.shadowRoot.children);
+			const elem = stack[i++];
+			if (elem.shadowRoot) {
+				callback(elem);
+				stack.push(...elem.shadowRoot.children);
 			}
-			stack.push(...node.children);
+			stack.push(...elem.children);
 		}
-	}, // frycAPI.traverseShadowRoots(node => {});
+	}, // frycAPI.traverseShadowRoots(elem => {});
 	byClass(cls, rootElem = document) {
 		return rootElem.getElementsByClassName(cls)[0]; // when class was not found it will return undefined
 	}, // const elem = frycAPI.byClass("test");
@@ -12489,6 +12489,37 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			display: none;
 		}
 	`);
+} else if (frycAPI_host("betterdiscord.app")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		body > :has(iframe):has(span[data-google-query-id]),
+		body > :has(iframe[id^="google_ads_iframe"]),
+		.ad, .adsbygoogle, #google-anno-sa, .hide {
+			display: none !important;
+		}
+		.os-content {
+			padding: 0 !important;
+		}
+	`);
+
+	frycAPI.createMutObs(() => {
+		if (document.body) {
+			frycAPI.createMutObs(() => {
+				// frycAPI.traverseShadowRoots(elem => {
+				// 	if (elem.shadowRoot.getElementById("ft-floating-toolbar")) {
+				// 		elem.setAttribute("style", "display: none !important;");
+				// 	}
+				// });
+				frycAPI.forEach(`body > *`, elem => {
+					if (elem?.shadowRoot?.getElementById("ft-floating-toolbar")) {
+						elem.setAttribute("style", "display: none !important;");
+					}
+				});
+				frycAPI.forEach(`body > :has(iframe):has(span[data-google-query-id]), body > :has(iframe[id^="google_ads_iframe"]), .ad, .adsbygoogle, #google-anno-sa`, el => el.remove());
+			});
+			return true;
+		}
+	}, { elem: document.documentElement });
 }
 // Code-Lens-Action insert-snippet IF template
 
