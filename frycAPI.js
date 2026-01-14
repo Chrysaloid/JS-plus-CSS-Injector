@@ -12520,6 +12520,166 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			return true;
 		}
 	}, { elem: document.documentElement });
+} else if (frycAPI_host("old.reddit.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		body:not(.custom-css) {
+			.morelink, .morelink:hover, .mlh {
+				background-image: none;
+			}
+			button {
+				border-width: 0;
+			}
+			h1.redditname {
+				width: fit-content;
+				display: inline-block;
+				margin-right: 7px;
+			}
+			.side {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				margin-top: 5px;
+
+				& > * {
+					margin: 0 !important;
+				}
+			}
+			.content {
+				margin: 5px 5px 0px 5px;
+			}
+			.titlebox {
+				border: 1px solid gray;
+				padding: 5px;
+			}
+		}
+		.link .rank,
+		.link.promotedlink,
+		.domain,
+		.premium-banner,
+		.morelink .nub,
+		.col:has(a.buygold.choice),
+		.sidecontentbox .title {
+			display: none;
+		}
+		.md, textarea, input, button:not(.redesign-beta-optin), .morelink, ul.content, .linkinfo, .fancy-toggle-button .add, .titlebox {
+			border-radius: 5px !important;
+		}
+		.footer-parent {
+			padding: 0;
+			background-image: none;
+			margin-top: 20px;
+		}
+		button,
+		*:not(.author) {
+			&::first-letter {
+				text-transform: uppercase;
+			}
+		}
+		body.comments-page {
+			#siteTable {
+				display: flex;
+				gap: 5px;
+				align-items: flex-start;
+
+				.link {
+					margin: 0;
+					flex-grow: 1;
+				}
+			}
+		}
+		.link .usertext-body .md {
+			width: fit-content;
+		}
+		.linkinfo .score .number {
+			color: orangered;
+		}
+		li.message-button.centered {
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			gap: 5px;
+			padding-top: 0;
+
+			&::before {
+				content: "MODERATORS";
+				font-size: large;
+				font-weight: bold;
+			}
+		}
+		.titlebox .bottom {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+
+			& > * {
+				white-space: nowrap;
+				margin: 0;
+				padding: 0;
+				border: 0;
+			}
+		}
+		.footer {
+			width: fit-content;
+			white-space: nowrap;
+
+			.col {
+				flex-grow: 1;
+			}
+		}
+		.comment .child, .comment .showreplies {
+			border-left: 1px solid orangered;
+		}
+		.likes .score.likes {
+			color: orangered;
+		}
+		.edited-timestamp::before {
+			content: "| "
+		}
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		const COMMENTS_PAGE = frycAPI.querySelOk(`body.comments-page`);
+		const CUSTOM_CSS = frycAPI.querySelOk(`link[ref="applied_subreddit_stylesheet"]`);
+
+		if (CUSTOM_CSS) {
+			document.body.classList.add("custom-css");
+		}
+
+		if (COMMENTS_PAGE) {
+			const postBody = frycAPI.byID("siteTable");
+			if (postBody) {
+				postBody.querySelectorAll(".clearleft").forEach(el => el.remove());
+				postBody.appendChild(frycAPI.byClass("linkinfo"));
+			}
+		}
+
+		frycAPI.byID("shortlink-text")?.addEventListener("click", ev => {
+			const me = ev.target;
+			navigator.clipboard.writeText(me.value);
+		});
+
+		frycAPI.qSel(`.titlebox .bottom`)?.childNodes.forEach(node => {
+			if (node.nodeType === Node.TEXT_NODE) {
+				const span = frycAPI.elem("span").text(node.textContent)._;
+				node.frycAPI_insertAfter(span);
+				node.remove();
+			}
+		});
+
+		frycAPI.forEach(`.userattrs a.submitter`, el => (el.innerText = "OP"));
+
+		frycAPI.createMutObs(() => {
+			frycAPI.setDefaultDate(`*:not(.age) > time`);
+		}, { options: { characterData: true } });
+	});
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.forEach(`.side .spacer:is(:not(:has(*)), :has(.premium-banner-outer))`, el => el.remove());
+	}, 2);
 }
 // Code-Lens-Action insert-snippet IF template
 
