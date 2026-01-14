@@ -8945,7 +8945,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 				}
 			});
 
-			frycAPI.forEach(`shreddit-post:not(.poprawnyPost)`, (daElem, daI, daArr) => {
+			frycAPI.forEach(`shreddit-post:not(.poprawnyPost):has(shreddit-post-flair)`, (daElem, daI, daArr) => {
 				daElem.querySelector(`a[slot="title"]`)?.appendChild(daElem.querySelector(`shreddit-post-flair`));
 				daElem.classList.add("poprawnyPost");
 			});
