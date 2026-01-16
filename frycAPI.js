@@ -5101,6 +5101,16 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 			display: none;
 		}
 	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.forEach(`:is(h1,h2,h3,h4,h5,h6)[id]`, heading => {
+			heading.innerHTML = `<a href="${location.origin + location.pathname + "#" + heading.id}">${heading.innerText}</a>`;
+		});
+		frycAPI.forEach(`li[id]:has(> em)`, li => {
+			const em = li.frycAPI_elemByTag("em");
+			em.innerHTML = `<a href="${location.origin + location.pathname + "#" + li.id}">${em.innerText}</a>`;
+		});
+	});
 } else if (1 && frycAPI_host("mail.google.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
