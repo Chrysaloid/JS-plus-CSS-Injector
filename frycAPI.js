@@ -1087,19 +1087,20 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return frycAPI.setDefaultDateEnum;
 	},
 	setDefaultDateText(elem, data, dateOpts) {
-		elem.frycAPI_setInnerHTML(frycAPI.getDefaultDateText(data, dateOpts));
-		return elem.firstElementChild;
-		/* Upgrade attempt
-		// https://web.dev/articles/avoid-large-complex-layouts-and-layout-thrashing?utm_source=devtools#avoid-forced-synchronous-layouts
-		elem.textContent = "";
-		const lepCzs = document.createElement("span");
-		lepCzs.classList.add("lepszyCzas");
-		lepCzs.appendChild(document.createElement("span").frycAPI_addClass("abs-czas")).innerText = frycAPI.printDate(data, dateOpts?.printDate);
-		lepCzs.appendChild(document.createElement("span").frycAPI_addClass("myślnik-czas")).innerText = " - ";
-		lepCzs.appendChild(document.createElement("span").frycAPI_addClass("rel-czas")).innerText = frycAPI.printRelTime(data, dateOpts?.printDate);
-		elem.appendChild(lepCzs);
-		return lepCzs;
-		*/
+		if (frycAPI.escapeHTMLPolicy) {
+			elem.frycAPI_setInnerHTML(frycAPI.getDefaultDateText(data, dateOpts));
+			return elem.firstElementChild;
+		} else {
+			// https://web.dev/articles/avoid-large-complex-layouts-and-layout-thrashing?utm_source=devtools#avoid-forced-synchronous-layouts
+			elem.textContent = "";
+			const lepCzs = document.createElement("span");
+			lepCzs.classList.add("lepszyCzas");
+			lepCzs.appendChild(document.createElement("span").frycAPI_addClass("abs-czas")).innerText = frycAPI.printDate(data, dateOpts?.printDate);
+			lepCzs.appendChild(document.createElement("span").frycAPI_addClass("myślnik-czas")).innerText = " - ";
+			lepCzs.appendChild(document.createElement("span").frycAPI_addClass("rel-czas")).innerText = frycAPI.printRelTime(data, dateOpts?.printDate);
+			elem.appendChild(lepCzs);
+			return lepCzs;
+		}
 	},
 	appendDefaultDateText(elem, data, dateOpts) {
 		return elem.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, dateOpts));
@@ -1938,7 +1939,7 @@ frycAPI.dateFormatterForFileName = frycAPI.getDateFormatter();
 frycAPI.dateOptsNoTime = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
 // #region //* frycAPI.createHTML
 try {
-	if (!frycAPI_host("teams.microsoft.com", "vscode.dev") && window?.trustedTypescreatePolicy) {
+	if (!frycAPI_host("teams.microsoft.com", "vscode.dev") && window.trustedTypes?.createPolicy) {
 		frycAPI.escapeHTMLPolicy = trustedTypes.createPolicy("safeInnerHtml", {
 			createHTML: str => str,
 		});
@@ -6246,6 +6247,14 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			display: none;
 		}
 	`);
+
+	frycAPI.onLoadSetter(() => {
+		frycAPI.createMutObs(() => {
+			frycAPI.setDefaultDate(`:is([data-tid="chat-pane-item"], [data-tid="reply-message-header"], [data-tid="post-message-subheader"]) time`, {
+				getDate: elem => parseInt(elem.id.replace("timestamp-", "")),
+			});
+		});
+	});
 } else if (1 && frycAPI_host("tech.wp.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -10958,7 +10967,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 
 			// let relTimeCount = 0;
 			frycAPI.forEach(`relative-time`, (daElem, daI, daArr) => { // :not(.poprawnyCzas)
-				if (daElem.shadowRoot.querySelector(`span.dspNONE`) === null) {
+				if (daElem.shadowRoot?.querySelector(`span.dspNONE`) === null) {
 					const data = new Date(daElem.getAttribute("datetime"));
 					if (frycAPI.isValidDate(data)) {
 						daElem.shadowRoot.innerHTML = frycAPI.printRelTime(data) + `<span class="dspNONE"></span>`;
