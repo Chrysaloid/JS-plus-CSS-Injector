@@ -4126,7 +4126,11 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 		}
 
 		/* Disable "The GPT-5 model limit has been reached on the Free plan." */
-		:has(> * > * > * > * > * > * > button[data-testid="close-button"]) {
+		/* :has(> * > * > * > * > * > * > button[data-testid="close-button"]) {
+			display: none;
+		} */
+
+		#page-header :has(> [aria-label="Dismiss upgrade reminder"]) {
 			display: none;
 		}
 	`);
