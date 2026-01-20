@@ -1,4 +1,4 @@
-// #region //* Początek
+// #region //* Beggining
 /* 0 eslint no-implicit-globals: ["warn", {"lexicalBindings": true}] */
 /// <reference path="frycAPI-expandPrototype.js"/>
 "use strict";
@@ -422,7 +422,7 @@ function temₚ(strings, ...values) { // Extract contents of string template lit
 
 // #region //* frycAPI
 var frycAPI = { // eslint-disable-line object-shorthand, no-var
-	// #region //* Zmienne 1
+	// #region //* Variables 1
 	// #region //* Deklaracje
 	second: null,
 	minute: null,
@@ -499,7 +499,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	// #endregion
 	// #endregion
 
-	// #region //* Funkcje 1
+	// #region //* Functions 1
 	sleep(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms)); // eslint-disable-line no-promise-executor-return
 	}, // await frycAPI.sleep(1);
@@ -707,7 +707,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return fact;
 	},
 	// #endregion
-	// #region //* Funkcje 2
+	// #region //* Functions 2
 	getWorkerURL(myWorkerFun = () => {}) {
 		const str = myWorkerFun.toString();
 		return URL.createObjectURL(new Blob([str.substring(
@@ -940,7 +940,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return frycAPI.sendEventToBackground("getImgAsDataUrl", imgUrl);
 	},
 	// #endregion
-	// #region //* Funkcje 3
+	// #region //* Functions 3
 	gDriveLinkToImgSrc(link) { // Converts Google drive open link to download link which is possible to be src of an img etc.
 		return frycAPI.gDriveIdToImgSrc(new URL(link).pathname.replace("/file/d/", "").replace("/view", ""));
 	},
@@ -1439,7 +1439,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return outStr;
 	},
 	// #endregion
-	// #region //* Funkcje 4
+	// #region //* Functions 4
 	querySelOk(selector, elem = document) {
 		return elem.querySelector(selector) !== null;
 	},
@@ -1926,7 +1926,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	// #endregion
 	// #endregion
 };
-// #region //* Reszta
+// #region //* Rest
 frycAPI.second =                  1000;
 frycAPI.minute = frycAPI.second *   60;
 frycAPI.hour   = frycAPI.minute *   60;
@@ -1954,8 +1954,8 @@ try {
 // #endregion
 // #endregion
 
-// #region //* IFy  1
-if (1) { //* Globalne funkcje
+// #region //* IFs  1
+if (1) { //* Global functions
 	// frycAPI.injectStyleOnLoad(/*css*/`
 	// 	* {
 	// 		tab-size: 3 !important;
@@ -2057,7 +2057,7 @@ if (1) { //* Globalne funkcje
 	});
 	*/
 
-	frycAPI.createManualFunctions("Globalne funkcje", {
+	frycAPI.createManualFunctions("Global functions", {
 		funcArr: [
 			(name = "Edit Script", type = frycAPI_Normal) => {
 				const f = new type({ name });
@@ -2115,6 +2115,17 @@ if (1) { //* Globalne funkcje
 				const f = new type({ name });
 				f.callback = function (obj) {
 					frycAPI.copyTxt(decodeURI(location.href));
+				};
+				return f;
+			},
+			(name = "Make headings clickable", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = function (obj) {
+					frycAPI.forEach(`:is(h1,h2,h3,h4,h5,h6)[id]`, heading => {
+						const txt = heading.innerText;
+						heading.innerText = "";
+						heading.appendChild(frycAPI.elem("a").attr("href", location.origin + location.pathname + "#" + heading.id).text(txt)._);
+					});
 				};
 				return f;
 			},
@@ -4410,7 +4421,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy  2
+// #region //* IFs  2
 else if (1 && frycAPI_host("css-tricks.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -5043,7 +5054,7 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy  3
+// #region //* IFs  3
 else if (1 && frycAPI_host("jsongrid.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -5357,7 +5368,7 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy  4
+// #region //* IFs  4
 else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith("/api/")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -6290,7 +6301,7 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy  5
+// #region //* IFs  5
 else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -7729,7 +7740,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy  6
+// #region //* IFs  6
 else if (1 && frycAPI_host("www.enpassant.dk")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -8256,7 +8267,7 @@ else if (1 && frycAPI_host("www.enpassant.dk")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy  7
+// #region //* IFs  7
 else if (1 && frycAPI_host("www.messenger.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	const messageContainer = `[aria-label^="Wiadomości"] > div > div[role="none"] > div`;
@@ -9092,7 +9103,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	});
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy  8
+// #region //* IFs  8
 else if (1 && frycAPI_host("www.worldometers.info")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -9872,7 +9883,7 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 	`);
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy  9
+// #region //* IFs  9
 else if (frycAPI_host("www.fakrosno.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -11306,7 +11317,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	});
 } // eslint-disable-line brace-style
 // #endregion
-// #region //* IFy 10
+// #region //* IFs 10
 else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -12706,7 +12717,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 }
 // Code-Lens-Action insert-snippet IF template
 
-// #region //* IFy 11
+// #region //* IFs 11
 // #endregion
 // #endregion
 if (1) { //* Global functions end
@@ -12736,7 +12747,7 @@ if (1) { //* Global functions end
 	// #endregion
 }
 
-// #region //* Koniec
+// #region //* End
 if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // Adding style from the active IF block
 	frycAPI.createMutObs(() => {
 		if (document.body) {
