@@ -12714,6 +12714,13 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.onLoadSetter(function () {
 		frycAPI.forEach(`.side .spacer:is(:not(:has(*)), :has(.premium-banner-outer))`, el => el.remove());
 	}, 2);
+} else if (frycAPI_host("matplotlib.org", "numpy.org", "pandas.pydata.org")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		#pst-back-to-top {
+			display: none !important;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
