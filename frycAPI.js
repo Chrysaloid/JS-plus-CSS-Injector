@@ -9290,7 +9290,7 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 		}
 	`);
 
-	let disableEndScreen;
+	let disableEndScreen, hideTranslateButtons;
 
 	(frycAPI.beforeLoad = function () {
 		// Delete comments
@@ -9401,6 +9401,12 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 				display: none;
 			}
 		`);
+
+		hideTranslateButtons = frycAPI.injectStyle(/*css*/`
+			tp-yt-paper-button[noink].ytd-tri-state-button-view-model {
+				display: none;
+			}
+		`);
 	});
 
 	frycAPI.createManualFunctions("YouTube", {
@@ -9412,6 +9418,16 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 				});
 				f.callback = function (obj) {
 					disableEndScreen.toggle();
+				};
+				return f;
+			},
+			(name = "Hide translate buttons", type = frycAPI_PureState) => {
+				const f = new type({
+					name: name,
+					state: 1,
+				});
+				f.callback = function (obj) {
+					hideTranslateButtons.toggle();
 				};
 				return f;
 			},
