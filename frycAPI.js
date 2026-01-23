@@ -1648,14 +1648,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return frycAPI.sendEventToBackground("getStorage", { UUID: frycAPI.UUID, keys: keys });
 	}, // const vals = await frycAPI.getStorages(["key"]);
 	searchParamsToObj(url = location.href) {
-		if (url instanceof URL === false) {
-			url = new URL(url);
-		}
-		const obj = {};
-		for (const [key, value] of url.searchParams) {
-			obj[key] = value;
-		}
-		return obj;
+		return Object.fromEntries(new URL(url).searchParams);
 	}, // const objPars = frycAPI.searchParamsToObj();
 	qSelList: Element.prototype.frycAPI_qSelList,
 	// const elem = frycAPI.qSelList([``]);
