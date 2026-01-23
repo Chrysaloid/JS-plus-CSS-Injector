@@ -11,7 +11,7 @@ async function runOnPage(daFunc, args = []) {
 	});
 	return result;
 }
-class ManualFuncTypes {
+class ManualFuncTypes { // class is used here instead of object so the variable has different color than a CONSTANT
 	static NORMAL   = "NORMAL";
 	static STATE    = "STATE";
 	static RADIO    = "RADIO";

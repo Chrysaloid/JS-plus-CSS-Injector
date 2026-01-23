@@ -6345,6 +6345,7 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 			document.querySelector(`[jsname="T118cc"]`).click();
 		});
 	});
+	window.onbeforeunload = e => "Are you sure?"; // as Translate Google is always open this acts like a close confirmation for the whole browser // https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#:~:text=Returning%20any%20truthy%20value%20from%20the%20event%20handler%20function
 } else if (1 && frycAPI_host("trello.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
