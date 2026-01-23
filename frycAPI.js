@@ -11040,14 +11040,27 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 } else if (frycAPI_host("support.google.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		frycAPI.forEach(`sc-tailwind-thread-post_header-post-date`, (daElem, daI, daArr) => {
-			const htmlBlob = daElem.querySelector(`html-blob`);
-			const data = new Date(htmlBlob.innerText);
-			daElem.querySelector(`.scTailwindThreadPost_headerPostdateroot`).innerHTML = frycAPI.printRelTime(data);
-			htmlBlob.innerText = frycAPI.printDate(data);
+		frycAPI.setDefaultDate(`sc-tailwind-thread-post_header-post-date`, {
+			getDate: elem => {
+				const txt = elem.querySelector(`.post-date-tooltip`).innerText;
+				const [date, time] = txt.replace(",", "").split(" ");
+				const [day, month, year] = date.split(".");
+				return `${year}-${month}-${day} ${time}`;
+			},
+			dateOpts: {
+				printDate: frycAPI.getDateFormatter({
+					year  : "numeric",
+					month : "2-digit",
+					day   : "2-digit",
+					defaultUndef: 1,
+				}),
+			},
 		});
 	});
 } else if (frycAPI_host("okazja-hurtownia.pl")) {
@@ -11932,6 +11945,12 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 				if (daElem.innerText === "") {
 					daElem.classList.add("empty-p");
 				}
+			});
+
+			frycAPI.forEach(`.dcc-code-sections__label[id]:not(:has(> a))`, heading => {
+				const txt = heading.innerText;
+				heading.innerText = "";
+				heading.appendChild(frycAPI.elem("a").attr("href", location.origin + location.pathname + "#" + heading.id).text(txt)._);
 			});
 		});
 	}, 2);

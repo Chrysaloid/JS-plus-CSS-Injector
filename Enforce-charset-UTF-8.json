@@ -1,0 +1,33 @@
+[
+	{
+		"id": 1,
+		"priority": 1,
+		"condition": {
+			"resourceTypes": ["main_frame", "sub_frame"],
+			"requestMethods": ["get"],
+			"urlFilter": "|http",
+			"excludedResponseHeaders": [
+				{
+					"header": "content-type",
+					"values": ["*charset=?utf-8*"]
+				}
+			],
+			"responseHeaders": [
+				{
+					"header": "content-type",
+					"values": ["*text/html*"]
+				}
+			]
+		},
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "set",
+					"header": "content-type",
+					"value": "text/html; charset=utf-8"
+				}
+			]
+		}
+	}
+]

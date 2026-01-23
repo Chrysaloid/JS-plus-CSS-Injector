@@ -40,6 +40,11 @@
 				"id": "pdf",
 				"enabled": false,
 				"path": "PDF-download-rule.json"
+			},
+			{
+				"id": "charset-utf8",
+				"enabled": true,
+				"path": "Enforce-charset-UTF-8.json"
 			}
 		]
 	}
