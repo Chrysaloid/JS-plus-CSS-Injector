@@ -827,7 +827,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	}, // frycAPI.downloadUrl(url, "Test.txt");
 	downloadTxt(text, filename) {
 		// a.href = 'data:attachment/text;charset=utf-8,' + encodeURI(text);
-		frycAPI.downloadHelper(URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" })), filename);
+		frycAPI.downloadHelper(URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" })), filename);
 	}, // frycAPI.downloadTxt("Test", "Test.txt");
 	async getMimeType(filename) {
 		const pos = filename.lastIndexOf(".");
@@ -12750,6 +12750,23 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			display: none !important;
 		}
 	`);
+} else if (frycAPI_host("developer.spotify.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	frycAPI.createManualFunctions("Spotify for Developers", {
+		funcArr: [
+			(name = "Catch and redirect request", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = async function (obj) {
+					await frycAPI.sendEventToBackground("catchSpotifyRequest");
+					frycAPI.qSel(`[data-encore-id="buttonPrimary"]`).click();
+				};
+				return f;
+			},
+		],
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 

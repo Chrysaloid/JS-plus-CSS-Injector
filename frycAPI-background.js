@@ -84,7 +84,28 @@ function blobToBase64(blob) {
 		};
 	});
 }
-// data:image/jpeg;
+function catchSpotifyRequest(details) {
+	if (details.method !== "GET") return;
+
+	const authorization = details.requestHeaders?.find(
+		header => header.name.toLowerCase() === "authorization"
+	)?.value;
+
+	if (!authorization) return;
+
+	chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest);
+	fetch("http://localhost:3099/", { headers: { authorization } });
+}
+function onTabClosed(tabId, callback) {
+	const listener = closedTabId => {
+		if (closedTabId !== tabId) return;
+		chrome.tabs.onRemoved.removeListener(listener);
+		callback();
+	};
+
+	chrome.tabs.onRemoved.addListener(listener);
+}
+
 chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sender, sendResp) {
 	// log(name);
 	// log(data);
@@ -137,6 +158,11 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 			case "storageUsedPerc": return chrome.storage.sync.getBytesInUse(null).then(bytesInUse => {
 				return (bytesInUse / chrome.storage.sync.QUOTA_BYTES * 100).toFixed(3) + " %";
 			});
+			case "catchSpotifyRequest": {
+				chrome.webRequest.onBeforeSendHeaders.addListener(catchSpotifyRequest, { urls: ["https://api.spotify.com/*"], tabId: sender.tab.id }, ["requestHeaders"]);
+				onTabClosed(sender.tab.id, () => chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest));
+				return;
+			};
 			case "test": {
 				log(data);
 				return data;
