@@ -1913,6 +1913,11 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			return err.stack.match(/(\d+):\d+$/)?.[1]; // return first capturing group
 		}
 	}, // frycAPI.getLineNumber();
+	runResScript(filename) {
+		const script = document.createElement("script");
+		script.src = frycAPI.getResURL(filename);
+		document.documentElement.appendChild(script);
+	}, // frycAPI.runResScript("Test-script.js");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
