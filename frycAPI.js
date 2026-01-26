@@ -1914,6 +1914,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 	}, // frycAPI.getLineNumber();
 	runResScript(filename) {
+		frycAPI.forEach(`script[src$="${filename}"]`, elem => elem.remove());
 		const script = document.createElement("script");
 		script.src = frycAPI.getResURL(filename);
 		document.documentElement.appendChild(script);
@@ -12759,19 +12760,6 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
 	`);
-
-	frycAPI.createManualFunctions("Spotify for Developers", {
-		funcArr: [
-			(name = "Catch and redirect request", type = frycAPI_Normal) => {
-				const f = new type({ name });
-				f.callback = async function (obj) {
-					await frycAPI.sendEventToBackground("catchSpotifyRequest");
-					frycAPI.qSel(`[data-encore-id="buttonPrimary"]`).click();
-				};
-				return f;
-			},
-		],
-	});
 }
 // Code-Lens-Action insert-snippet IF template
 

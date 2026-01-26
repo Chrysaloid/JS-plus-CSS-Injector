@@ -84,6 +84,21 @@ function blobToBase64(blob) {
 		};
 	});
 }
+function onTabClosed(tabId, callback) {
+	const listener = closedTabId => {
+		if (closedTabId !== tabId) return;
+		chrome.tabs.onRemoved.removeListener(listener);
+		callback();
+	};
+
+	chrome.tabs.onRemoved.addListener(listener);
+}
+
+let spotifyAuthorizationResolve, spotifyAuthorizationReject;
+const spotifyAuthorization = new Promise((resolve, reject) => {
+	spotifyAuthorizationResolve = resolve;
+	spotifyAuthorizationReject = reject;
+});
 function catchSpotifyRequest(details) {
 	if (details.method !== "GET") return;
 
@@ -94,16 +109,7 @@ function catchSpotifyRequest(details) {
 	if (!authorization) return;
 
 	chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest);
-	fetch("http://localhost:3099/", { headers: { authorization } });
-}
-function onTabClosed(tabId, callback) {
-	const listener = closedTabId => {
-		if (closedTabId !== tabId) return;
-		chrome.tabs.onRemoved.removeListener(listener);
-		callback();
-	};
-
-	chrome.tabs.onRemoved.addListener(listener);
+	spotifyAuthorizationResolve(authorization);
 }
 
 chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sender, sendResp) {
@@ -160,9 +166,13 @@ chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sen
 			});
 			case "catchSpotifyRequest": {
 				chrome.webRequest.onBeforeSendHeaders.addListener(catchSpotifyRequest, { urls: ["https://api.spotify.com/*"], tabId: sender.tab.id }, ["requestHeaders"]);
-				onTabClosed(sender.tab.id, () => chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest));
+				onTabClosed(sender.tab.id, () => {
+					chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest);
+					spotifyAuthorizationReject();
+				});
 				return;
 			};
+			case "getSpotifyAuthorization": return spotifyAuthorization;
 			case "test": {
 				log(data);
 				return data;
