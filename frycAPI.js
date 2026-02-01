@@ -576,10 +576,10 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			console.error("Oops, unable to copy", err);
 		}
 		document.body.removeChild(textArea);
-	},
+	}, // frycAPI.ctrlC("Hello");
 	copyTxt(txt) {
 		return navigator.clipboard.writeText(txt);
-	},
+	}, // frycAPI.copyTxt("Hello");
 	zaokrl(val, decimals) {
 		return Number(Math.round(Number(val.toFixed(decimals) + "e+" + decimals)) + "e-" + decimals);
 	},
@@ -710,7 +710,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	// #region //* Functions 2
 	getWorkerURL(myWorkerFun = () => {}) {
 		const str = myWorkerFun.toString();
-		return URL.createObjectURL(new Blob([str.substring(
+		return frycAPI.objUrl(new Blob([str.substring(
 			str.indexOf("{") + 1,
 			str.lastIndexOf("}")
 		)]));
@@ -822,12 +822,16 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 		a.click();
 	},
-	downloadUrl(url, filename) {
-		return frycAPI.sendEventToBackground("downloadURL", { url, filename });
+	downloadUrl(url, filename, conflictAction = "overwrite") {
+		return frycAPI.sendEventToBackground("downloadURL", { url, filename, conflictAction });
 	}, // frycAPI.downloadUrl(url, "Test.txt");
+	createTextUrl(text, type = "application/octet-stream") { // application/octet-stream prevents Chrome from changing the file's extension if the URL were to be downloaded
+		return frycAPI.objUrl(new Blob([text], { type }));
+	}, // const url = frycAPI.createTextUrl("Test");
 	downloadTxt(text, filename) {
-		// a.href = 'data:attachment/text;charset=utf-8,' + encodeURI(text);
-		frycAPI.downloadHelper(URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" })), filename);
+		const url = frycAPI.createTextUrl(text);
+		frycAPI.downloadHelper(url, filename);
+		URL.revokeObjectURL(url);
 	}, // frycAPI.downloadTxt("Test", "Test.txt");
 	async getMimeType(filename) {
 		const pos = filename.lastIndexOf(".");
@@ -844,7 +848,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return frycAPI.mimeTypes[fileExt] ?? "text/plain";
 	}, // const mimeType = frycAPI.getMimeType("Test.txt");
 	async downloadTxtBackground(text, filename) {
-		return frycAPI.sendEventToBackground("downloadURL", { url: URL.createObjectURL(new Blob(["\ufeff" + text], { type: `${await frycAPI.getMimeType(filename)};charset=utf-8` })), filename: filename });
+		const url = frycAPI.createTextUrl(text);
+		await frycAPI.downloadUrl(url, filename);
+		URL.revokeObjectURL(url);
 	}, // frycAPI.downloadTxtBackground("Test", "Test.txt");
 	redownloadImg(img, filename) {
 		frycAPI.downloadHelper(img.src, filename);
@@ -961,7 +967,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return frycAPI.changeFavicon(frycAPI.getResURL(filename));
 	}, // frycAPI.changeFaviconRes("filename");
 	getResURL(filename) {
-		return `chrome-extension://${frycAPI.id}/resources/` + filename;
+		return `chrome-extension://${frycAPI.id}/resources/${filename}`;
 	}, // frycAPI.getResURL("")
 	readFile(filename, fileType, redirect = false) {
 		return fetch(redirect ? `/redirect?url=${encodeURIComponent(filename)}` : filename).then(resp => {
@@ -1729,7 +1735,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		canvas.getContext("2d").drawImage(videoEl, 0, 0);
 		canvas.toBlob(blob => {
 			if (!blob) return console.error("Failed to create blob");
-			const url = URL.createObjectURL(blob);
+			const url = frycAPI.objUrl(blob);
 			frycAPI.downloadHelper(url, filename);
 			URL.revokeObjectURL(url);
 		});
@@ -2113,7 +2119,7 @@ if (1) { //* Global functions
 			(name = "Copy decoded URL", type = frycAPI_Normal) => {
 				const f = new type({ name });
 				f.callback = function (obj) {
-					frycAPI.copyTxt(decodeURI(location.href));
+					frycAPI.ctrlC(decodeURI(location.href));
 				};
 				return f;
 			},
