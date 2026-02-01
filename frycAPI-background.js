@@ -93,6 +93,15 @@ function onTabClosed(tabId, callback) {
 
 	chrome.tabs.onRemoved.addListener(listener);
 }
+async function runOnPage(tabId, daFunc, args = []) {
+	const [{ result }] = await chrome.scripting.executeScript({
+		world: "MAIN",
+		target: { tabId },
+		func: daFunc,
+		args: args,
+	});
+	return result;
+} // const out = await runOnPage(sender.tab.id, () => {});
 
 let spotifyAuthorizationResolve, spotifyAuthorizationReject;
 const spotifyAuthorization = new Promise((resolve, reject) => {
@@ -112,77 +121,77 @@ function catchSpotifyRequest(details) {
 	spotifyAuthorizationResolve(authorization);
 }
 
-chrome.runtime.onMessageExternal.addListener(async function ({ name, data }, sender, sendResp) {
+chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, sendResp) {
 	// log(name);
 	// log(data);
-	try {
-		const dataOut = await (async () => { switch (name) { // eslint-disable-line brace-style
-			case "closeTab": return void chrome.tabs.remove(sender.tab.id);
-			case "downloadPDF": {
-				chrome.downloads.download({ url: data.url }).then(downloadId => {
-					// log(downloadId);
-					if (data.czyZamknąć) {
-						chrome.tabs.remove(sender.tab.id);
-					} else {
-						chrome.tabs.goBack(sender.tab.id);
-					}
-				});
-				return;
-			};
-			case "downloadURL": return void chrome.downloads.download({ url: data.url, filename: data.filename });
-			case "getImgAsDataUrl": return fetch(data).then(res => res.blob()).then(async blob => "data:" + blob.type + ";" + (await blobToBase64(blob)));
-			case "injectStyle": return sender.tab ? chrome.scripting.insertCSS(CSSInjection(data, sender)) : 0;
-			case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(CSSInjection(data, sender)) : 0;
-			case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
-				const obj = result[data.UUID];
-				if (obj) {
-					let objChanged = false;
-					for (const [key, value] of Object.entries(data.obj)) {
-						// hasOwnProperty is necessary to catch possibility of defining a new key with value undefined
-						if (obj[key] !== value || !obj.hasOwnProperty(key)) objChanged = true;
-						obj[key] = value;
-					}
-					if (objChanged) chrome.storage.sync.set({ [data.UUID]: obj });
+
+	(async () => { switch (name) { // eslint-disable-line brace-style
+		case "closeTab": return void chrome.tabs.remove(sender.tab.id);
+		case "downloadPDF": {
+			chrome.downloads.download({ url: data.url }).then(downloadId => {
+				// log(downloadId);
+				if (data.czyZamknąć) {
+					chrome.tabs.remove(sender.tab.id);
 				} else {
-					chrome.storage.sync.set({ [data.UUID]: data.obj });
+					chrome.tabs.goBack(sender.tab.id);
 				}
 			});
-			case "getStorage": return chrome.storage.sync.get(data.UUID).then(result => {
-				const obj = result[data.UUID];
-				if (obj) {
-					const newObj = {};
-					for (const key of data.keys) {
-						newObj[key] = obj[key];
-					}
-					return newObj;
-				} else {
-					return {};
+			return;
+		};
+		case "downloadURL": return void chrome.downloads.download(data);
+		case "getImgAsDataUrl": return fetch(data).then(res => res.blob()).then(async blob => "data:" + blob.type + ";" + (await blobToBase64(blob)));
+		case "injectStyle": return sender.tab ? chrome.scripting.insertCSS(CSSInjection(data, sender)) : 0;
+		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(CSSInjection(data, sender)) : 0;
+		case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
+			const obj = result[data.UUID];
+			if (obj) {
+				let objChanged = false;
+				for (const [key, value] of Object.entries(data.obj)) {
+					// hasOwnProperty is necessary to catch possibility of defining a new key with value undefined
+					if (obj[key] !== value || !obj.hasOwnProperty(key)) objChanged = true;
+					obj[key] = value;
 				}
+				if (objChanged) chrome.storage.sync.set({ [data.UUID]: obj });
+			} else {
+				chrome.storage.sync.set({ [data.UUID]: data.obj });
+			}
+		});
+		case "getStorage": return chrome.storage.sync.get(data.UUID).then(result => {
+			const obj = result[data.UUID];
+			if (obj) {
+				const newObj = {};
+				for (const key of data.keys) {
+					newObj[key] = obj[key];
+				}
+				return newObj;
+			} else {
+				return {};
+			}
+		});
+		case "removeStorage": return chrome.storage.sync.remove(data);
+		case "storageUsed": return chrome.storage.sync.getBytesInUse(null);
+		case "storageUsedPerc": return chrome.storage.sync.getBytesInUse(null).then(bytesInUse => {
+			return (bytesInUse / chrome.storage.sync.QUOTA_BYTES * 100).toFixed(3) + " %";
+		});
+		case "catchSpotifyRequest": {
+			chrome.webRequest.onBeforeSendHeaders.addListener(catchSpotifyRequest, { urls: ["https://api.spotify.com/*"], tabId: sender.tab.id }, ["requestHeaders"]);
+			onTabClosed(sender.tab.id, () => {
+				chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest);
+				spotifyAuthorizationReject();
 			});
-			case "removeStorage": return chrome.storage.sync.remove(data);
-			case "storageUsed": return chrome.storage.sync.getBytesInUse(null);
-			case "storageUsedPerc": return chrome.storage.sync.getBytesInUse(null).then(bytesInUse => {
-				return (bytesInUse / chrome.storage.sync.QUOTA_BYTES * 100).toFixed(3) + " %";
-			});
-			case "catchSpotifyRequest": {
-				chrome.webRequest.onBeforeSendHeaders.addListener(catchSpotifyRequest, { urls: ["https://api.spotify.com/*"], tabId: sender.tab.id }, ["requestHeaders"]);
-				onTabClosed(sender.tab.id, () => {
-					chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest);
-					spotifyAuthorizationReject();
-				});
-				return;
-			};
-			case "getSpotifyAuthorization": return spotifyAuthorization;
-			case "test": {
-				log(data);
-				return data;
-			};
-			default: throw new Error(`There is no event with name "${name}". Received data: ${data}`);
-		}})(); // eslint-disable-line brace-style
+			return;
+		};
+		case "getSpotifyAuthorization": return spotifyAuthorization;
+		case "test": {
+			log(data);
+			return data;
+		};
+		default: throw new Error(`There is no event with name "${name}". Received data: ${data}`);
+	}})().then(dataOut => { // eslint-disable-line brace-style
 		sendResp({ error: false, data: dataOut });
-	} catch (err) {
+	}).catch(err => {
 		sendResp({ error: true, errObj: { message: err.message, stack: err.stack } });
-	}
+	});
 	return true; // Necessary if we want to send a response using sendResp
 });
 
@@ -195,7 +204,7 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 	if (!findHeader(details.responseHeaders, "content-type")?.value.toLowerCase().includes("application/pdf")) return; // request is not for PDF
 	if (findHeader(details.responseHeaders, "content-disposition")?.value.toLowerCase().includes("attachment")) return; // requested PDF will be downloaded so don't download it again
 	// log(details);
-	chrome.downloads.download({ url: details.url });
+	chrome.downloads.download({ url: details.url, conflictAction: "overwrite" });
 	chrome.tabs.onUpdated.addListener(function tabsOnUpdated(tabId, changeInfo, tab) { // addlistener to close the tab or go back
 		// log(changeInfo);
 		if (changeInfo.status === "loading") {
@@ -206,6 +215,18 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 		}
 	});
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
+
+/* // Force all downloads to overwrite any existing files instead of inserting ' (1)', ' (2)', etc. | Does not work and is dangerous
+chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
+	if	(item.byExtensionId) {
+		log(item.byExtensionId);
+		suggest(); // does not work, conflictAction from download is ignored
+	} else {
+		log("Empty");
+		suggest({ filename: item.filename, conflictAction: "overwrite" });
+	}
+});
+*/
 
 // #region Unused
 /* // As of Manifest V3, this is only available to policy installed extensions.
