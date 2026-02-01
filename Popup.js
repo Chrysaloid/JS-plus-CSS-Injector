@@ -1,6 +1,9 @@
 "use strict";
-async function getActiveTarget() {
-	return { tabId: (await chrome.tabs.query({ active: true, currentWindow: true }))[0].id };
+function getActiveTab() { // https://stackoverflow.com/a/17076501/12035658
+	return chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(tabArr => tabArr[0]);
+} // const tab = await getActiveTab();
+function getActiveTarget() {
+	return getActiveTab().then(tab => ({ tabId: tab.id }));
 } // const tabID = await getActiveTarget();
 async function runOnPage(daFunc, args = []) {
 	const [{ result }] = await chrome.scripting.executeScript({
@@ -10,7 +13,7 @@ async function runOnPage(daFunc, args = []) {
 		args: args,
 	});
 	return result;
-}
+} // const out = await runOnPage(() => {});
 class ManualFuncTypes { // class is used here instead of object so the variable has different color than a CONSTANT
 	static NORMAL   = "NORMAL";
 	static STATE    = "STATE";
@@ -65,12 +68,12 @@ function setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows) {
 		if (col === numCols) funcEl.classList.add("lastCol");
 	}
 }
-const additionalActions = {
+const additionalActions = { // they should return true if the popup should be rerendered
 	close: data => window.close(),
 };
 async function main(frycAPI0) {
 	// #region //* Wstęp
-	if ((await chrome.tabs.query({ active: true, currentWindow: true }))[0].url.startsWith("chrome://")) return;
+	if (await getActiveTab().then(tab => tab.url.startsWith("chrome://"))) return;
 	frycAPI0 ??= await runOnPage(() => frycAPI);
 	const mainCont = document.getElementById("mainCont");
 	mainCont.textContent = "";
