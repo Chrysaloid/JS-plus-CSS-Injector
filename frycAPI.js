@@ -1925,6 +1925,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		script.src = frycAPI.getResURL(filename);
 		document.documentElement.appendChild(script);
 	}, // frycAPI.runResScript("Test-script.js");
+	goToId(id) {
+		if (!frycAPI.byID(id)) throw new Error(`There is no element with id="${id}"`);
+		location.hash = id;
+	}, // frycAPI.goToId("someId");
+	scrollToId(id, options) {
+		const elem = frycAPI.byID(id);
+		if (!elem) throw new Error(`There is no element with id="${id}"`);
+		elem.scrollIntoView(options);
+	}, // frycAPI.goToId("someId");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
