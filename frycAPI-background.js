@@ -216,6 +216,24 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 	});
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
 
+/* // For the future if we needed to add repetative declarativeNetRequest rules. It has to be done iside onInstalled
+chrome.runtime.onInstalled.addListener(() => {
+	chrome.declarativeNetRequest.getDynamicRules().then(oldRules => {
+		chrome.declarativeNetRequest.updateDynamicRules({
+			removeRuleIds: oldRules.map(rule => rule.id),
+			addRules: [
+				"value",
+			].map((value, index) => ({
+				id: index + 1,
+				priority: 1,
+				condition: {},
+				action: {},
+			})),
+		});
+	});
+});
+*/
+
 /* // Force all downloads to overwrite any existing files instead of inserting ' (1)', ' (2)', etc. | Does not work and is dangerous
 chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
 	if	(item.byExtensionId) {
