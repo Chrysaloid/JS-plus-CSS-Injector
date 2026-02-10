@@ -10941,6 +10941,11 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		:root {
 			--wysokość: 13px;
 			--padd: 5px;
+			/* --fontStack-monospace: "Source Code Fryc"; */
+			--fontStack-sansSerif: "IBM Plex Sans Condensed";
+		}
+		tt, code, samp {
+			font-family: "Source Code Fryc", var(--fontStack-monospace);
 		}
 		div:has(>pre:first-child) {
 			padding-top: calc(var(--wysokość) + 2*var(--padd));
@@ -10962,7 +10967,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				color: var(--color-prettylights-syntax-comment);
 				line-height: var(--wysokość);
 				/* box-sizing: border-box; */
-				font-family: var(--fontStack-monospace, ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace);
+				font-family:  "Source Code Fryc", var(--fontStack-monospace, ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace);
 			}
 			>.zeroclipboard-container {
 				top: calc(var(--wysokość) + 2*var(--padd)) !important;
