@@ -3086,10 +3086,10 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 				const myButtWrapTemp = frycAPI.elemFromHTML(/*html*/`<td><div class="myButtonWrapper"></div></td>`);
 				const buttTemp = frycAPI.elemFromHTML(/*html*/`<div class="copyButton"></div>`);
 				const arrowToWASD = {
-					"Up Arrow.png": "w",
-					"Left Arrow.png": "a",
-					"Down Arrow.png": "s",
-					"Right Arrow.png": "d",
+					"Stratagem Arrow Up.svg": "w",
+					"Stratagem Arrow Left.svg": "a",
+					"Stratagem Arrow Down.svg": "s",
+					"Stratagem Arrow Right.svg": "d",
 				};
 				frycAPI.retryIf(() => frycAPI.querySelOk(`.wikitable thead > tr`), 50, () => {
 					frycAPI.forEach(`.wikitable`, table => {
@@ -3107,7 +3107,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 								frycAPI.copyTxt(firstChild.firstElementChild.firstElementChild.src.match(/.+?\.png/)[0].replace("/thumb", ""));
 							});
 							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("AHK code")).addEventListener("click", () => {
-								frycAPI.copyTxt(`helld2("${thirdChild.querySelectorAll("img").map(e => arrowToWASD[e.alt]).join("")}",0) ; ${secondChild.innerText}`);
+								frycAPI.copyTxt(`helld2("${thirdChild.querySelectorAll("img").map(e => arrowToWASD[e.alt]).join("")}",1) ; ${secondChild.innerText}`);
 							});
 							myButtWrap.appendChild(buttTemp.cloneNode(1).frycAPI_setInnerText("Delete row")).addEventListener("click", () => {
 								row.remove();
