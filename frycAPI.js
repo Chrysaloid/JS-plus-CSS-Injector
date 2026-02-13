@@ -405,6 +405,26 @@ class frycAPI_MutationObserver extends MutationObserver {
 		return this;
 	}
 }
+class frycAPI_Cache extends Object {
+	path;
+	constructor(cacheId) {
+		super();
+		this.path = frycAPI.atob_utf8(cacheId); // eslint-disable-line no-use-before-define
+	}
+	getFileUrl(name) {
+		return this.path + name;
+	}
+	async fileExists(name) {
+		const url = this.getFileUrl(name);
+
+		try {
+			const response = await fetch(url, { method: "HEAD" });
+			return response.ok;
+		} catch {
+			return false;
+		}
+	}
+}
 function loguj(...tekst) {
 	console.log(...tekst);
 }
@@ -1934,6 +1954,23 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		if (!elem) throw new Error(`There is no element with id="${id}"`);
 		elem.scrollIntoView(options);
 	}, // frycAPI.goToId("someId");
+	btoa_utf8(value) {
+		return btoa(
+			String.fromCharCode(
+				...new TextEncoder()
+				.encode(value)
+			)
+		);
+	}, // const encoded = frycAPI.btoa_utf8("msg");
+	atob_utf8(value) {
+		const value_latin1 = atob(value);
+		return new TextDecoder().decode(
+			Uint8Array.from(
+				{ length: value_latin1.length },
+				(element, index) => value_latin1.charCodeAt(index)
+			)
+		);
+	}, // const decoded = frycAPI.atob_utf8("dfgbbklhdfg");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -9987,6 +10024,11 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	const poolTileDesc = `section.posts-container article`;
 
 	const pathName = frycAPI.path;
+	const caches = [
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxLyFEb2MyLw=="),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxLw=="),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvRGlzY29yZCBBUlRzL01pbmVGb2xkZXIv"),
+	];
 
 	frycAPI.injectStyleOnLoad(/*css*/`
 		*:not(i) {
@@ -10020,7 +10062,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		ul#ui-id-1 {
 			width: fit-content !important;
 		}
-		img#image {
+		#image {
 			max-width: 100%;
 			max-height: 94vh;
 			/* width: 95vw;
@@ -10354,6 +10396,17 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 
 	frycAPI.onLoadSetter(() => {
 		if (pathName.startsWith("/posts/")) {
+			const image = frycAPI.byID("image");
+
+			const sidebarInfo = {};
+			frycAPI.forEach(`#post-information .post-sidebar-label`, daElem => {
+				const txt = daElem.textContent.trim();
+				if (!txt) return;
+				const valElem = daElem.nextElementSibling;
+				if (!valElem) return;
+				sidebarInfo[txt] = valElem.textContent.trim();
+			});
+
 			const defaultScroll = () => {
 				scrollTo(0, document.documentElement.scrollTop + (document.getElementById("nav-links-top") ?? document.getElementById("image")).getBoundingClientRect().y - 1);
 			};
@@ -10362,7 +10415,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			.frycAPI_setInnerHTML("Deafult scroll")
 			.onclick = defaultScroll)();
 
-			document.getElementById("image").addEventListener("load", defaultScroll);
+			image.addEventListener("load", defaultScroll);
 
 			// const download = document.querySelector(`#image-download-link > a.button`);
 			// download.setAttribute("onclick", `location.href = '${download.getAttribute("href")}'`);
@@ -10377,6 +10430,20 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			const newComment = frycAPI.qSel(`.new-comment`);
 			newComment.parentElement.insertAdjacentElement("afterBegin", newComment);
 			frycAPI.byID("post-sections").style.setProperty("--comment-count", `"Comments (${frycAPI.qSelAll(`article.comment`).length})"`);
+			// #endregion
+
+			// #region //* Try to load image from cache
+			(async () => {
+				const filename = `${sidebarInfo.MD5}.${sidebarInfo.Type.toLowerCase()}`.lóg;
+				for (const cache of caches) {
+					if (await cache.fileExists(filename)) {
+						image.src = "";
+						image.src = cache.getFileUrl(filename);
+						document.title = "Cached - " + document.title;
+						return;
+					}
+				}
+			})();
 			// #endregion
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.querySelector("form.post-search-form"));
