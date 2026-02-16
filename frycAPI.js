@@ -1939,10 +1939,11 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			return err.stack.match(/(\d+):\d+$/)?.[1]; // return first capturing group
 		}
 	}, // frycAPI.getLineNumber();
-	runResScript(filename) {
+	runResScript(filename, asynchronous = false) {
 		frycAPI.forEach(`script[src$="${filename}"]`, elem => elem.remove());
 		const script = document.createElement("script");
 		script.src = frycAPI.getResURL(filename);
+		script.async = asynchronous;
 		document.documentElement.appendChild(script);
 	}, // frycAPI.runResScript("Test-script.js");
 	goToId(id) {
@@ -1971,6 +1972,16 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			)
 		);
 	}, // const decoded = frycAPI.atob_utf8("dfgbbklhdfg");
+	async resExists(filename) {
+		const url = frycAPI.getResURL(filename);
+
+		try {
+			const response = await fetch(url, { method: "HEAD" });
+			return response.ok ? url : null;
+		} catch {
+			return null;
+		}
+	}, // const fileURL = await frycAPI.resExists("someName");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -2107,6 +2118,14 @@ if (1) { //* Global functions
 		],
 	});
 	*/
+
+	// Run script passed as URL param
+	const filenames = frycAPI.websiteUrl.searchParams.get("frycAPI-run-script");
+	if (filenames) {
+		for (const filename of filenames.split(";")) {
+			frycAPI.runResScript(filename);
+		}
+	}
 
 	frycAPI.createManualFunctions("Global functions", {
 		funcArr: [
