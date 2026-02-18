@@ -2188,6 +2188,13 @@ if (1) { //* Global functions
 				};
 				return f;
 			},
+			(name = "Copy base URL", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = function (obj) {
+					frycAPI.ctrlC(location.origin);
+				};
+				return f;
+			},
 			(name = "Make headings clickable", type = frycAPI_Normal) => {
 				const f = new type({ name });
 				f.callback = function (obj) {
