@@ -11418,28 +11418,28 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	`);
 
 	frycAPI.onLoadSetter(function () {
-		if (frycAPI.path.startsWith("/koszyk")) {
-			frycAPI.createMutObs((mutRecArr, mutObs) => {
-				frycAPI.forEach(`cart div > section`, sekcja => {
-					let suma = 0;
-					sekcja.querySelectorAll(`.pr127m.pro3hx`).forEach(cena => {
-						suma += Number(cena.innerText.replace(/.zł/, "").replace(",", "."));
-					});
-					const dostawa = sekcja.querySelector(`.mpof_uk.munh_4.pr127m`);
-					if (dostawa !== null) suma += Number(dostawa.innerText.replace(/.zł/, "").replace(",", "."));
-					const sumaParent = sekcja.querySelector(`[data-box-name="baby-search"]`);
-					if (sumaParent !== null) {
-						suma = `Suma: ${suma.toFixed(2).replace(".", ",")} zł`;
-						const sumaElem = sumaParent.querySelector(`.suma-od-jednego-sprzedawcy`);
-						if (sumaElem !== null) {
-							sumaElem.innerText = suma;
-						} else {
-							sumaParent.frycAPI_appendHTML(`<div class="suma-od-jednego-sprzedawcy">${suma}</div>`);
-						}
-					}
-				});
-			}, { elem: document.querySelector(`cart cart-header + div`) });
-		}
+		// if (frycAPI.path.startsWith("/koszyk")) {
+		// 	frycAPI.createMutObs((mutRecArr, mutObs) => {
+		// 		frycAPI.forEach(`cart div > section`, sekcja => {
+		// 			let suma = 0;
+		// 			sekcja.querySelectorAll(`.pr127m.pro3hx`).forEach(cena => {
+		// 				suma += Number(cena.innerText.replace(/.zł/, "").replace(",", "."));
+		// 			});
+		// 			const dostawa = sekcja.querySelector(`.mpof_uk.munh_4.pr127m`);
+		// 			if (dostawa !== null) suma += Number(dostawa.innerText.replace(/.zł/, "").replace(",", "."));
+		// 			const sumaParent = sekcja.querySelector(`[data-box-name="baby-search"]`);
+		// 			if (sumaParent !== null) {
+		// 				suma = `Suma: ${suma.toFixed(2).replace(".", ",")} zł`;
+		// 				const sumaElem = sumaParent.querySelector(`.suma-od-jednego-sprzedawcy`);
+		// 				if (sumaElem !== null) {
+		// 					sumaElem.innerText = suma;
+		// 				} else {
+		// 					sumaParent.frycAPI_appendHTML(`<div class="suma-od-jednego-sprzedawcy">${suma}</div>`);
+		// 				}
+		// 			}
+		// 		});
+		// 	}, { elem: document.querySelector(`cart cart-header + div`) });
+		// }
 	}, 2);
 
 	frycAPI.createManualFunctions("Opinie o produkcie", {
