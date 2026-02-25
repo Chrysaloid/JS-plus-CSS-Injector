@@ -12873,6 +12873,22 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
 	`);
+} else if (frycAPI_host("groups.google.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.createMutObs(() => {
+			frycAPI.setDefaultDate(`section[role="listitem"][data-doc-id][data-subject] [jsname] span + div > span:first-child`, { getDate: elem => {
+				const txt = elem.innerText; // date and time
+				if (!txt) return;
+				const nextTxtArr = elem.nextElementSibling.innerText.split("."); // date, non-american
+				if (nextTxtArr.length < 3) return;
+				return [nextTxtArr[1], nextTxtArr[0], nextTxtArr[2]].join(".") + txt.split(",")[1]; // convert to american date and add time that already contains a leading space
+			} });
+		});
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 
