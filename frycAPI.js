@@ -3105,7 +3105,9 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		#wikigg-showcase-sidebar,
 		#wikigg-sl-header,
-		#wikigg-showcase-header {
+		#wikigg-showcase-header,
+		#wikigg-sl-rail,
+		#wikigg-sl-footer {
 			display: none;
 		}
 
