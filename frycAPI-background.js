@@ -139,6 +139,17 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 			return;
 		};
 		case "downloadURL": return void chrome.downloads.download(data);
+		case "downloadNotify": return new Promise(resolve => {
+			let theId;
+			function onChanged({ id, state }) {
+				if (id === theId && state?.current !== "in_progress") { // state.current === "interrupted" || state.current === "complete"
+					chrome.downloads.onChanged.removeListener(onChanged);
+					resolve();
+				}
+			}
+			chrome.downloads.onChanged.addListener(onChanged);
+			chrome.downloads.download(data).then(id => { theId = id });
+		});
 		case "getImgAsDataUrl": return fetch(data).then(res => res.blob()).then(async blob => "data:" + blob.type + ";" + (await blobToBase64(blob)));
 		case "injectStyle": return sender.tab ? chrome.scripting.insertCSS(CSSInjection(data, sender)) : 0;
 		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(CSSInjection(data, sender)) : 0;

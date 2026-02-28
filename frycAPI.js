@@ -845,6 +845,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	downloadUrl(url, filename, conflictAction = "overwrite") {
 		return frycAPI.sendEventToBackground("downloadURL", { url, filename, conflictAction });
 	}, // frycAPI.downloadUrl(url, "Test.txt");
+	downloadNotify(url, filename, conflictAction = "overwrite") {
+		return frycAPI.sendEventToBackground("downloadNotify", { url, filename, conflictAction });
+	}, // frycAPI.downloadNotify(url, "Test.txt");
 	createTextUrl(text, type = "application/octet-stream") { // application/octet-stream prevents Chrome from changing the file's extension if the URL were to be downloaded
 		return frycAPI.objUrl(new Blob([text], { type }));
 	}, // const url = frycAPI.createTextUrl("Test");
