@@ -530,6 +530,12 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	injectStyle(style, opts = {}) { // Injects style to the page
 		if ((style = style.trim()).length) {
 			opts.id        ??= "frycAPI_styleNormal" + (++frycAPI.injectStyleNormalNum);
+
+			const alreadyInjectedStyle = frycAPI.byID(opts.id);
+			if (alreadyInjectedStyle) {
+				return alreadyInjectedStyle.frycAPI_StyleState;
+			}
+
 			opts.elevated  ??= false;
 			opts.state     ??= true;
 			opts.allFrames ??= false;
@@ -547,7 +553,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				if (!opts.state) styleElem.disabled = true; // For some reason setting disabled to true disables the style only when it is in the DOM, so we have to set it AFTER we instert it
 			}
 
-			return new frycAPI_StyleState({
+			const styleState = new frycAPI_StyleState({
 				id: opts.id,
 				styleElem: styleElem,
 				state: opts.state,
@@ -555,6 +561,8 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				style: css,
 				allFrames: opts.allFrames,
 			});
+			if (styleElem) styleElem.frycAPI_StyleState = styleState;
+			return styleState;
 		}
 	}, // frycAPI.injectStyle(/*css*/``, { id: "frycAPI_styleNormal", elem: document.documentElement, elevated: false, state: true, allFrames: false });
 	minifyCSS(style) {
@@ -615,14 +623,17 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		}
 	}, // frycAPI.clean();
 	makeTableSortable(tabElem, trSel = "tr:not(:first-child)", tdSel = "td", thSel = "th", tbodySel = "tbody") { // Pass reference to the table element
+		if (typeof tabElem === "string") {
+			tabElem = frycAPI.qSel(tabElem);
+		}
 		if (!tabElem) return;
 		const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
 		const sortObj = {
-			deafult      : (a, obj) =>        a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText,
-			ignoreCase   : (a, obj) =>        a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText.toUpperCase(),
-			numeric      : (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).innerText),
-			attrib       : (a, obj) =>        a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib),
-			attribNumeric: (a, obj) => Number(a.querySelector(`${tdSel}:nth-child(${obj.myIndex})`).getAttribute(obj.attrib)),
+			deafult      : (a, obj) =>        a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).innerText,
+			ignoreCase   : (a, obj) =>        a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).innerText.toUpperCase(),
+			numeric      : (a, obj) => Number(a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).innerText),
+			attrib       : (a, obj) =>        a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).getAttribute(obj.attrib),
+			attribNumeric: (a, obj) => Number(a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).getAttribute(obj.attrib)),
 		};
 		const sortHelp = function (objFun, obj) {
 			return (a, b) => sortHelp0(objFun(a, obj), objFun(b, obj), obj.kierunek);
@@ -631,7 +642,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			const th = this;
 			const kier = typeof rosnąco === "boolean" ? !rosnąco : th.classList.contains("posortowana");
 			const tbody = typeof tbodySel === "string" ? (tabElem.querySelector(tbodySel) ?? tabElem) : tbodySel;
-			Array.prototype.slice.call(tabElem.querySelectorAll(`${trSel}`), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "deafult"], {
+			Array.prototype.slice.call(tabElem.querySelectorAll(trSel), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "deafult"], {
 				attrib: th.getAttribute("attribSort"),
 				myIndex: th.getAttribute("index"), // :scope>tr
 				kierunek: kier ? -1 : 1,
@@ -652,7 +663,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 				& ${thSel} {
 					cursor: pointer;
 					&:hover {
-						background-color: hsla(0, 0%, 20%, 50%);
+						background-color: hsla(0, 0%, 40%, 50%) !important;
 					}
 					/* &:hover {
 						position: relative;
@@ -674,11 +685,23 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 					}
 				}
 			}
-		`);
-		tabElem.querySelectorAll(thSel).forEach(function (daElem, daI, daArr) {
+		`, { id: "frycAPI_makeTableSortable" });
+		tabElem.querySelectorAll(thSel).forEach((daElem, daI) => {
 			daElem.setAttribute("index", daI + 1);
 			daElem.addEventListener("click", sortFun);
 			daElem.sortFun = sortFun;
+		});
+		tabElem.querySelectorAll(`${tdSel}[rowspan]`).forEach(daElem => {
+			let rowspan = Number(daElem.getAttribute("rowspan"));
+			if (Number.isNaN(rowspan) || rowspan <= 1) return;
+			rowspan--;
+			daElem.removeAttribute("rowspan");
+			const idx = daElem.frycAPI_childIndex;
+			let parent = daElem.parentElement;
+			for (let i = 1; i <= rowspan; i++) {
+				parent.nextEl.children[idx]?.insertAdjacentElement("beforeBegin", daElem.cloneNode(1)) ?? parent.nextEl.insertAdjacentElement("beforeEnd", daElem.cloneNode(1));
+				parent = parent.nextEl;
+			}
 		});
 	}, // frycAPI.makeTableSortable(document.querySelector(`table`));
 	zmierzCzas(callback) {
@@ -3182,6 +3205,10 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 							});
 						});
 					});
+				});
+			} else if (frycAPI.path === "/wiki/Demolition") { // https://helldivers.wiki.gg/wiki/Demolition
+				frycAPI.forEach(".wikitable", el => {
+					frycAPI.makeTableSortable(el, "tr:not(:first-child)", "td,th", "tr:first-child > :is(td,th)");
 				});
 			}
 		}, 2);
