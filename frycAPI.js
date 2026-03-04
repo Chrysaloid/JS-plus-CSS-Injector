@@ -366,21 +366,43 @@ class frycAPI_Elem extends Object {
 	}
 }
 class frycAPI_MutationObserver extends MutationObserver {
-	#callback; target; options; #connected;
-	constructor(callback) {
+	#callback; #target; #options; #connected; #asyncCallback;
+	constructor(callback, asyncCallback, target, options, callTheCallback = true) {
 		super(callback);
 		this.#callback = callback;
+		this.#asyncCallback = asyncCallback ?? callback.constructor.name === "AsyncFunction";
+		this.#connected = false;
+		if (target && options) {
+			this.#target = target;
+			this.#options = options;
+			this.reconnect(callTheCallback);
+		} else if (target || options) {
+			throw new Error("target and options should be specified if you want to observe the target immediately");
+		} else {
+			this.#target = null;
+			this.#options = null;
+		}
 	}
 	get callback() {
 		return this.#callback;
 	}
+	get target() {
+		return this.#target;
+	}
+	get options() {
+		return this.#options;
+	}
 	get connected() {
 		return this.#connected;
 	}
+	get asyncCallback() {
+		return this.#asyncCallback;
+	}
 	observe(target, options) { // TODO: Make it so that multiple targets can be observed
+		super.disconnect();
 		super.observe(target, options);
-		this.target = target;
-		this.options = options;
+		this.#target = target;
+		this.#options = options;
 		this.#connected = true;
 		return this;
 	}
@@ -390,10 +412,24 @@ class frycAPI_MutationObserver extends MutationObserver {
 		return this;
 	}
 	reconnect(callTheCallback = false) {
-		if (this.#connected === false && (!callTheCallback || this.#callback([], this) !== true)) {
-			super.observe(this.target, this.options);
-			this.#connected = true;
+		if (this.#connected) return this;
+		if (callTheCallback) {
+			if (this.#asyncCallback) {
+				this.#connected = this.#callback([], this).then(result => {
+					if (result === true) {
+						return (this.#connected = false);
+					} else {
+						super.observe(this.#target, this.#options);
+						return (this.#connected = true);
+					}
+				});
+				return this;
+			} else if (this.#callback([], this) === true) {
+				return this;
+			}
 		}
+		super.observe(this.#target, this.#options);
+		this.#connected = true;
 		return this;
 	}
 	toggle(callOnReconnect) {
@@ -1068,20 +1104,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		};
 		const elem          = objOpts.elem        ?? document.body;
 		const runCallback   = objOpts.runCallback ?? true;
-		const asyncCallback = objOpts.async       ?? false;
+		const asyncCallback = objOpts.async       ?? callback.constructor.name === "AsyncFunction";
 
-		let mut;
-		if (asyncCallback) {
-			mut = new frycAPI_MutationObserver(async (mutRecArr, mutObs) => {
-				mutObs.disconnect();
-				if (await callback(mutRecArr, mutObs) !== true) mutObs.observe(elem, options);
-			});
-		} else {
-			mut = new frycAPI_MutationObserver((mutRecArr, mutObs) => {
-				mutObs.disconnect();
-				if (callback(mutRecArr, mutObs) !== true) mutObs.observe(elem, options);
-			});
-		}
+		const mut = asyncCallback ? new frycAPI_MutationObserver(async (mutRecArr, mutObs) => {
+			mutObs.disconnect();
+			if (await callback(mutRecArr, mutObs) !== true) mutObs.observe(elem, options);
+		}, asyncCallback) : new frycAPI_MutationObserver((mutRecArr, mutObs) => {
+			mutObs.disconnect();
+			if (callback(mutRecArr, mutObs) !== true) mutObs.observe(elem, options);
+		}, asyncCallback);
 
 		if (runCallback) {
 			if (asyncCallback) {
