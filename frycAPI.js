@@ -9573,6 +9573,22 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 				};
 				return f;
 			},
+			(name = "YT-DLP", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.additionalAction = { name: "close" };
+				f.callback = function (obj) {
+					frycAPI.sendMessageToAHK("YT-DLP", location.href);
+				};
+				return f;
+			},
+			(name = "YT-DLP extract audio", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.additionalAction = { name: "close" };
+				f.callback = function (obj) {
+					frycAPI.sendMessageToAHK("YT-DLP extract audio", location.href);
+				};
+				return f;
+			},
 		],
 	});
 } else if (1 && frycAPI_host("wyniki.diag.pl")) {
