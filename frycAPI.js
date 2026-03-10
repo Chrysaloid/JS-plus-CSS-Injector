@@ -1872,14 +1872,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		return currEl;
 	}, // frycAPI.traverseUntil("forward", elem, e => e.hasAttribute("attr"));
 	consonantsAsFirstLetters(str = "alphabet", consonants = "bcdfghjklmnpqrstvwxz") {
-		const vowels = "aąeęioóuy";
+		const vowels = "aąeęioóuy-";
 		str = str.split(" ").map(word => word.trim()).filter(word => word.length).map(word => {
 			const wordLower = word.toLowerCase();
+			const posOfFirstVowel = Math.min(...vowels.map(l => {
+				const idx = wordLower.indexOf(l);
+				return idx !== -1 ? idx : Infinity;
+			}));
 			return {
-				word: wordLower.slice(Math.min(...vowels.map(l => {
-					const idx = wordLower.indexOf(l);
-					return idx !== -1 ? idx : Infinity;
-				}))),
+				word: wordLower.slice(posOfFirstVowel !== Infinity ? posOfFirstVowel : 1),
 				case: word[0] === word[0].toUpperCase(),
 			};
 		});
