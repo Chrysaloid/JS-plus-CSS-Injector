@@ -1733,6 +1733,14 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	searchParamsToObj(url = location.href) {
 		return Object.fromEntries(new URL(url).searchParams);
 	}, // const objPars = frycAPI.searchParamsToObj();
+	searchParamsToObjMult(url = location.href) {
+		const searchParams = new URL(url).searchParams;
+		const baseObj = Object.fromEntries(searchParams);
+		for (const key of Object.keys(baseObj)) {
+			baseObj[key] = searchParams.getAll(key);
+		}
+		return baseObj;
+	}, // const objPars = frycAPI.searchParamsToObjMult();
 	qSelList: Element.prototype.frycAPI_qSelList,
 	// const elem = frycAPI.qSelList([``]);
 	checkChromeVersion() {
