@@ -4120,8 +4120,11 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 		.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary {
 			overflow: visible;
 		} */
-		*:not(code, code *, #codemirror *) {
+		* {
 			font-family: "IBM Plex Sans Condensed", sans-serif !important;
+		}
+		code, code *, #codemirror *, pre, pre * {
+			font-family: "Source Code Fryc", monospace !important;
 		}
 		/* body {
 			--my-width: 360px;
@@ -4478,6 +4481,9 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 		}
 		.copy-buttons {
 			cursor: pointer;
+		}
+		[data-fuse] {
+			display: none;
 		}
 	`);
 
