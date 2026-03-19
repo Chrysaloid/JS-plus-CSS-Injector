@@ -12975,6 +12975,26 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			} });
 		});
 	});
+} else if (frycAPI_host("code.visualstudio.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.forEach(`.docs a.type-ref`, daElem => {
+			daElem.addEventListener("click", e => {
+				e.stopPropagation();
+				location.hash = daElem.getAttribute("href");
+			});
+		});
+	});
+} else if (frycAPI_host("www.libtorrent.org")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
