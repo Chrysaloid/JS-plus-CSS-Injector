@@ -12996,7 +12996,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			});
 		});
 	});
-} else if (frycAPI_host("www.libtorrent.org")) {
+} else if (frycAPI_host("www.libtorrent.org", "www.rasterbar.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
