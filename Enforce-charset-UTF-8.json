@@ -9,7 +9,7 @@
 			"excludedResponseHeaders": [
 				{
 					"header": "content-type",
-					"values": ["*charset=?utf-8*"]
+					"values": ["*charset=?*"]
 				}
 			],
 			"responseHeaders": [
