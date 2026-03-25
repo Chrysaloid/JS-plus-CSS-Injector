@@ -185,6 +185,10 @@ frycAPI_expandPrototype(Element, "frycAPI_setAttribute", function (attName, attV
 	this.setAttribute(attName, attValue);
 	return this;
 });
+frycAPI_expandPrototype(Element, "frycAPI_removeAttribute", function (attName) {
+	this.removeAttribute(attName);
+	return this;
+});
 frycAPI_expandPrototype(Element, "frycAPI_setAttributeBulk", function (...args) {
 	if (args.length % 2 !== 0) throw new Error("Arguments' length must be even.");
 	const max = args.length / 2;
@@ -413,6 +417,9 @@ frycAPI_expandPrototype(Number, "frycAPI_lt", function (num) {
 frycAPI_expandPrototype(Number, "frycAPI_le", function (num) {
 	return this <= num;
 });
+frycAPI_expandPrototype(Number, "hex", function (num) {
+	return this.toString(16).padStart(2, "0");
+}, true);
 
 [
 	"at",

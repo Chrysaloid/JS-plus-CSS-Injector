@@ -551,6 +551,15 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	listMarkerCollapsed: "⮞",
 	listMarkerOpen: "⮟",
 	websiteUrl: new URL(location.href),
+	matlabColors: [
+		"#0089e3", // Blue
+		"#ff631e", // Orange
+		"#ffd426", // Yellow
+		"#9738aa", // Purple
+		"#8fce3a", // Green
+		"#5ce4ff", // Cyan
+		"#c21838", // Magenta
+	],
 	// #region //* Zmienne 2
 	// #endregion
 	// #endregion
@@ -2048,6 +2057,125 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			return null;
 		}
 	}, // const fileURL = await frycAPI.resExists("someName");
+	getDistinctColors(numColors = 36, returnFormat = "hsl", saturation = 100, lightness = 26) {
+		const colorArr = [];
+		if (returnFormat === "hsl") {
+			saturation = saturation.toFixed(1);
+			lightness = lightness.toFixed(1);
+			for (let i = 0; i < numColors; i++) {
+				colorArr.push(`hsl(${(i / numColors * 360).toFixed(1)} ${saturation} ${lightness})`);
+			}
+		} else if (returnFormat === "rgb") {
+			saturation /= 100;
+			lightness /= 100;
+			for (let i = 0; i < numColors; i++) {
+				const [r, g, b] = frycAPI.hslToRgb(i / numColors, saturation, lightness);
+				colorArr.push(`rgb(${r} ${g} ${b})`);
+			}
+		} else if (returnFormat === "rgbInt") {
+			saturation /= 100;
+			lightness /= 100;
+			for (let i = 0; i < numColors; i++) {
+				colorArr.push(frycAPI.hslToRgb(i / numColors, saturation, lightness));
+			}
+		} else if (returnFormat === "hex") {
+			saturation /= 100;
+			lightness /= 100;
+			for (let i = 0; i < numColors; i++) {
+				const [r, g, b] = frycAPI.hslToRgb(i / numColors, saturation, lightness);
+				colorArr.push(`#${r.hex}${g.hex}${b.hex}`);
+			}
+		} else {
+			throw new Error(`Invalid returnFormat: ${returnFormat}`);
+		}
+		return colorArr;
+	}, // const colorArr = frycAPI.getDistinctColors();
+	hueToRgb(p, q, t) {
+		if (t < 0) t += 1;
+		if (t > 1) t -= 1;
+		if (t < 1 / 6) return p + (q - p) * 6 * t;
+		if (t < 1 / 2) return q;
+		if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+		return p;
+	},
+	/**
+	 * Converts an HSL color value to RGB. Conversion formula
+	 * adapted from https://en.wikipedia.org/wiki/HSL_color_space.
+	 * Assumes h, s, and l are contained in the set [0, 1] and
+	 * returns r, g, and b in the set [0, 255].
+	 *
+	 * @param   {number}  h       The hue
+	 * @param   {number}  s       The saturation
+	 * @param   {number}  l       The lightness
+	 * @return  {Array}           The RGB representation
+	*/
+	hslToRgb(h, s, l) {
+		let r, g, b;
+
+		if (s === 0) {
+			r = g = b = l; // achromatic
+		} else {
+			const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+			const p = 2 * l - q;
+			r = frycAPI.hueToRgb(p, q, h + 1 / 3);
+			g = frycAPI.hueToRgb(p, q, h);
+			b = frycAPI.hueToRgb(p, q, h - 1 / 3);
+		}
+
+		return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+	}, // const [r, g, b] = frycAPI.hslToRgb(h, s, l);
+	/**
+	 * Converts an RGB color value to HSL. Conversion formula
+	 * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+	 * Assumes r, g, and b are contained in the set [0, 255] and
+	 * returns h, s, and l in the set [0, 1].
+	 *
+	 * @param   {number}  r       The red color value
+	 * @param   {number}  g       The green color value
+	 * @param   {number}  b       The blue color value
+	 * @return  {Array}           The HSL representation
+	*/
+	rgbToHsl(r, g, b) {
+		r /= 255;
+		g /= 255;
+		b /= 255;
+		const vmax = Math.max(r, g, b), vmin = Math.min(r, g, b);
+		let h, s, l = (vmax + vmin) / 2; // eslint-disable-line prefer-const
+
+		if (vmax === vmin) {
+			return [0, 0, l]; // achromatic
+		}
+
+		const d = vmax - vmin;
+		s = l > 0.5 ? d / (2 - vmax - vmin) : d / (vmax + vmin); // eslint-disable-line prefer-const
+		if (vmax === r) h = (g - b) / d + (g < b ? 6 : 0);
+		if (vmax === g) h = (b - r) / d + 2;
+		if (vmax === b) h = (r - g) / d + 4;
+		h /= 6;
+
+		return [h, s, l];
+	}, // const [h, s, l] = frycAPI.hslToRgb(r, g, b);
+	hexToRGB(hex) {
+		const r = parseInt(hex.slice(1, 3), 16);
+		const g = parseInt(hex.slice(3, 5), 16);
+		const b = parseInt(hex.slice(5, 7), 16);
+		return [r, g, b];
+	}, // const [r, g, b] = frycAPI.hexToRGB("#123456");
+	getGoodTextColor(backgroundColor, colorFormat = "hex") { // see https://math.hws.edu/graphicsbook/demos/c2/rgb-hsv.html for good example usage
+		let r, g, b;
+		if (colorFormat === "hex") {
+			[r, g, b] = frycAPI.hexToRGB(backgroundColor);
+		} else if (colorFormat === "rgbInt") {
+			[r, g, b] = backgroundColor;
+		} else {
+			throw new Error(`Invalid colorFormat: ${colorFormat}`);
+		}
+		r /= 255;
+		g /= 255;
+		b /= 255;
+		const war = Math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b) > 0.5;
+		return war ? "#000000" : "#ffffff";
+	}, // const goodTextColor = frycAPI.getGoodTextColor("#123456");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -10969,7 +11097,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			tab-size: 3 !important;
 		}
 		*:not(textarea, textarea *, code, code *) {
-			font-family: IBM Plex Sans Condensed !important;
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
 		}
 		.bv2-event-note {
 			margin-top: 0px;
@@ -11018,6 +11146,39 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		.bv2-event-note-container:has(~ .bv2-issue-event-attachments) {
 			margin-bottom: 6px;
 		}
+
+		.user-image-edited {
+			b-user-image {
+				justify-content: center;
+				height: 32px;
+				width: 32px;
+				box-sizing: border-box;
+				border: 1px solid var(--c400, #bdc1c6);
+				border-radius: 50%;
+				background-color: var(--bg-color);
+
+				span {
+					background-image: none !important;
+					background-color: transparent !important;
+					width: fit-content !important;
+					height: fit-content !important;
+					border: 0px !important;
+					color: var(--text-color) !important;
+					opacity: 1 !important;
+				}
+				span::after {
+					content: var(--counter);
+					/* -webkit-text-stroke: 1px black; */
+				}
+				/* span::before {
+					content: var(--counter);
+					position: absolute;
+				} */
+			}
+			[role="img"] .user-avatar {
+				display: none;
+			}
+		}
 	`);
 
 	const daSel = el => (el.nodeType === Node.TEXT_NODE && el.textContent.trim() === "") || el.nodeName === "BR";
@@ -11026,7 +11187,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			if (document.body !== null) {
 				frycAPI.setDefaultDateStyle().mode.relatywnyCzas().toolTipLeft();
 				frycAPI.createMutObs((mutRecArr, mutObs) => {
-					// #region //* Zmiana daty
+					// #region //* Fix dates
 					frycAPI.setDefaultDate(`:is(b-issues-grid, b-issues-table) b-formatted-date-time > time`, {
 						customStyle: `cursor: none;`,
 						dateEnumStyle: frycAPI.setDefaultDateEnum.style.floatLeft,
@@ -11035,25 +11196,27 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 						customStyle: `cursor: none;`, // --tt-y: 10px; --tt-x: 10px;
 					});
 					// #endregion
-					// #region //* Usunięcie nic niewnoszących ("zduplikowanych") części nazwy użytkowników
+					// #region //* Delete useless (duplicated) parts of the user name
 					frycAPI.forEach(`h4.bv2-event-user:not(:has(.hideId))`, (daElem, daI, daArr) => {
-						const userName = daElem.querySelector(`b-user-display-name`);
+						const userName = daElem.querySelector(`b-user-display-name,b-user-display`);
 						const userId = daElem.querySelector(`span.bv2-event-user-id`);
 						if (userName === null || userId === null) return;
-						if (userName.innerText.trim() === userId.innerText.trim().slice(1, -1)) {
+						const name = userName.innerText.trim();
+						const id = userId.innerText.trim().slice(1, -1);
+						if (name === id || name === "Fryderyk Kukowski") {
 							userId.frycAPI_addClass("hideId");
 						}
 					});
 					// #endregion
-					// #region //* Zmniejszenie nic niewnoszących komentarzy [Empty comment from Monorail migration]
+					// #region //* Collapse useless [Empty comment from Monorail migration] comments
 					frycAPI.forEach(`.bv2-edit-issue-history-stream > div`, daElem => {
 						// const msgText = daElem.querySelector(`:scope .bv2-event-note-container`);
-						if (daElem.querySelector(`:scope .bv2-event-note-container`).innerText === "[Empty comment from Monorail migration]") {
+						if (daElem.querySelector(`:scope .bv2-event-note-container`).innerText.includes("[Empty comment from Monorail migration]")) {
 							daElem.frycAPI_addClass("only-monorail-migration");
 						}
 					});
 					// #endregion
-					// #region //* Zaawansowany trim() na komentarzach
+					// #region //* Advanced comment trim()
 					frycAPI.forEach(`.bv2-event-content-cell .child`, daElem => {
 						const arr = [...daElem.childNodes];
 						for (let i = 0; i < arr.length; i++) {
@@ -11073,6 +11236,50 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 							}
 						}
 					});
+					// #endregion
+					// #region //* Add user numbering and coloring
+					const userHasPhoto = {};
+					const emailElems = frycAPI.forEach(`b-user-display`, emailElem => {
+						emailElem.email = emailElem.innerText.trim();
+						userHasPhoto[emailElem.email] = false;
+					});
+					if (emailElems.length) {
+						const historyEvents = frycAPI.forEach(`b-history-event`, historyEvent => {
+							const emailElem = historyEvent.querySelector(`b-user-display`);
+							if (!emailElem) return;
+							historyEvent.emailElem = emailElem;
+							const userImg = historyEvent.querySelector(`b-user-image img`);
+							if (userImg) {
+								const src = userImg.getAttribute("src");
+								if (!(src.includes("googleusercontent.com") && src.includes("default-user"))) { // i.e. https://lh3.googleusercontent.com/a/default-user=s32-p-k
+									userHasPhoto[emailElem.email] = true;
+								}
+							}
+						});
+						if (historyEvents.length) {
+							const userID = {};
+							let counter = 0;
+							emailElems.forEach(emailElem => {
+								if (!userID.hasOwnProperty(emailElem.email) && (!userHasPhoto[emailElem.email] || counter === 0)) {
+									userID[emailElem.email] = counter++;
+								}
+							});
+							const colorArr = frycAPI.getDistinctColors(counter, "rgbInt").map(rgb => [`rgb(${rgb.join(" ")})`, frycAPI.getGoodTextColor(rgb, "rgbInt")]);
+							// loguj("userHasPhoto", userHasPhoto);
+							// loguj("userID", userID);
+							historyEvents.forEach(historyEvent => {
+								if (!historyEvent.emailElem || userHasPhoto[historyEvent.emailElem.email]) {
+									historyEvent.frycAPI_removeClass("user-image-edited");
+									historyEvent.removeAttribute("style");
+									return;
+								}
+								const id = userID[historyEvent.emailElem.email];
+								const [bgColor, textColor] = colorArr[id];
+								historyEvent.frycAPI_addClass("user-image-edited");
+								historyEvent.setAttribute("style", `--counter: "${id === 0 ? "OP" : id}"; --bg-color: ${bgColor}; --text-color: ${textColor}`);
+							});
+						}
+					}
 					// #endregion
 				});
 				return true;
@@ -12268,7 +12475,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			daElem.firstElementChild.innerText = eval(daElem.firstElementChild.innerText).toFixed(2).replace(".00", "");
 		});
 	});
-} else if (frycAPI_host("math.hws.edu") && frycAPI.path === "/graphicsbook/demos/c2/rgb-hsv.html") {
+} else if (frycAPI_host("math.hws.edu") && frycAPI.path === "/graphicsbook/demos/c2/rgb-hsv.html") { // https://math.hws.edu/graphicsbook/demos/c2/rgb-hsv.html
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
@@ -12282,26 +12489,16 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			top: 5px;
 			left: 5px;
 		}
+		html {
+			background-color: #595959;
+		}
 	`);
-	// #region colConv
-	const colConv = { "00":0, "01":1, "02":2, "03":3, "04":4, "05":5, "06":6, "07":7, "08":8, "09":9, "0A":10, "0B":11, "0C":12, "0D":13, "0E":14, "0F":15, "10":16, "11":17, "12":18, "13":19, "14":20, "15":21, "16":22, "17":23, "18":24, "19":25, "1A":26, "1B":27, "1C":28, "1D":29, "1E":30, "1F":31, "20":32, "21":33, "22":34, "23":35, "24":36, "25":37, "26":38, "27":39, "28":40, "29":41, "2A":42, "2B":43, "2C":44, "2D":45, "2E":46, "2F":47, "30":48, "31":49, "32":50, "33":51, "34":52, "35":53, "36":54, "37":55, "38":56, "39":57, "3A":58, "3B":59, "3C":60, "3D":61, "3E":62, "3F":63, "40":64, "41":65, "42":66, "43":67, "44":68, "45":69, "46":70, "47":71, "48":72, "49":73, "4A":74, "4B":75, "4C":76, "4D":77, "4E":78, "4F":79, "50":80, "51":81, "52":82, "53":83, "54":84, "55":85, "56":86, "57":87, "58":88, "59":89, "5A":90, "5B":91, "5C":92, "5D":93, "5E":94, "5F":95, "60":96, "61":97, "62":98, "63":99, "64":100, "65":101, "66":102, "67":103, "68":104, "69":105, "6A":106, "6B":107, "6C":108, "6D":109, "6E":110, "6F":111, "70":112, "71":113, "72":114, "73":115, "74":116, "75":117, "76":118, "77":119, "78":120, "79":121, "7A":122, "7B":123, "7C":124, "7D":125, "7E":126, "7F":127, "80":128, "81":129, "82":130, "83":131, "84":132, "85":133, "86":134, "87":135, "88":136, "89":137, "8A":138, "8B":139, "8C":140, "8D":141, "8E":142, "8F":143, "90":144, "91":145, "92":146, "93":147, "94":148, "95":149, "96":150, "97":151, "98":152, "99":153, "9A":154, "9B":155, "9C":156, "9D":157, "9E":158, "9F":159, "A0":160, "A1":161, "A2":162, "A3":163, "A4":164, "A5":165, "A6":166, "A7":167, "A8":168, "A9":169, "AA":170, "AB":171, "AC":172, "AD":173, "AE":174, "AF":175, "B0":176, "B1":177, "B2":178, "B3":179, "B4":180, "B5":181, "B6":182, "B7":183, "B8":184, "B9":185, "BA":186, "BB":187, "BC":188, "BD":189, "BE":190, "BF":191, "C0":192, "C1":193, "C2":194, "C3":195, "C4":196, "C5":197, "C6":198, "C7":199, "C8":200, "C9":201, "CA":202, "CB":203, "CC":204, "CD":205, "CE":206, "CF":207, "D0":208, "D1":209, "D2":210, "D3":211, "D4":212, "D5":213, "D6":214, "D7":215, "D8":216, "D9":217, "DA":218, "DB":219, "DC":220, "DD":221, "DE":222, "DF":223, "E0":224, "E1":225, "E2":226, "E3":227, "E4":228, "E5":229, "E6":230, "E7":231, "E8":232, "E9":233, "EA":234, "EB":235, "EC":236, "ED":237, "EE":238, "EF":239, "F0":240, "F1":241, "F2":242, "F3":243, "F4":244, "F5":245, "F6":246, "F7":247, "F8":248, "F9":249, "FA":250, "FB":251, "FC":252, "FD":253, "FE":254, "FF":255 };
-	// #endregion
-	function getTextColor(hex) {
-		const r = colConv[hex.slice(1, 3)] / 255;
-		const g = colConv[hex.slice(3, 5)] / 255;
-		const b = colConv[hex.slice(5, 7)] / 255;
-		// const war = (Math.max(r, g, b) / 255) >= 0.5;
-		// const war = ((r + g + b) / 765) >= 0.5;
-		// const war = (0.299 * r + 0.587 * g + 0.114 * b) > 128;
-		const war = Math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b) > 0.5;
-		return war ? "#000000" : "#FFFFFF";
-	}
 	const rgb2hex = rgb => `#${rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/).slice(1).map(n => parseInt(n, 10).toString(16).padStart(2, "0")).join("").toUpperCase()}`; // eslint-disable-line radix
 	frycAPI.onLoadSetter(function () {
 		const canv = document.getElementById("maincanvas");
 		const myDiv = canv.parentElement.appendChild(document.createElement("div").frycAPI_setAttribute("id", "myDiv").frycAPI_setInnerHTML("Hello, I'm text"));
 		frycAPI.createMutObs((mutRecArr0, mutObs0) => {
-			if (canv.style.backgroundColor.length > 0) myDiv.style.color = getTextColor(rgb2hex(canv.style.backgroundColor));
+			if (canv.style.backgroundColor.length > 0) myDiv.style.color = frycAPI.getGoodTextColor(rgb2hex(canv.style.backgroundColor));
 		}, { runOnLoad: false, elem: canv, options: { attributes: true, childList: false, subtree: false } });
 	});
 } else if (frycAPI_host("ponepaste.org")) {
