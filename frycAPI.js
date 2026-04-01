@@ -2161,6 +2161,9 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 		const b = parseInt(hex.slice(5, 7), 16);
 		return [r, g, b];
 	}, // const [r, g, b] = frycAPI.hexToRGB("#123456");
+	RGBToHex(r, g, b) {
+		return `#${r.hex}${g.hex}${b.hex}`;
+	}, // const hex = frycAPI.RGBToHex(1, 2, 3);
 	getGoodTextColor(backgroundColor, colorFormat = "hex") { // see https://math.hws.edu/graphicsbook/demos/c2/rgb-hsv.html for good example usage
 		let r, g, b;
 		if (colorFormat === "hex") {
