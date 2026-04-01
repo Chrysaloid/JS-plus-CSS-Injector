@@ -4480,7 +4480,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 					const tableClear = container.frycAPI_elemByClass("clear");
 
 					const promptElemBase = frycAPI.elem("div").class("prompt")._;
-					const articles = document.getElementsByTagName("article");
+					const sections = document.getElementsByTagName("section"); // An HTMLCollection in the HTML DOM is live
 					let lastArticlesLen, lastPromptsLen, lastTitle, promptElems = [];
 					function searchPrompts() {
 						if (!promptElems.length) return;
@@ -4504,10 +4504,10 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 					document.body.classList.remove("table-of-prompts");
 
 					mutObs = frycAPI.createMutObs(() => {
-						if (lastTitle === document.title && lastArticlesLen === articles.length) return;
-						lastArticlesLen = articles.length;
+						if (lastTitle === document.title && lastArticlesLen === sections.length) return;
+						lastArticlesLen = sections.length;
 
-						const prompts = articles.filter(a => a.getAttribute("data-turn") === "user");
+						const prompts = sections.filter(s => s.getAttribute("data-turn") === "user");
 						if (lastTitle === document.title && lastPromptsLen === prompts.length) return;
 						lastPromptsLen = prompts.length;
 						lastTitle = document.title;
