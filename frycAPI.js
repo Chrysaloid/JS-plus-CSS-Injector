@@ -13200,6 +13200,17 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
+} else if (frycAPI_host("go.dev")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		*:not(.material-icons) {
+			tab-size: 3 !important;
+			font-family: "IBM Plex Sans Condensed", sans-serif !important;
+		}
+		code, #code, .Playground-output, span.system, span.stdout {
+			font-family: "Source Code Fryc", monospace !important;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
