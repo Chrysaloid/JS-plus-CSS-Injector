@@ -13225,15 +13225,14 @@ if (1) { //* Global functions end
 	if (frycAPI.colorSchemeDark) {
 		document.getElementById("frycAPI-color-scheme-only-light")?.remove();
 	} else {
-		const meta = frycAPI.elem("meta", 0).frycAPI_setAttributeBulk(
-			"name", "color-scheme",
-			"content", "only light",
-			"id", "frycAPI-color-scheme-only-light"
-		);
 		frycAPI.createMutObs(() => {
 			if (document.head) {
-				if (document.head.querySelector('meta[name="color-scheme"]:is([content="dark"],[content="dark light"])') === null) {
-					document.head.insertAdjacentElement("afterbegin", meta);
+				if (document.head.querySelector('meta[name="color-scheme"]:is([content="dark"],[content="dark light"],[content="light dark"])') === null) {
+					document.head.insertAdjacentElement("afterBegin", frycAPI.elem("meta", 0).frycAPI_setAttributeBulk(
+						"name", "color-scheme",
+						"content", "only light",
+						"id", "frycAPI-color-scheme-only-light"
+					));
 				}
 				return true;
 			}
