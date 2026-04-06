@@ -191,11 +191,11 @@ frycAPI_expandPrototype(Element, "frycAPI_removeAttribute", function (attName) {
 });
 frycAPI_expandPrototype(Element, "frycAPI_setAttributeBulk", function (...args) {
 	if (args.length % 2 !== 0) throw new Error("Arguments' length must be even.");
-	const max = args.length / 2;
+	const max = args.length;
 	let attName, attValue;
-	for (let i = 0; i < max; i += 2) {
-		attName = args[i];
-		attValue = args[i + 1];
+	for (let i = 1; i < max; i += 2) {
+		attName = args[i - 1];
+		attValue = args[i];
 		this.setAttribute(attName, attValue);
 	}
 	return this;
