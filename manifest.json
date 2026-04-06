@@ -49,5 +49,13 @@
 				"path": "Enforce-charset-UTF-8.json"
 			}
 		]
+	},
+	"commands": {
+		"_execute_action": {
+			"suggested_key": {
+				"default": "Ctrl+Shift+F",
+				"mac": "MacCtrl+Shift+F"
+			}
+		}
 	}
 }
