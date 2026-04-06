@@ -53,14 +53,15 @@ function getNumColsAndRows(funcObj, elCont) {
 	return [numCols, numRows];
 }
 function setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows) {
-	if (funcObj.numCols !== undefined) {
+	if (!funcObj.numCols && !funcObj.numRows) funcObj.numCols = 1;
+	if (funcObj.numCols) {
 		if (i % funcObj.numCols === 0) funcEl.classList.add("firstCol");
 		if (i % funcObj.numCols === funcObj.numCols - 1) funcEl.classList.add("lastCol");
 		const row = Math.floor(i / funcObj.numCols);
 		if (row === 0) funcEl.classList.add("firstRow");
 		if (row === numRows) funcEl.classList.add("lastRow");
 	}
-	if (funcObj.numRows !== undefined) {
+	if (funcObj.numRows) {
 		if (i % funcObj.numRows === 0) funcEl.classList.add("firstRow");
 		if (i % funcObj.numRows === funcObj.numRows - 1) funcEl.classList.add("lastRow");
 		const col = Math.floor(i / funcObj.numRows);

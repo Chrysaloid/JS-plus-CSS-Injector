@@ -163,7 +163,7 @@ class frycAPI_Checkbox extends frycAPI_ManualFunc {
 		this.prevState = structuredClone(this.state);
 		if (obj.state !== undefined) this.replaceState(obj.state);
 		this.setNumCols(obj.numCols);
-		this.setNumRows(obj.numRows ?? 1);
+		this.setNumRows(obj.numRows);
 	}
 	setState(pos, newState) {
 		return (this.state[pos] = Boolean(newState));
@@ -503,13 +503,13 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	simpleFontChange: `* { font-family: "IBM Plex Sans Condensed", sans-serif; }`, // ${frycAPI.simpleFontChange}
 	functionsForClasses: {
 		setNumCols(numCols) {
-			if (numCols !== undefined && numCols >= 1) {
+			if (numCols && numCols >= 1) {
 				this.numCols = numCols;
 				this.numRows = undefined;
 			}
 		},
 		setNumRows(numRows) {
-			if (numRows !== undefined && numRows >= 1) {
+			if (numRows && numRows >= 1) {
 				this.numRows = numRows;
 				this.numCols = undefined;
 			}
