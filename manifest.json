@@ -29,7 +29,9 @@
 		"declarativeNetRequest",
 		"declarativeNetRequestFeedback",
 		"offscreen",
-		"windows"
+		"windows",
+		"clipboardRead",
+		"clipboardWrite"
 	],
 	"host_permissions": ["<all_urls>"],
 	"devtools_page": "DevTools.html",
