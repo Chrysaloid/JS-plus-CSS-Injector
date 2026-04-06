@@ -380,6 +380,9 @@ frycAPI_expandPrototype(Element, "isDescendantOf", function (elem = document.doc
 	}
 	return parElem === elem;
 });
+frycAPI_expandPrototype(Element, "bgImgUrl", function () {
+	return getComputedStyle(this).backgroundImage.match(/url\("?([^)"]+)"?\)/i)?.[1];
+}, true);
 frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (listenerType, callback) {
 	this.addEventListener(listenerType, callback);
 	return callback;
