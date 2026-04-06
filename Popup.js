@@ -69,6 +69,17 @@ function setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows) {
 		if (col === numCols) funcEl.classList.add("lastCol");
 	}
 }
+function loguj(...tekst) {
+	console.log(...tekst);
+}
+function btoa_utf8(value) {
+	return btoa(
+		String.fromCharCode(
+			...new TextEncoder()
+			.encode(value)
+		)
+	);
+}
 const additionalActions = { // they should return true if the popup should be rerendered
 	close: data => window.close(),
 };
@@ -226,6 +237,18 @@ async function main(frycAPI0) {
 			}
 		});
 	});
+
+	async function waitForSpecialKeys(e) {
+		if (e.code === "F4" && e.altKey && e.ctrlKey && e.shiftKey) {
+			const clip = await navigator.clipboard.readText();
+			navigator.clipboard.writeText(clip.split("\n").map(s => s.trim()).filter(s => s).map(s => {
+				return `const ${s.split("/").pop().replaceAll(/[^a-zA-Z0-9_]/g, "")} = new frycAPI_Cache("${btoa_utf8(s)}");`;
+			}).join("\n"));
+			// document.removeEventListener("keydown", waitForSpecialKeys);
+			// loguj("Test");
+		}
+	}
+	document.addEventListener("keydown", waitForSpecialKeys);
 }
 
 // const t0 = performance.now();
