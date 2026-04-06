@@ -159,7 +159,8 @@ class frycAPI_Checkbox extends frycAPI_ManualFunc {
 	constructor(obj) {
 		super(obj);
 		this.#setStateDescBase(obj.stateDesc);
-		this.state = obj.state !== undefined ? structuredClone(obj.state) : this.stateDesc.map(e => false);
+		const defaultState = obj.defaultState ?? false;
+		this.state = obj.state !== undefined ? structuredClone(obj.state) : this.stateDesc.map(e => defaultState);
 		this.prevState = structuredClone(this.state);
 		if (obj.state !== undefined) this.replaceState(obj.state);
 		this.setNumCols(obj.numCols);
