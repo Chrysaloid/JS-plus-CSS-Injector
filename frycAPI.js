@@ -13221,6 +13221,34 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "Source Code Fryc", monospace !important;
 		}
 	`);
+} else if (frycAPI_host("discord.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	frycAPI.createManualFunctions("Discord", {
+		funcArr: [
+			(name = "Download emojis from the current server", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = function (obj) {
+					const currentServerName = frycAPI.qSel(`[class*="title"] > [class*="defaultColor"][class*="lineClamp"]`)?.innerText;
+					if (!currentServerName) return;
+					const currentServerIcon = frycAPI.qSel(`[class*="title"] > [class*="iconActive"]`);
+					if (currentServerIcon) {
+						const imgUrl = new URL(currentServerIcon.bgImgUrl);
+						imgUrl.searchParams.set("size", "512");
+						frycAPI.downloadUrl(imgUrl.href, `${currentServerName}/${currentServerName} server icon.webm`);
+					}
+					frycAPI.forEach(`img[aria-label$="z: ${currentServerName}"]`, daElem => {
+						const imgUrl = new URL(daElem.src);
+						imgUrl.searchParams.set("size", "512");
+						frycAPI.downloadUrl(imgUrl.href, `${currentServerName}/${daElem.getAttribute("alt").replaceAll(":", "")}.webm`);
+					});
+				};
+				return f;
+			},
+		],
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 
