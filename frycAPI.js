@@ -2364,43 +2364,49 @@ if (1) { //* Global functions
 				};
 				return f;
 			},
-			(name = "ඞ", type = frycAPI_Normal) => {
-				const f = new type({ name });
-				f.callback = function (obj) {
-					frycAPI.forEach(`*`, daElem => {
-						if (daElem.nodeName !== "STYLE" && daElem.nodeName !== "SCRIPT" && daElem.nodeName !== "NOSCRIPT") {
-							daElem.childNodes.forEach(child => {
-								if (child.nodeType === Node.TEXT_NODE) {
-									child.nodeValue = "ඞ";
-								}
-							});
+		],
+	});
+	const gridNormal = {
+		"Copy host": (obj, f) => {
+			frycAPI.ctrlC(frycAPI_host());
+		},
+		"Copy decoded URL": (obj, f) => {
+			frycAPI.ctrlC(decodeURI(location.href));
+		},
+		"Copy base URL": (obj, f) => {
+			frycAPI.ctrlC(location.origin);
+		},
+		"ඞ": (obj, f) => {
+			frycAPI.forEach(`*`, daElem => {
+				if (daElem.nodeName !== "STYLE" && daElem.nodeName !== "SCRIPT" && daElem.nodeName !== "NOSCRIPT") {
+					daElem.childNodes.forEach(child => {
+						if (child.nodeType === Node.TEXT_NODE) {
+							child.nodeValue = "ඞ";
 						}
 					});
-				};
-				return f;
-			},
-			(name = "Copy decoded URL", type = frycAPI_Normal) => {
-				const f = new type({ name });
+				}
+			});
+		},
+		"Make headings clickable": (obj, f) => {
+			frycAPI.forEach(`:is(h1,h2,h3,h4,h5,h6)[id]`, heading => {
+				const txt = heading.innerText;
+				heading.innerText = "";
+				heading.appendChild(frycAPI.elem("a").attr("href", location.origin + location.pathname + "#" + heading.id).text(txt)._);
+			});
+		},
+	};
+	frycAPI.createManualFunctions("Global grid normal", {
+		funcArr: [
+			(name = "Grid normal", type = frycAPI_Checkbox) => {
+				const f = new type({
+					name: name,
+					numCols: 3,
+					defaultState: true,
+					stateDesc: Object.keys(gridNormal),
+				});
 				f.callback = function (obj) {
-					frycAPI.ctrlC(decodeURI(location.href));
-				};
-				return f;
-			},
-			(name = "Copy base URL", type = frycAPI_Normal) => {
-				const f = new type({ name });
-				f.callback = function (obj) {
-					frycAPI.ctrlC(location.origin);
-				};
-				return f;
-			},
-			(name = "Make headings clickable", type = frycAPI_Normal) => {
-				const f = new type({ name });
-				f.callback = function (obj) {
-					frycAPI.forEach(`:is(h1,h2,h3,h4,h5,h6)[id]`, heading => {
-						const txt = heading.innerText;
-						heading.innerText = "";
-						heading.appendChild(frycAPI.elem("a").attr("href", location.origin + location.pathname + "#" + heading.id).text(txt)._);
-					});
+					f.setState(obj.index, true);
+					gridNormal[f.stateDesc[obj.index]](obj, f);
 				};
 				return f;
 			},
