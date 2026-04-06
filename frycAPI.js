@@ -13249,6 +13249,24 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			},
 		],
 	});
+} else if (frycAPI_host("wiki.mbxmas.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		img[alt="DPS"] {
+			filter: saturate(0.3);
+		}
+	`);
+
+	const mechabellum = new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvSWNvbnMvTWVjaGFiZWxsdW0v");
+
+	frycAPI.onLoadSetter(function () {
+		const panel = frycAPI.qSel(`.bevel-panel-content.stats-panel`);
+		if (!panel) return;
+		const dpsRow = panel.appendChild(panel.lastEl.cloneNode(1));
+		dpsRow.querySelector(`img`).frycAPI_setAttributeBulk("src", mechabellum.getFileUrl("badge_red.webp"), "alt", "DPS");
+		dpsRow.querySelector(`.stat-label`).innerText = "DPS";
+		dpsRow.querySelector(`.stat-value`).innerText = (parseFloat(panel.querySelector(`[alt="ATK"] ~ .stat-value`).innerText) / parseFloat(panel.querySelector(`[alt="Attack Interval"] ~ .stat-value`).innerText)).toFixed(1);
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 
