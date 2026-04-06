@@ -1981,7 +1981,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 			frycAPI.enforceTitle.mutObs?.disconnect();
 			document.title = `${frycAPI.specialStringAHK}${name}|${value}|`;
 			function waitForSpecialKeys(e) {
-				if (e.code === "NumpadEnter" && e.altKey && e.ctrlKey && e.shiftKey) {
+				if (e.code === "F2" && e.altKey && e.ctrlKey && e.shiftKey) {
 					document.title = originalTitle;
 					frycAPI.enforceTitle.mutObs?.reconnect();
 					document.removeEventListener("keydown", waitForSpecialKeys);
