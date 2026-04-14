@@ -18,12 +18,14 @@ function addJsSnippet(proto, name, func, czyGet) {
 	};
 }
 */
+const frycAPI_noSetter = v => { throw new Error("This is a read-only property") };
 function frycAPI_expandPrototype(proto, name, func, czyGet = false, writable = false, active = true) {
 	if (active) {
 		try {
 			Object.defineProperty(proto.prototype, name,
 				czyGet ? {
 					get: func, // getter cannot be writable so when @czyGet is true then @writable is ignored
+					set: frycAPI_noSetter,
 				} : {
 					value: func,
 					writable: writable,
@@ -79,6 +81,7 @@ frycAPI_expandPrototype(String, "frycAPI_includesAny", function (...strList) {
 	}
 	return false;
 });
+
 const frycAPI_Object_condition = !(frycAPI_host("www.youtube.com", "www.desmos.com", "studio.youtube.com") || frycAPI_hostIncludes("googlesource.com"));
 frycAPI_expandPrototype(Object, "lóg", function () {
 	console.log(this);
@@ -93,12 +96,35 @@ frycAPI_expandPrototype(Object, "jsón", function () {
 frycAPI_expandPrototype(Object, "frycAPI_then", function (callback) {
 	return callback(this);
 }, false, true, frycAPI_Object_condition);
+
 frycAPI_expandPrototype(String, "jsón", function () {
 	return JSON.parse(this);
 }, true);
 frycAPI_expandPrototype(String, "specialTrim", function () {
 	return this.replaceAll(/^[\x00-\x20\x7F-\xA0]+|[\x00-\x20\x7F-\xA0]+$/g, "");
 });
+frycAPI_expandPrototype(String, "frycAPI_toTitleCase", function () {
+	return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
+});
+frycAPI_expandPrototype(String, "frycAPI_eval", function () {
+	return eval(this);
+});
+[
+	"every",
+	"filter",
+	"forEach",
+	"map",
+	"reduce",
+	"reduceRight",
+	"some",
+	"toReversed",
+	"toSorted",
+	"toSpliced",
+	"with",
+].forEach(str => {
+	frycAPI_expandPrototype(String, str, Array.prototype[str]);
+});
+
 frycAPI_expandPrototype(Array, "frycAPI_shuffle", function () {
 	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	let currentIndex = this.length, randomIndex;
@@ -169,6 +195,88 @@ frycAPI_expandPrototype(Array, "frycAPI_run", function (...args) {
 frycAPI_expandPrototype(Array, "frycAPI_runReturn", function (...args) {
 	return this.map(fun => fun(...args));
 });
+frycAPI_expandPrototype(Array, "min", function (getter = a => a) {
+	const len = this.length;
+	if (!len) return null;
+	let val = getter(this[0]);
+	for (let i = 1; i < len; i++) {
+		const newVal = getter(this[i]);
+		if (val > newVal) {
+			val = newVal;
+		}
+	}
+	return val;
+});
+frycAPI_expandPrototype(Array, "max", function (getter = a => a) {
+	const len = this.length;
+	if (!len) return null;
+	let val = getter(this[0]);
+	for (let i = 1; i < len; i++) {
+		const newVal = getter(this[i]);
+		if (val < newVal) {
+			val = newVal;
+		}
+	}
+	return val;
+});
+frycAPI_expandPrototype(Array, "minElem", function (getter = a => a) {
+	const len = this.length;
+	if (!len) return null;
+	let el = this[0];
+	let val = getter(el);
+	for (let i = 1; i < len; i++) {
+		const newEl = this[i];
+		const newVal = getter(newEl);
+		if (val > newVal) {
+			val = newVal;
+			el = newEl;
+		}
+	}
+	return el;
+});
+frycAPI_expandPrototype(Array, "maxElem", function (getter = a => a) {
+	const len = this.length;
+	if (!len) return null;
+	let el = this[0];
+	let val = getter(el);
+	for (let i = 1; i < len; i++) {
+		const newEl = this[i];
+		const newVal = getter(newEl);
+		if (val < newVal) {
+			val = newVal;
+			el = newEl;
+		}
+	}
+	return el;
+});
+frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListener", function (listenerType, callback) {
+	this.addEventListener(listenerType, callback);
+	return this;
+});
+frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (listenerType, callback) {
+	this.addEventListener(listenerType, callback);
+	return callback;
+});
+
+frycAPI_expandPrototype(DOMTokenList, "notContains", function (daClass) {
+	return !this.contains(daClass);
+});
+
+frycAPI_expandPrototype(Node, "frycAPI_isText", function () {
+	return this.nodeType === Node.TEXT_NODE;
+}, true);
+frycAPI_expandPrototype(Node, "frycAPI_insertAfter", function (newNode) {
+	if (frycAPI.isString(newNode)) {
+		newNode = frycAPI.elemFromHTML(newNode);
+	}
+	if (this.nextSibling !== null) {
+		this.parentNode.insertBefore(newNode, this.nextSibling);
+	} else {
+		this.parentNode.appendChild(newNode);
+	}
+	return newNode;
+});
+
 frycAPI_expandPrototype(Element, "frycAPI_addClass", function (...classNames) {
 	this.classList.add(...classNames);
 	return this;
@@ -214,10 +322,6 @@ frycAPI_expandPrototype(Element, "frycAPI_setInnerText", function (newInnerText)
 });
 frycAPI_expandPrototype(Element, "frycAPI_insertAdjacentElement", function (where, elem) {
 	this.insertAdjacentElement(where, elem);
-	return this;
-});
-frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListener", function (listenerType, callback) {
-	this.addEventListener(listenerType, callback);
 	return this;
 });
 frycAPI_expandPrototype(Element, "frycAPI_shuffleChildren", function () {
@@ -289,9 +393,6 @@ frycAPI_expandPrototype(Element, "frycAPI_appendHTML", function (htmlString) { /
 frycAPI_expandPrototype(Element, "frycAPI_insertHTML", function (position, htmlString) { // tylko jeżeli root zawiera pojedynczy element
 	return this.insertAdjacentElement(position, frycAPI.elemFromHTML(htmlString));
 });
-frycAPI_expandPrototype(DOMTokenList, "notContains", function (daClass) {
-	return !this.contains(daClass);
-});
 frycAPI_expandPrototype(Element, "frycAPI_qSelNull", function (selector) {
 	return this.querySelector(selector) === null;
 });
@@ -306,23 +407,6 @@ frycAPI_expandPrototype(Element, "frycAPI_qSelList", function (list, root = docu
 		if (elem !== null) return elem;
 	}
 	return null;
-});
-frycAPI_expandPrototype(Node, "frycAPI_isText", function () {
-	return this.nodeType === Node.TEXT_NODE;
-}, true);
-frycAPI_expandPrototype(Node, "frycAPI_insertAfter", function (newNode) {
-	if (frycAPI.isString(newNode)) {
-		newNode = frycAPI.elemFromHTML(newNode);
-	}
-	if (this.nextSibling !== null) {
-		this.parentNode.insertBefore(newNode, this.nextSibling);
-	} else {
-		this.parentNode.appendChild(newNode);
-	}
-	return newNode;
-});
-frycAPI_expandPrototype(String, "frycAPI_toTitleCase", function () {
-	return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
 });
 frycAPI_expandPrototype(Element, "frycAPI_hasClass", function (klasa) {
 	return this.classList.contains(klasa);
@@ -383,13 +467,7 @@ frycAPI_expandPrototype(Element, "isDescendantOf", function (elem = document.doc
 frycAPI_expandPrototype(Element, "bgImgUrl", function () {
 	return getComputedStyle(this).backgroundImage.match(/url\("?([^)"]+)"?\)/i)?.[1];
 }, true);
-frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (listenerType, callback) {
-	this.addEventListener(listenerType, callback);
-	return callback;
-});
-frycAPI_expandPrototype(String, "frycAPI_eval", function () {
-	return eval(this);
-});
+
 frycAPI_expandPrototype(Number, "frycAPI_add", function (num) {
 	return this + num;
 });
@@ -447,21 +525,6 @@ frycAPI_expandPrototype(Number, "hex", function (num) {
 	frycAPI_expandPrototype(HTMLCollection, str, Array.prototype[str]);
 });
 frycAPI_expandPrototype(HTMLCollection, "forEach", Array.prototype.forEach);
-[
-	"every",
-	"filter",
-	"forEach",
-	"map",
-	"reduce",
-	"reduceRight",
-	"some",
-	"toReversed",
-	"toSorted",
-	"toSpliced",
-	"with",
-].forEach(str => {
-	frycAPI_expandPrototype(String, str, Array.prototype[str]);
-});
 
 /* This might not be usefull
 [
