@@ -5711,6 +5711,9 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 		body.skin--responsive, #menus-cover-background {
 			background-image: none !important;
 		}
+		:is(pre, code, tt, kbd, samp, .mw-code) * {
+			font-family: monospace, monospace;
+		}
 
 		[id]:is(h1,h2,h3,h4,h5,h6) {
 			cursor: pointer;
