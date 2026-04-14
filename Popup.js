@@ -86,11 +86,12 @@ const additionalActions = { // they should return true if the popup should be re
 async function main(frycAPI0) {
 	// #region //* Wstęp
 	if (await getActiveTab().then(tab => tab.url.startsWith("chrome://"))) return;
+	const firstStart = !frycAPI0;
 	frycAPI0 ??= await runOnPage(() => frycAPI);
 	const mainCont = document.getElementById("mainCont");
 	mainCont.textContent = "";
-	if (frycAPI0 === undefined) {
-		mainCont.innerText = "Something went wrong. frycAPI is undefined";
+	if (!frycAPI0) {
+		mainCont.innerText = `Something went wrong. frycAPI is ${frycAPI0}`;
 		return;
 	}
 	const funcGroupArr = frycAPI0.funcGroupArr;
@@ -143,7 +144,8 @@ async function main(frycAPI0) {
 				case ManualFuncTypes.NORMAL: {
 					const funcEl = document.createElement("div");
 					funcEl.classList.add("funcEl");
-					funcEl.innerHTML = funcObj.name;
+					funcEl.innerHTML = firstStart && funcObj.resetNameOnFirstStart ? funcObj.__nameBase : funcObj.name; // eslint-disable-line no-underscore-dangle
+					// funcEl.innerHTML = funcObj.name;
 					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
 					funcDiv.appendChild(funcEl);
 					break;

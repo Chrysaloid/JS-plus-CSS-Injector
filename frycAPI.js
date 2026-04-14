@@ -5,15 +5,31 @@
 const frycAPI_t1 = performance.now();
 
 class frycAPI_ManualFunc extends Object {
-	callback; funcGroup; num; prevFunc; nextFunc; style; name; Off; displayName; nameClickable; additionalAction;
+	callback;
+	funcGroup;
+	num;
+	prevFunc;
+	nextFunc;
+	style;
+	name;
+	Off;
+	displayName;
+	nameClickable;
+	additionalAction;
+	__nameBase; // we cannot use #nameBase (real private property) because Popup.js will not be able to read it
 	constructor(obj) {
 		super();
 		this.name = obj.name;
+		this.__nameBase = obj.name;
 		this.style = obj.style;
 		this.displayName = obj.displayName ?? false;
 		this.nameClickable = obj.nameClickable ?? false;
 		this.Off = obj.Off ?? false;
 		this.additionalAction = obj.additionalAction ?? {};
+		this.resetNameOnFirstStart = obj.resetNameOnFirstStart ?? true;
+	}
+	get nameBase() {
+		return this.__nameBase;
 	}
 	setDisplayName(newName) {
 		if (frycAPI.isString(newName)) { // eslint-disable-line no-use-before-define
@@ -32,6 +48,9 @@ class frycAPI_ManualFunc extends Object {
 	toggle() {
 		this.Off = !this.Off;
 	}
+	// fixGeneralStateBase(obj) {
+	// 	this.name = this.nameBase;
+	// }
 	static types = {
 		NORMAL  : "NORMAL",
 		STATE   : "STATE",
@@ -626,6 +645,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 	},
 	handleManualFunction(daObj) {
 		const func = frycAPI.funcGroupArr[daObj.groupNumber].funcArr[daObj.funcNumber];
+		// func.fixGeneralStateBase(daObj.obj);
 		func.fixGeneralState?.(daObj.obj);
 		func.callback(daObj.obj);
 		return frycAPI;
