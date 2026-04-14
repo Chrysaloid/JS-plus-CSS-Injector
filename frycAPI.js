@@ -497,7 +497,7 @@ function temₚ(strings, ...values) { // Extract contents of string template lit
 // #endregion
 
 // #region //* frycAPI
-var frycAPI = { // eslint-disable-line object-shorthand, no-var
+var frycAPI = { // eslint-disable-line no-var
 	// #region //* Variables 1
 	// #region //* Deklaracje
 	second: null,
@@ -586,7 +586,7 @@ var frycAPI = { // eslint-disable-line object-shorthand, no-var
 
 	// #region //* Functions 1
 	sleep(ms) {
-		return new Promise(resolve => setTimeout(resolve, ms)); // eslint-disable-line no-promise-executor-return
+		return new Promise(resolve => { setTimeout(resolve, ms) });
 	}, // await frycAPI.sleep(1);
 	injectStyleOnLoad(style, opts = {}) { // Injects style to the page at the moment when body element is created
 		frycAPI.styleStr += style.trim() + "\n";
@@ -6304,9 +6304,9 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 				getDate: getDate,
 				dateEnumStyle: frycAPI.setDefaultDateEnum.style.toolTipCenter,
 			});
-			frycAPI.setDefaultDate(`.ai-center:has(.owner) + span.comment-date .relativetime-clean`, { getDate, customStyle: `--tt-y: 1px;` }); // eslint-disable-line object-shorthand
+			frycAPI.setDefaultDate(`.ai-center:has(.owner) + span.comment-date .relativetime-clean`, { getDate, customStyle: `--tt-y: 1px;` });
 			frycAPI.setDefaultDate(`:is(.relativetime-clean, .relativetime)`, { getDate });
-			frycAPI.setDefaultDate(`.s-user-card .s-user-card--time`, { getDate, customStyle: `cursor: none;` }); // eslint-disable-line object-shorthand
+			frycAPI.setDefaultDate(`.s-user-card .s-user-card--time`, { getDate, customStyle: `cursor: none;` });
 			// #endregion
 			// #region //* Move user name to the beginning of the comment
 			frycAPI.forEach(`.comment-body:not(.zmieniona-kolejność)`, daElem => {
@@ -12576,7 +12576,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			function dateHelper(daElem, frontStr) {
 				const modDateStr = daElem.textContent.trim();
 				if (modDateStr.startsWith(frontStr)) {
-					return { frontStr, dateStr: modDateStr.replace(frontStr, "") }; // eslint-disable-line object-shorthand
+					return { frontStr, dateStr: modDateStr.replace(frontStr, "") };
 				} else {
 					return undefined;
 				}
