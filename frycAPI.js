@@ -471,15 +471,26 @@ class frycAPI_Cache extends Object {
 		return this.path + name;
 	}
 	async fileExists(name) {
-		const url = this.getFileUrl(name);
-
 		try {
-			const response = await fetch(url, { method: "HEAD" });
+			const response = await fetch(this.getFileUrl(name), { method: "HEAD" });
 			return response.ok;
 		} catch {
 			return false;
 		}
 	}
+	fileExistsPromise(name) {
+		return fetch(this.getFileUrl(name), { method: "HEAD" });
+	}
+	// fileExistsFast(name) {
+	// 	return new Promise(resolve => {
+	// 		const img = new Image();
+
+	// 		img.onload = () => resolve(true);
+	// 		img.onerror = () => resolve(false);
+
+	// 		img.src = this.getFileUrl(name);
+	// 	});
+	// }
 }
 function loguj(...tekst) {
 	console.log(...tekst);
@@ -545,7 +556,7 @@ var frycAPI = { // eslint-disable-line no-var
 	},
 	script: document.currentScript,
 	createMutObsLicznik: 0,
-	path: location.pathname,
+	get path() { return location.pathname },
 	UUID: null,
 	mimeTypes: null,
 	line: null,
@@ -1909,7 +1920,7 @@ var frycAPI = { // eslint-disable-line no-var
 		frycAPI.forEach(`[${visited}]`, el => el.removeAttribute(visited));
 		return currEl;
 	}, // frycAPI.traverseUntil("forward", elem, e => e.hasAttribute("attr"));
-	consonantsAsFirstLetters(str = "alphabet", consonants = "bcdfghjklmnpqrstvwxz") {
+	consonantsAsFirstLetters(str = "alphabet", consonants = "bcdfghjklmnpqrstvwxz") { // "bcćdfghjklmnńpqrsśtvwxzżź"
 		const vowels = "aąeęioóuy-";
 		str = str.split(" ").map(word => word.trim()).filter(word => word.length).map(word => {
 			const wordLower = word.toLowerCase();
@@ -2200,6 +2211,9 @@ var frycAPI = { // eslint-disable-line no-var
 		const war = Math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b) > 0.5;
 		return war ? "#000000" : "#ffffff";
 	}, // const goodTextColor = frycAPI.getGoodTextColor("#123456");
+	unblockImagesOnThisTab() {
+		return frycAPI.sendEventToBackground("unblockImagesOnThisTab");
+	}, // await frycAPI.unblockImagesOnThisTab();
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -10712,20 +10726,6 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			newComment.parentElement.insertAdjacentElement("afterBegin", newComment);
 			frycAPI.byID("post-sections").style.setProperty("--comment-count", `"Comments (${frycAPI.qSelAll(`article.comment`).length})"`);
 			// #endregion
-
-			// #region //* Try to load image from cache
-			(async () => {
-				const filename = `${sidebarInfo.MD5}.${sidebarInfo.Type.toLowerCase()}`.lóg;
-				for (const cache of caches) {
-					if (await cache.fileExists(filename)) {
-						image.src = "";
-						image.src = cache.getFileUrl(filename);
-						document.title = "Cached - " + document.title;
-						return;
-					}
-				}
-			})();
-			// #endregion
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.querySelector("form.post-search-form"));
 			scrollTo(0, 0);
@@ -11006,7 +11006,81 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		});
 	});
 
-	if (pathName.startsWith("/posts")) {
+	if (pathName.startsWith("/posts/")) { //* Try to load image from cache
+		// frycAPI.createMutObs(() => {
+		// 	if (document.body) { // `head meta[property="og:image"]`
+		// 		frycAPI.createMutObs((mutRecArr, mutObs) => {
+		// 			const image = document.getElementById("image");
+		// 			if (!image?.currentSrc) return;
+		// 			const [MD5, ext] = new URL(image.currentSrc.lóg).pathname.split("/").pop().split(".");
+		// 			const possibleExts = image.nodeName === "VIDEO" ? ["webm", "mp4"] : ["png", "jpg", "jpeg", "gif", "webp"];
+		// 			const checks = [];
+		// 			for (const cache of caches) {
+		// 				for (const posExt of possibleExts) {
+		// 					const filename = `${MD5}.${posExt}`;
+		// 					checks.push(cache.fileExistsPromise(filename));
+		// 				}
+		// 			}
+		// 			Promise.any(checks).then(response => {
+		// 				if (response.ok) {
+		// 					image.removeAttribute("poster");
+		// 					image.src = response.url.lóg;
+		// 					document.title = "Cached - " + document.title;
+		// 					frycAPI.unblockImagesOnThisTab();
+		// 				}
+		// 			}).catch(() => {});
+		// 			return true;
+		// 			// for (const mutRec of mutRecArr) {
+		// 			// 	for (const image of mutRec.addedNodes) {
+		// 			// 		if (image instanceof Element && image.getAttribute("id") === "image") { // (image.tagName === "IMG" || image.tagName === "VIDEO")
+		// 			// 		}
+		// 			// 	}
+		// 			// }
+		// 		}, { elem: document.body, options: { childList: true, subtree: true } });
+		// 		return true;
+		// 	}
+		// }, { elem: document.documentElement });
+
+		// let image, postOptions, postInformation, og_image;
+		// frycAPI.createMutObs(() => {
+		// 	image ??= document.getElementById("image")?.lóg;
+		// 	postOptions ??= document.getElementById("post-options")?.lóg;
+		// 	postInformation ??= document.getElementById("post-information")?.lóg;
+		// 	og_image ??= document.querySelector(`head meta[property="og:image"]`)?.lóg;
+		// }, { elem: document.documentElement });
+
+		const POSSIBLE_EXTS = ["png", "jpg", "webm", "mp4", "jpeg", "gif", "webp"];
+		frycAPI.createMutObs(() => {
+			const ogImage = document.querySelector(`head meta[property="og:image"]`);
+			if (!ogImage) return;
+			const origSrc = ogImage.getAttribute("content");
+			const [MD5, ext] = new URL(origSrc).pathname.split("/").pop().split(".");
+			const checks = [];
+			for (const posExt of POSSIBLE_EXTS) {
+				for (const cache of caches) {
+					const filename = `${MD5}.${posExt}`;
+					checks.push(cache.fileExistsPromise(filename));
+				}
+			}
+			Promise.any(checks).then(response => {
+				if (!response.ok) return;
+				frycAPI.createMutObs(() => {
+					const image = document.getElementById("image");
+					if (!image?.currentSrc) return;
+					image.removeAttribute("poster");
+					image.src = response.url;
+					frycAPI.createMutObs(() => {
+						image.src = response.url;
+					}, { elem: image, options: { childList: false, subtree: false, attributes: true, attributeFilter: ["src"] } });
+					document.title = "Cached - " + document.title;
+					return true;
+				}, { elem: document.documentElement });
+			}).catch(() => {}).finally(() => {
+				frycAPI.unblockImagesOnThisTab();
+			});
+			return true;
+		}, { elem: document.documentElement });
+	} else if (pathName.startsWith("/posts")) {
 		function getPostIDs() {
 			let str = "";
 			frycAPI.forEach(`article.thumbnail`, daElem => {
@@ -13290,6 +13364,73 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		dpsRow.querySelector(`.stat-label`).innerText = "DPS";
 		dpsRow.querySelector(`.stat-value`).innerText = (parseFloat(panel.querySelector(`[alt="ATK"] ~ .stat-value`).innerText) / parseFloat(panel.querySelector(`[alt="Attack Interval"] ~ .stat-value`).innerText)).toFixed(1);
 	});
+} else if (frycAPI_host("my.zerotier.com") && frycAPI.path.startsWith("/network")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	function getTableJSON() {
+		const table = frycAPI.qSel(`section > section > table`); // potentially unsafe selector
+		if (!table) return null;
+		const jsn = [];
+		table.querySelectorAll(`tbody > tr`).forEach(tr => {
+			jsn.push({
+				Auth        : tr.children[2].innerText.trim() === "✅",
+				Node_ID     : tr.children[3].querySelector(`.code`).innerText.trim(),
+				Virtual_MAC : tr.children[3].querySelector(`.code + div`).innerText.trim(),
+				Name        : tr.children[4].querySelector(`span`).innerText.trim(),
+				Description : tr.children[4].querySelector(`span + div`).innerText.trim(),
+				Managed_IPv4: tr.children[5].querySelector(`[title="managedV4"]`)?.innerText.trim() ?? "",
+				Managed_IPv6: tr.children[5].querySelector(`[title="6plane"]`)?.innerText.trim() ?? "",
+				Last_Seen   : tr.children[6].innerText.trim(),
+				Version     : tr.children[7].innerText.trim(),
+				Physical_IP : tr.children[8].innerText.trim(),
+				OS          : tr.children[9].innerText.trim(),
+				Architecture: tr.children[10].innerText.trim(),
+			});
+		});
+		return jsn;
+	}
+	function getDownloadName() {
+		return `ZeroTier ${frycAPI.qSel(`h1[title="Network Name"]`).innerText.trim()} [${frycAPI.byID("networkIdField").value}]`;
+	}
+	frycAPI.createManualFunctions("Zero Tier", {
+		funcArr: [
+			(name = "Download members table as CSV", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = function (obj) {
+					const jsn = getTableJSON();
+					if (!jsn) {
+						f.name = "I can't find the table";
+						return;
+					}
+					const colNames = Object.keys(jsn[0]);
+					const str = `${colNames.join(",")}\n${jsn.map(row => Object.values(row).join(",")).join("\n")}`;
+					frycAPI.downloadTxt(str, getDownloadName() + ".csv");
+				};
+				return f;
+			},
+			(name = "Download members table as JSON", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = function (obj) {
+					const jsn = getTableJSON();
+					if (!jsn) {
+						f.name = "I can't find the table";
+						return;
+					}
+					frycAPI.downloadTxt(jsn.jsón, getDownloadName() + ".json");
+				};
+				return f;
+			},
+		],
+	});
+} else if (frycAPI_host("www.netfala.pl")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		body {
+			background: var(--darkreader-background-ffffff, #212324) !important;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 

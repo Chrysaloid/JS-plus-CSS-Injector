@@ -9,6 +9,8 @@ Object.defineProperty(Object.prototype, "log", {
 	},
 });
 
+const RULE_ID_BASE = 1000;
+
 // #region Unused chrome.storage.session wrapper
 /* // This someday might be useful...
 const varDefaults = { // Global persistent variables. Can't be null or undefined
@@ -138,6 +140,7 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 			});
 			return;
 		};
+		case "unblockImagesOnThisTab": return chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [RULE_ID_BASE + sender.tab.id] });
 		case "downloadURL": return void chrome.downloads.download(data);
 		case "downloadNotify": return new Promise(resolve => {
 			let theId;
@@ -226,6 +229,29 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 		}
 	});
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
+
+const INTERESTING_REQUEST_DOMAINS = ["static1.e621.net", "static1.e926.net"];
+const INTERESTING_DOMAINS = ["e621.net", "e926.net"];
+
+chrome.webNavigation.onBeforeNavigate.addListener(async details => {
+	log("Before navigate:", details);
+	const ruleId = RULE_ID_BASE + details.tabId;
+	await chrome.declarativeNetRequest.updateSessionRules({
+		removeRuleIds: [ruleId],
+		addRules: [{
+			id: ruleId,
+			priority: 1,
+			condition: {
+				requestDomains: INTERESTING_REQUEST_DOMAINS,
+				resourceTypes: ["image", "media"],
+				tabIds: [details.tabId],
+			},
+			action: { type: "block" },
+		}],
+	});
+}, {
+	url: INTERESTING_DOMAINS.map(s => ({ hostEquals: s, pathContains: "/posts/" })),
+});
 
 /* // For the future if we needed to add repetative declarativeNetRequest rules. It has to be done iside onInstalled
 chrome.runtime.onInstalled.addListener(() => {

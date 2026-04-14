@@ -30,6 +30,7 @@
 		"declarativeNetRequestFeedback",
 		"offscreen",
 		"windows",
+		"webNavigation",
 		"clipboardRead",
 		"clipboardWrite"
 	],
