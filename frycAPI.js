@@ -481,16 +481,6 @@ class frycAPI_Cache extends Object {
 	fileExistsPromise(name) {
 		return fetch(this.getFileUrl(name), { method: "HEAD" });
 	}
-	// fileExistsFast(name) {
-	// 	return new Promise(resolve => {
-	// 		const img = new Image();
-
-	// 		img.onload = () => resolve(true);
-	// 		img.onerror = () => resolve(false);
-
-	// 		img.src = this.getFileUrl(name);
-	// 	});
-	// }
 }
 function loguj(...tekst) {
 	console.log(...tekst);
