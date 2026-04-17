@@ -4,7 +4,7 @@
 "use strict";
 const frycAPI_t1 = performance.now();
 
-class frycAPI_ManualFunc extends Object {
+class frycAPI_ManualFunc {
 	callback;
 	funcGroup;
 	num;
@@ -18,7 +18,6 @@ class frycAPI_ManualFunc extends Object {
 	additionalAction;
 	__nameBase; // we cannot use #nameBase (real private property) because Popup.js will not be able to read it
 	constructor(obj) {
-		super();
 		this.name = obj.name;
 		this.__nameBase = obj.name;
 		this.style = obj.style;
@@ -239,10 +238,9 @@ class frycAPI_Input extends frycAPI_ManualFunc {
 	// 	INPUT: "input",
 	// };
 }
-class frycAPI_FuncGroup extends Object {
+class frycAPI_FuncGroup {
 	name; funcArr; num; style;
 	constructor(name, obj) {
-		super();
 		this.name = name;
 		this.style = obj.style;
 		this.funcArr = obj.funcArr;
@@ -255,10 +253,9 @@ class frycAPI_FuncGroup extends Object {
 		});
 	}
 }
-class frycAPI_StyleState extends Object {
+class frycAPI_StyleState {
 	id; state; styleElem; on; off; toggle; eventObj;
 	constructor(obj) {
-		super();
 		const me = this;
 		me.state = Boolean(obj.state ?? true);
 		me.id = obj.id;
@@ -355,10 +352,9 @@ class frycAPI_StyleState extends Object {
 		}
 	}
 }
-class frycAPI_Elem extends Object {
+class frycAPI_Elem {
 	elem;
 	constructor(elemType) {
-		super();
 		this.elem = document.createElement(elemType);
 	}
 	get _() {
@@ -461,10 +457,9 @@ class frycAPI_MutationObserver extends MutationObserver {
 		return this;
 	}
 }
-class frycAPI_Cache extends Object {
+class frycAPI_Cache {
 	path;
 	constructor(cacheId) {
-		super();
 		this.path = frycAPI.atob_utf8(cacheId); // eslint-disable-line no-use-before-define
 	}
 	getFileUrl(name) {
