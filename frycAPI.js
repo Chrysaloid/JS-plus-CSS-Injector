@@ -6258,6 +6258,22 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 		.js-zone-container:has([id^="google_ads_iframe"]) {
 			display: none;
 		}
+
+		.my-button {
+			position: absolute;
+			top: 8px;
+			left: 152px;
+			background-color: hsl(0deg 0% 25%);
+			color: white;
+			border-radius: 4px;
+			width: max-content;
+			padding: 3px 5px;
+			cursor: pointer;
+			font-size: 15px;
+		}
+		:has(> .my-button) {
+			position: relative;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -6336,6 +6352,16 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 			// #endregion
 			// const t2 = performance.now(); frycAPI.perf(t1, t2);
 		});
+
+		if (frycAPI.path.startsWith("/users/")) {
+			const img = frycAPI.qSel(`img.bar-sm.bar-md.d-block`);
+			const parent = frycAPI.qSel(`.d-flex.ai-center.fw-wrap.gs16`);
+			if (img) {
+				parent.appendChild(frycAPI.elem("div").text("Download avatar image").class("my-button")._).addEventListener("click", ev => {
+					frycAPI.downloadUrl(img.src.lóg, `${frycAPI_host()}${frycAPI.path.replaceAll("/", ";")};${img.alt}.png`);
+				});
+			}
+		}
 	});
 } else if (1 && frycAPI_host("steamcommunity.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
