@@ -13442,6 +13442,16 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			background: var(--darkreader-background-ffffff, #212324) !important;
 		}
 	`);
+} else if (frycAPI.path.startsWith("/C:/Users/Fryderyk/AppData/Roaming/npm") && frycAPI.path.endsWith(".html")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		html, img, #logobar {
+			filter: invert(1) hue-rotate(180deg); /* !important */
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
