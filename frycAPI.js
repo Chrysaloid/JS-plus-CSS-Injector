@@ -13500,6 +13500,13 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			--font-user-message: 'IBM Plex Sans Condensed', sans-serif !important;
 		}
 	`);
+} else if (frycAPI_host("triq.org")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.pulseplot-messages strong {
+			font-family: "Source Code Fryc", sans-serif;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
