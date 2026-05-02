@@ -50,6 +50,12 @@
 				"id": "charset-utf8",
 				"enabled": false,
 				"path": "Enforce-charset-UTF-8.json"
+			},
+			{
+				"//": "Does not work. Check out https://phrogz.net/js/string_to_number.html",
+				"id": "upgrade-http-to-https",
+				"enabled": false,
+				"path": "upgrade-http-to-https.json"
 			}
 		]
 	},

@@ -1,0 +1,21 @@
+[
+	{
+		"id": 1,
+		"priority": 1,
+		"condition": {
+			"urlFilter": "|http://",
+			"requestDomains": [
+				"microsoft.com",
+				"google.com"
+			]
+		},
+		"action": {
+			"type": "redirect",
+			"redirect": {
+				"transform": {
+					"scheme": "https"
+				}
+			}
+		}
+	}
+]
