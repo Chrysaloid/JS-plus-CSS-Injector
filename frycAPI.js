@@ -13507,6 +13507,18 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "Source Code Fryc", sans-serif;
 		}
 	`);
+} else if (frycAPI_host("aa.quae.nl")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		body {
+			width: 1000px;
+			max-width: 100%;
+			margin: auto;
+		}
+		* {
+			font-family: "IBM Plex Sans Condensed", Calibri, sans-serif !important;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
