@@ -8617,7 +8617,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const myMessageBody = ".html-div.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x1gslohp.x11i5rnm.x12nagc.x1mh8g0r.x1yc453h.x126k92a.xyk4ms5";
 	const myMessageContainer = `[role="none"] > .html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x6ikm8r.x10wlt62 > .html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.x14ctfv`;
 	const messageList = ".x78zum5.xdt5ytf.x1iyjqo2.x2lah0s.xl56j7k.x121v3j4";
-	const buttonContainer = `[data-release-focus-from="CLICK"] > div > .html-div:nth-child(3) [role="presentation"] [role="presentation"]`;
+	const buttonContainer = `[data-release-focus-from="CLICK"] > div > .html-div:nth-child(3) [role="toolbar"] [role="presentation"] [role="presentation"]`;
 	const reactCSS = `[aria-label="Zareaguj"]`;
 	const replyCSS = `[aria-label="Odpowiedz"]`;
 	const moreCSS = `[aria-label="Więcej"]`;
@@ -8717,6 +8717,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		}
 		#facebook * {
 			--chat-outgoing-message-bubble-background-color: #4C4C4C !important;
+			--chat-message-text-color: white !important;
 		}
 		${messageScroller} {
 			background-color: #000000;
@@ -8740,6 +8741,9 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 					background-position: center;
 					background-size: var(--s2);
 				}
+			}
+			& > .przerobiony {
+				display: none;
 			}
 			& > .react {
 				order: 1;
