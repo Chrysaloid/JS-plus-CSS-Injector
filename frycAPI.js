@@ -13473,6 +13473,25 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", "verdana", sans-serif;
 		}
 	`);
+} else if (0 && frycAPI_host("phrogz.net")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	// None of this worked to fix the Mixed Content error
+
+	// document.appendChild(frycAPI.elemFromHTML('<script type="text/javascript" src="https://ajax.microsoft.com/ajax/jquery/jquery-1.4.4.min.js"></script>'));
+
+	// frycAPI.createMutObs(() => {
+	// 	frycAPI.forEach(`script[src^="http://"]`, script => {
+	// 		// script.src = "https" + script.src.slice(4);
+	// 		// script.setAttribute("src", "https" + script.getAttribute("src").slice(4));
+	// 		const clone = script.cloneNode(1);
+	// 		clone.src = "https" + script.src.slice(4);
+	// 		script.insertAdjacentElement("afterEnd", clone);
+	// 		script.remove();
+	// 	});
+	// });
 }
 // Code-Lens-Action insert-snippet IF template
 
