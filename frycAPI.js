@@ -13519,6 +13519,9 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", Calibri, sans-serif !important;
 		}
 	`);
+} else if (frycAPI_host("127.0.0.1")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.colorSchemeDark = true;
 }
 // Code-Lens-Action insert-snippet IF template
 
