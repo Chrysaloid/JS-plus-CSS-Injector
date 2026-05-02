@@ -8973,6 +8973,9 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 		body {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
+		#wtg_meteogramy_bill_top {
+			display: none;
+		}
 	`);
 	if (frycAPI.path.startsWith("/um/")) {
 		frycAPI.injectStyleOnLoad(/*css*/`
