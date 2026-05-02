@@ -4363,7 +4363,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 					}
 				}
 				.search {
-					background-color: var(--theme-user-msg-bg);
+					background-color: #373737;
 					padding: 5px;
 					gap: 5px;
 					display: flex;
@@ -4384,20 +4384,20 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 					}
 					.clear:hover {
 						filter: brightness(1.3);
-						background-color: var(--theme-user-msg-bg);
+						background-color: #373737;
 						cursor: pointer;
 					}
 				}
 			}
 			.prompt:hover {
 				filter: brightness(1);
-				background-color: color-mix(in srgb, var(--theme-user-msg-bg), 10% white);
+				background-color: color-mix(in srgb, #373737, 10% white);
 			}
 
 			.prompt {
 				padding: 2px 5px;
 				display: -webkit-box;
-				background-color: var(--theme-user-msg-bg); /* rgb(47, 47, 47) */
+				background-color: #373737; /* rgb(47, 47, 47) */
 				overflow: clip;
 				-webkit-line-clamp: 3;
 				-webkit-box-orient: vertical;
