@@ -46,8 +46,9 @@
 				"path": "PDF-download-rule.json"
 			},
 			{
+				"//": "Fixed by frycAPIScript.setAttribute('charset', 'utf-8') in frycAPI-inject.js",
 				"id": "charset-utf8",
-				"enabled": true,
+				"enabled": false,
 				"path": "Enforce-charset-UTF-8.json"
 			}
 		]
