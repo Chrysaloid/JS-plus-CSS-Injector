@@ -13492,6 +13492,14 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	// 		script.remove();
 	// 	});
 	// });
+} else if (frycAPI_host("claude.ai")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		html {
+			--font-claude-response: 'IBM Plex Sans Condensed', sans-serif !important;
+			--font-user-message: 'IBM Plex Sans Condensed', sans-serif !important;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
