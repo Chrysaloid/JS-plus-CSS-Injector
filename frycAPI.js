@@ -13459,6 +13459,20 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			filter: invert(1) hue-rotate(180deg); /* !important */
 		}
 	`);
+} else if (frycAPI_host("docs.ntpsec.org")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		html, body {
+			background-color: hsl(34 0% 17% / 1);
+		}
+		body {
+			width: 50%;
+			margin: auto;
+			padding: 10px;
+			text-align: left;
+			font-family: "IBM Plex Sans Condensed", "verdana", sans-serif;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
