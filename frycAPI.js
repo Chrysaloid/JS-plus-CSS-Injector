@@ -11094,7 +11094,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					return true;
 				}, { elem: document.documentElement });
 			}).catch(() => {}).finally(() => {
-				frycAPI.unblockImagesOnThisTab();
+				// frycAPI.unblockImagesOnThisTab();
 			});
 			return true;
 		}, { elem: document.documentElement });
