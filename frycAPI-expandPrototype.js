@@ -109,6 +109,11 @@ frycAPI_expandPrototype(String, "frycAPI_toTitleCase", function () {
 frycAPI_expandPrototype(String, "frycAPI_eval", function () {
 	return eval(this);
 });
+frycAPI_expandPrototype(String, "extractAfter", function (subStr = "\x00") {
+	const idx = this.indexOf(subStr);
+	return idx >= 0 ? this.slice(idx + subStr.length) : "";
+});
+
 [
 	"every",
 	"filter",

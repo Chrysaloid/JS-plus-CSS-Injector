@@ -11,6 +11,7 @@ class frycAPI_ManualFunc {
 	prevFunc;
 	nextFunc;
 	style;
+	funcElStyle;
 	name;
 	Off;
 	displayName;
@@ -21,6 +22,7 @@ class frycAPI_ManualFunc {
 		this.name = obj.name;
 		this.__nameBase = obj.name;
 		this.style = obj.style;
+		this.funcElStyle = obj.funcElStyle;
 		this.displayName = obj.displayName ?? false;
 		this.nameClickable = obj.nameClickable ?? false;
 		this.Off = obj.Off ?? false;
@@ -221,10 +223,13 @@ class frycAPI_Input extends frycAPI_ManualFunc {
 	state = "";
 	prevState = "";
 	stateChanged = false;
+	attributes;
+	selectOnFocus;
 	constructor(obj) {
 		super(obj);
 		// this.inputType = obj.inputType ?? frycAPI_Input.inputTypes.DIV;
 		this.attributes = obj.attributes;
+		this.selectOnFocus = obj.selectOnFocus;
 	}
 	fixGeneralState(obj) {
 		this.prevState = this.state;
@@ -462,6 +467,9 @@ class frycAPI_Cache {
 	constructor(cacheId) {
 		this.path = frycAPI.atob_utf8(cacheId); // eslint-disable-line no-use-before-define
 	}
+	getFolder() {
+		return this.path.replace(/chrome-extension:\/\/.+?\//, "G:/");
+	}
 	getFileUrl(name) {
 		return this.path + name;
 	}
@@ -639,11 +647,11 @@ var frycAPI = { // eslint-disable-line no-var
 		const fGroup = new frycAPI_FuncGroup(name, obj);
 		fGroup.num = frycAPI.funcGroupArr.push(fGroup) - 1;
 	},
-	handleManualFunction(daObj) {
+	async handleManualFunction(daObj) {
 		const func = frycAPI.funcGroupArr[daObj.groupNumber].funcArr[daObj.funcNumber];
 		// func.fixGeneralStateBase(daObj.obj);
 		func.fixGeneralState?.(daObj.obj);
-		func.callback(daObj.obj);
+		await func?.callback(daObj.obj);
 		return frycAPI;
 	},
 	ctrlC(text) {
@@ -13549,6 +13557,69 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			display: none;
 		}
 	`);
+} else if (frycAPI_host("archidekt.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	frycAPI.onLoadSetter(function () {
+	});
+
+	const precons = new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL01hZ2ljIHRoZSBHYXRoZXJpbmcvRm9yZ2UvcmVzL3F1ZXN0L3ByZWNvbnMv");
+
+	frycAPI.createManualFunctions("Archidekt", {
+		funcArr: [
+			(name = "Validate deck", type = frycAPI_Input) => {
+				const f = new type({ name });
+				f.displayName = 1;
+				f.nameClickable = 1;
+				f.selectOnFocus = 1;
+				const numAndSpace = /^[\d\s]+/g;
+				f.callback = async function (obj) {
+					const deckName = f.state.trim().replaceAll(numAndSpace, "");
+					f.state = deckName;
+					const result = f.funcGroup.funcArr[f.num + 1];
+					if (await precons.fileExists(deckName + ".dck")) {
+						const deckContent = (await frycAPI.readFile(precons.getFileUrl(deckName + ".dck"), "txt")).toLowerCase();
+						let localCards = deckContent.extractAfter("[commander]");
+						localCards ||= deckContent.extractAfter("[main]");
+						localCards = localCards
+						.split("\n")
+						.map(s => s.trim())
+						.filter(s => s && !s.startsWith("["))
+						.map(s => s.replaceAll(numAndSpace, "").split("|", 1)[0].replace(/\+$/, ""));
+						localCards = new Set(localCards);
+
+						let siteCards = frycAPI.qSelAll(`#deck-container [id="basicCardImage"]`)
+						.map(s => s.alt.match(/(.+) \(.+\).+$/)[1].toLowerCase());
+						siteCards = new Set(siteCards);
+
+						const localMinusSite = Array.from(localCards.difference(siteCards));
+						const siteMinuslocal = Array.from(siteCards.difference(localCards));
+
+						if (localMinusSite.length || siteMinuslocal.length) {
+							result.name =
+							(localMinusSite.length ? `Local cards not on site (${localMinusSite.length}): ${localMinusSite.join(", ")}` : "") +
+							(localMinusSite.length && siteMinuslocal.length ? "<br>" : "") +
+							(siteMinuslocal.length ? `Site cards not in local: (${siteMinuslocal.length}): ${siteMinuslocal.join(", ")}` : "");
+						} else {
+							result.name = "Decks are identical";
+						}
+					} else {
+						result.name = "Deck not found";
+					}
+				};
+				return f;
+			},
+			(name = "Result", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.funcElStyle = "height: fit-content; white-space: normal;";
+				f.resetNameOnFirstStart = 0;
+				// f.callback = function (obj) { };
+				return f;
+			},
+		],
+	});
 }
 // Code-Lens-Action insert-snippet IF template
 

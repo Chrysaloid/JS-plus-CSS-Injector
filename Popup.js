@@ -26,7 +26,7 @@ function addDaListener(elem, daObj, additionalAction = () => true, type = "click
 	const newObj = structuredClone(daObj);
 	// newObj.type = elem.type;
 	elem.addEventListener(type, function (e) {
-		if (e.target.value !== undefined) newObj.obj.state = e.target.value;
+		if (elem.value !== undefined) newObj.obj.state = elem.value;
 		runOnPage(newDaObj => frycAPI.handleManualFunction(newDaObj), [newObj])
 		.then(frycAPI0 => {
 			if (additionalAction()) {
@@ -106,7 +106,7 @@ async function main(frycAPI0) {
 	funcGroupArr.forEach(function (funcGroup, groupNum) {
 		const subCont = document.createElement("div");
 		subCont.classList.add("subCont");
-		// funcGroup.style
+		if (funcGroup.style) subCont.setAttribute("style", funcGroup.style);
 		const groupName = document.createElement("span");
 		groupName.classList.add("groupName");
 		groupName.innerHTML = funcGroup.name;
@@ -120,7 +120,7 @@ async function main(frycAPI0) {
 			const funcDiv = document.createElement("div");
 			funcDiv.classList.add("funcDiv", funcObj.type);
 			if (funcObj.Off) funcDiv.classList.add("Off");
-			// funcObj.style
+			if (funcObj.style) funcDiv.setAttribute("style", funcObj.style);
 			funcCont.appendChild(funcDiv);
 			daObj.groupNumber = groupNum;
 			daObj.funcNumber = funcNum;
@@ -131,7 +131,7 @@ async function main(frycAPI0) {
 			funcName.classList.add("funcName");
 			funcName.innerHTML = funcObj.name;
 			daObj.obj.type = "name";
-			if (funcObj.displayName === false) funcName.classList.add("dspNone");
+			if (!funcObj.displayName) funcName.classList.add("dspNone");
 			if (funcObj.nameClickable) {
 				funcName.classList.add("nameClickable");
 				addDaListener(funcName, daObj, additionalAction);
@@ -144,6 +144,7 @@ async function main(frycAPI0) {
 				case ManualFuncTypes.NORMAL: {
 					const funcEl = document.createElement("div");
 					funcEl.classList.add("funcEl");
+					if (funcObj.funcElStyle) funcEl.setAttribute("style", funcObj.funcElStyle);
 					funcEl.innerHTML = firstStart && funcObj.resetNameOnFirstStart ? funcObj.__nameBase : funcObj.name; // eslint-disable-line no-underscore-dangle
 					// funcEl.innerHTML = funcObj.name;
 					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
@@ -224,10 +225,11 @@ async function main(frycAPI0) {
 				case ManualFuncTypes.INPUT: {
 					const funcEl = document.createElement("input");
 					funcEl.classList.add("funcEl");
+					if (funcObj.selectOnFocus) funcEl.addEventListener(`focus`, () => funcEl.select());
 					funcEl.setAttribute("value", funcObj.state);
 					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction, "change");
 					funcDiv.appendChild(funcEl);
-					if (funcObj.attributes !== undefined) {
+					if (funcObj.attributes) {
 						Object.entries(funcObj.attributes).forEach(([key, value]) => {
 							funcEl.setAttribute(key, value);
 						});
