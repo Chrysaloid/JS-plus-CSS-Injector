@@ -13542,6 +13542,13 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.createMutObs((mutRecArr, mutObs) => {
 		frycAPI.qSel(`.comments__hero button.close`)?.click();
 	}, { options: { attributes: true } });
+} else if (frycAPI_host("www.urbandictionary.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.py-3.print\\:hidden {
+			display: none;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
