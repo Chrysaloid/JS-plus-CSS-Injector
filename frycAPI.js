@@ -11885,6 +11885,18 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			display: flex;
 			align-items: center;
 		}
+
+		#transaction-buttons-section {
+			> :has(#buy-and-pay-button_SHOW_ITEM_STATIC_DESKTOP) {
+				display: none;
+			}
+			> :has(#add-to-cart-button) {
+				margin: 0;
+			}
+		}
+		[data-testid="allegro-pay-button"] { /* Zapłać później */
+			display: none;
+		}
 	`);
 
 	frycAPI.onLoadSetter(function () {
