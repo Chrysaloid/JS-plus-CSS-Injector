@@ -11887,7 +11887,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		}
 
 		#transaction-buttons-section {
-			> :has(#buy-and-pay-button_SHOW_ITEM_STATIC_DESKTOP) {
+			> :has(#buy-and-pay-button_SHOW_ITEM_STATIC_DESKTOP) { /* Kup teraz */
 				display: none;
 			}
 			> :has(#add-to-cart-button) {
