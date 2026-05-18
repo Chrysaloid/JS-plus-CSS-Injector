@@ -5506,15 +5506,21 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 		}
 	`);
 
-	/*
 	frycAPI.onLoadSetter(function () {
-		frycAPI.setDefaultDateStyle().mode.oba();
+		frycAPI.setDefaultDateStyle().mode.absolutnyCzas();
+		const opts = {
+			getDate: elem => elem.innerText.replace("CEST", "+0200").replace("CET", "+0100"),
+			dateOpts: {
+				printDate: frycAPI.getDateFormatter({
+					second: "2-digit",
+				}),
+			},
+		};
 		frycAPI.createMutObs(() => {
 			// loguj("MutObs");
-			frycAPI.setDefaultDate(`span[id][class][title][alt][role][tabindex="-1"]`, { getDate: elem => elem.getAttribute("title") });
+			frycAPI.setDefaultDate(`div:has(span[email="noreply-apps-scripts-notifications@google.com"]:not([translate])) table ~ table tr > td:is(:first-child, :last-child)`, opts);
 		});
 	});
-	*/
 } else if (1 && frycAPI_host("mat-fiz-samouczek.pw.edu.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
