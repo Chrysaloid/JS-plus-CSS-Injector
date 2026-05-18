@@ -13528,31 +13528,31 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 // #region //* IFs 11
 // #endregion
 // #endregion
-if (1) { //* Global functions end
-	// #region //* color scheme only light
-	if (frycAPI.colorSchemeDark) {
-		document.getElementById("frycAPI-color-scheme-only-light")?.remove();
-	} else {
-		frycAPI.createMutObs(() => {
-			if (document.head) {
-				if (document.head.querySelector('meta[name="color-scheme"]:is([content="dark"],[content="dark light"],[content="light dark"])') === null) {
-					document.head.insertAdjacentElement("afterBegin", frycAPI.elem("meta", 0).frycAPI_setAttributeBulk(
-						"name", "color-scheme",
-						"content", "only light",
-						"id", "frycAPI-color-scheme-only-light"
-					));
-				}
-				return true;
+// #region //* Global functions end
+// #region //* color scheme only light
+if (frycAPI.colorSchemeDark) {
+	document.getElementById("frycAPI-color-scheme-only-light")?.remove();
+} else {
+	frycAPI.createMutObs(() => {
+		if (document.head) {
+			if (document.head.querySelector('meta[name="color-scheme"]:is([content="dark"],[content="dark light"],[content="light dark"])') === null) {
+				document.head.insertAdjacentElement("afterBegin", frycAPI.elem("meta", 0).frycAPI_setAttributeBulk(
+					"name", "color-scheme",
+					"content", "only light",
+					"id", "frycAPI-color-scheme-only-light"
+				));
 			}
-		}, { elem: document.documentElement, options: { childList: true, subtree: false } });
-	}
-	// #endregion
-	// #region //* Esc to scroll to top
-	document.addEventListener("keydown", e => { if (e.key === "Escape") scrollTo(0, 0); });
-	// #endregion
-	// #region //*
-	// #endregion
+			return true;
+		}
+	}, { elem: document.documentElement, options: { childList: true, subtree: false } });
 }
+// #endregion
+// #region //* Esc to scroll to top
+document.addEventListener("keydown", e => { if (e.key === "Escape") scrollTo(0, 0); });
+// #endregion
+// #region //*
+// #endregion
+// #endregion
 
 // #region //* End
 if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // Adding style from the active IF block
