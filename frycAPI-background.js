@@ -123,7 +123,7 @@ function catchSpotifyRequest(details) {
 	spotifyAuthorizationResolve(authorization);
 }
 
-chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, sendResp) {
+chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, sendResp) { //* Main background logic
 	// log(name);
 	// log(data);
 
@@ -209,6 +209,7 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 	return true; // Necessary if we want to send a response using sendResp
 });
 
+// #region //* PDF handling
 function findHeader(headers, headerStr) {
 	return headers.find(header => header.name.toLowerCase() === headerStr);
 }
@@ -229,6 +230,7 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 		}
 	});
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
+// #endregion
 
 // const INTERESTING_REQUEST_DOMAINS = ["static1.e621.net", "static1.e926.net"];
 // const INTERESTING_DOMAINS = ["e621.net", "e926.net"];
