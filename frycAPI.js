@@ -13522,6 +13522,26 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 } else if (frycAPI_host("127.0.0.1")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.colorSchemeDark = true;
+} else if (frycAPI_host("www.instrukcjaobslugipdf.pl")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		html, img {
+			filter: invert(1) hue-rotate(180deg); /* !important */
+		}
+		:is(.ad-placeholder, .manual__navigation) + :has(.adsbygoogle) {
+			display: none;
+		}
+	`);
+
+	frycAPI.onLoadSetter(function () {
+	});
+
+	frycAPI.createMutObs((mutRecArr, mutObs) => {
+		frycAPI.qSel(`.comments__hero button.close`)?.click();
+	}, { options: { attributes: true } });
 }
 // Code-Lens-Action insert-snippet IF template
 
