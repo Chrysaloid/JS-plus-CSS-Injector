@@ -10672,11 +10672,9 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		}
 
 		/* Collapsing comments */
-		#post-sections li:first-child {
+		.my-comments-header {
 			color: var(--color-link);
-			a {
-				display: none;
-			}
+
 			&::before, &::after {
 				display: inline-block;
 				font-weight: bold;
@@ -10689,14 +10687,14 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				content: "${frycAPI.listMarkerOpen}";
 				width: 17px;
 			}
-			.content.collapsed &::before {
+			#comments.collapsed &::before {
 				content: "${frycAPI.listMarkerCollapsed}";
 			}
 			&::after {
 				content: var(--comment-count, "Comments");
 			}
 		}
-		.content.collapsed #comments {
+		#comments.collapsed .comments-for-post {
 			display: none;
 		}
 
@@ -10749,14 +10747,46 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			// download.setAttribute("href", "");
 
 			// #region //* Uncollapse comments button
-			const content = frycAPI.qSel(`.content`);
-			content.frycAPI_addClass("collapsed");
-			frycAPI.qSel(`#post-sections li.active`).addEventListener("click", e => {
-				content.classList.toggle("collapsed");
+			const comments = frycAPI.byID("comments");
+			comments.frycAPI_addClass("collapsed");
+			const myCommentsHeader = frycAPI.elem("span").class("my-comments-header")._;
+			myCommentsHeader.addEventListener("click", e => {
+				comments.classList.toggle("collapsed");
 			});
+			comments.insertAdjacentElement("afterBegin", myCommentsHeader);
 			const newComment = frycAPI.qSel(`.new-comment`);
-			newComment.parentElement.insertAdjacentElement("afterBegin", newComment);
-			frycAPI.byID("post-sections").style.setProperty("--comment-count", `"Comments (${frycAPI.qSelAll(`article.comment`).length})"`);
+			if (newComment) newComment.parentElement.insertAdjacentElement("afterBegin", newComment);
+			myCommentsHeader.style.setProperty("--comment-count", `"Comments (${frycAPI.qSelAll(`article.comment`).length})"`);
+			// #endregion
+
+			// #region //* Add download button
+			const fileUrl = frycAPI.qSel(`#post-options a[href^="https://static"`).href;
+			const filename = fileUrl.split("/").pop();
+			const editButton = frycAPI.qSel(".ptbr-edit");
+			const fullscreenButton = frycAPI.qSel(".ptbr-fullscreen");
+			const downloadButt = editButton.cloneNode(1);
+			const realButton = downloadButt.children[0];
+			realButton.removeAttribute("id");
+			realButton.removeAttribute("data-hotkey");
+			realButton.removeAttribute("title");
+			realButton.classList.remove("ptbr-edit-button");
+			realButton.innerText = "Download";
+			realButton.addEventListener("click", e => {
+				(async () => {
+					for (const cache of caches) {
+						if (await cache.fileExists(filename)) {
+							realButton.setAttribute("title", `To folder: ${cache.getFolder()}`);
+							return;
+						}
+					}
+					await frycAPI.downloadNotify(fileUrl);
+					realButton.setAttribute("title", `To folder: ${caches[0].getFolder()}`);
+				})()
+				.then(() => {
+					realButton.innerText = "Downloaded ✅";
+				});
+			});
+			fullscreenButton.insertAdjacentElement("afterEnd", downloadButt);
 			// #endregion
 		} else if (pathName === "/posts" || pathName.startsWith("/posts?")) {
 			document.getElementById("c-posts")?.insertAdjacentElement("beforebegin", document.querySelector("form.post-search-form"));
