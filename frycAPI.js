@@ -4461,7 +4461,42 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 		#page-header :has(> [aria-label="Dismiss upgrade reminder"]) {
 			display: none;
 		}
+
+		.myMsgTime {
+			text-align: right;
+			margin-right: 22px;
+		}
 	`);
+
+	const originalFetch = window.fetch;
+	let msgObs = null;
+	window.fetch = async (...args) => {
+		const response = await originalFetch(...args);
+
+		if (response.url.startsWith("https://chatgpt.com/backend-api/conversation/")) {
+			response.clone().json().then(conversation => {
+				if (conversation?.conversation_id) {
+					// loguj(conversation);
+					msgObs?.disconnect();
+					msgObs = frycAPI.createMutObs((mutRecArr, mutObs) => {
+						frycAPI.forEach(`[data-turn-id-container]:not([date-added])`, daElem => {
+							const msg = conversation.mapping[daElem.getAttribute("data-turn-id-container")]?.message;
+							if (msg?.author?.role === "user") {
+								const myMessageParent = daElem.querySelector(`:scope > section > div > div`);
+								if (!myMessageParent) return;
+								const lepCzs = frycAPI.elem("div").class("lepszyCzasParent", "myMsgTime")._;
+								frycAPI.setDefaultDateText(lepCzs, new Date(msg.create_time * 1000));
+								myMessageParent.insertAdjacentElement("afterBegin", lepCzs);
+								daElem.setAttribute("date-added", "");
+							}
+						});
+					});
+				}
+			});
+		}
+
+		return response;
+	};
 
 	const promptSelector = `[data-message-author-role="user"] .whitespace-pre-wrap`;
 	frycAPI.createManualFunctions("ChatGPT", {
