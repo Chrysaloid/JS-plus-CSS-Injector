@@ -5571,7 +5571,7 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 		};
 		frycAPI.createMutObs(() => {
 			// loguj("MutObs");
-			frycAPI.setDefaultDate(`div:has(span[email="noreply-apps-scripts-notifications@google.com"]:not([translate])) table ~ table tr > td:is(:first-child, :last-child)`, opts);
+			frycAPI.setDefaultDate(`div:has(span[email="noreply-apps-scripts-notifications@google.com"]:not([translate])) :is(table ~ table, table:only-of-type) tr > td:is(:first-child, :last-child)`, opts);
 		});
 	});
 } else if (1 && frycAPI_host("mat-fiz-samouczek.pw.edu.pl")) {
