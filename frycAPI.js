@@ -9967,7 +9967,7 @@ else if (1 && frycAPI_host("www.worldometers.info")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		body {
 			margin: auto;
-			font-family: IBM Plex Sans Condensed;
+			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
 } else if (frycAPI_host("www.ctan.org", "ctan.org")) {
