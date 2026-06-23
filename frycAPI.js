@@ -13614,8 +13614,10 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
 		html {
-			--font-claude-response: 'IBM Plex Sans Condensed', sans-serif !important;
-			--font-user-message: 'IBM Plex Sans Condensed', sans-serif !important;
+			--my-font: "IBM Plex Sans Condensed", sans-serif !important;
+			--font-claude-response: var(--my-font);
+			--font-user-message: var(--my-font);
+			--font-ui: var(--my-font);
 		}
 	`);
 } else if (frycAPI_host("triq.org")) {
