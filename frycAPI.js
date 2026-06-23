@@ -1947,7 +1947,7 @@ var frycAPI = { // eslint-disable-line no-var
 
 		while (i < stack.length) {
 			const elem = stack[i++];
-			if (elem.shadowRoot) {
+			if (elem.shadowRoot) { // shadowRoot will be null if it was created like this: const shadow = elem.attachShadow({ mode: "closed" });
 				callback(elem);
 				stack.push(...elem.shadowRoot.children);
 			}
