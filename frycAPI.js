@@ -1162,7 +1162,7 @@ var frycAPI = { // eslint-disable-line no-var
 
 		return mut;
 	}, // frycAPI.createMutObs((mutRecArr, mutObs) => {}, { runCallback: true, elem: document.body, options: { childList: true, subtree: true } });
-	setDefaultDate(selector, options = {}) { // { getDate: 111, setDate: 111, dateTitle: 111 }
+	setDefaultDate(selector = "time", options = {}) { // { getDate: 111, setDate: 111, dateTitle: 111 }
 		// Flag usage on www.autohotkey.com
 		const rootElem = options.rootElem ?? document.body;
 		const sel = rootElem.querySelectorAll(`:is(${selector.trim()}):not(.lepszyCzasParent)`);
@@ -1218,7 +1218,7 @@ var frycAPI = { // eslint-disable-line no-var
 			elem.appendChild(lepCzs);
 			return lepCzs;
 		}
-	},
+	}, // frycAPI.setDefaultDateText(elem, data, dateOpts);
 	appendDefaultDateText(elem, data, dateOpts) {
 		return elem.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, dateOpts));
 	},
