@@ -13799,6 +13799,14 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			getDate: elem => Number(elem.getAttribute("data-time")) * 1000,
 		});
 	});
+} else if (frycAPI_host("www.gnu.org")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		body {
+			--darkreader-inline-bgimage: none !important;
+			background-image: none !important;
+		}
+	`);
 } else if (frycAPI_host("pacjent.gov.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
