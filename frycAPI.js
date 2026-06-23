@@ -2244,6 +2244,16 @@ var frycAPI = { // eslint-disable-line no-var
 		if (print) loguj(outStr);
 		return outStr;
 	}, // frycAPI.printTable();
+	createTimesThatCreateMen(hard = "hard", strong = "strong", good = "good", weak = "weak", times = "times", men = "men", create = "create") {
+		hard   = hard.toLocaleLowerCase();
+		strong = strong.toLocaleLowerCase();
+		good   = good.toLocaleLowerCase();
+		weak   = weak.toLocaleLowerCase();
+		times  = times.toLocaleLowerCase();
+		men    = men.toLocaleLowerCase();
+		create = create.toLocaleLowerCase();
+		loguj(`${hard.frycAPI_toTitleCase()} ${times} ${create} ${strong} ${men}.\n${strong.frycAPI_toTitleCase()} ${men} ${create} ${good} ${times}.\n${good.frycAPI_toTitleCase()} ${times} ${create} ${weak} ${men}.\n${weak.frycAPI_toTitleCase()} ${men} ${create} ${hard} ${times}.`);
+	}, // frycAPI.createTimesThatCreateMen("sus", "impostor", "kill", "vent");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
