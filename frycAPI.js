@@ -12915,6 +12915,11 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		* {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
+		.docutils.literal, code, kbd, pre, samp, tt {
+			&, & > span {
+				font-family: "Source Code Fryc", "Source Code Pro", monospace;
+			}
+		}
 	`, { elevated: true });
 } else if (frycAPI_host("x.com", "twitter.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
