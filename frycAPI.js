@@ -10409,9 +10409,18 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 
 	const pathName = frycAPI.path;
 	const caches = [
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxLyFEb2MyLw=="),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxLw=="),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvRGlzY29yZCBBUlRzLw=="),
 		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvRGlzY29yZCBBUlRzL01pbmVGb2xkZXIv"),
+
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUv"),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvSnVzdCBJbnRlcmVzdGluZy8="),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvUGlua2llJ3MgRGluZ2Rvbmcv"),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvRnVubnkv"),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvVW5leHBlY3RlZCB0cmVhc3VyZXMv"),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvRW1iZXIv"),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvUlAgTmlld29sbmljYS8="),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvZTYyMURvd25sb2FkZXIvR2VuZXJhbCBTZWFyY2hlcy9vcmRlcl9zY29yZSAtYW5pbWF0ZWQgcmF0aW5nX3MgcHJpbmNlc3NfY2VsZXN0aWFfKG1scCkgc2NvcmVfXz02My8="),
+		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvZTYyMURvd25sb2FkZXIvR2VuZXJhbCBTZWFyY2hlcy9wcmluY2Vzc19sdW5hXyhtbHApIG9yZGVyX3Njb3JlIC10eXBlX3dlYm0gcmF0aW5nX3NhZmUgLWNvdmVyIHNjb3JlX189NzAv"),
 	];
 
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -11169,20 +11178,25 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		// }, { elem: document.documentElement });
 
 		const POSSIBLE_EXTS = ["png", "jpg", "webm", "mp4", "jpeg", "gif", "webp"];
+		const POSSIBLE_ENDINGS = ["", " Just Interesting", " Alternate", " doc1"];
 		frycAPI.createMutObs(() => {
 			const ogImage = document.querySelector(`head meta[property="og:image"]`);
 			if (!ogImage) return;
 			const origSrc = ogImage.getAttribute("content");
 			const [MD5, ext] = new URL(origSrc).pathname.split("/").pop().split(".");
 			const checks = [];
-			for (const posExt of POSSIBLE_EXTS) {
+			const t1 = performance.now();
+			for (const ending of POSSIBLE_ENDINGS) {
 				for (const cache of caches) {
-					const filename = `${MD5}.${posExt}`;
-					checks.push(cache.fileExistsPromise(filename));
+					for (const posExt of POSSIBLE_EXTS) {
+						const filename = `${MD5}${ending}.${posExt}`;
+						checks.push(cache.fileExistsPromise(filename));
+					}
 				}
 			}
 			Promise.any(checks).then(response => {
 				if (!response.ok) return;
+				const t2 = performance.now(); frycAPI.perf(t1, t2);
 				frycAPI.createMutObs(() => {
 					const image = document.getElementById("image");
 					if (!image?.currentSrc) return;
