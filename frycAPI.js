@@ -13887,6 +13887,17 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			],
 		});
 	}
+} else if (frycAPI_host("nano-editor.org")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		body {
+			margin: auto;
+			box-sizing: border-box;
+			max-width: 1000px;
+			padding: 0 10px;
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
