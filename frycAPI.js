@@ -5161,7 +5161,15 @@ else if (1 && frycAPI_host("css-tricks.com")) {
 		.a-X-k {
 			background: #212324;
 		}
+
+		a[aria-label="Dysk"] > img {
+			content: url("chrome-extension://jmpmjlfehojjhkfmjhnhlfgobpiekeci/resources/Google Drive.ico");
+		}
 	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.changeFaviconRes("Google Drive.ico");
+	});
 } else if (1 && frycAPI_host("dydmat.mimuw.edu.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -6326,6 +6334,10 @@ else if (1 && frycAPI_hostIncludes("wikipedia.org") && !frycAPI.path.startsWith(
 	`);
 
 	frycAPI.onLoadSetter(() => {
+		if (frycAPI_hostIncludes("stackoverflow.com")) {
+			frycAPI.changeFaviconRes("Stack Overflow.ico");
+		}
+
 		frycAPI.forEach(".user-info:has(.user-gravatar32)", daElem => { // Better avatar design
 			const myDiv = document.createElement("div");
 			myDiv.classList.add("myDiv");
@@ -12970,6 +12982,16 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	}, 2);
 } else if (frycAPI_host("keep.google.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		a[aria-label="Keep"] > img {
+			content: url("chrome-extension://jmpmjlfehojjhkfmjhnhlfgobpiekeci/resources/Google Keep.ico");
+		}
+	`);
+
+	frycAPI.onLoadSetter(function () {
+		frycAPI.changeFaviconRes("Google Keep.ico");
+	});
+
 	frycAPI.createManualFunctions("Google Keep", {
 		funcArr: [
 			(name = "Download expanded note", type = frycAPI_Normal) => {
