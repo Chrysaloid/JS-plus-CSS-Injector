@@ -2217,6 +2217,33 @@ var frycAPI = { // eslint-disable-line no-var
 			}
 		`;
 	}, // frycAPI.getAvatarReplacementCssOnGitHub("userID", "imageURL");
+	printTable(arr2d = [["Hello", "world!"], ["world!", "Hello"]], joiner = ",", pad = true, print = true) {
+		const rowCount = arr2d.length;
+		if (!rowCount) {
+			if (print) loguj("");
+			return "";
+		}
+		const colCount = arr2d[0].length;
+		if (!colCount) {
+			if (print) loguj("");
+			return "";
+		}
+		const colLen = new Array(colCount).fill(0);
+		const tempArr = new Array(rowCount);
+		for (let i = 0; i < rowCount; i++) {
+			tempArr[i] = new Array(colCount);
+			for (let j = 0; j < colCount; j++) {
+				const newVal = arr2d[i][j].toString();
+				tempArr[i][j] = newVal;
+				if (colLen[j] < newVal.length) {
+					colLen[j] = newVal.length;
+				}
+			}
+		}
+		const outStr = tempArr.map(row => row.map((el, j) => (pad ? el.padEnd(colLen[j]) : el)).join(joiner)).join("\n");
+		if (print) loguj(outStr);
+		return outStr;
+	}, // frycAPI.printTable();
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -13757,6 +13784,86 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			},
 		],
 	});
+} else if (frycAPI_host("pacjent.gov.pl")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+
+	let recepty = null;
+
+	const originalOpen = XMLHttpRequest.prototype.open;
+	const originalSend = XMLHttpRequest.prototype.send;
+	XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+		this._url = url;
+		return originalOpen.call(this, method, url, ...rest);
+	};
+	XMLHttpRequest.prototype.send = function (...args) {
+		this.addEventListener("load", () => {
+			if (this._url === "ikp/recepty/wyszukaj") {
+				const respJson = this.responseText.jsón;
+				if (respJson.lista?.length) {
+					// loguj(respJson.lista);
+					recepty = respJson.lista;
+				}
+			}
+		});
+		return originalSend.apply(this, args);
+	};
+
+	// frycAPI.onLoadSetter(function () {
+	// });
+
+	if (frycAPI.path.startsWith("/ikp/recepty/moje-recepty")) {
+		function getTabelaReceptManual() {
+			const recArr = [];
+			frycAPI.forEach(`cez-list-tile`, daElem => {
+				const recepta = recArr.frycAPI_pushElem({});
+				recepta.data_wystawienia = daElem.querySelector(`h4`).textContent.trim();
+				recepta.lekarz = daElem.querySelector(`ikp-recepta-kafelek > div > div > div:nth-child(3)`).textContent.trim();
+				recepta.placówka = daElem.querySelector(`ikp-recepta-kafelek > div > div > div:nth-child(4)`).textContent.trim();
+				recepta.kod = daElem.querySelector(`.cez-h1--medium`).textContent.trim();
+				recepta.leki = daElem.querySelectorAll(`.recepta-kafelek__lista-lekow > ol > li`).map(el => ({ nazwa: el.querySelector(`:scope > div > span`).textContent.trim(), status: el.querySelector(`:scope > div > div`).textContent.trim() }));
+			});
+			return recArr;
+		}
+		function getTabelaRecept(manFunc) {
+			if (!recepty) {
+				manFunc.setDisplayName("Recepty są niedostąpne");
+				throw new Error("Recepty są niedostąpne");
+			}
+			return recepty.map(recepta => ({
+				data_wystawienia: recepta.dataWystawienia.slice(0, 10),
+				lekarz          : recepta.pracownikMedycznyWystawcy,
+				placówka        : recepta.podmiotWystawcy,
+				kod             : recepta.kodPakietu,
+				leki            : recepta.recepty.map(el => ({ nazwa: el.nazwaLeku, status: el.status })),
+			}));
+		}
+		frycAPI.createManualFunctions("Pobieranie recept", {
+			funcArr: [
+				(name = "Pobierz tabelę recept jako JSON", type = frycAPI_Normal) => {
+					const f = new type({ name });
+					f.callback = function (obj) {
+						frycAPI.downloadTxt(getTabelaRecept(f).jsón, "Tabela recept.json");
+						f.name = "Recepty pobrane";
+					};
+					return f;
+				},
+				(name = "Pobierz tabelę recept jako CSV", type = frycAPI_Normal) => {
+					const f = new type({ name });
+					f.callback = function (obj) {
+						const recArr = [["data_wystawienia", "leki", "lekarz", "placówka", "kod"]];
+						for (const { data_wystawienia, leki, lekarz, placówka, kod } of getTabelaRecept(f)) {
+							recArr.push([data_wystawienia, leki.map(lek => `${lek.nazwa} - ${lek.status}`).join("; "), lekarz, placówka, kod]);
+						}
+						frycAPI.downloadTxt(frycAPI.printTable(recArr, "\t", false), "Tabela recept.csv");
+						f.name = "Recepty pobrane";
+					};
+					return f;
+				},
+			],
+		});
+	}
 }
 // Code-Lens-Action insert-snippet IF template
 
