@@ -8716,10 +8716,10 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const myMessageContainer = `[role="none"] > .html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.xexx8yu.x4uap5.x18d9i69.xkhd6sd.x6ikm8r.x10wlt62 > .html-div.xdj266r.x11i5rnm.xat24cr.x1mh8g0r.x14ctfv`;
 	const messageList = ".x78zum5.xdt5ytf.x1iyjqo2.x2lah0s.xl56j7k.x121v3j4";
 	const buttonContainer = `[data-release-focus-from="CLICK"] > div > .html-div:nth-child(3) [role="toolbar"] [role="presentation"] [role="presentation"]`;
-	const reactCSS = `[aria-label="Zareaguj"]`;
-	const replyCSS = `[aria-label="Odpowiedz"]`;
-	const moreCSS = `[aria-label="Więcej"]`;
-	const shareCSS = `[aria-label="Prześlij"]`;
+	const reactCSS = `:is([aria-label="Zareaguj przy użyciu ikony emoji"],[aria-label="React using emoji"])`;
+	const replyCSS = `:is([aria-label="Odpowiedz na tę wiadomość"],[aria-label="Reply to this message"])`;
+	const moreCSS = `:is([aria-label="Więcej opcji"],[aria-label="More actions"],[aria-label="Więcej działań"])`;
+	const shareCSS = `:is([aria-label="Prześlij"],[aria-label="Share"])`;
 	const shareItemCSS = `${shareCSS}[role="menuitem"]`;
 	const replyItemCSS = `${replyCSS}[role="menuitem"]`;
 	const delCSS = `[aria-label="Cofnij wysłanie wiadomości"][role="menuitem"]`;
