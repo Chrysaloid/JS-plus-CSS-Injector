@@ -10888,7 +10888,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 						this.innerHTML = "";
 						const img = frycAPI.insertLoadingGif(this);
 						const poolID = article.firstElementChild.getAttribute("href").replace("/pools/", "");
-						frycAPI.readFile(`${location.origin}/posts.json?tags=pool:${poolID}&limit=1000`).then(resp => {
+						frycAPI.readFile(`${location.origin}/posts.json?tags=pool:${poolID}&limit=320`).then(resp => {
 							this.frycAPI_appendHTML(`<div class="pool-diff-graph">${
 								`<div>Liczba postów: ${resp.posts.length >= 320 ? `<b>${resp.posts.length}</b>` : resp.posts.length} | 100.0 %</div>${getRatStr(resp.posts)}`
 								.replaceAll(" ", "&nbsp").replaceAll("$", " ")
