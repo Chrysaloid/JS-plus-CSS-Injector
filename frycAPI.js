@@ -1930,8 +1930,8 @@ var frycAPI = { // eslint-disable-line no-var
 		consonants.forEach(c => {
 			out += str.map(obj => (obj.case ? c.toUpperCase() : c) + obj.word).join(" ") + "\n";
 		});
-		return out;
-	}, // loguj(frycAPI.consonantsAsFirstLetters("Fryc API"));
+		loguj(out);
+	}, // frycAPI.consonantsAsFirstLetters("Fryc API")
 	byID(id, docOrFragment = document) {
 		return docOrFragment.getElementById(id);
 	}, // const elem = frycAPI.byID(id);
