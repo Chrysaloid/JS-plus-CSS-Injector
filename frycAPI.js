@@ -2207,6 +2207,16 @@ var frycAPI = { // eslint-disable-line no-var
 	unblockImagesOnThisTab() {
 		return frycAPI.sendEventToBackground("unblockImagesOnThisTab");
 	}, // await frycAPI.unblockImagesOnThisTab();
+	getAvatarReplacementCssOnGitHub(userID, imageURL) {
+		return /*css*/`
+			img:is([alt="Avatar for ${userID}"],[alt="@${userID}"],[alt="${userID}"],[alt="View ${userID}'s full-sized avatar"]),
+			body:has(nav[aria-label="Breadcrumbs"] [href="/${userID}"]) [alt="Owner avatar"],
+			a[href="/${userID}"] > img[data-component="Avatar"],
+			img[alt="author"]:has(+ [data-inline="true"][title="${userID}"]) {
+				content: url("${imageURL}");
+			}
+		`;
+	}, // frycAPI.getAvatarReplacementCssOnGitHub("userID", "imageURL");
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -11541,6 +11551,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	`);
 } else if (frycAPI_host("github.com", "gist.github.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
+	const arts = new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvRGlzY29yZCBBUlRzLw==");
 	frycAPI.injectStyleOnLoad(/*css*/`
 		* {
 			tab-size: 3 !important;
@@ -11600,7 +11611,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				transparent calc(100% - var(--off-set))
 			);
 		}
-
+		${frycAPI.getAvatarReplacementCssOnGitHub("Michal-Roman0", arts.getFileUrl("Nick dragon profile.png"))}
 		/* Indentation lines attempt
 		.react-file-line.html-div {
 			--initial-color: hsl(0, 0%, 30%);
