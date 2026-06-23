@@ -13784,6 +13784,21 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			},
 		],
 	});
+} else if (frycAPI_host("www.furaffinity.net")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		site-banner {
+			display: none;
+		}
+		#site-content {
+			padding-top: 73px;
+		}
+	`);
+	frycAPI.onLoadSetter(function () {
+		frycAPI.setDefaultDate(`span.popup_date`, {
+			getDate: elem => Number(elem.getAttribute("data-time")) * 1000,
+		});
+	});
 } else if (frycAPI_host("pacjent.gov.pl")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
