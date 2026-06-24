@@ -254,6 +254,10 @@ frycAPI_expandPrototype(Array, "maxElem", function (getter = a => a) {
 	}
 	return el;
 });
+frycAPI_expandPrototype(Array, "last", function () {
+	return this[this.length - 1];
+}, true);
+
 frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListener", function (listenerType, callback) {
 	this.addEventListener(listenerType, callback);
 	return this;

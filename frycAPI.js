@@ -4515,21 +4515,65 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 		}
 	`);
 
+	const promptElemBase = frycAPI.elem("div").class("prompt")._;
+	let msgObs = null, lastConversation = null, lastPrompts = [], container, promptElems = [], tableTextOuter, tableInput, tableClear;
+	function getAllPrompts() {
+		return Object.values(lastConversation.mapping)
+		.filter(obj => obj?.message?.author?.role === "user")
+		.frycAPI_sortValuesSimple(obj => obj.message.create_time)
+		.map(obj => ({ prompt: obj.message.content.parts.join("\n").trim(), id: obj.id }));
+	}
+	function searchPrompts() {
+		if (!promptElems.length) return;
+		const val = tableInput?.value.toLowerCase().trim();
+		if (!val) {
+			promptElems.forEach(pElem => pElem.classList.remove("hide"));
+			return;
+		}
+		for (const pElem of promptElems) {
+			const prompt = pElem.prompt;
+			if (prompt.includes(val)) {
+				pElem.classList.remove("hide");
+			} else {
+				pElem.classList.add("hide");
+			}
+		}
+	}
+	function updateTableOfPrompts() {
+		if (!container?.isDescendantOf(document.body)) return; // case of container removal
+		if (!document.body.classList.contains("table-of-prompts")) return;
+		const newPrompts = getAllPrompts();
+		if (lastPrompts.length === newPrompts.length && lastPrompts.last.prompt === newPrompts.last.prompt) return;
+		lastPrompts = newPrompts;
+
+		promptElems.forEach(el => el.remove());
+		const fragment = document.createDocumentFragment();
+		for (const { prompt, id } of lastPrompts) {
+			const promptElem = promptElemBase.cloneNode().frycAPI_setInnerText(prompt).frycAPI_setAttribute("title", prompt);
+			fragment.appendChild(promptElem).addEventListener("click", () => {
+				frycAPI.qSel(`section[data-turn-id="${id}"]`)?.scrollIntoView();
+			});
+			promptElem.prompt = prompt.toLowerCase();
+		}
+		promptElems = Array.from(fragment.children);
+		searchPrompts();
+		container.appendChild(fragment);
+	}
+
 	const originalFetch = window.fetch;
-	let msgObs = null;
 	window.fetch = async (...args) => {
 		const response = await originalFetch(...args);
 
 		if (response.url.startsWith("https://chatgpt.com/backend-api/conversation/")) {
 			response.clone().json().then(conversation => {
 				if (conversation?.conversation_id) {
-					// loguj(conversation);
+					lastConversation = conversation;
 					msgObs?.disconnect();
 					msgObs = frycAPI.createMutObs((mutRecArr, mutObs) => {
-						frycAPI.forEach(`[data-turn-id-container]:not([date-added])`, daElem => {
-							const msg = conversation.mapping[daElem.getAttribute("data-turn-id-container")]?.message;
+						frycAPI.forEach(`[data-message-author-role="user"][data-message-id]:not([date-added])`, daElem => {
+							const msg = conversation.mapping[daElem.getAttribute("data-message-id")]?.message;
 							if (msg?.author?.role === "user") {
-								const myMessageParent = daElem.querySelector(`:scope > section > div > div`);
+								const myMessageParent = daElem.parentElement.parentElement;
 								if (!myMessageParent) return;
 								const lepCzs = frycAPI.elem("div").class("lepszyCzasParent", "myMsgTime")._;
 								frycAPI.setDefaultDateText(lepCzs, new Date(msg.create_time * 1000));
@@ -4538,8 +4582,10 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 							}
 						});
 					});
+
+					updateTableOfPrompts();
 				}
-			});
+			}).catch(console.error);
 		}
 
 		return response;
@@ -4552,28 +4598,36 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 				const f = new type({ name });
 				f.callback = function () {
 					console.clear();
-					frycAPI.forEach(promptSelector, daElem => {
-						loguj(daElem.innerText.trim());
+					getAllPrompts().map(obj => obj.prompt).forEach(p => loguj(p));
+				};
+				return f;
+			},
+			(name = "Save all prompts to file", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = function () {
+					let txt = "";
+					const separator = `\n\n${"#".repeat(30)}\n\n`;
+					getAllPrompts().map(obj => obj.prompt).forEach(prompt => {
+						txt += prompt.trim() + separator;
 					});
+					frycAPI.downloadTxt(txt.slice(0, -separator.length), `ChatGPT prompts - ${document.title} - ${frycAPI.printDateForFileName()}.txt`);
 				};
 				return f;
 			},
 			(name = "Table of prompts", type = frycAPI_Normal) => {
 				const f = new type({ name });
 
-				let mutObs, container;
-				function bodyClassFun(event) {
+				function bodyToggleTableClass(event) {
 					event?.stopPropagation();
-					document.body.classList.toggle("table-of-prompts");
-					if (mutObs.toggle(1).connected) {
-						container.removeEventListener("click", bodyClassFun);
+					if (document.body.classList.toggle("table-of-prompts")) {
+						container.removeEventListener("click", bodyToggleTableClass);
 					} else {
-						container.addEventListener("click", bodyClassFun);
+						container.addEventListener("click", bodyToggleTableClass);
 					}
 				}
 				f.callback = function () {
 					if (container?.isDescendantOf(document.body)) {
-						bodyClassFun();
+						bodyToggleTableClass();
 						return;
 					} // first call or page wipe
 
@@ -4588,86 +4642,31 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 							</div>
 						</div>
 					`));
-					// const tableText = container.frycAPI_elemByClass("text");
-					const tableTextOuter = container.frycAPI_elemByClass("text-outer");
-					// const tableSearch = container.frycAPI_elemByClass("search");
-					// const tableTitle = container.frycAPI_elemByClass("title");
-					const tableInput = container.frycAPI_elemByTag("input");
-					const tableClear = container.frycAPI_elemByClass("clear");
+					tableTextOuter = container.frycAPI_elemByClass("text-outer");
+					tableInput = container.frycAPI_elemByTag("input");
+					tableClear = container.frycAPI_elemByClass("clear");
 
-					const promptElemBase = frycAPI.elem("div").class("prompt")._;
-					const sections = document.getElementsByTagName("section"); // An HTMLCollection in the HTML DOM is live
-					let lastArticlesLen, lastPromptsLen, lastTitle, promptElems = [];
-					function searchPrompts() {
-						if (!promptElems.length) return;
-						const val = tableInput.value.toLowerCase().trim();
-						if (!val) {
-							promptElems.forEach(pElem => pElem.classList.remove("hide"));
-							return;
-						}
-						for (const pElem of promptElems) {
-							const prompt = pElem.prompt;
-							if (prompt.includes(val)) {
-								pElem.classList.remove("hide");
-							} else {
-								pElem.classList.add("hide");
-							}
-						}
-					}
-
-					// in case of major page wipe
-					mutObs?.disconnect(); // disconnect old observer if it exists
 					document.body.classList.remove("table-of-prompts");
+					bodyToggleTableClass();
 
-					mutObs = frycAPI.createMutObs(() => {
-						if (lastTitle === document.title && lastArticlesLen === sections.length) return;
-						lastArticlesLen = sections.length;
-
-						const prompts = sections.filter(s => s.getAttribute("data-turn") === "user");
-						if (lastTitle === document.title && lastPromptsLen === prompts.length) return;
-						lastPromptsLen = prompts.length;
-						lastTitle = document.title;
-
-						// disconnect in case of container removal
-						if (prompts.length === 0 && !container.isDescendantOf(document.body)) return true;
-
-						promptElems.forEach(el => el.remove());
-						const fragment = document.createDocumentFragment();
-						for (const prompt of prompts) {
-							const scrollElem = prompt.children.find(e => e.tagName === "DIV");
-							const daText = prompt.frycAPI_elemByClass("whitespace-pre-wrap").innerText.trim();
-							const promptElem = promptElemBase.cloneNode().frycAPI_setInnerText(daText).frycAPI_setAttribute("title", daText);
-							fragment.appendChild(promptElem).addEventListener("click", () => {
-								scrollElem.scrollIntoView();
-							});
-							promptElem.prompt = daText.toLowerCase();
+					let lastTitle;
+					frycAPI.createMutObs((mutRecArr, mutObs) => {
+						if (lastTitle !== document.title) {
+							lastTitle = document.title;
+							if (document.title === "ChatGPT") { // when in new chat
+								promptElems.forEach(el => el.remove());
+							}
+							updateTableOfPrompts();
 						}
-						promptElems = Array.from(fragment.children);
-						searchPrompts();
-						container.appendChild(fragment);
-						// loguj("Done");
-					}, { runCallback: false }); // do not run because it will be run in bodyClassFun
-					mutObs.disconnect(); // disconnect because it will be connected in bodyClassFun
-					bodyClassFun();
-					tableTextOuter.addEventListener("click", bodyClassFun);
+					}, { elem: document.querySelector("title"), options: { characterData: true } });
+
+					tableTextOuter.addEventListener("click", bodyToggleTableClass);
 					tableInput.addEventListener("input", searchPrompts);
 					tableClear.addEventListener("click", () => {
 						tableInput.value = "";
 						tableInput.select();
 						promptElems.forEach(pElem => pElem.classList.remove("hide"));
 					});
-				};
-				return f;
-			},
-			(name = "Save all prompts to file", type = frycAPI_Normal) => {
-				const f = new type({ name });
-				f.callback = function () {
-					let txt = "";
-					const separator = `\n\n${"#".repeat(30)}\n\n`;
-					frycAPI.forEach(promptSelector, daElem => {
-						txt += daElem.innerText.trim() + separator;
-					});
-					frycAPI.downloadTxt(txt.slice(0, -separator.length), `ChatGPT prompts - ${document.title} - ${frycAPI.printDateForFileName()}.txt`);
 				};
 				return f;
 			},
