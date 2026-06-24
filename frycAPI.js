@@ -4513,6 +4513,13 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 			text-align: right;
 			margin-right: 22px;
 		}
+
+		[data-testid="thread-header-right-actions"] > div:has(use[href*="2e54eb"]),
+		div:has(> button[aria-label="Claim offer"]),
+		#thread-bottom-container > div > div > button[aria-hidden="true"][tabindex="-1"] {
+			display: none;
+		}
+
 	`);
 
 	const promptElemBase = frycAPI.elem("div").class("prompt")._;
