@@ -4768,6 +4768,10 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 		[data-fuse] {
 			display: none;
 		}
+
+		td:has(#fuse-slot-incontent_1-1) {
+			display: none;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -4794,6 +4798,8 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 					});
 				});
 			}
+
+			document.querySelector(`form table:first-of-type > tbody > tr:nth-child(2) > td:nth-child(3)`)?.remove();
 		});
 	});
 
