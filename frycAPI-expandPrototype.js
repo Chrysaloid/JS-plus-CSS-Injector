@@ -267,7 +267,7 @@ frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (li
 	return callback;
 });
 
-frycAPI_expandPrototype(DOMTokenList, "notContains", function (daClass) {
+frycAPI_expandPrototype(DOMTokenList, "notContains", function (daClass) { // i.e. Element's classList is a DOMTokenList
 	return !this.contains(daClass);
 });
 

@@ -2254,6 +2254,28 @@ var frycAPI = { // eslint-disable-line no-var
 		create = create.toLocaleLowerCase();
 		loguj(`${hard.frycAPI_toTitleCase()} ${times} ${create} ${strong} ${men}.\n${strong.frycAPI_toTitleCase()} ${men} ${create} ${good} ${times}.\n${good.frycAPI_toTitleCase()} ${times} ${create} ${weak} ${men}.\n${weak.frycAPI_toTitleCase()} ${men} ${create} ${hard} ${times}.`);
 	}, // frycAPI.createTimesThatCreateMen("sus", "impostor", "kill", "vent");
+	filledArray(value, length) {
+		return Array(length).fill(value);
+	}, // frycAPI.filledArray(1, 5);
+	readFileXMLHttpRequest(url, callback) {
+		const xhr = new XMLHttpRequest();
+
+		xhr.open("GET", url, true);
+
+		xhr.onload = function () {
+			if (xhr.status >= 200 && xhr.status < 300) {
+				callback(null, xhr.responseText);
+			} else {
+				callback(new Error("HTTP " + xhr.status), null);
+			}
+		};
+
+		xhr.onerror = function () {
+			callback(new Error("Network error"), null);
+		};
+
+		xhr.send();
+	}, // frycAPI.readFileXMLHttpRequest("https://example.com/file.txt", function (error, text) { if (error) { console.error(error); return } console.log(text) });
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -5687,17 +5709,6 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 		.clearfix~div.columns {
 			align-items: unset;
 		}
-		.clearfix~div.columns>div {
-			border-right: 1px solid #eee;
-			padding: 0 10px;
-		}
-		.clearfix~div.columns>div:last-child {
-			border-right: 0px;
-			padding-right: 0px;
-		}
-		.clearfix~div.columns>div:first-child {
-			padding-left: 0px;
-		}
 		.clearfix~div.columns ul.list-unstyled>li:has(a.default) {
 			display: flex;
 		}
@@ -5726,9 +5737,6 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 		.clearfix~div.columns ul.list-unstyled>li:has(a.default) {
 			font-family: monospace;
 		}
-		a.default {
-			font-family: "Helvetica Neue","Segoe UI",Helvetica,Arial,sans-serif;
-		}
 		/*
 		.content:has(.clearfix) > .columns ~ .columns > div {
 			border-top: 1px solid #eee;
@@ -5753,33 +5761,219 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 		.content:has(.clearfix) > div.columns ~ div.columns {
 			margin-top: 0px;
 		}
+
+		body {
+			height: fit-content;
+			box-sizing: border-box;
+
+			> svg {
+				display: none;
+			}
+		}
+		body, * {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		div.columns {
+			display: inline-flex;
+			gap: 10px;
+			max-height: ${frycAPI.path.startsWith("/units/unit") ? "88vh" : "100vh"};
+			flex-direction: column;
+			align-content: flex-start;
+
+			div {
+				margin: 0;
+				padding: 0;
+
+				h2, ul {
+					margin: 0;
+				}
+			}
+			& ~ .columns {
+				padding-left: 10px;
+			}
+		}
+		.clearfix ~ div.columns ul.list-unstyled > li:has(a.default) {
+			display: flex;
+
+			a {
+				flex-grow: 1;
+			}
+		}
+		span.unit-value {
+			color: #7ee774 !important;
+		}
+		div.unit-header {
+			> :first-child, h1 {
+				white-space: nowrap;
+			}
+			> :last-child {
+				display: flex;
+				gap: 10px;
+			}
+		}
+		#content table {
+			th {
+				font-weight: bold;
+			}
+			td.name {
+				padding: 0;
+				box-sizing: border-box;
+				height: 77px;
+
+				a {
+					display: flex;
+					align-items: center;
+					width: 100%;
+					height: 100%;
+					padding: 8px;
+					gap: 8px;
+					box-sizing: border-box;
+				}
+			}
+		}
+		table th {
+			background-color: rgba(33, 37, 41, 1) !important;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
-		// <span title="Cooldown Time">0:00</span>
-		if (document.querySelector("span[title='Rolloff Time']") !== null && document.querySelector("div.columns>div:nth-child(2) h4").innerText === "Physics") {
-			const listy = document.querySelectorAll("h4+ul.list-unstyled");
-			let zbudPrzez;
-			for (let i = 0; i < listy.length; i++) {
-				if (listy[i].previousElementSibling.innerText === "Built By") {
-					zbudPrzez = listy[i];
-					break;
+		frycAPI.changeFaviconRes("titans_icon.png");
+
+		if (frycAPI.qSel("span[title='Rolloff Time']") && frycAPI.qSel("div.columns>div:nth-child(2) h4")?.innerText === "Physics") {
+			const zbudPrzez = document.querySelectorAll("h4 + ul.list-unstyled").find(el => el.prevEl.innerText === "Built By");
+			const spanRolloffTime = frycAPI.elem("span").attr("title", "Rolloff Time").class("dodane", "unit-value").text("0:00")._;
+			for (const zbudChild of zbudPrzez.children) {
+				if (zbudChild.querySelector("span[title='Rolloff Time']") === null) {
+					zbudChild.appendChild(document.createTextNode(" + "));
+					zbudChild.appendChild(spanRolloffTime.cloneNode(1));
 				}
 			}
-			const spanRolloffTime = document.createElement("span");
-			spanRolloffTime.title = "Rolloff Time";
-			spanRolloffTime.classList.add("dodane");
-			spanRolloffTime.innerHTML = "0:00";
-			const zbudChild = zbudPrzez.children;
-			for (let i = 0; i < zbudChild.length; i++) {
-				if (zbudChild[i].querySelector("span[title='Rolloff Time']") === null) {
-					zbudChild[i].appendChild(document.createTextNode(" + "));
-					zbudChild[i].appendChild(spanRolloffTime.cloneNode(1));
-				}
-			}
-			console.log("Done!");
+			loguj("Done!");
 		}
-	});
+
+		if (frycAPI.path.startsWith("/units/?")) {
+			frycAPI.forEach(`#content .columns > div > ul:not(:only-of-type):not(:first-of-type)`, daElem => {
+				const cont = frycAPI.elem("div", 0);
+				cont.appendChild(daElem.prevEl);
+				daElem.parentElement.insertAdjacentElement("afterEnd", cont);
+				cont.appendChild(daElem);
+			});
+		}
+
+		if (frycAPI.path.startsWith("/units/compare") || frycAPI.path.startsWith("/units/unit")) {
+			const columnsCost = {};
+			frycAPI.forEach(`#content h4`, daElem => {
+				if (daElem.innerText === "Overview") {
+					const ul = daElem.nextEl.nextEl;
+					const keys = ul.getElementsByClassName("unit-key");
+					const cost = parseInt(keys.find(el => el.innerText === "Build cost")?.nextEl.innerText);
+					if (Number.isNaN(cost)) return;
+					columnsCost[daElem.parentElement.parentElement.frycAPI_childIndex] = cost;
+					const dps = parseFloat(keys.find(el => el.innerText === "Total DPS")?.nextEl.innerText);
+					if (Number.isNaN(dps)) return;
+					const newValue = ul.lastEl.cloneNode(1);
+					newValue.frycAPI_elemByClass("unit-key").innerText = "DPS per cost";
+					newValue.frycAPI_elemByClass("unit-value").innerText = (dps / cost).toFixed(3);
+					ul.appendChild(newValue);
+				} else if (daElem.innerText === "Economy") {
+					const ul = daElem.nextEl;
+					const keys = ul.getElementsByClassName("unit-key");
+					for (const prodElem of [keys.find(el => el.innerText === "Energy production"), keys.find(el => el.innerText === "Metal production")]) {
+						if (!prodElem) continue;
+						const production = parseInt(prodElem.nextEl.innerText);
+						if (Number.isNaN(production)) continue;
+						const cost = columnsCost[daElem.parentElement.parentElement.parentElement.frycAPI_childIndex];
+						if (!cost) continue;
+						let newValue = ul.lastEl.cloneNode(1);
+						newValue.frycAPI_elemByClass("unit-key").innerText = `${prodElem.innerText} per cost`;
+						newValue.frycAPI_elemByClass("unit-value").innerText = (production / cost).toFixed(3);
+						prodElem.parentElement.insertAdjacentElement("afterEnd", newValue);
+						if (prodElem.innerText !== "Metal production") continue;
+						newValue = ul.lastEl.cloneNode(1);
+						newValue.frycAPI_elemByClass("unit-key").innerText = `Investment return after`;
+						newValue.frycAPI_elemByClass("unit-value").innerText = (cost / production).toFixed(1) + " s";
+						prodElem.parentElement.insertAdjacentElement("afterEnd", newValue);
+					}
+				}
+			});
+		} else if (frycAPI.path.startsWith("/units/table")) {
+			const table = frycAPI.qSel(`#content table`);
+			if (table) {
+				const rows = table.tBodies[0].children;
+				const headers = table.tHead.children[0].children;
+
+				const costCls = headers.find(h => h.innerText === "Cost")?.className;
+				const dpsHeader = headers.find(h => h.innerText === "DPS");
+				const dpsCls = dpsHeader?.className;
+				if (costCls && dpsCls) {
+					dpsHeader.insertAdjacentElement("afterEnd", frycAPI.elem("th").text("DPS per cost")._);
+					for (const row of rows) {
+						const dpsTd = row.frycAPI_elemByClass(dpsCls);
+						dpsTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text(
+							(parseFloat(dpsTd.innerText) / parseFloat(row.frycAPI_elemByClass(costCls).innerText)).toFixed(3)
+						)._);
+					}
+				}
+
+				const metalHeader = headers.find(h => h.innerText === "M Rate");
+				const metalCls = metalHeader?.className;
+				if (metalCls) {
+					metalHeader.insertAdjacentElement("afterEnd", frycAPI.elem("th").text("Investment return time [s]")._);
+					metalHeader.insertAdjacentElement("afterEnd", frycAPI.elem("th").text("Metal per cost")._);
+					for (const row of rows) {
+						const metalRateTd = row.frycAPI_elemByClass(metalCls);
+						const metalRate = parseFloat(metalRateTd.innerText);
+						const cost = parseFloat(row.frycAPI_elemByClass(costCls).innerText);
+						metalRateTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text( // Investment
+							metalRate ? (cost / metalRate).toFixed(1) : "-1"
+						)._);
+						metalRateTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text( // MPC
+							(metalRate / cost).toFixed(3)
+						)._);
+					}
+				}
+
+				const energyHeader = headers.find(h => h.innerText === "E Rate");
+				const energyCls = energyHeader?.className;
+				if (energyCls) {
+					energyHeader.insertAdjacentElement("afterEnd", frycAPI.elem("th").text("Energy per cost")._);
+					for (const row of rows) {
+						const energyRateTd = row.frycAPI_elemByClass(energyCls);
+						energyRateTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text( // EPC
+							(parseFloat(energyRateTd.innerText) / parseFloat(row.frycAPI_elemByClass(costCls).innerText)).toFixed(3)
+						)._);
+					}
+				}
+
+				const fixedFloatingPoint = frycAPI.filledArray(0, headers.length);
+				const floatingPartRegex = /\.(.*)/;
+				const trailingZerosRegex = /0+$/g;
+				const firstNumericColIdx = 2;
+				const dpsValueThreshold = 0.1;
+				for (const row of rows) {
+					for (let i = firstNumericColIdx; i < row.children.length; i++) {
+						const td = row.children[i];
+						const valueText = td.innerText;
+						let floatingPointPart = valueText.match(floatingPartRegex);
+						if (!floatingPointPart) continue;
+						floatingPointPart = floatingPointPart[1].replaceAll(trailingZerosRegex, "");
+						if (!floatingPointPart) continue;
+						const floatingPointLen = (floatingPointPart.length === 1 || floatingPointPart.every(char => char === floatingPointPart[0])) ? 1 : (
+							(td.className === dpsCls && parseFloat(valueText) < dpsValueThreshold) ? 0 : floatingPointPart.length
+						);
+						if (fixedFloatingPoint[i] < floatingPointLen) { // find max
+							fixedFloatingPoint[i] = floatingPointLen;
+						}
+					}
+				}
+				for (const row of rows) {
+					for (let i = firstNumericColIdx; i < row.children.length; i++) {
+						row.children[i].innerText = parseFloat(row.children[i].innerText).toFixed(fixedFloatingPoint[i]);
+					}
+				}
+			}
+		}
+	}, 0);
 } else if (1 && frycAPI_host("pl.wikibooks.org")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
