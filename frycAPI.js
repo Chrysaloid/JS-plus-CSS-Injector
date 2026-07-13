@@ -14128,6 +14128,27 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			font-family: "IBM Plex Sans Condensed", sans-serif;
 		}
 	`);
+} else if (frycAPI_host("publishmarkdown.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		.max-w-7xl {
+			max-width: 90rem;
+		}
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		.markdown-content {
+			filter: brightness(1);
+
+			code {
+				font-family: "Source Code Fryc", monospace;
+				font-size: 13;
+				background-color: hsl(200 4% 16% / 1);
+				border: 1px solid hsl(0 0% 29% / 1);
+				--darkreader-border-4a4a4a: hsl(33 0% 29% / 1) !important;
+			}
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
