@@ -19,16 +19,18 @@ function addJsSnippet(proto, name, func, czyGet) {
 }
 */
 const frycAPI_noSetter = v => { throw new Error("This is a read-only property") };
-function frycAPI_expandPrototype(proto, name, func, czyGet = false, writable = false, active = true) {
+function frycAPI_expandPrototype(proto, name, func, czyGet = false, writable = false, configurable = false, active = true) {
 	if (active) {
 		try {
 			Object.defineProperty(proto.prototype, name,
 				czyGet ? {
 					get: func, // getter cannot be writable so when @czyGet is true then @writable is ignored
 					set: frycAPI_noSetter,
+					configurable: configurable,
 				} : {
 					value: func,
 					writable: writable,
+					configurable: configurable,
 				}
 			);
 		} catch (error) {
@@ -86,16 +88,16 @@ const frycAPI_Object_condition = !(frycAPI_host("www.youtube.com", "www.desmos.c
 frycAPI_expandPrototype(Object, "lóg", function () {
 	console.log(this);
 	return this;
-}, true, true, frycAPI_Object_condition);
+}, true, true, true, frycAPI_Object_condition);
 frycAPI_expandPrototype(Object, "frycAPI_if", function (condition) {
 	return condition ? this : null;
-}, false, true, frycAPI_Object_condition);
+}, false, true, true, frycAPI_Object_condition);
 frycAPI_expandPrototype(Object, "jsón", function () {
 	return JSON.stringify(this);
-}, true, true, frycAPI_Object_condition);
+}, true, true, true, frycAPI_Object_condition);
 frycAPI_expandPrototype(Object, "frycAPI_then", function (callback) {
 	return callback(this);
-}, false, true, frycAPI_Object_condition);
+}, false, true, true, frycAPI_Object_condition);
 
 frycAPI_expandPrototype(String, "jsón", function () {
 	return JSON.parse(this);
