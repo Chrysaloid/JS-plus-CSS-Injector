@@ -5951,6 +5951,18 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 					}
 				}
 
+				const buildRateHeader = headers.find(h => h.innerText === "Build Rate");
+				const buildRateCls = buildRateHeader?.className;
+				if (buildRateCls) {
+					buildRateHeader.insertAdjacentElement("afterEnd", frycAPI.elem("th").text("Build rate per cost")._);
+					for (const row of rows) {
+						const buildRateTd = row.frycAPI_elemByClass(buildRateCls);
+						buildRateTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text( // EPC
+							((parseFloat(buildRateTd.innerText) / parseFloat(row.frycAPI_elemByClass(costCls).innerText)) || 0).toFixed(3)
+						)._);
+					}
+				}
+
 				const fixedFloatingPoint = frycAPI.filledArray(0, headers.length);
 				const floatingPartRegex = /\.(.*)/;
 				const trailingZerosRegex = /0+$/g;
