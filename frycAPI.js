@@ -708,7 +708,7 @@ var frycAPI = { // eslint-disable-line no-var
 		const sortHelp = function (objFun, obj) {
 			return (a, b) => sortHelp0(objFun(a, obj), objFun(b, obj), obj.kierunek);
 		};
-		const sortFun = function (rosnąco) {
+		function sortFun(rosnąco) {
 			const th = this;
 			const kier = typeof rosnąco === "boolean" ? !rosnąco : th.classList.contains("posortowana");
 			const tbody = typeof tbodySel === "string" ? (tabElem.querySelector(tbodySel) ?? tabElem) : tbodySel;
@@ -726,7 +726,7 @@ var frycAPI = { // eslint-disable-line no-var
 			} else {
 				th.classList.add("posortowana");
 			}
-		};
+		}
 		tabElem.classList.add("sortowalnaTabela");
 		frycAPI.injectStyle(/*css*/`
 			.sortowalnaTabela {
@@ -759,7 +759,7 @@ var frycAPI = { // eslint-disable-line no-var
 		tabElem.querySelectorAll(thSel).forEach((daElem, daI) => {
 			daElem.setAttribute("index", daI + 1);
 			daElem.addEventListener("click", sortFun);
-			daElem.sortFun = sortFun;
+			// daElem.sortFun = sortFun;
 		});
 		tabElem.querySelectorAll(`${tdSel}[rowspan]`).forEach(daElem => {
 			let rowspan = Number(daElem.getAttribute("rowspan"));
