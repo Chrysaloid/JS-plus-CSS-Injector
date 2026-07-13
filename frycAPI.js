@@ -5916,7 +5916,7 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 					for (const row of rows) {
 						const dpsTd = row.frycAPI_elemByClass(dpsCls);
 						dpsTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text(
-							(parseFloat(dpsTd.innerText) / parseFloat(row.frycAPI_elemByClass(costCls).innerText)).toFixed(3)
+							((parseFloat(dpsTd.innerText) / parseFloat(row.frycAPI_elemByClass(costCls).innerText)) || 0).toFixed(3)
 						)._);
 					}
 				}
@@ -5928,8 +5928,8 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 					metalHeader.insertAdjacentElement("afterEnd", frycAPI.elem("th").text("Metal per cost")._);
 					for (const row of rows) {
 						const metalRateTd = row.frycAPI_elemByClass(metalCls);
-						const metalRate = parseFloat(metalRateTd.innerText);
-						const cost = parseFloat(row.frycAPI_elemByClass(costCls).innerText);
+						const metalRate = parseFloat(metalRateTd.innerText) || 0;
+						const cost = parseFloat(row.frycAPI_elemByClass(costCls).innerText) || 0;
 						metalRateTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text( // Investment
 							metalRate ? (cost / metalRate).toFixed(1) : "-1"
 						)._);
@@ -5946,7 +5946,7 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 					for (const row of rows) {
 						const energyRateTd = row.frycAPI_elemByClass(energyCls);
 						energyRateTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text( // EPC
-							(parseFloat(energyRateTd.innerText) / parseFloat(row.frycAPI_elemByClass(costCls).innerText)).toFixed(3)
+							((parseFloat(energyRateTd.innerText) / parseFloat(row.frycAPI_elemByClass(costCls).innerText)) || 0).toFixed(3)
 						)._);
 					}
 				}
@@ -5974,7 +5974,7 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 				}
 				for (const row of rows) {
 					for (let i = firstNumericColIdx; i < row.children.length; i++) {
-						row.children[i].innerText = parseFloat(row.children[i].innerText).toFixed(fixedFloatingPoint[i]);
+						row.children[i].innerText = (parseFloat(row.children[i].innerText) || 0).toFixed(fixedFloatingPoint[i]);
 					}
 				}
 			}
