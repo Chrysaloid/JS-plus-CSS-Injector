@@ -5989,6 +5989,11 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 						row.children[i].innerText = (parseFloat(row.children[i].innerText) || 0).toFixed(fixedFloatingPoint[i]);
 					}
 				}
+
+				for (const header of headers) {
+					header.setAttribute("krytSort", header.frycAPI_hasClass("name") ? "default" : "numeric");
+				}
+				frycAPI.makeTableSortable(table, `tbody > tr`);
 			}
 		}
 	}, 0);
