@@ -13408,12 +13408,9 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 					let elemPath = "";
 					frycAPI.traverseIframeWindows(window, win => {
 						if (!elemPath) {
-							const elems = win.document.querySelectorAll(`.InfoPaneSection-information-path`);
-							if (elems.length) {
-								elems.forEach(daElem => {
-									elemPath += "/" + daElem.innerText.trim();
-								});
-							}
+							win.document.lóg.querySelectorAll(`.InfoPaneSection-information-path`)?.forEach(daElem => {
+								elemPath += "/" + daElem.innerText.trim();
+							});
 						}
 					});
 					if (elemPath) {
