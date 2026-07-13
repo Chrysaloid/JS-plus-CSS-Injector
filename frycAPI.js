@@ -699,7 +699,7 @@ var frycAPI = { // eslint-disable-line no-var
 		if (!tabElem) return;
 		const sortHelp0 = (a1, b1, kierunek) => ((a1 < b1) ? -1 : ((a1 > b1) ? 1 : 0)) * kierunek;
 		const sortObj = {
-			deafult      : (a, obj) =>        a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).innerText,
+			default      : (a, obj) =>        a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).innerText,
 			ignoreCase   : (a, obj) =>        a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).innerText.toUpperCase(),
 			numeric      : (a, obj) => Number(a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).innerText),
 			attrib       : (a, obj) =>        a.querySelector(`:is(${tdSel}):nth-child(${obj.myIndex})`).getAttribute(obj.attrib),
@@ -712,7 +712,7 @@ var frycAPI = { // eslint-disable-line no-var
 			const th = this;
 			const kier = typeof rosnąco === "boolean" ? !rosnąco : th.classList.contains("posortowana");
 			const tbody = typeof tbodySel === "string" ? (tabElem.querySelector(tbodySel) ?? tabElem) : tbodySel;
-			Array.prototype.slice.call(tabElem.querySelectorAll(trSel), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "deafult"], {
+			Array.prototype.slice.call(tabElem.querySelectorAll(trSel), 0).sort(sortHelp(sortObj[th.getAttribute("krytSort") || "default"], {
 				attrib: th.getAttribute("attribSort"),
 				myIndex: th.getAttribute("index"), // :scope>tr
 				kierunek: kier ? -1 : 1,
@@ -4045,7 +4045,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 				aFile.parentNode.parentNode.parentNode.scrollIntoView();
 				if (myRec[0].addedNodes.length) {
 					const addedImg = myRec[0].addedNodes[0];
-					// myRec[0].addedNodes[0].setAttribute("style", myRec[0].target.firstChild.getAttribute("deafult_style"));
+					// myRec[0].addedNodes[0].setAttribute("style", myRec[0].target.firstChild.getAttribute("default_style"));
 
 					// loguj(addedImg.getAttribute("style"));
 					// addedImg.style.maxWidth = thumb.style.width;
@@ -4065,7 +4065,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 					// 	event.target.parentNode.classList.remove("growing");
 					// });
 				} else {
-					thumb.setAttribute("style", thumb.getAttribute("deafult_style"));
+					thumb.setAttribute("style", thumb.getAttribute("default_style"));
 					thumb.classList.remove("transEnd");
 					aFile.parentNode.classList.remove("image-expanded");
 				}
@@ -4208,7 +4208,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 				// daElem.firstChild.setAttribute("a_width", wymiary[0]);
 				// daElem.firstChild.setAttribute("a_height", wymiary[1]);
 				daElem.firstChild.setAttribute("a_aspect", wymiary[0] / wymiary[1]);
-				daElem.firstChild.setAttribute("deafult_style", daElem.firstChild.getAttribute("style"));
+				daElem.firstChild.setAttribute("default_style", daElem.firstChild.getAttribute("style"));
 				obserwatorFileThumb.observe(daElem, opcje);
 			});
 
@@ -11046,7 +11046,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			};
 			(document.body.appendChild(document.createElement("div"))
 			.frycAPI_setAttribute("id", "mojScroll")
-			.frycAPI_setInnerHTML("Deafult scroll")
+			.frycAPI_setInnerHTML("Default scroll")
 			.onclick = defaultScroll)();
 
 			image.addEventListener("load", defaultScroll);
