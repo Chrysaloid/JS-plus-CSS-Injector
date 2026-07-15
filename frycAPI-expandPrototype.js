@@ -156,12 +156,16 @@ frycAPI_expandPrototype(Array, "frycAPI_numSort", function () {
 frycAPI_expandPrototype(Array, "frycAPI_numSortReverse", function () {
 	return this.sort((a, b) => b - a);
 });
-frycAPI_expandPrototype(Array, "frycAPI_sortValuesSimple", function (getValue = a => a) {
-	return this.sort((a, b) => {
+frycAPI_expandPrototype(Array, "frycAPI_sortValuesSimple", function (getValue) {
+	return getValue ? this.sort(function (a, b) {
 		const a1 = getValue(a);
 		const b1 = getValue(b);
 		if (a1 < b1) return -1;
 		if (a1 > b1) return 1;
+		return 0;
+	}) : this.sort(function (a, b) {
+		if (a < b) return -1;
+		if (a > b) return 1;
 		return 0;
 	});
 });
