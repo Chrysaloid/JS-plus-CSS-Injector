@@ -5781,10 +5781,11 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 		}
 		div.columns {
 			display: inline-flex;
-			gap: 10px;
-			max-height: ${frycAPI.path.startsWith("/units/unit") ? "88vh" : "100vh"};
+			max-height: ${frycAPI.path.startsWith("/units/unit") ? "88vh" : "104vh"};
+			gap: 7px;
 			flex-direction: column;
 			align-content: flex-start;
+			align-items: stretch;
 
 			div {
 				margin: 0;
@@ -5840,6 +5841,14 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 		table th {
 			background-color: rgba(33, 37, 41, 1) !important;
 		}
+
+		.list-unstyled a {
+			width: 100%;
+			display: block;
+		}
+		img.strategic-icon-small, img.buildbar-small, img.thumbnail-small {
+			height: 30px;
+		}
 	`);
 
 	frycAPI.onLoadSetter(() => {
@@ -5857,7 +5866,7 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 			loguj("Done!");
 		}
 
-		if (frycAPI.path.startsWith("/units/?")) {
+		if (frycAPI.path === "/units/") {
 			frycAPI.forEach(`#content .columns > div > ul:not(:only-of-type):not(:first-of-type)`, daElem => {
 				const cont = frycAPI.elem("div", 0);
 				cont.appendChild(daElem.prevEl);
@@ -6009,6 +6018,23 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 				frycAPI.makeTableSortable(table, `tbody > tr`);
 			}
 		}
+
+		let hoveredLink = null;
+		document.addEventListener("mouseover", e => {
+			const link = e.target.closest("a[href]");
+			hoveredLink = link ? link.href : null;
+		});
+		document.addEventListener("mouseout", e => {
+			if (e.target.closest("a[href]")) hoveredLink = null;
+		});
+		document.addEventListener("keydown", e => {
+			if (e.key !== "c") return;
+			if (!hoveredLink) return; // no link under mouse, do nothing
+
+			navigator.clipboard.writeText(hoveredLink)
+			.then(() => loguj("Copied:", hoveredLink))
+			.catch(err => console.error("Copy failed:", err));
+		});
 	}, 0);
 } else if (1 && frycAPI_host("pl.wikibooks.org")) {
 	frycAPI.line = frycAPI.getLineNumber();
