@@ -5934,11 +5934,15 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 				const rangeCls = rangeHeader?.className;
 				if (costCls && dpsCls && rangeCls) {
 					rangeHeader.insertAdjacentElement("afterEnd", frycAPI.elem("th").text("DPS/C*R²")._);
+					rangeHeader.insertAdjacentElement("afterEnd", frycAPI.elem("th").text("DPS*R²")._);
 					for (const row of rows) {
 						const dpsTd = row.frycAPI_elemByClass(dpsCls);
 						const rangeTd = row.frycAPI_elemByClass(rangeCls);
 						rangeTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text(
 							((parseFloat(dpsTd.innerText) / parseFloat(row.frycAPI_elemByClass(costCls).innerText) * parseFloat(rangeTd.innerText) ** 2) || 0).toFixed(1)
+						)._);
+						rangeTd.insertAdjacentElement("afterEnd", frycAPI.elem("td").text(
+							((parseFloat(dpsTd.innerText) * parseFloat(rangeTd.innerText) ** 2) || 0).toFixed(1)
 						)._);
 					}
 				}
