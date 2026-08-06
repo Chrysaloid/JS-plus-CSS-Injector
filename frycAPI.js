@@ -2545,6 +2545,11 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 			},
 		],
 	});
+} else if (location.origin === "file://") {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+	`);
+	frycAPI.colorSchemeDark = true;
 } else if (1 && frycAPI_hostIncludes("fandom.com")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
