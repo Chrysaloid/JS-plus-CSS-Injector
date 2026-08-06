@@ -1,13 +1,10 @@
-/* Should be inserted into "C:\Program Files\Microsoft VS Code\<id>\resources\app\extensions\markdown-language-features\media\markdown.css" */
-/* The above instruction was before I discovered markdown.styles VSCode setting */
-
-/** My Style */
-
+/* custom css START */
 p {
 	margin-bottom: 10px;
 }
 body {
 	/* color: green; */
 	max-width: 800px;
-	margin: auto;
+	margin: 0 auto;
 }
+/* custom css END */
