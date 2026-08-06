@@ -14190,12 +14190,17 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		.markdown-content {
 			filter: brightness(1);
 
-			code {
+			*:not(pre) > code {
 				font-family: "Source Code Fryc", monospace;
 				font-size: 13;
 				background-color: hsl(200 4% 16% / 1);
 				border: 1px solid hsl(0 0% 29% / 1);
 				--darkreader-border-4a4a4a: hsl(33 0% 29% / 1) !important;
+			}
+
+			hr {
+				height: 3px;
+				background-color: rgb(165 165 165);
 			}
 		}
 	`);
