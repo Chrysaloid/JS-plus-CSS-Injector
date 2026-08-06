@@ -13945,9 +13945,11 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.injectStyleOnLoad(/*css*/`
 		html {
 			--my-font: "IBM Plex Sans Condensed", sans-serif !important;
-			--font-claude-response: var(--my-font);
-			--font-user-message: var(--my-font);
-			--font-ui: var(--my-font);
+			--font-claude-response: var(--my-font) !important;
+			--font-user-message: var(--my-font) !important;
+			--font-ui: var(--my-font) !important;
+			--default-mono-font-family: "Source Code Fryc", monospace !important;
+			--font-mono: var(--default-mono-font-family) !important;
 		}
 	`);
 } else if (frycAPI_host("triq.org")) {
