@@ -265,7 +265,7 @@ class frycAPI_StyleState {
 		me.state = Boolean(obj.state ?? true);
 		me.id = obj.id;
 
-		if (obj.elevated === true) {
+		if (obj.elevated) {
 			me.eventObj = { style: obj.style, allFrames: obj.allFrames };
 			me.setState = async function (newState) {
 				newState = Boolean(newState);
@@ -517,7 +517,10 @@ var frycAPI = { // eslint-disable-line no-var
 	myStyleState: null,
 	myStyleManualFunc: null,
 	styleStr: "",
-	styleOpts: {},
+	styleOpts: {
+		wait_for_elem: () => document.body,
+		inject_end_condition: () => true,
+	},
 	// #endregion
 	id: document.currentScript.getAttribute("script-id"),
 	funcGroupArr: [],
@@ -592,7 +595,7 @@ var frycAPI = { // eslint-disable-line no-var
 	sleep(ms) {
 		return new Promise(resolve => { setTimeout(resolve, ms) });
 	}, // await frycAPI.sleep(1);
-	injectStyleOnLoad(style, opts = {}) { // Injects style to the page at the moment when body element is created
+	injectStyleOnLoad(style, opts = frycAPI.styleOpts) { // Injects style to the page at the moment when body element is created
 		frycAPI.styleStr += style.trim() + "\n";
 		frycAPI.styleOpts = opts;
 	},
@@ -611,9 +614,9 @@ var frycAPI = { // eslint-disable-line no-var
 			const css = frycAPI.minifyCSS(style);
 			let styleElem;
 
-			if (opts.elevated && opts.state) {
+			if (opts.elevated) {
 				// This option is able to workaround this error: Refused to apply inline style because it violates the following Content Security Policy directive: "style-src 'self'"
-				frycAPI.sendEventToBackground("injectStyle", { style: css, allFrames: opts.allFrames });
+				if (opts.state) frycAPI.sendEventToBackground("injectStyle", { style: css, allFrames: opts.allFrames });
 			} else {
 				styleElem = frycAPI.elem("style").attr("id", opts.id)._;
 				styleElem.textContent = css;
@@ -2276,6 +2279,20 @@ var frycAPI = { // eslint-disable-line no-var
 
 		xhr.send();
 	}, // frycAPI.readFileXMLHttpRequest("https://example.com/file.txt", function (error, text) { if (error) { console.error(error); return } console.log(text) });
+	iframe_looks_loaded(iframe) {
+		const doc = iframe?.contentDocument;
+		if (!doc) return null; // cross-origin: unknown
+		const src = iframe.getAttribute("src");
+		const is_initial_blank = doc.URL === "about:blank" && src && src !== "about:blank";
+		return !is_initial_blank && doc.readyState === "complete";
+	}, // frycAPI.iframe_looks_loaded(iframe);
+	iframe_has_real_document(iframe) {
+		const doc = iframe?.contentDocument;
+		if (!doc) return null; // cross-origin: unknown
+		const src = iframe.getAttribute("src");
+		const is_initial_blank = doc.URL === "about:blank" && src && src !== "about:blank";
+		return !is_initial_blank && Boolean(doc.documentElement);
+	}, // frycAPI.iframe_has_real_document(iframe);
 	template() {
 	}, // frycAPI.template();
 	// #region //* Funkcje 5
@@ -7944,7 +7961,9 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 				.fa-thumb-tack, .fa-thumb-tack *,
 				.glyphicon, .glyphicon *,
 				.mega-octicon, .mega-octicon *,
-				.my-special-class
+				.my-special-class,
+				.lyt_tools, .lyt_tools *,
+				.lyt_sidebar_toggle, .lyt_sidebar_toggle *
 			)) {
 				font-family: "IBM Plex Sans Condensed", "Lucida Grande", Arial, sans-serif !important;
 			}
@@ -8183,7 +8202,39 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 					align-items: center;
 				}
 			}
-		`);
+
+			${frycAPI.path.startsWith("/docs") ? /*css*/`
+				body {
+					> :is(h1, h2, h3, h4) {
+						border-bottom: 0px  !important;
+						border-top: 1px solid #766e63 !important;
+						--pad-top: 13px;
+						padding-top: var(--pad-top);
+					}
+					> h2 {
+						margin-top: abs(1.1em - var(--pad-top)) !important;
+						/* margin-bottom: .5em; */
+					}
+					> h3 {
+						margin-top: abs(1.5em - var(--pad-top)) !important;
+						/* margin-bottom: .5em; */
+					}
+					> h4 {
+						margin-top: abs(1.33em - var(--pad-top)) !important;
+						/* margin-bottom: .5em; */
+					}
+				}
+			` : ""}
+
+			pre, pre *,
+			code, code *,
+			kbd, kbd * {
+				font-family: "Source Code Fryc", monospace !important;
+			}
+		`, { elevated: true, allFrames: true, inject_end_condition: frycAPI.path.startsWith("/docs") ? () => {
+			// return frycAPI.iframe_has_real_document(frycAPI.qSel(".lyt_frame")); // with this style breaks on first link click so we have to keep it disabled to constantly apply the style
+			// loguj("Test");
+		} : null });
 
 		frycAPI.onLoadSetter(() => {
 			// const t1 = performance.now();
@@ -8194,143 +8245,145 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 				frycAPI.changeFaviconRes("AHK_Better.png");
 			}
 			// #endregion
-			// #region //* Naprawa dat
-			/* Test wydajności
-			const posts = document.querySelectorAll(`.post`);
-			const pierwszy = posts[0].cloneNode(1);
-			posts.forEach(el => el.remove());
-			const pageBody = document.getElementById("page-body");
-			for (let i = 0; i < 250; i++) {
-				pageBody.appendChild(pierwszy.cloneNode(1));
-			}
-			*/
-			// const t1 = performance.now();
-			const opts = frycAPI.dateOptsNoTime;
-			frycAPI.setDefaultDate(`
-				.postbody p.author > a,
-				cite > .responsive-hide,
-				p.notification-time,
-				.column2 dl.details > dd:nth-of-type(1), .column2 dl.details > dd:nth-of-type(2)
-			`, { getDate: "txt" });
-			frycAPI.setDefaultDate("_" + frycAPI.arrayToTemplate([2, 3, 4, 5, 6, 7], temₚ`,table:has(thead th:nth-child(${0}).joined) td:nth-child(${0})`), {
-				getDate: "txt",
-				dateOpts: { printRelTime: { compact: 2, ago: false } },
-			});
-			frycAPI.setDefaultDate(`.postprofile > .profile-joined`, {
-				getDate: elem => elem.innerText.replace("Joined: ", ""),
-				setDate: (elem, data) => elem.frycAPI_setInnerHTML(
-					"<strong>Joined: </strong>" + frycAPI.getDefaultDateText(data, opts)
-				),
-				dateEnumMode: frycAPI.setDefaultDateEnum.mode.relatywnyCzas,
-				dateEnumStyle: frycAPI.setDefaultDateEnum.style.floatLeft,
-				customStyle: `cursor: none;`,
-			}); // .mode.absolutnyCzas().floatLeft();
-			frycAPI.setDefaultDate(`.postbody-inner > p.author > strong`, {
-				getDate: elem => elem.nextSibling.textContent.replace("»", "").trim(),
-				setDate: (elem, data) => {
+			if (frycAPI.path.startsWith("/boards")) {
+				// #region //* Naprawa dat
+				/* Test wydajności
+				const posts = document.querySelectorAll(`.post`);
+				const pierwszy = posts[0].cloneNode(1);
+				posts.forEach(el => el.remove());
+				const pageBody = document.getElementById("page-body");
+				for (let i = 0; i < 250; i++) {
+					pageBody.appendChild(pierwszy.cloneNode(1));
+				}
+				*/
+				// const t1 = performance.now();
+				const opts = frycAPI.dateOptsNoTime;
+				frycAPI.setDefaultDate(`
+					.postbody p.author > a,
+					cite > .responsive-hide,
+					p.notification-time,
+					.column2 dl.details > dd:nth-of-type(1), .column2 dl.details > dd:nth-of-type(2)
+				`, { getDate: "txt" });
+				frycAPI.setDefaultDate("_" + frycAPI.arrayToTemplate([2, 3, 4, 5, 6, 7], temₚ`,table:has(thead th:nth-child(${0}).joined) td:nth-child(${0})`), {
+					getDate: "txt",
+					dateOpts: { printRelTime: { compact: 2, ago: false } },
+				});
+				frycAPI.setDefaultDate(`.postprofile > .profile-joined`, {
+					getDate: elem => elem.innerText.replace("Joined: ", ""),
+					setDate: (elem, data) => elem.frycAPI_setInnerHTML(
+						"<strong>Joined: </strong>" + frycAPI.getDefaultDateText(data, opts)
+					),
+					dateEnumMode: frycAPI.setDefaultDateEnum.mode.relatywnyCzas,
+					dateEnumStyle: frycAPI.setDefaultDateEnum.style.floatLeft,
+					customStyle: `cursor: none;`,
+				}); // .mode.absolutnyCzas().floatLeft();
+				frycAPI.setDefaultDate(`.postbody-inner > p.author > strong`, {
+					getDate: elem => elem.nextSibling.textContent.replace("»", "").trim(),
+					setDate: (elem, data) => {
 					// const txtNode = elem.nextSibling;
-					elem.nextSibling.textContent = " » ";
-					return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data));
-				},
-			});
-			frycAPI.setDefaultDate(`.list-inner > .responsive-hide > a:first-of-type`, {
-				getDate: elem => elem.nextSibling.textContent.replaceAll("»", "").replace("in", "").trim(),
-				setDate: (elem, data) => {
-					const txtNode = elem.nextSibling;
-					const containsIn = txtNode.textContent.lastIndexOf("in") !== -1;
-					txtNode.textContent = " » ";
-					const lepCzas = txtNode.frycAPI_insertAfter(frycAPI.elemFromHTML(frycAPI.getDefaultDateText(data, opts)));
-					containsIn && lepCzas.frycAPI_insertAfter(document.createTextNode(" » in "));
-					return lepCzas;
-				},
-			});
-			frycAPI.setDefaultDate(`.row dd.lastpost > span > br`, {
-				getDate: elem => elem.nextSibling.textContent.trim(),
-				setDate: (elem, data) => {
+						elem.nextSibling.textContent = " » ";
+						return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data));
+					},
+				});
+				frycAPI.setDefaultDate(`.list-inner > .responsive-hide > a:first-of-type`, {
+					getDate: elem => elem.nextSibling.textContent.replaceAll("»", "").replace("in", "").trim(),
+					setDate: (elem, data) => {
+						const txtNode = elem.nextSibling;
+						const containsIn = txtNode.textContent.lastIndexOf("in") !== -1;
+						txtNode.textContent = " » ";
+						const lepCzas = txtNode.frycAPI_insertAfter(frycAPI.elemFromHTML(frycAPI.getDefaultDateText(data, opts)));
+						containsIn && lepCzas.frycAPI_insertAfter(document.createTextNode(" » in "));
+						return lepCzas;
+					},
+				});
+				frycAPI.setDefaultDate(`.row dd.lastpost > span > br`, {
+					getDate: elem => elem.nextSibling.textContent.trim(),
+					setDate: (elem, data) => {
 					// const txtNode = elem.nextSibling;
-					elem.nextSibling.remove();
-					return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, opts));
-				},
-			});
-			const zegar = document.querySelector(`a.dropdown-trigger.time.dropdown-toggle`);
-			zegar?.setAttribute("title", "It is currently " + frycAPI.printDate(new Date(zegar.getAttribute("title").replace("It is currently ", ""))));
-			// const t2 = performance.now(); frycAPI.perf(t1, t2);
-			// #endregion
-			// #region //* Ukrycie nic nie wnoszących tytułów postów
-			const titleElem = document.querySelector(`h2.topic-title > a, h2.posting-title > a`);
-			if (titleElem !== null) {
-				const baseTitle = "Re: " + (titleElem.innerText = titleElem.innerText.trim());
-				frycAPI.forEach(`.postbody h3 > a`, (daElem, daI, daArr) => {
-					const tNode = daElem.frycAPI_getFirstTextNode();
-					if ((tNode.textContent = tNode.textContent.trim()) === baseTitle) {
-						daElem.frycAPI_addClass("dspNone");
+						elem.nextSibling.remove();
+						return elem.parentElement.frycAPI_appendHTML(frycAPI.getDefaultDateText(data, opts));
+					},
+				});
+				const zegar = document.querySelector(`a.dropdown-trigger.time.dropdown-toggle`);
+				zegar?.setAttribute("title", "It is currently " + frycAPI.printDate(new Date(zegar.getAttribute("title").replace("It is currently ", ""))));
+				// const t2 = performance.now(); frycAPI.perf(t1, t2);
+				// #endregion
+				// #region //* Ukrycie nic nie wnoszących tytułów postów
+				const titleElem = document.querySelector(`h2.topic-title > a, h2.posting-title > a`);
+				if (titleElem !== null) {
+					const baseTitle = "Re: " + (titleElem.innerText = titleElem.innerText.trim());
+					frycAPI.forEach(`.postbody h3 > a`, (daElem, daI, daArr) => {
+						const tNode = daElem.frycAPI_getFirstTextNode();
+						if ((tNode.textContent = tNode.textContent.trim()) === baseTitle) {
+							daElem.frycAPI_addClass("dspNone");
+						}
+					});
+				}
+				// #endregion
+				// #region //* Ukrycie panelu emoji
+				const smileyBox = document.getElementById("smiley-box");
+				if (smileyBox !== null) {
+					document.querySelector(`#format-buttons:has(select[name="addbbcode_codeboxplus"])`)?.appendChild(
+						document.createElement("div")
+						.frycAPI_addClass("smiley-control")
+						.frycAPI_setInnerHTML("Show smiles")
+						.frycAPI_addEventListener("click", function () {
+							if (smileyBox.classList.toggle("dspNone")) {
+								this.frycAPI_setInnerHTML("Show smiles");
+							} else {
+								this.frycAPI_setInnerHTML("Hide smiles");
+							}
+						})
+					);
+					smileyBox.classList.toggle("dspNone");
+				}
+				// #endregion
+				// #region //* Przeniesienie postów ponad pole tekstowe
+				const topicReview = document.getElementById("topicreview");
+				if (topicReview !== null) {
+					const review = document.getElementById("review");
+					review.querySelector(`span.right-box > a`).click();
+					review.classList.add("dspNone");
+					document.getElementById("postform").insertAdjacentElement("afterbegin", topicReview);
+					const preview = document.getElementById("preview");
+					if (preview !== null) {
+						preview.scrollIntoView();
+					} else {
+						topicReview.querySelector(`.post:not(.post ~ .post)`).scrollIntoView();
+					}
+				}
+				// #endregion
+				// #region //* Dodanie przycisku Top do Nav-Baru
+				document.querySelector(`ul.leftside > li.tab.home`)?.insertAdjacentHTML("afterend",
+					`<li class="tab top responsive-cloned-item" data-responsive-class="small-icon" title="top"><a class="nav-link" href="#top" data-navbar-reference="Top">Top</a></li>`
+				);
+				// #endregion
+				// #region //* Sprawdzenie które posty mają Text jako pierwszy Node
+				frycAPI.forEach(`.postbody .content`, (daElem, daI, daArr) => {
+					if (daElem.firstChild.frycAPI_isText) {
+						daElem.frycAPI_addClass("pierwszy-node-to-text");
 					}
 				});
+				// #endregion
+				// #region //* Przypisanie konkrentych wymiarów obrazom profilowym
+				frycAPI.forEach(`img.avatar`, (daElem, daI, daArr) => {
+					daElem.style.width = daElem.getAttribute("width") + "px !important";
+					daElem.style.height = daElem.getAttribute("height") + "px !important";
+				});
+				// #endregion
+				// #region //* Sortowanie tabeli
+				// frycAPI.forEach(`table:has(tr > th):has(tr > td)`, (daElem, daI, daArr) => {
+				// 	daElem.querySelector(`th.posts`).setAttribute("krytSort", "numeric");
+				// 	frycAPI.makeTableSortable(daElem);
+				// });
+				// #endregion
+				// #region //* Poprawienie linka Board index
+				const bIdx = document.querySelector(`a[title="Board index"]`);
+				bIdx && (bIdx.innerHTML = `<span class="my-special-class">&#xE021;</span><span>Board index</span>`); // + bIdx.innerHTML
+			// #endregion
+				// #region //*
+				// #endregion
 			}
-			// #endregion
-			// #region //* Ukrycie panelu emoji
-			const smileyBox = document.getElementById("smiley-box");
-			if (smileyBox !== null) {
-				document.querySelector(`#format-buttons:has(select[name="addbbcode_codeboxplus"])`)?.appendChild(
-					document.createElement("div")
-					.frycAPI_addClass("smiley-control")
-					.frycAPI_setInnerHTML("Show smiles")
-					.frycAPI_addEventListener("click", function () {
-						if (smileyBox.classList.toggle("dspNone")) {
-							this.frycAPI_setInnerHTML("Show smiles");
-						} else {
-							this.frycAPI_setInnerHTML("Hide smiles");
-						}
-					})
-				);
-				smileyBox.classList.toggle("dspNone");
-			}
-			// #endregion
-			// #region //* Przeniesienie postów ponad pole tekstowe
-			const topicReview = document.getElementById("topicreview");
-			if (topicReview !== null) {
-				const review = document.getElementById("review");
-				review.querySelector(`span.right-box > a`).click();
-				review.classList.add("dspNone");
-				document.getElementById("postform").insertAdjacentElement("afterbegin", topicReview);
-				const preview = document.getElementById("preview");
-				if (preview !== null) {
-					preview.scrollIntoView();
-				} else {
-					topicReview.querySelector(`.post:not(.post ~ .post)`).scrollIntoView();
-				}
-			}
-			// #endregion
-			// #region //* Dodanie przycisku Top do Nav-Baru
-			document.querySelector(`ul.leftside > li.tab.home`)?.insertAdjacentHTML("afterend",
-				`<li class="tab top responsive-cloned-item" data-responsive-class="small-icon" title="top"><a class="nav-link" href="#top" data-navbar-reference="Top">Top</a></li>`
-			);
-			// #endregion
-			// #region //* Sprawdzenie które posty mają Text jako pierwszy Node
-			frycAPI.forEach(`.postbody .content`, (daElem, daI, daArr) => {
-				if (daElem.firstChild.frycAPI_isText) {
-					daElem.frycAPI_addClass("pierwszy-node-to-text");
-				}
-			});
-			// #endregion
-			// #region //* Przypisanie konkrentych wymiarów obrazom profilowym
-			frycAPI.forEach(`img.avatar`, (daElem, daI, daArr) => {
-				daElem.style.width = daElem.getAttribute("width") + "px !important";
-				daElem.style.height = daElem.getAttribute("height") + "px !important";
-			});
-			// #endregion
-			// #region //* Sortowanie tabeli
-			// frycAPI.forEach(`table:has(tr > th):has(tr > td)`, (daElem, daI, daArr) => {
-			// 	daElem.querySelector(`th.posts`).setAttribute("krytSort", "numeric");
-			// 	frycAPI.makeTableSortable(daElem);
-			// });
-			// #endregion
-			// #region //* Poprawienie linka Board index
-			const bIdx = document.querySelector(`a[title="Board index"]`);
-			bIdx && (bIdx.innerHTML = `<span class="my-special-class">&#xE021;</span><span>Board index</span>`); // + bIdx.innerHTML
-			// #endregion
-			// #region //*
-			// #endregion
 			// const t2 = performance.now(); frycAPI.perf(t1, t2);
 		});
 	}
@@ -14204,6 +14257,21 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			}
 		}
 	`);
+} else if (frycAPI_host("mtg.wiki")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		html, body, * {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+		}
+		body {
+			width: 1000px !important;
+			max-width: 100% !important;
+			margin: auto !important;
+		}
+		.mw-body, #mw-head-base, #left-navigation, #mw-data-after-content, .mw-footer {
+			margin-left: 0;
+		}
+	`);
 }
 // Code-Lens-Action insert-snippet IF template
 
@@ -14239,11 +14307,12 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") scrollTo(0, 
 // #region //* End
 if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // Adding style from the active IF block
 	frycAPI.createMutObs(() => {
-		if (document.body) {
+		if (frycAPI.styleOpts.wait_for_elem ? frycAPI.styleOpts.wait_for_elem() : document.body) { // because frycAPI.styleOpts.wait_for_elem?.() ?? document.body is not exactly what we want
 			const state = frycAPI.styleOpts.state;
 			frycAPI.myStyleState = frycAPI.injectStyle(frycAPI.styleStr, {
 				id: "frycAPI_myStyle",
 				elevated: frycAPI.styleOpts.elevated,
+				allFrames: frycAPI.styleOpts.allFrames,
 				elem: frycAPI.styleOpts.elem,
 				state: state,
 			});
@@ -14253,7 +14322,8 @@ if ((frycAPI.styleStr = frycAPI.styleStr.trim()).length) { // Adding style from 
 				frycAPI.myStyleManualFunc.setState(savedState);
 				if (savedState !== frycAPI.myStyleState.state) frycAPI.myStyleState.toggle();
 			});
-			return true;
+
+			return frycAPI.styleOpts.inject_end_condition ? frycAPI.styleOpts.inject_end_condition() : true;
 		}
 	}, { elem: document.documentElement });
 } else {
@@ -14272,3 +14342,4 @@ if (frycAPI.script.getAttribute("src").includes("chrome-extension")) {
 const frycAPI_t2 = performance.now(); loguj(`frycAPI loaded in ${(frycAPI_t2 - frycAPI_t1).toFixed(1)} ms! (from ${frycAPI_loadSource})`);
 document.currentScript.remove();
 // #endregion
+//

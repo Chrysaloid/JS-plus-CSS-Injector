@@ -154,7 +154,7 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 			chrome.downloads.download(data).then(id => { theId = id });
 		});
 		case "getImgAsDataUrl": return fetch(data).then(res => res.blob()).then(async blob => "data:" + blob.type + ";" + (await blobToBase64(blob)));
-		case "injectStyle": return sender.tab ? chrome.scripting.insertCSS(CSSInjection(data, sender)) : 0;
+		case "injectStyle": return sender.tab ? Promise.all([chrome.scripting.removeCSS(CSSInjection(data, sender)), chrome.scripting.insertCSS(CSSInjection(data, sender))]) : 0; // deduplicating injections
 		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(CSSInjection(data, sender)) : 0;
 		case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
 			const obj = result[data.UUID];
