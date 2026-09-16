@@ -13509,16 +13509,16 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 					let elemPath = "";
 					frycAPI.traverseIframeWindows(window, win => {
 						if (!elemPath) {
-							win.document.lóg.querySelectorAll(`.InfoPaneSection-information-path`)?.forEach(daElem => {
+							win.document.querySelectorAll(`[class*="informationPathSegment"]`)?.forEach(daElem => {
 								elemPath += "/" + daElem.innerText.trim();
 							});
 						}
 					});
 					if (elemPath) {
 						frycAPI.ctrlC(elemPath);
-						f.name = "Copied!";
+						loguj(f.name = "Copied!");
 					} else {
-						f.name = "No path found";
+						loguj(f.name = "No path found");
 					}
 					await frycAPI.sleep(1000);
 					f.name = name;
