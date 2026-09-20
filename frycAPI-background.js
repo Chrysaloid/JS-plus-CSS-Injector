@@ -9,6 +9,8 @@ Object.defineProperty(Object.prototype, "log", {
 	},
 });
 
+importScripts("frycAPI-cdp-bridge.js"); //* After `log` is defined, since the bridge uses it
+
 const RULE_ID_BASE = 1000;
 
 // #region Unused chrome.storage.session wrapper
