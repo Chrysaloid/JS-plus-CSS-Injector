@@ -1,11 +1,11 @@
 "use strict";
 //* CDP bridge - lets a local tool (Claude Workbench\chrome_bridge_client.py) evaluate JS and
 //* inspect the DOM in this browser through chrome.debugger, i.e. the DevTools protocol.
-//* Imported by frycAPI-background.js, so `log` is already defined. Needs the "debugger" and
-//* "alarms" permissions. Set chrome.storage.local.cdpBridgeEnabled = false to switch it off.
+//* Imported by frycAPI-background.js, so `log` is already defined. Needs the "debugger" permission.
+//* Connects only on demand - frycAPI.connectClaudeBridge() in a page - never by itself, so a
+//* server that is down costs nothing. Once connected, the server's keepalive holds it open.
 
 const CDP_BRIDGE_URL     = "ws://127.0.0.1:9333/ext";
-const CDP_BRIDGE_ALARM   = "cdpBridgeReconnect";
 const CDP_VERSION        = "1.3";
 const CDP_EVENT_MAX_SIZE = 65536; // Characters of a forwarded event's params before it is replaced by a note
 
@@ -17,10 +17,6 @@ function bridgeSend(message) {
 	if (bridgeSocket?.readyState !== WebSocket.OPEN) return false;
 	bridgeSocket.send(JSON.stringify(message));
 	return true;
-}
-async function isBridgeEnabled() {
-	const { cdpBridgeEnabled } = await chrome.storage.local.get("cdpBridgeEnabled");
-	return cdpBridgeEnabled !== false; // Enabled unless explicitly turned off
 }
 async function resolveTab(data) {
 	if (typeof data.tabId === "number") return data.tabId;
@@ -180,23 +176,31 @@ async function handleBridgeCommand({ command, ...data }) {
 		default: throw new Error(`unknown bridge command "${command}"`);
 	}
 }
-async function connectBridge() {
-	if (bridgeSocket?.readyState === WebSocket.OPEN || bridgeSocket?.readyState === WebSocket.CONNECTING) return;
-	if (!await isBridgeEnabled()) return;
+let bridgeConnecting = null; // The promise of an attempt in flight, so a double trigger shares it
 
-	let socket;
-	try {
-		socket = new WebSocket(CDP_BRIDGE_URL);
-	} catch { // Nothing is listening - the alarm will try again
-		return;
-	}
-	bridgeSocket = socket; // eslint-disable-line require-atomic-updates
+function connectBridge() { // Resolves to a status string, rejects when the server cannot be reached
+	if (bridgeSocket?.readyState === WebSocket.OPEN) return Promise.resolve("already connected to " + CDP_BRIDGE_URL);
+	if (bridgeConnecting) return bridgeConnecting;
 
-	socket.onopen  = () => log("CDP bridge connected to " + CDP_BRIDGE_URL);
-	socket.onerror = () => {}; // A refused connection is the normal case when the server is down
-	socket.onclose = () => {
-		if (bridgeSocket === socket) bridgeSocket = null;
-	};
+	const socket = new WebSocket(CDP_BRIDGE_URL);
+	bridgeSocket = socket;
+	bridgeConnecting = new Promise((resolve, reject) => {
+		socket.onopen = () => {
+			bridgeConnecting = null;
+			log("CDP bridge connected to " + CDP_BRIDGE_URL);
+			resolve("connected to " + CDP_BRIDGE_URL);
+		};
+		socket.onerror = () => {}; // onclose follows and does the reporting
+		socket.onclose = () => {
+			if (bridgeSocket === socket) bridgeSocket = null;
+			if (bridgeConnecting) {
+				bridgeConnecting = null;
+				reject(new Error(`cannot reach the bridge server at ${CDP_BRIDGE_URL} - is chrome_bridge.py running?`));
+			} else {
+				log("CDP bridge disconnected");
+			}
+		};
+	});
 	socket.onmessage = async event => {
 		let message;
 		try {
@@ -212,12 +216,5 @@ async function connectBridge() {
 			bridgeSend({ id: message.id, ok: false, error: err.message, stack: err.stack });
 		}
 	};
+	return bridgeConnecting;
 }
-
-chrome.alarms.create(CDP_BRIDGE_ALARM, { periodInMinutes: 0.5 }); // 30 s is the minimum Chrome allows, and lets the worker sleep in between
-chrome.alarms.onAlarm.addListener(alarm => {
-	if (alarm.name === CDP_BRIDGE_ALARM) connectBridge();
-});
-chrome.runtime.onStartup.addListener(connectBridge);
-chrome.runtime.onInstalled.addListener(connectBridge);
-connectBridge(); // Also on every service worker wake-up

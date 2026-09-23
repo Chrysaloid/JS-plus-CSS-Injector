@@ -22,7 +22,6 @@
 		"nativeMessaging",
 		"scripting",
 		"debugger",
-		"alarms",
 		"activeTab",
 		"tabs",
 		"downloads",

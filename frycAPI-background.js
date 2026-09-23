@@ -198,6 +198,7 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 			return;
 		};
 		case "getSpotifyAuthorization": return spotifyAuthorization;
+		case "connectCdpBridge": return connectBridge();
 		case "test": {
 			log(data);
 			return data;
