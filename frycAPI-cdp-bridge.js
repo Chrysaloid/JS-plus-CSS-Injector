@@ -5,7 +5,7 @@
 //* Connects only on demand - frycAPI.connectClaudeBridge() in a page - never by itself, so a
 //* server that is down costs nothing. Once connected, the server's keepalive holds it open.
 
-const CDP_BRIDGE_URL     = "ws://127.0.0.1:9333/ext";
+const CDP_BRIDGE_URL     = "ws://127.0.0.1:9333/ext?app=chrome"; // chrome_bridge.py keys connections by app; manual_chrome_bridge.js brings the others
 const CDP_VERSION        = "1.3";
 const CDP_EVENT_MAX_SIZE = 65536; // Characters of a forwarded event's params before it is replaced by a note
 
@@ -72,6 +72,7 @@ async function cdpEvalByReference(tabId, expression, awaitPromise, note) {
 		returnByValue         : false,
 		generatePreview       : true,
 		includeCommandLineAPI : true,
+		replMode              : true,
 		userGesture           : true,
 	});
 	if (result.exceptionDetails) return { ok: false, exception: describeException(result.exceptionDetails) };
@@ -87,6 +88,7 @@ async function cdpEval(tabId, expression, awaitPromise = true) {
 		awaitPromise,
 		returnByValue         : true,
 		includeCommandLineAPI : true, // $, $$, $x and friends
+		replMode              : true, // The console's semantics: top-level await, and let/const may be redeclared by a re-run
 		userGesture           : true,
 	};
 	if (cspFlagSupported) options.allowUnsafeEvalBlockedByCSP = true; // Lets the expression run on pages that forbid unsafe-eval
@@ -187,6 +189,7 @@ function connectBridge() { // Resolves to a status string, rejects when the serv
 	bridgeConnecting = new Promise((resolve, reject) => {
 		socket.onopen = () => {
 			bridgeConnecting = null;
+			bridgeSend({ type: "hello", userAgent: navigator.userAgent, via: "JS + CSS Injector extension" });
 			log("CDP bridge connected to " + CDP_BRIDGE_URL);
 			resolve("connected to " + CDP_BRIDGE_URL);
 		};
