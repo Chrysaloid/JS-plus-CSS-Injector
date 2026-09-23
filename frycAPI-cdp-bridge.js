@@ -27,9 +27,7 @@ async function resolveTab(data) {
 
 	if (data.match) {
 		const needle = data.match.toLowerCase();
-		const hits = (await chrome.tabs.query({})).filter(tab =>
-			(tab.url ?? "").toLowerCase().includes(needle) || (tab.title ?? "").toLowerCase().includes(needle)
-		);
+		const hits = (await chrome.tabs.query({})).filter(tab => (tab.url ?? "").toLowerCase().includes(needle) || (tab.title ?? "").toLowerCase().includes(needle));
 		if (hits.length === 1) return hits[0].id;
 		if (hits.length === 0) throw new Error(`no tab matches "${data.match}"`);
 		throw new Error(`"${data.match}" matches ${hits.length} tabs, be more specific: ` + JSON.stringify(hits.map(tab => ({ id: tab.id, title: tab.title, url: tab.url }))));
@@ -71,6 +69,20 @@ function describeException({ exception, text, lineNumber, columnNumber }) {
 		columnNumber: columnNumber,
 	};
 }
+async function cdpEvalByReference(tabId, expression, awaitPromise, note) {
+	const result = await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", {
+		expression,
+		awaitPromise,
+		returnByValue         : false,
+		generatePreview       : true,
+		includeCommandLineAPI : true,
+		userGesture           : true,
+	});
+	if (result.exceptionDetails) return { ok: false, exception: describeException(result.exceptionDetails) };
+
+	const { type, subtype, className, description, preview } = result.result;
+	return { ok: true, note, type, subtype, className, description, preview };
+}
 async function cdpEval(tabId, expression, awaitPromise = true) {
 	await ensureAttached(tabId);
 
@@ -87,7 +99,7 @@ async function cdpEval(tabId, expression, awaitPromise = true) {
 	try {
 		result = await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", options);
 	} catch (err) {
-		if (cspFlagSupported && /nvalid parameter|allowUnsafeEvalBlockedByCSP/.test(err.message)) { // This Chrome does not know the experimental flag
+		if (cspFlagSupported && (/nvalid parameter|allowUnsafeEvalBlockedByCSP/).test(err.message)) { // This Chrome does not know the experimental flag
 			cspFlagSupported = false;
 			log("CDP bridge: allowUnsafeEvalBlockedByCSP rejected, continuing without it");
 			return cdpEval(tabId, expression, awaitPromise);
@@ -105,25 +117,11 @@ async function cdpEval(tabId, expression, awaitPromise = true) {
 
 	return { ok: true, type, subtype, value: value ?? unserializableValue ?? description };
 }
-async function cdpEvalByReference(tabId, expression, awaitPromise, note) {
-	const result = await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", {
-		expression,
-		awaitPromise,
-		returnByValue         : false,
-		generatePreview       : true,
-		includeCommandLineAPI : true,
-		userGesture           : true,
-	});
-	if (result.exceptionDetails) return { ok: false, exception: describeException(result.exceptionDetails) };
-
-	const { type, subtype, className, description, preview } = result.result;
-	return { ok: true, note, type, subtype, className, description, preview };
-}
 async function cdpHtml(tabId, selector, all, maxLength) {
 	const sel = JSON.stringify(selector);
-	const expression = all
-		? `[...document.querySelectorAll(${sel})].map(el => el.outerHTML.slice(0, ${maxLength}))`
-		: `(() => { const el = document.querySelector(${sel}); return el === null ? null : el.outerHTML.slice(0, ${maxLength}); })()`;
+	const expression = all ?
+		`[...document.querySelectorAll(${sel})].map(el => el.outerHTML.slice(0, ${maxLength}))` :
+		`(() => { const el = document.querySelector(${sel}); return el === null ? null : el.outerHTML.slice(0, ${maxLength}); })()`;
 	return cdpEval(tabId, expression, false);
 }
 
@@ -149,15 +147,15 @@ async function handleBridgeCommand({ command, ...data }) {
 		case "tabs": {
 			const needle = data.match?.toLowerCase();
 			const tabs = (await chrome.tabs.query({}))
-				.filter(tab => !needle || (tab.url ?? "").toLowerCase().includes(needle) || (tab.title ?? "").toLowerCase().includes(needle))
-				.map(tab => ({ id: tab.id, title: tab.title, url: tab.url, active: tab.active, windowId: tab.windowId, attached: attachedTabs.has(tab.id) }));
+			.filter(tab => !needle || (tab.url ?? "").toLowerCase().includes(needle) || (tab.title ?? "").toLowerCase().includes(needle))
+			.map(tab => ({ id: tab.id, title: tab.title, url: tab.url, active: tab.active, windowId: tab.windowId, attached: attachedTabs.has(tab.id) }));
 			return { tabs };
-		};
+		}
 		case "attach": {
 			const tabId = await resolveTabAndPrepare(data);
 			await ensureAttached(tabId);
 			return { tabId, attached: true };
-		};
+		}
 		case "detach": {
 			const tabIds = data.all ? [...attachedTabs] : [await resolveTab(data)];
 			for (const tabId of tabIds) {
@@ -165,20 +163,20 @@ async function handleBridgeCommand({ command, ...data }) {
 				attachedTabs.delete(tabId);
 			}
 			return { detached: tabIds };
-		};
+		}
 		case "eval": {
 			const tabId = await resolveTabAndPrepare(data);
 			return { tabId, ...await cdpEval(tabId, data.expression, data.awaitPromise !== false) };
-		};
+		}
 		case "html": {
 			const tabId = await resolveTabAndPrepare(data);
 			return { tabId, ...await cdpHtml(tabId, data.selector, data.all === true, data.maxLength ?? 20000) };
-		};
+		}
 		case "cdp": {
 			const tabId = await resolveTabAndPrepare(data);
 			await ensureAttached(tabId);
 			return { tabId, result: await chrome.debugger.sendCommand({ tabId }, data.method, data.params ?? {}) };
-		};
+		}
 		default: throw new Error(`unknown bridge command "${command}"`);
 	}
 }
@@ -192,7 +190,7 @@ async function connectBridge() {
 	} catch { // Nothing is listening - the alarm will try again
 		return;
 	}
-	bridgeSocket = socket;
+	bridgeSocket = socket; // eslint-disable-line require-atomic-updates
 
 	socket.onopen  = () => log("CDP bridge connected to " + CDP_BRIDGE_URL);
 	socket.onerror = () => {}; // A refused connection is the normal case when the server is down

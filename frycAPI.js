@@ -14342,4 +14342,3 @@ if (frycAPI.script.getAttribute("src").includes("chrome-extension")) {
 const frycAPI_t2 = performance.now(); loguj(`frycAPI loaded in ${(frycAPI_t2 - frycAPI_t1).toFixed(1)} ms! (from ${frycAPI_loadSource})`);
 document.currentScript.remove();
 // #endregion
-//
