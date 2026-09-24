@@ -1,9 +1,8 @@
 "use strict";
-//* CDP bridge - lets a local tool (Claude Workbench\chrome_bridge_client.py) evaluate JS and
-//* inspect the DOM in this browser through chrome.debugger, i.e. the DevTools protocol.
+//* CDP bridge - lets Claude Workbench\chrome_bridge_client.py drive this browser through chrome.debugger.
 //* Imported by frycAPI-background.js, so `log` is already defined. Needs the "debugger" permission.
-//* Connects only on demand - frycAPI.connectClaudeBridge() in a page - never by itself, so a
-//* server that is down costs nothing. Once connected, the server's keepalive holds it open.
+//* Connects only when frycAPI.connectClaudeBridge() asks, never by itself.
+//* The module docstring of chrome_bridge_client.py is the documentation.
 
 const CDP_BRIDGE_URL     = "ws://127.0.0.1:9333/ext?app=chrome"; // chrome_bridge.py keys connections by app; manual_chrome_bridge.js brings the others
 const CDP_VERSION        = "1.3";
