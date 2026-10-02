@@ -10,11 +10,14 @@
 	--back3: #2f2f2f;
 	--el-height: 23px;
 	--el-real-height: calc(var(--el-height) + 2*1px + 2*1px);
+	--font-family: "IBM Plex Sans Condensed";
+	--text-align: center;
+	--display: flex;
 }
 * {
-	font-family: "IBM Plex Sans Condensed";
+	font-family: var(--font-family);
 	color: white;
-	text-align: center;
+	text-align: var(--text-align);
 }
 body {
 	box-sizing: border-box;
@@ -114,6 +117,7 @@ body {
 	}
 }
 .funcEl {
+	display: var(--display) !important;
 	height: var(--el-height);
 	border: var(--border);
 	padding: 1px 4px;

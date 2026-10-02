@@ -121,6 +121,7 @@ async function main(frycAPI0) {
 			funcDiv.classList.add("funcDiv", funcObj.type);
 			if (funcObj.Off) funcDiv.classList.add("Off");
 			if (funcObj.style) funcDiv.setAttribute("style", funcObj.style);
+			if (funcObj.title) funcDiv.setAttribute("title", funcObj.title);
 			funcCont.appendChild(funcDiv);
 			daObj.groupNumber = groupNum;
 			daObj.funcNumber = funcNum;

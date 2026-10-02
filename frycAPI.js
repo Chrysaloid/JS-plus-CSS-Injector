@@ -28,6 +28,7 @@ class frycAPI_ManualFunc {
 		this.Off = obj.Off ?? false;
 		this.additionalAction = obj.additionalAction ?? {};
 		this.resetNameOnFirstStart = obj.resetNameOnFirstStart ?? true;
+		this.title = obj.title;
 	}
 	get nameBase() {
 		return this.__nameBase;
@@ -835,6 +836,8 @@ var frycAPI = { // eslint-disable-line no-var
 		return str.slice(0, -N);
 	}, // str = frycAPI.removeLast(str, N);
 	printRelTime(epoch_ms, obj = {}) {
+		if (isNaN(epoch_ms)) return obj.fallback ?? "";
+
 		const czyDiff   = obj.czyDiff   ?? true;
 		const lang      = obj.lang      ?? "ang";
 		const compact   = obj.compact   ?? 0;
@@ -842,16 +845,18 @@ var frycAPI = { // eslint-disable-line no-var
 		const ago       = obj.ago       ?? true;
 		const leftAlign = obj.leftAlign ?? false;
 		const prec      = obj.prec      ?? undefined;
+		let   agoStr    = obj.agoStr    || undefined;
+		let   znak      = obj.znak      || undefined;
 
 		let czas = (czyDiff ? (Date.now() - epoch_ms) : epoch_ms);
-		const znak = czas < 0 ? "-" : "";
+		znak ??= czas < 0 ? "-" : "";
 		czas = Math.abs(czas);
-		let czytCzas, timeNames, agoStr;
+		let czytCzas, timeNames;
 
 		try {
 			const [agoStrBase, timeNamesArr] = frycAPI.timeNamesDict[lang];
 			timeNames = timeNamesArr[compact];
-			agoStr = agoStrBase;
+			agoStr ??= agoStrBase;
 		} catch {
 			throw new Error("Language not supported");
 		}
@@ -1074,10 +1079,10 @@ var frycAPI = { // eslint-disable-line no-var
 	},
 	isValidDate(d) {
 		return d instanceof Date && !isNaN(d);
-	},
+	}, // frycAPI.isValidDate()
 	isNotValidDate(d) {
 		return !frycAPI.isValidDate(d);
-	},
+	}, // frycAPI.isNotValidDate()
 	changeFavicon(href) {
 		document.head.querySelectorAll(`link[rel~="icon"]`).forEach(daElem => daElem.remove());
 		return document.head.frycAPI_appendHTML(`<link rel="icon" href="${href}">`);
@@ -2310,6 +2315,24 @@ frycAPI.day    = frycAPI.hour   *   24;
 frycAPI.month  = frycAPI.day    *   30;
 frycAPI.year   = frycAPI.day    *  365;
 frycAPI.week   = frycAPI.day    *    7;
+frycAPI.week_days = [
+	"sunday",
+	"monday",
+	"tuesday",
+	"wednesday",
+	"thursday",
+	"friday",
+	"saturday",
+];
+frycAPI.week_days_reverse = {
+	sunday   : 0,
+	monday   : 1,
+	tuesday  : 2,
+	wednesday: 3,
+	thursday : 4,
+	friday   : 5,
+	saturday : 6,
+};
 frycAPI.dateFormatter = frycAPI.getDateFormatter({ second: undefined });
 frycAPI.dateFormatterForFileName = frycAPI.getDateFormatter();
 frycAPI.dateOptsNoTime = { printDate: frycAPI.getDateFormatter({ year: "numeric", month: "2-digit", day: "2-digit", defaultUndef: 1 }) };
@@ -9061,7 +9084,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 	const messageList = ".x78zum5.xdt5ytf.x1iyjqo2.x2lah0s.xl56j7k.x121v3j4";
 	const buttonContainer = `[data-release-focus-from="CLICK"] > div > .html-div:nth-child(3) [role="toolbar"] [role="presentation"] [role="presentation"]`;
 	const reactCSS = `:is([aria-label="Zareaguj przy użyciu ikony emoji"],[aria-label="React using emoji"])`;
-	const replyCSS = `:is([aria-label="Odpowiedz na tę wiadomość"],[aria-label="Reply to this message"])`;
+	const replyCSS = `:is([aria-label="Odpowiedz na tę wiadomość"],[aria-label="Reply to this message"],[aria-label="Odpowiedz"])`;
 	const moreCSS = `:is([aria-label="Więcej opcji"],[aria-label="More actions"],[aria-label="Więcej działań"])`;
 	const shareCSS = `:is([aria-label="Prześlij"],[aria-label="Share"])`;
 	const shareItemCSS = `${shareCSS}[role="menuitem"]`;
@@ -9330,7 +9353,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 					moreButt.click();
 					frycAPI.sleep(10).then(() => {
 						const editButt = document.querySelector(editCSS);
-						if (editButt !== null) {
+						if (editButt) {
 							editButt.click();
 						} else {
 							moreButt.click();
@@ -9348,7 +9371,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 				}));
 				container.append(share.cloneNode(1).frycAPI_addEventListener("click", () => {
 					const shareButt = container.querySelector(shareCSS);
-					if (shareButt !== null) {
+					if (shareButt) {
 						shareButt.click();
 					} else {
 						container.querySelector(moreCSS)?.click();
@@ -9360,7 +9383,7 @@ else if (1 && frycAPI_host("www.messenger.com")) {
 				}));
 				container.append(reply.cloneNode(1).frycAPI_addEventListener("click", () => {
 					const replyButt = container.querySelector(replyCSS);
-					if (replyButt !== null) {
+					if (replyButt) {
 						replyButt.click();
 					} else {
 						container.querySelector(moreCSS)?.click();
@@ -14015,6 +14038,43 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 			--font-mono: var(--default-mono-font-family) !important;
 		}
 	`);
+
+	frycAPI.createManualFunctions("Claude", {
+		funcArr: [
+			(name = "Get usage", type = frycAPI_Normal) => {
+				const f = new type({
+					name,
+					style: `--el-height: fit-content; --font-family: "Source Code Fryc"; --text-align: left; --display: block;`,
+					resetNameOnFirstStart: false,
+					title: "Click to refresh",
+				});
+				f.callback = async function (obj) {
+					const usage = await (await fetch("https://claude.ai/api/organizations/97083ba7-1fd6-4fdd-aaa5-dc1bc12a98e2/usage")).json();
+					const opts = { ago: false, znak: "in " };
+					const curr_date = new Date();
+					const five_hour = usage.five_hour.utilization;
+					const seven_day = usage.seven_day.utilization;
+					const five_hour_resets_at = new Date(usage.five_hour.resets_at || undefined);
+					const seven_day_resets_at = new Date(usage.seven_day.resets_at || undefined);
+					const five_hour_remaining_time = (five_hour_resets_at - curr_date) / frycAPI.hour;
+					const seven_day_remaining_time = (seven_day_resets_at - curr_date) / frycAPI.day;
+					const five_hour_util_time = curr_date - (five_hour_resets_at - 5 * frycAPI.hour);
+					const seven_day_util_time = curr_date - (seven_day_resets_at - 7 * frycAPI.day);
+					const five_hour_util_time_scaled = five_hour_util_time / frycAPI.hour;  // h
+					const seven_day_util_time_scaled = seven_day_util_time / frycAPI.day;  // day
+					const five_hour_rate = five_hour ? five_hour / five_hour_util_time_scaled : 0; // %/h
+					const seven_day_rate = seven_day ? seven_day / seven_day_util_time_scaled : 0; // %/day
+					const five_hour_run_out = five_hour ? (100 - five_hour) / five_hour_rate : 0;  // h
+					const seven_day_run_out = seven_day ? (100 - seven_day) / seven_day_rate : 0;  // day
+					const padE = (str, maxLen = 2, char = "@", real_char = "&nbsp;") => str.padEnd(maxLen, char).replaceAll(char, real_char);
+					const fixPad = (str, toFixed = 0, maxLen = 2, char = "@", real_char = "&nbsp;") => str.toFixed(toFixed).padStart(maxLen, char).replaceAll(char, real_char);
+					f.name = `Session (5 h)${"".repeat(100)}: ${fixPad(five_hour)} % | Resets ${padE(frycAPI.printRelTime(five_hour_resets_at, opts) || "in 5.0 hours", 13)}| <span style="color: ${!five_hour || five_hour_run_out > five_hour_remaining_time ? "#00d600" : "red"}">Will run out in ${five_hour_run_out.toFixed(1)   } h with rate ${five_hour_rate.toFixed(1)} %/h</span>${ // eslint-disable-line template-curly-spacing
+						"<br>"}This week${"&nbsp;".repeat(4)}: ${fixPad(seven_day)} % | Resets ${padE(frycAPI.printRelTime(seven_day_resets_at, opts) || "in 7.0 days" , 13)}| <span style="color: ${!seven_day || seven_day_run_out > seven_day_remaining_time ? "#00d600" : "red"}">Will run out in ${seven_day_run_out.toFixed(1)} days with rate ${seven_day_rate.toFixed(1)} %/day</span>`; // eslint-disable-line comma-spacing
+				};
+				return f;
+			},
+		],
+	});
 } else if (frycAPI_host("triq.org")) {
 	frycAPI.line = frycAPI.getLineNumber();
 	frycAPI.injectStyleOnLoad(/*css*/`
@@ -14281,6 +14341,21 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		.mw-body, #mw-head-base, #left-navigation, #mw-data-after-content, .mw-footer {
 			margin-left: 0;
 		}
+	`);
+} else if (frycAPI_host("www.hplovecraft.com")) {
+	frycAPI.line = frycAPI.getLineNumber();
+	frycAPI.injectStyleOnLoad(/*css*/`
+		* {
+			font-family: "IBM Plex Sans Condensed", sans-serif;
+			font-size: 16px;
+		}
+		body {
+		}
+		[size="-2"] { &, & *{ font-size: 14px !important; }}
+		[size="-1"] { &, & *{ font-size: 15px !important; }}
+		[size="0"]  { &, & *{ font-size: 16px !important; }}
+		[size="+1"] { &, & *{ font-size: 17px !important; }}
+		[size="+2"] { &, & *{ font-size: 18px !important; }}
 	`);
 }
 // Code-Lens-Action insert-snippet IF template
