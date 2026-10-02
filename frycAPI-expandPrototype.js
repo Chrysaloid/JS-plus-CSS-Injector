@@ -262,7 +262,7 @@ frycAPI_expandPrototype(Array, "maxElem", function (getter = a => a) {
 });
 frycAPI_expandPrototype(Array, "last", function () {
 	return this[this.length - 1];
-}, true);
+}, true, true, true, !frycAPI_host("steamcommunity.com"));
 
 frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListener", function (listenerType, callback) {
 	this.addEventListener(listenerType, callback);
