@@ -891,6 +891,7 @@ var frycAPI = { // eslint-disable-line no-var
 			hour  : options.hasOwnProperty("hour"  ) ? options.hour   : ( defaultUndef ? undefined : "2-digit"),
 			minute: options.hasOwnProperty("minute") ? options.minute : ( defaultUndef ? undefined : "2-digit"),
 			second: options.hasOwnProperty("second") ? options.second : ( defaultUndef ? undefined : "2-digit"),
+			timeZoneName: options.timeZoneName,
 			/* eslint-enable */
 		});
 	}, // const dtFrmter = frycAPI.getDateFormatter({ year: "2-digit" });
@@ -971,9 +972,9 @@ var frycAPI = { // eslint-disable-line no-var
 		}
 		return frycAPI.mimeTypes[fileExt] ?? "text/plain";
 	}, // const mimeType = frycAPI.getMimeType("Test.txt");
-	async downloadTxtBackground(text, filename) {
+	async downloadTxtBackground(text, filename, conflictAction) {
 		const url = frycAPI.createTextUrl(text);
-		await frycAPI.downloadUrl(url, filename);
+		await frycAPI.downloadUrl(url, filename, conflictAction);
 		URL.revokeObjectURL(url);
 	}, // frycAPI.downloadTxtBackground("Test", "Test.txt");
 	redownloadImg(img, filename) {
@@ -14039,6 +14040,8 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}
 	`);
 
+	const CLAUDE_ORG = "97083ba7-1fd6-4fdd-aaa5-dc1bc12a98e2";
+	const ADD_RELATIVE_TIME = false;
 	frycAPI.createManualFunctions("Claude", {
 		funcArr: [
 			(name = "Get usage", type = frycAPI_Normal) => {
@@ -14049,7 +14052,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 					title: "Click to refresh",
 				});
 				f.callback = async function (obj) {
-					const usage = await (await fetch("https://claude.ai/api/organizations/97083ba7-1fd6-4fdd-aaa5-dc1bc12a98e2/usage")).json();
+					const usage = await (await fetch(`https://claude.ai/api/organizations/${CLAUDE_ORG}/usage`)).json();
 					const opts = { ago: false, znak: "in " };
 					const curr_date = new Date();
 					const five_hour = usage.five_hour.utilization;
@@ -14070,6 +14073,53 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 					const fixPad = (str, toFixed = 0, maxLen = 2, char = "@", real_char = "&nbsp;") => str.toFixed(toFixed).padStart(maxLen, char).replaceAll(char, real_char);
 					f.name = `Session (5 h)${"".repeat(100)}: ${fixPad(five_hour)} % | Resets ${padE(frycAPI.printRelTime(five_hour_resets_at, opts) || "in 5.0 hours", 13)}| <span style="color: ${!five_hour || five_hour_run_out > five_hour_remaining_time ? "#00d600" : "red"}">Will run out in ${five_hour_run_out.toFixed(1)   } h with rate ${five_hour_rate.toFixed(1)} %/h</span>${ // eslint-disable-line template-curly-spacing
 						"<br>"}This week${"&nbsp;".repeat(4)}: ${fixPad(seven_day)} % | Resets ${padE(frycAPI.printRelTime(seven_day_resets_at, opts) || "in 7.0 days" , 13)}| <span style="color: ${!seven_day || seven_day_run_out > seven_day_remaining_time ? "#00d600" : "red"}">Will run out in ${seven_day_run_out.toFixed(1)} days with rate ${seven_day_rate.toFixed(1)} %/day</span>`; // eslint-disable-line comma-spacing
+				};
+				return f;
+			},
+			(name = "Download conversation as markdown", type = frycAPI_Normal) => {
+				const f = new type({ name });
+				f.callback = async function (obj) { // Same format as /export of "search Claude's output.py"
+					const conv_uuid = location.pathname.match(/^\/chat\/([\da-f-]{36})/)?.[1];
+					if (!conv_uuid) return (f.name = "Open a conversation first");
+					const resp = await fetch(`/api/organizations/${CLAUDE_ORG}/chat_conversations/${conv_uuid}?tree=True&rendering_mode=messages&render_all_tools=true`);
+					if (!resp.ok) return (f.name = `Fetching the conversation failed: HTTP ${resp.status}`);
+					const conv = await resp.json();
+
+					// The tree holds every edit and retry - walk up from the current leaf to get only the branch on screen
+					const by_uuid = new Map(conv.chat_messages.map(msg => [msg.uuid, msg]));
+					const branch = [];
+					for (let msg = by_uuid.get(conv.current_leaf_message_uuid); msg; msg = by_uuid.get(msg.parent_message_uuid)) branch.unshift(msg);
+
+					const get_text = msg => {
+						const blocks = msg.content ?? [];
+						// Only the closing answer, not the notes written between tool calls - text blocks split by citations join with ""
+						const after_tools = blocks.slice(blocks.findLastIndex(block => block.type.includes("tool")) + 1);
+						const closing = after_tools.filter(block => block.type === "text").map(block => block.text).join("").trim();
+						return closing || blocks.filter(block => block.type === "text").map(block => block.text.trim()).join("\n\n").trim() || msg.text?.trim();
+					};
+
+					const sections = [];
+					const date_formatter = frycAPI.getDateFormatter();
+					for (const msg of branch) {
+						const text = get_text(msg);
+						if (text) {
+							const da_date = new Date(msg.created_at);
+							sections.push(`# ${msg.sender === "human" ? "🙋‍♂️ Prompt" : "🤖 Output"} | ${frycAPI.printDate(da_date, date_formatter)}${ADD_RELATIVE_TIME ? ` - ${frycAPI.printRelTime(da_date)}` : ""}\n${text}`);
+						}
+					}
+					if (!sections.length) return (f.name = "Nothing to export - the conversation has no messages with text");
+
+					const header = [
+						"---",
+						`title: ${JSON.stringify(conv.name)}`,
+						`source: ${JSON.stringify(`${location.origin}/chat/${conv_uuid}`)}`,
+						`exported: ${frycAPI.printDate(Date.now(), frycAPI.getDateFormatter({ timeZoneName: "longOffset" })).replace("GMT", "")}`,
+						"---",
+					].join("\n");
+					const title_for_filename = conv.name ? conv.name.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_").replace(/[. ]+$/, "") : "";
+					const filename = (title_for_filename ? title_for_filename + " - " + conv_uuid : conv_uuid) + ".md";
+					const content = `${header}\n\n${sections.join("\n\n")}\n`;
+					frycAPI.downloadTxtBackground(content, filename, "uniquify"); // Never overwrite - a different conversation can have the same title
 				};
 				return f;
 			},
