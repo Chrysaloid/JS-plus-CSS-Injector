@@ -6299,7 +6299,7 @@ else if (1 && frycAPI_host_includes("wikipedia.org") && !frycAPI.path.startsWith
 				const f = new type({ name });
 				f.callback = function (obj) {
 					const artwork = document.querySelectorAll(".playableTile__image>.sc-artwork>span");
-					new_div = document.createElement("div");
+					const new_div = document.createElement("div");
 					new_div.setAttribute("id", "mojelem");
 					for (let i = 0; i < 184; i++) {
 						new_div.innerHTML += getComputedStyle(artwork[i]).getPropertyValue("background-image");

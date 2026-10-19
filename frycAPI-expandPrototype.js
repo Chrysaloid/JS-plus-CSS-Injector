@@ -384,9 +384,6 @@ frycAPI_expand_prototype(Element, "frycAPI_sort_children_reversible", function (
 frycAPI_expand_prototype(Element, "frycAPI_sort_children_control", function (sort_fun = frycAPI_inner_text_compare) {
 	const me = this;
 	const elem_arr = Array.from(me.children);
-	if (!get_values.length) {
-		get_values = [elem => elem.innerText];
-	}
 	elem_arr.sort(sort_fun);
 	elem_arr.forEach(function (da_elem) {
 		me.appendChild(da_elem);
