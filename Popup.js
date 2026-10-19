@@ -1,20 +1,20 @@
 "use strict";
-function getActiveTab() { // https://stackoverflow.com/a/17076501/12035658
-	return chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(tabArr => tabArr[0]);
-} // const tab = await getActiveTab();
-function getActiveTarget() {
-	return getActiveTab().then(tab => ({ tabId: tab.id }));
-} // const tabID = await getActiveTarget();
-async function runOnPage(daFunc, args = []) {
+function get_active_tab() { // https://stackoverflow.com/a/17076501/12035658
+	return chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(tab_arr => tab_arr[0]);
+} // const tab = await get_active_tab();
+function get_active_target() {
+	return get_active_tab().then(tab => ({ tabId: tab.id }));
+} // const tabID = await get_active_target();
+async function run_on_page(da_func, args = []) {
 	const [{ result }] = await chrome.scripting.executeScript({
 		world: "MAIN",
-		target: await getActiveTarget(),
-		func: daFunc,
+		target: await get_active_target(),
+		func: da_func,
 		args: args,
 	});
 	return result;
-} // const out = await runOnPage(() => {});
-class ManualFuncTypes { // class is used here instead of object so the variable has different color than a CONSTANT
+} // const out = await run_on_page(() => {});
+class Manual_func_types { // class is used here instead of object so the variable has different color than a CONSTANT
 	static NORMAL   = "NORMAL";
 	static STATE    = "STATE";
 	static RADIO    = "RADIO";
@@ -22,51 +22,51 @@ class ManualFuncTypes { // class is used here instead of object so the variable 
 	static COMBO    = "COMBO";
 	static INPUT    = "INPUT";
 }
-function addDaListener(elem, daObj, additionalAction = () => true, type = "click") {
-	const newObj = structuredClone(daObj);
-	// newObj.type = elem.type;
+function add_da_listener(elem, da_obj, additional_action = () => true, type = "click") {
+	const new_obj = structuredClone(da_obj);
+	// new_obj.type = elem.type;
 	elem.addEventListener(type, function (e) {
-		if (elem.value !== undefined) newObj.obj.state = elem.value;
-		runOnPage(newDaObj => frycAPI.handleManualFunction(newDaObj), [newObj])
+		if (elem.value !== undefined) new_obj.obj.state = elem.value;
+		run_on_page(new_da_obj => frycAPI.handle_manual_function(new_da_obj), [new_obj])
 		.then(frycAPI0 => {
-			if (additionalAction()) {
+			if (additional_action()) {
 				main(frycAPI0); // eslint-disable-line no-use-before-define
 			}
 		});
 	});
 }
-function handleColsAndRows(funcObj, elCont) {
-	if (funcObj.numCols !== undefined) {
-		elCont.setAttribute("numCols", funcObj.numCols);
-		elCont.style.setProperty("--numCols", funcObj.numCols);
-		elCont.style.setProperty("--last-child-column-start", funcObj.numStates % funcObj.numCols);
-	} else if (funcObj.numRows !== undefined) {
-		elCont.setAttribute("numRows", funcObj.numRows);
-		// elCont.style.setProperty("--numRows", funcObj.numRows === 1 ? `var(--el-real-height)` : `var(--el-real-height) repeat(${funcObj.numRows - 1}, calc(var(--el-real-height) - 1px))`); // (ponieważ calc(1 - 1) != 0 for some reason) Nie. Ponieważ repeat nie pozwala na 0
-		elCont.style.setProperty("--numRows", funcObj.numRows);
-		elCont.style.setProperty("--last-child-row-start", funcObj.numStates % funcObj.numRows);
+function handle_cols_and_rows(func_obj, el_cont) {
+	if (func_obj.num_cols !== undefined) {
+		el_cont.setAttribute("numCols", func_obj.num_cols);
+		el_cont.style.setProperty("--numCols", func_obj.num_cols);
+		el_cont.style.setProperty("--last-child-column-start", func_obj.num_states % func_obj.num_cols);
+	} else if (func_obj.num_rows !== undefined) {
+		el_cont.setAttribute("numRows", func_obj.num_rows);
+		// el_cont.style.setProperty("--numRows", func_obj.num_rows === 1 ? `var(--el-real-height)` : `var(--el-real-height) repeat(${func_obj.num_rows - 1}, calc(var(--el-real-height) - 1px))`); // (ponieważ calc(1 - 1) != 0 for some reason) Nie. Ponieważ repeat nie pozwala na 0
+		el_cont.style.setProperty("--numRows", func_obj.num_rows);
+		el_cont.style.setProperty("--last-child-row-start", func_obj.num_states % func_obj.num_rows);
 	}
 }
-function getNumColsAndRows(funcObj, elCont) {
-	const numRows = Math.ceil(funcObj.numStates / funcObj.numCols) - 1;
-	const numCols = Math.ceil(funcObj.numStates / funcObj.numRows) - 1;
-	return [numCols, numRows];
+function get_num_cols_and_rows(func_obj, el_cont) {
+	const num_rows = Math.ceil(func_obj.num_states / func_obj.num_cols) - 1;
+	const num_cols = Math.ceil(func_obj.num_states / func_obj.num_rows) - 1;
+	return [num_cols, num_rows];
 }
-function setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows) {
-	if (!funcObj.numCols && !funcObj.numRows) funcObj.numCols = 1;
-	if (funcObj.numCols) {
-		if (i % funcObj.numCols === 0) funcEl.classList.add("firstCol");
-		if (i % funcObj.numCols === funcObj.numCols - 1) funcEl.classList.add("lastCol");
-		const row = Math.floor(i / funcObj.numCols);
-		if (row === 0) funcEl.classList.add("firstRow");
-		if (row === numRows) funcEl.classList.add("lastRow");
+function set_cols_rows_attrs(func_obj, func_el, i, num_cols, num_rows) {
+	if (!func_obj.num_cols && !func_obj.num_rows) func_obj.num_cols = 1;
+	if (func_obj.num_cols) {
+		if (i % func_obj.num_cols === 0) func_el.classList.add("firstCol");
+		if (i % func_obj.num_cols === func_obj.num_cols - 1) func_el.classList.add("lastCol");
+		const row = Math.floor(i / func_obj.num_cols);
+		if (row === 0) func_el.classList.add("firstRow");
+		if (row === num_rows) func_el.classList.add("lastRow");
 	}
-	if (funcObj.numRows) {
-		if (i % funcObj.numRows === 0) funcEl.classList.add("firstRow");
-		if (i % funcObj.numRows === funcObj.numRows - 1) funcEl.classList.add("lastRow");
-		const col = Math.floor(i / funcObj.numRows);
-		if (col === 0) funcEl.classList.add("firstCol");
-		if (col === numCols) funcEl.classList.add("lastCol");
+	if (func_obj.num_rows) {
+		if (i % func_obj.num_rows === 0) func_el.classList.add("firstRow");
+		if (i % func_obj.num_rows === func_obj.num_rows - 1) func_el.classList.add("lastRow");
+		const col = Math.floor(i / func_obj.num_rows);
+		if (col === 0) func_el.classList.add("firstCol");
+		if (col === num_cols) func_el.classList.add("lastCol");
 	}
 }
 function loguj(...tekst) {
@@ -80,180 +80,180 @@ function btoa_utf8(value) {
 		)
 	);
 }
-const additionalActions = { // they should return true if the popup should be rerendered
+const additional_actions = { // they should return true if the popup should be rerendered
 	close: data => window.close(),
 };
 async function main(frycAPI0) {
 	// #region //* Wstęp
-	if (await getActiveTab().then(tab => tab.url.startsWith("chrome://"))) return;
-	const firstStart = !frycAPI0;
-	frycAPI0 ??= await runOnPage(() => frycAPI);
-	const mainCont = document.getElementById("mainCont");
-	mainCont.textContent = "";
+	if (await get_active_tab().then(tab => tab.url.startsWith("chrome://"))) return;
+	const first_start = !frycAPI0;
+	frycAPI0 ??= await run_on_page(() => frycAPI);
+	const main_cont = document.getElementById("mainCont");
+	main_cont.textContent = "";
 	if (!frycAPI0) {
-		mainCont.innerText = `Something went wrong. frycAPI is ${frycAPI0}`;
+		main_cont.innerText = `Something went wrong. frycAPI is ${frycAPI0}`;
 		return;
 	}
-	const funcGroupArr = frycAPI0.funcGroupArr;
+	const func_group_arr = frycAPI0.func_group_arr;
 	// console.log(frycAPI0);
-	if (funcGroupArr.length === 0) {
-		mainCont.innerText = "Your functions will be here when you define them"; // Tutaj będą twoje funkcje gdy je zdefiniujesz
+	if (func_group_arr.length === 0) {
+		main_cont.innerText = "Your functions will be here when you define them"; // Tutaj będą twoje funkcje gdy je zdefiniujesz
 		return;
 	}
 	// #endregion
 
-	const daObj = {};
-	funcGroupArr.forEach(function (funcGroup, groupNum) {
-		const subCont = document.createElement("div");
-		subCont.classList.add("subCont");
-		if (funcGroup.style) subCont.setAttribute("style", funcGroup.style);
-		const groupName = document.createElement("span");
-		groupName.classList.add("groupName");
-		groupName.innerHTML = funcGroup.name;
-		subCont.appendChild(groupName);
-		const funcCont = document.createElement("div");
-		funcCont.classList.add("funcCont");
-		subCont.appendChild(funcCont);
-		mainCont.appendChild(subCont);
+	const da_obj = {};
+	func_group_arr.forEach(function (func_group, group_num) {
+		const sub_cont = document.createElement("div");
+		sub_cont.classList.add("subCont");
+		if (func_group.style) sub_cont.setAttribute("style", func_group.style);
+		const group_name = document.createElement("span");
+		group_name.classList.add("groupName");
+		group_name.innerHTML = func_group.name;
+		sub_cont.appendChild(group_name);
+		const func_cont = document.createElement("div");
+		func_cont.classList.add("funcCont");
+		sub_cont.appendChild(func_cont);
+		main_cont.appendChild(sub_cont);
 
-		funcGroup.funcArr.forEach(function (funcObj, funcNum) {
-			const funcDiv = document.createElement("div");
-			funcDiv.classList.add("funcDiv", funcObj.type);
-			if (funcObj.Off) funcDiv.classList.add("Off");
-			if (funcObj.style) funcDiv.setAttribute("style", funcObj.style);
-			if (funcObj.title) funcDiv.setAttribute("title", funcObj.title);
-			funcCont.appendChild(funcDiv);
-			daObj.groupNumber = groupNum;
-			daObj.funcNumber = funcNum;
-			daObj.obj = {};
-			const additionalAction = (additionalActions[funcObj.additionalAction.name] ?? (() => true)).bind(null, funcObj.additionalAction.data);
+		func_group.func_arr.forEach(function (func_obj, func_num) {
+			const func_div = document.createElement("div");
+			func_div.classList.add("funcDiv", func_obj.type);
+			if (func_obj.is_off) func_div.classList.add("Off");
+			if (func_obj.style) func_div.setAttribute("style", func_obj.style);
+			if (func_obj.title) func_div.setAttribute("title", func_obj.title);
+			func_cont.appendChild(func_div);
+			da_obj.group_number = group_num;
+			da_obj.func_number = func_num;
+			da_obj.obj = {};
+			const additional_action = (additional_actions[func_obj.additional_action.name] ?? (() => true)).bind(null, func_obj.additional_action.data);
 
-			const funcName = document.createElement("div");
-			funcName.classList.add("funcName");
-			funcName.innerHTML = funcObj.name;
-			daObj.obj.type = "name";
-			if (!funcObj.displayName) funcName.classList.add("dspNone");
-			if (funcObj.nameClickable) {
-				funcName.classList.add("nameClickable");
-				addDaListener(funcName, daObj, additionalAction);
+			const func_name = document.createElement("div");
+			func_name.classList.add("funcName");
+			func_name.innerHTML = func_obj.name;
+			da_obj.obj.type = "name";
+			if (!func_obj.display_name) func_name.classList.add("dspNone");
+			if (func_obj.name_clickable) {
+				func_name.classList.add("nameClickable");
+				add_da_listener(func_name, da_obj, additional_action);
 			}
-			funcDiv.appendChild(funcName);
+			func_div.appendChild(func_name);
 
-			daObj.obj.type = "elem";
-			switch (funcObj.type) {
+			da_obj.obj.type = "elem";
+			switch (func_obj.type) {
 				default:
-				case ManualFuncTypes.NORMAL: {
-					const funcEl = document.createElement("div");
-					funcEl.classList.add("funcEl");
-					if (funcObj.funcElStyle) funcEl.setAttribute("style", funcObj.funcElStyle);
-					funcEl.innerHTML = firstStart && funcObj.resetNameOnFirstStart ? funcObj.__nameBase : funcObj.name; // eslint-disable-line no-underscore-dangle
-					// funcEl.innerHTML = funcObj.name;
-					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
-					funcDiv.appendChild(funcEl);
+				case Manual_func_types.NORMAL: {
+					const func_el = document.createElement("div");
+					func_el.classList.add("funcEl");
+					if (func_obj.func_el_style) func_el.setAttribute("style", func_obj.func_el_style);
+					func_el.innerHTML = first_start && func_obj.reset_name_on_first_start ? func_obj.__name_base : func_obj.name; // eslint-disable-line no-underscore-dangle
+					// func_el.innerHTML = func_obj.name;
+					if (!func_obj.is_off) add_da_listener(func_el, da_obj, additional_action);
+					func_div.appendChild(func_el);
 					break;
 				}
-				case ManualFuncTypes.STATE: {
-					const funcEl = document.createElement("div");
-					funcEl.classList.add("funcEl");
-					funcEl.innerHTML = funcObj.stateDesc[funcObj.state];
-					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
-					funcDiv.appendChild(funcEl);
+				case Manual_func_types.STATE: {
+					const func_el = document.createElement("div");
+					func_el.classList.add("funcEl");
+					func_el.innerHTML = func_obj.state_desc[func_obj.state];
+					if (!func_obj.is_off) add_da_listener(func_el, da_obj, additional_action);
+					func_div.appendChild(func_el);
 					break;
 				}
-				case ManualFuncTypes.RADIO: {
-					const elCont = document.createElement("div");
-					elCont.classList.add("elCont");
-					handleColsAndRows(funcObj, elCont);
-					funcDiv.appendChild(elCont);
-					const [numCols, numRows] = getNumColsAndRows(funcObj);
-					funcObj.stateDesc.forEach((desc, i) => {
-						const funcEl = document.createElement("div");
-						funcEl.classList.add("funcEl");
-						funcEl.innerHTML = desc;
-						daObj.obj.state = i;
-						if (funcObj.state === i) funcEl.classList.add("choice");
-						if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
-						setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows);
-						elCont.appendChild(funcEl);
+				case Manual_func_types.RADIO: {
+					const el_cont = document.createElement("div");
+					el_cont.classList.add("elCont");
+					handle_cols_and_rows(func_obj, el_cont);
+					func_div.appendChild(el_cont);
+					const [num_cols, num_rows] = get_num_cols_and_rows(func_obj);
+					func_obj.state_desc.forEach((desc, i) => {
+						const func_el = document.createElement("div");
+						func_el.classList.add("funcEl");
+						func_el.innerHTML = desc;
+						da_obj.obj.state = i;
+						if (func_obj.state === i) func_el.classList.add("choice");
+						if (!func_obj.is_off) add_da_listener(func_el, da_obj, additional_action);
+						set_cols_rows_attrs(func_obj, func_el, i, num_cols, num_rows);
+						el_cont.appendChild(func_el);
 					});
 					break;
 				}
-				case ManualFuncTypes.COMBO: {
-					const elCont = document.createElement("select");
-					elCont.classList.add("funcEl");
-					funcDiv.appendChild(elCont);
-					if (!funcObj.Off) {
-						addDaListener(elCont, daObj, additionalAction, "change");
-						elCont.addEventListener("wheel", e => {
+				case Manual_func_types.COMBO: {
+					const el_cont = document.createElement("select");
+					el_cont.classList.add("funcEl");
+					func_div.appendChild(el_cont);
+					if (!func_obj.is_off) {
+						add_da_listener(el_cont, da_obj, additional_action, "change");
+						el_cont.addEventListener("wheel", e => {
 							e.preventDefault();
-							if (e.deltaY > 0 && funcObj.state < funcObj.numStates - 1) {
-								elCont.selectedIndex++;
-								elCont.dispatchEvent(new Event("change"));
-							} else if (e.deltaY < 0 && funcObj.state > 0) {
-								elCont.selectedIndex--;
-								elCont.dispatchEvent(new Event("change"));
+							if (e.deltaY > 0 && func_obj.state < func_obj.num_states - 1) {
+								el_cont.selectedIndex++;
+								el_cont.dispatchEvent(new Event("change"));
+							} else if (e.deltaY < 0 && func_obj.state > 0) {
+								el_cont.selectedIndex--;
+								el_cont.dispatchEvent(new Event("change"));
 							}
 						});
 					}
-					funcObj.stateDesc.forEach((desc, i) => {
-						const funcEl = document.createElement("option");
-						// funcEl.classList.add("funcEl");
-						funcEl.innerHTML = desc;
-						funcEl.setAttribute("value", i);
-						if (funcObj.state === i) funcEl.setAttribute("selected", true);
-						elCont.appendChild(funcEl);
+					func_obj.state_desc.forEach((desc, i) => {
+						const func_el = document.createElement("option");
+						// func_el.classList.add("funcEl");
+						func_el.innerHTML = desc;
+						func_el.setAttribute("value", i);
+						if (func_obj.state === i) func_el.setAttribute("selected", true);
+						el_cont.appendChild(func_el);
 					});
 					break;
 				}
-				case ManualFuncTypes.CHECKBOX: {
-					const elCont = document.createElement("div");
-					elCont.classList.add("elCont");
-					handleColsAndRows(funcObj, elCont);
-					funcDiv.appendChild(elCont);
-					const [numCols, numRows] = getNumColsAndRows(funcObj);
-					funcObj.stateDesc.forEach((desc, i) => {
-						const funcEl = document.createElement("div");
-						funcEl.classList.add("funcEl");
-						funcEl.innerHTML = desc;
-						daObj.obj.index = i;
-						if (funcObj.state[i]) funcEl.classList.add("choice");
-						if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction);
-						setColsRowsAttrs(funcObj, funcEl, i, numCols, numRows);
-						elCont.appendChild(funcEl);
+				case Manual_func_types.CHECKBOX: {
+					const el_cont = document.createElement("div");
+					el_cont.classList.add("elCont");
+					handle_cols_and_rows(func_obj, el_cont);
+					func_div.appendChild(el_cont);
+					const [num_cols, num_rows] = get_num_cols_and_rows(func_obj);
+					func_obj.state_desc.forEach((desc, i) => {
+						const func_el = document.createElement("div");
+						func_el.classList.add("funcEl");
+						func_el.innerHTML = desc;
+						da_obj.obj.index = i;
+						if (func_obj.state[i]) func_el.classList.add("choice");
+						if (!func_obj.is_off) add_da_listener(func_el, da_obj, additional_action);
+						set_cols_rows_attrs(func_obj, func_el, i, num_cols, num_rows);
+						el_cont.appendChild(func_el);
 					});
 					break;
 				}
-				case ManualFuncTypes.INPUT: {
-					const funcEl = document.createElement("input");
-					funcEl.classList.add("funcEl");
-					if (funcObj.selectOnFocus) funcEl.addEventListener(`focus`, () => funcEl.select());
-					funcEl.setAttribute("value", funcObj.state);
-					if (!funcObj.Off) addDaListener(funcEl, daObj, additionalAction, "change");
-					funcDiv.appendChild(funcEl);
-					if (funcObj.attributes) {
-						Object.entries(funcObj.attributes).forEach(([key, value]) => {
-							funcEl.setAttribute(key, value);
+				case Manual_func_types.INPUT: {
+					const func_el = document.createElement("input");
+					func_el.classList.add("funcEl");
+					if (func_obj.select_on_focus) func_el.addEventListener(`focus`, () => func_el.select());
+					func_el.setAttribute("value", func_obj.state);
+					if (!func_obj.is_off) add_da_listener(func_el, da_obj, additional_action, "change");
+					func_div.appendChild(func_el);
+					if (func_obj.attributes) {
+						Object.entries(func_obj.attributes).forEach(([key, value]) => {
+							func_el.setAttribute(key, value);
 						});
 					}
-					if (!funcEl.hasAttribute("type")) funcEl.setAttribute("type", "text");
-					if (!funcEl.hasAttribute("size")) funcEl.setAttribute("size", "1");
+					if (!func_el.hasAttribute("type")) func_el.setAttribute("type", "text");
+					if (!func_el.hasAttribute("size")) func_el.setAttribute("size", "1");
 					break;
 				}
 			}
 		});
 	});
 
-	async function waitForSpecialKeys(e) {
+	async function wait_for_special_keys(e) {
 		if (e.code === "F4" && e.altKey && e.ctrlKey && e.shiftKey) {
 			const clip = await navigator.clipboard.readText();
 			navigator.clipboard.writeText(clip.split("\n").map(s => s.trim()).filter(s => s).map(s => {
 				return `const ${s.split("/").pop().replaceAll(/[^a-zA-Z0-9_]/g, "")} = new frycAPI_Cache("${btoa_utf8(s)}");`;
 			}).join("\n"));
-			// document.removeEventListener("keydown", waitForSpecialKeys);
+			// document.removeEventListener("keydown", wait_for_special_keys);
 			// loguj("Test");
 		}
 	}
-	document.addEventListener("keydown", waitForSpecialKeys);
+	document.addEventListener("keydown", wait_for_special_keys);
 }
 
 // const t0 = performance.now();

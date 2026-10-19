@@ -104,14 +104,14 @@ const a = [
 // #endregion
 
 // #region 2
-function voidFun() {
-	return voidFun;
+function void_fun() {
+	return void_fun;
 }
 
 function frycAPI_arr(cond, fun) {
 	if (cond()) {
 		fun();
-		return voidFun;
+		return void_fun;
 	} else {
 		return frycAPI_arr;
 	}

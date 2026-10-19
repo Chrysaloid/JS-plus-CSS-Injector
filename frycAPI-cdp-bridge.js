@@ -1,23 +1,23 @@
 "use strict";
 //* CDP bridge - lets Claude Workbench\chrome_bridge_client.py drive this browser through chrome.debugger.
 //* Imported by frycAPI-background.js, so `log` is already defined. Needs the "debugger" permission.
-//* Connects only when frycAPI.connectClaudeBridge() asks, never by itself.
+//* Connects only when frycAPI.connect_claude_bridge() asks, never by itself.
 //* The module docstring of chrome_bridge_client.py is the documentation.
 
 const CDP_BRIDGE_URL     = "ws://127.0.0.1:9333/ext?app=chrome"; // chrome_bridge.py keys connections by app; manual_chrome_bridge.js brings the others
 const CDP_VERSION        = "1.3";
 const CDP_EVENT_MAX_SIZE = 65536; // Characters of a forwarded event's params before it is replaced by a note
 
-let bridgeSocket = null;
-const attachedTabs = new Set();
-let cspFlagSupported = true; // allowUnsafeEvalBlockedByCSP is experimental; cleared for good if this Chrome rejects it
+let bridge_socket = null;
+const attached_tabs = new Set();
+let csp_flag_supported = true; // allowUnsafeEvalBlockedByCSP is experimental; cleared for good if this Chrome rejects it
 
-function bridgeSend(message) {
-	if (bridgeSocket?.readyState !== WebSocket.OPEN) return false;
-	bridgeSocket.send(JSON.stringify(message));
+function bridge_send(message) {
+	if (bridge_socket?.readyState !== WebSocket.OPEN) return false;
+	bridge_socket.send(JSON.stringify(message));
 	return true;
 }
-async function resolveTab(data) {
+async function resolve_tab(data) {
 	if (typeof data.tabId === "number") return data.tabId;
 
 	if (data.match) {
@@ -32,171 +32,171 @@ async function resolveTab(data) {
 	if (!active) throw new Error("there is no active tab in the last focused window");
 	return active.id;
 }
-async function ensureAttached(tabId) {
-	if (attachedTabs.has(tabId)) return;
+async function ensure_attached(tab_id) {
+	if (attached_tabs.has(tab_id)) return;
 
 	try {
-		await chrome.debugger.attach({ tabId }, CDP_VERSION);
+		await chrome.debugger.attach({ tabId: tab_id }, CDP_VERSION);
 	} catch (err) {
 		// Either this extension is attached already (service worker restarted and lost the Set), or somebody else is - DevTools, most likely.
 		try {
-			await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: "1", returnByValue: true });
+			await chrome.debugger.sendCommand({ tabId: tab_id }, "Runtime.evaluate", { expression: "1", returnByValue: true });
 		} catch {
-			throw new Error(`cannot attach to tab ${tabId}: ${err.message}. DevTools open on that tab? Close it, or use another tab. chrome:// pages and the Web Store cannot be attached at all.`);
+			throw new Error(`cannot attach to tab ${tab_id}: ${err.message}. DevTools open on that tab? Close it, or use another tab. chrome:// pages and the Web Store cannot be attached at all.`);
 		}
 	}
-	attachedTabs.add(tabId);
+	attached_tabs.add(tab_id);
 	// DevTools' "Emulate a focused page". Without it a hidden tab reports visibilityState "hidden" and Chrome throttles its timers to ~1/s
 	// (~1/min past five minutes hidden), which reads as the bridge hanging. Measured on a hidden tab: a 10 ms timer took 971 ms without
 	// this, 10 ms with it. Reverted automatically on detach, and it does not disturb the tab the user is looking at.
-	await chrome.debugger.sendCommand({ tabId }, "Emulation.setFocusEmulationEnabled", { enabled: true }).catch(() => {});
+	await chrome.debugger.sendCommand({ tabId: tab_id }, "Emulation.setFocusEmulationEnabled", { enabled: true }).catch(() => {});
 }
-async function activateTab(tabId) {
-	const tab = await chrome.tabs.get(tabId);
-	await chrome.tabs.update(tabId, { active: true });
+async function activate_tab(tab_id) {
+	const tab = await chrome.tabs.get(tab_id);
+	await chrome.tabs.update(tab_id, { active: true });
 	await chrome.windows.update(tab.windowId, { focused: true });
 }
-function describeException({ exception, text, lineNumber, columnNumber }) {
+function describe_exception({ exception, text, lineNumber: line_number, columnNumber: column_number }) {
 	return {
 		text        : exception?.description ?? exception?.value ?? text,
 		className   : exception?.className,
-		lineNumber  : lineNumber,
-		columnNumber: columnNumber,
+		lineNumber  : line_number,
+		columnNumber: column_number,
 	};
 }
-async function cdpEvalByReference(tabId, expression, awaitPromise, note) {
-	const result = await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", {
+async function cdp_eval_by_reference(tab_id, expression, await_promise, note) {
+	const result = await chrome.debugger.sendCommand({ tabId: tab_id }, "Runtime.evaluate", {
 		expression,
-		awaitPromise,
+		awaitPromise: await_promise,
 		returnByValue         : false,
 		generatePreview       : true,
 		includeCommandLineAPI : true,
 		replMode              : true,
 		userGesture           : true,
 	});
-	if (result.exceptionDetails) return { ok: false, exception: describeException(result.exceptionDetails) };
+	if (result.exceptionDetails) return { ok: false, exception: describe_exception(result.exceptionDetails) };
 
-	const { type, subtype, className, description, preview } = result.result;
-	return { ok: true, note, type, subtype, className, description, preview };
+	const { type, subtype, className: class_name, description, preview } = result.result;
+	return { ok: true, note, type, subtype, className: class_name, description, preview };
 }
-async function cdpEval(tabId, expression, awaitPromise = true) {
-	await ensureAttached(tabId);
+async function cdp_eval(tab_id, expression, await_promise = true) {
+	await ensure_attached(tab_id);
 
 	const options = {
 		expression,
-		awaitPromise,
+		awaitPromise: await_promise,
 		returnByValue         : true,
 		includeCommandLineAPI : true, // $, $$, $x and friends
 		replMode              : true, // The console's semantics: top-level await, and let/const may be redeclared by a re-run
 		userGesture           : true,
 	};
-	if (cspFlagSupported) options.allowUnsafeEvalBlockedByCSP = true; // Lets the expression run on pages that forbid unsafe-eval
+	if (csp_flag_supported) options.allowUnsafeEvalBlockedByCSP = true; // Lets the expression run on pages that forbid unsafe-eval
 
 	let result;
 	try {
-		result = await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", options);
+		result = await chrome.debugger.sendCommand({ tabId: tab_id }, "Runtime.evaluate", options);
 	} catch (err) {
-		if (cspFlagSupported && (/nvalid parameter|allowUnsafeEvalBlockedByCSP/).test(err.message)) { // This Chrome does not know the experimental flag
-			cspFlagSupported = false;
+		if (csp_flag_supported && (/nvalid parameter|allowUnsafeEvalBlockedByCSP/).test(err.message)) { // This Chrome does not know the experimental flag
+			csp_flag_supported = false;
 			log("CDP bridge: allowUnsafeEvalBlockedByCSP rejected, continuing without it");
-			return cdpEval(tabId, expression, awaitPromise);
+			return cdp_eval(tab_id, expression, await_promise);
 		}
 		// Otherwise the value could not be serialised (circular, a function, ...) - fall back to a description
-		return cdpEvalByReference(tabId, expression, awaitPromise, `not serialisable by value: ${err.message}`);
+		return cdp_eval_by_reference(tab_id, expression, await_promise, `not serialisable by value: ${err.message}`);
 	}
 
-	if (result.exceptionDetails) return { ok: false, exception: describeException(result.exceptionDetails) };
+	if (result.exceptionDetails) return { ok: false, exception: describe_exception(result.exceptionDetails) };
 
-	const { type, subtype, value, description, unserializableValue } = result.result;
+	const { type, subtype, value, description, unserializableValue: unserializable_value } = result.result;
 	if (type === "object" && value === undefined) { // A DOM node or similar serialises to nothing useful
-		return cdpEvalByReference(tabId, expression, awaitPromise, `a ${subtype ?? type} does not survive serialisation - return outerHTML or a plain object instead`);
+		return cdp_eval_by_reference(tab_id, expression, await_promise, `a ${subtype ?? type} does not survive serialisation - return outerHTML or a plain object instead`);
 	}
 
-	return { ok: true, type, subtype, value: value ?? unserializableValue ?? description };
+	return { ok: true, type, subtype, value: value ?? unserializable_value ?? description };
 }
-async function cdpHtml(tabId, selector, all, maxLength) {
+async function cdp_html(tab_id, selector, all, max_length) {
 	const sel = JSON.stringify(selector);
 	const expression = all ?
-		`[...document.querySelectorAll(${sel})].map(el => el.outerHTML.slice(0, ${maxLength}))` :
-		`(() => { const el = document.querySelector(${sel}); return el === null ? null : el.outerHTML.slice(0, ${maxLength}); })()`;
-	return cdpEval(tabId, expression, false);
+		`[...document.querySelectorAll(${sel})].map(el => el.outerHTML.slice(0, ${max_length}))` :
+		`(() => { const el = document.querySelector(${sel}); return el === null ? null : el.outerHTML.slice(0, ${max_length}); })()`;
+	return cdp_eval(tab_id, expression, false);
 }
 
 chrome.debugger.onEvent.addListener((source, method, params) => {
 	let payload = params;
-	const asText = JSON.stringify(params ?? null);
-	if (asText !== null && asText.length > CDP_EVENT_MAX_SIZE) payload = { truncated: true, size: asText.length, head: asText.slice(0, CDP_EVENT_MAX_SIZE) };
-	bridgeSend({ type: "event", tabId: source.tabId, method, params: payload });
+	const as_text = JSON.stringify(params ?? null);
+	if (as_text !== null && as_text.length > CDP_EVENT_MAX_SIZE) payload = { truncated: true, size: as_text.length, head: as_text.slice(0, CDP_EVENT_MAX_SIZE) };
+	bridge_send({ type: "event", tabId: source.tabId, method, params: payload });
 });
 chrome.debugger.onDetach.addListener((source, reason) => {
-	attachedTabs.delete(source.tabId);
-	bridgeSend({ type: "event", tabId: source.tabId, method: "Bridge.detached", params: { reason } });
+	attached_tabs.delete(source.tabId);
+	bridge_send({ type: "event", tabId: source.tabId, method: "Bridge.detached", params: { reason } });
 });
 
-async function resolveTabAndPrepare(data) {
-	const tabId = await resolveTab(data);
-	if (data.activate) await activateTab(tabId); // Foreground it, so timers and requestAnimationFrame actually run
-	return tabId;
+async function resolve_tab_and_prepare(data) {
+	const tab_id = await resolve_tab(data);
+	if (data.activate) await activate_tab(tab_id); // Foreground it, so timers and requestAnimationFrame actually run
+	return tab_id;
 }
-async function handleBridgeCommand({ command, ...data }) {
+async function handle_bridge_command({ command, ...data }) {
 	switch (command) {
 		case "keepalive": return { keepalive: true };
 		case "tabs": {
 			const needle = data.match?.toLowerCase();
 			const tabs = (await chrome.tabs.query({}))
 			.filter(tab => !needle || (tab.url ?? "").toLowerCase().includes(needle) || (tab.title ?? "").toLowerCase().includes(needle))
-			.map(tab => ({ id: tab.id, title: tab.title, url: tab.url, active: tab.active, windowId: tab.windowId, attached: attachedTabs.has(tab.id) }));
+			.map(tab => ({ id: tab.id, title: tab.title, url: tab.url, active: tab.active, windowId: tab.windowId, attached: attached_tabs.has(tab.id) }));
 			return { tabs };
 		}
 		case "attach": {
-			const tabId = await resolveTabAndPrepare(data);
-			await ensureAttached(tabId);
-			return { tabId, attached: true };
+			const tab_id = await resolve_tab_and_prepare(data);
+			await ensure_attached(tab_id);
+			return { tabId: tab_id, attached: true };
 		}
 		case "detach": {
-			const tabIds = data.all ? [...attachedTabs] : [await resolveTab(data)];
-			for (const tabId of tabIds) {
-				await chrome.debugger.detach({ tabId }).catch(() => {}); // Already gone is not an error here
-				attachedTabs.delete(tabId);
+			const tab_ids = data.all ? [...attached_tabs] : [await resolve_tab(data)];
+			for (const tab_id of tab_ids) {
+				await chrome.debugger.detach({ tabId: tab_id }).catch(() => {}); // Already gone is not an error here
+				attached_tabs.delete(tab_id);
 			}
-			return { detached: tabIds };
+			return { detached: tab_ids };
 		}
 		case "eval": {
-			const tabId = await resolveTabAndPrepare(data);
-			return { tabId, ...await cdpEval(tabId, data.expression, data.awaitPromise !== false) };
+			const tab_id = await resolve_tab_and_prepare(data);
+			return { tabId: tab_id, ...await cdp_eval(tab_id, data.expression, data.awaitPromise !== false) };
 		}
 		case "html": {
-			const tabId = await resolveTabAndPrepare(data);
-			return { tabId, ...await cdpHtml(tabId, data.selector, data.all === true, data.maxLength ?? 20000) };
+			const tab_id = await resolve_tab_and_prepare(data);
+			return { tabId: tab_id, ...await cdp_html(tab_id, data.selector, data.all === true, data.maxLength ?? 20000) };
 		}
 		case "cdp": {
-			const tabId = await resolveTabAndPrepare(data);
-			await ensureAttached(tabId);
-			return { tabId, result: await chrome.debugger.sendCommand({ tabId }, data.method, data.params ?? {}) };
+			const tab_id = await resolve_tab_and_prepare(data);
+			await ensure_attached(tab_id);
+			return { tabId: tab_id, result: await chrome.debugger.sendCommand({ tabId: tab_id }, data.method, data.params ?? {}) };
 		}
 		default: throw new Error(`unknown bridge command "${command}"`);
 	}
 }
-let bridgeConnecting = null; // The promise of an attempt in flight, so a double trigger shares it
+let bridge_connecting = null; // The promise of an attempt in flight, so a double trigger shares it
 
-function connectBridge() { // Resolves to a status string, rejects when the server cannot be reached
-	if (bridgeSocket?.readyState === WebSocket.OPEN) return Promise.resolve("already connected to " + CDP_BRIDGE_URL);
-	if (bridgeConnecting) return bridgeConnecting;
+function connect_bridge() { // Resolves to a status string, rejects when the server cannot be reached
+	if (bridge_socket?.readyState === WebSocket.OPEN) return Promise.resolve("already connected to " + CDP_BRIDGE_URL);
+	if (bridge_connecting) return bridge_connecting;
 
 	const socket = new WebSocket(CDP_BRIDGE_URL);
-	bridgeSocket = socket;
-	bridgeConnecting = new Promise((resolve, reject) => {
+	bridge_socket = socket;
+	bridge_connecting = new Promise((resolve, reject) => {
 		socket.onopen = () => {
-			bridgeConnecting = null;
-			bridgeSend({ type: "hello", userAgent: navigator.userAgent, via: "JS + CSS Injector extension" });
+			bridge_connecting = null;
+			bridge_send({ type: "hello", userAgent: navigator.userAgent, via: "JS + CSS Injector extension" });
 			log("CDP bridge connected to " + CDP_BRIDGE_URL);
 			resolve("connected to " + CDP_BRIDGE_URL);
 		};
 		socket.onerror = () => {}; // onclose follows and does the reporting
 		socket.onclose = () => {
-			if (bridgeSocket === socket) bridgeSocket = null;
-			if (bridgeConnecting) {
-				bridgeConnecting = null;
+			if (bridge_socket === socket) bridge_socket = null;
+			if (bridge_connecting) {
+				bridge_connecting = null;
 				reject(new Error(`cannot reach the bridge server at ${CDP_BRIDGE_URL} - is chrome_bridge.py running?`));
 			} else {
 				log("CDP bridge disconnected");
@@ -210,13 +210,13 @@ function connectBridge() { // Resolves to a status string, rejects when the serv
 		} catch {
 			return;
 		}
-		if (message.id === undefined) return void await handleBridgeCommand(message).catch(() => {}); // Fire and forget, e.g. the keepalive
+		if (message.id === undefined) return void await handle_bridge_command(message).catch(() => {}); // Fire and forget, e.g. the keepalive
 
 		try {
-			bridgeSend({ id: message.id, ok: true, ...await handleBridgeCommand(message) });
+			bridge_send({ id: message.id, ok: true, ...await handle_bridge_command(message) });
 		} catch (err) {
-			bridgeSend({ id: message.id, ok: false, error: err.message, stack: err.stack });
+			bridge_send({ id: message.id, ok: false, error: err.message, stack: err.stack });
 		}
 	};
-	return bridgeConnecting;
+	return bridge_connecting;
 }

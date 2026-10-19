@@ -18,14 +18,14 @@ function addJsSnippet(proto, name, func, czyGet) {
 	};
 }
 */
-const frycAPI_noSetter = v => { throw new Error("This is a read-only property") };
-function frycAPI_expandPrototype(proto, name, func, czyGet = false, writable = false, configurable = false, active = true) {
+const frycAPI_no_setter = v => { throw new Error("This is a read-only property") };
+function frycAPI_expand_prototype(proto, name, func, czy_get = false, writable = false, configurable = false, active = true) {
 	if (active) {
 		try {
 			Object.defineProperty(proto.prototype, name,
-				czyGet ? {
-					get: func, // getter cannot be writable so when @czyGet is true then @writable is ignored
-					set: frycAPI_noSetter,
+				czy_get ? {
+					get: func, // getter cannot be writable so when @czy_get is true then @writable is ignored
+					set: frycAPI_no_setter,
 					configurable: configurable,
 				} : {
 					value: func,
@@ -40,7 +40,7 @@ function frycAPI_expandPrototype(proto, name, func, czyGet = false, writable = f
 			} catch (err) {}
 		}
 	}
-	// addJsSnippet(proto, name, func, czyGet);
+	// addJsSnippet(proto, name, func, czy_get);
 }
 function frycAPI_host(...str) {
 	if (str.length === 0) {
@@ -49,10 +49,10 @@ function frycAPI_host(...str) {
 		return str.includes(window.location.hostname);
 	}
 }
-function frycAPI_hostIncludes(...str) {
-	return window.location.hostname.frycAPI_includesAny(...str);
+function frycAPI_host_includes(...str) {
+	return window.location.hostname.frycAPI_includes_any(...str);
 }
-function frycAPI_innerTextCompare(a, b) {
+function frycAPI_inner_text_compare(a, b) {
 	const a1 = a.innerText;
 	const b1 = b.innerText;
 	if (a1 < b1) return -1;
@@ -62,7 +62,7 @@ function frycAPI_innerTextCompare(a, b) {
 // I can't believe I have to do this...
 // Some sites (https://rapidsave.com/) overwrite chrome.runtime.sendMessage
 // So I have to store it before they do that
-const frycAPI_chrome_runtime_sendMessage = chrome.runtime.sendMessage;
+const frycAPI_chrome_runtime_send_message = chrome.runtime.sendMessage;
 
 //* Prototypy
 // #region Example of defining intellisense for expanded prototype
@@ -72,48 +72,48 @@ const frycAPI_chrome_runtime_sendMessage = chrome.runtime.sendMessage;
 // const ar = [];
 // ar.greet();
 // #endregion
-frycAPI_expandPrototype(String, "frycAPI_equalAny", function (...strList) {
-	return strList.includes(this);
+frycAPI_expand_prototype(String, "frycAPI_equal_any", function (...str_list) {
+	return str_list.includes(this);
 });
-frycAPI_expandPrototype(String, "frycAPI_includesAny", function (...strList) {
-	for (const daElem of strList) {
-		if (this.includes(daElem)) {
+frycAPI_expand_prototype(String, "frycAPI_includes_any", function (...str_list) {
+	for (const da_elem of str_list) {
+		if (this.includes(da_elem)) {
 			return true;
 		}
 	}
 	return false;
 });
 
-const frycAPI_Object_condition = !(frycAPI_host("www.youtube.com", "www.desmos.com", "studio.youtube.com") || frycAPI_hostIncludes("googlesource.com"));
-frycAPI_expandPrototype(Object, "lóg", function () {
+const frycAPI_object_condition = !(frycAPI_host("www.youtube.com", "www.desmos.com", "studio.youtube.com") || frycAPI_host_includes("googlesource.com"));
+frycAPI_expand_prototype(Object, "lóg", function () {
 	console.log(this);
 	return this;
-}, true, true, true, frycAPI_Object_condition);
-frycAPI_expandPrototype(Object, "frycAPI_if", function (condition) {
+}, true, true, true, frycAPI_object_condition);
+frycAPI_expand_prototype(Object, "frycAPI_if", function (condition) {
 	return condition ? this : null;
-}, false, true, true, frycAPI_Object_condition);
-frycAPI_expandPrototype(Object, "jsón", function () {
+}, false, true, true, frycAPI_object_condition);
+frycAPI_expand_prototype(Object, "jsón", function () {
 	return JSON.stringify(this);
-}, true, true, true, frycAPI_Object_condition);
-frycAPI_expandPrototype(Object, "frycAPI_then", function (callback) {
+}, true, true, true, frycAPI_object_condition);
+frycAPI_expand_prototype(Object, "frycAPI_then", function (callback) {
 	return callback(this);
-}, false, true, true, frycAPI_Object_condition);
+}, false, true, true, frycAPI_object_condition);
 
-frycAPI_expandPrototype(String, "jsón", function () {
+frycAPI_expand_prototype(String, "jsón", function () {
 	return JSON.parse(this);
 }, true);
-frycAPI_expandPrototype(String, "specialTrim", function () {
+frycAPI_expand_prototype(String, "special_trim", function () {
 	return this.replaceAll(/^[\x00-\x20\x7F-\xA0]+|[\x00-\x20\x7F-\xA0]+$/g, "");
 });
-frycAPI_expandPrototype(String, "frycAPI_toTitleCase", function () {
+frycAPI_expand_prototype(String, "frycAPI_to_title_case", function () {
 	return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
 });
-frycAPI_expandPrototype(String, "frycAPI_eval", function () {
+frycAPI_expand_prototype(String, "frycAPI_eval", function () {
 	return eval(this);
 });
-frycAPI_expandPrototype(String, "extractAfter", function (subStr = "\x00") {
-	const idx = this.indexOf(subStr);
-	return idx >= 0 ? this.slice(idx + subStr.length) : "";
+frycAPI_expand_prototype(String, "extract_after", function (sub_str = "\x00") {
+	const idx = this.indexOf(sub_str);
+	return idx >= 0 ? this.slice(idx + sub_str.length) : "";
 });
 
 [
@@ -129,37 +129,37 @@ frycAPI_expandPrototype(String, "extractAfter", function (subStr = "\x00") {
 	"toSpliced",
 	"with",
 ].forEach(str => {
-	frycAPI_expandPrototype(String, str, Array.prototype[str]);
+	frycAPI_expand_prototype(String, str, Array.prototype[str]);
 });
 
-frycAPI_expandPrototype(Array, "frycAPI_shuffle", function () {
+frycAPI_expand_prototype(Array, "frycAPI_shuffle", function () {
 	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-	let currentIndex = this.length, randomIndex;
-	while (currentIndex > 0) {
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex--;
-		[this[currentIndex], this[randomIndex]] = [this[randomIndex], this[currentIndex]];
+	let current_index = this.length, random_index;
+	while (current_index > 0) {
+		random_index = Math.floor(Math.random() * current_index);
+		current_index--;
+		[this[current_index], this[random_index]] = [this[random_index], this[current_index]];
 	}
 	return this;
 });
-frycAPI_expandPrototype(Array, "frycAPI_pushElem", function (elem) {
+frycAPI_expand_prototype(Array, "frycAPI_push_elem", function (elem) {
 	this.push(elem);
 	return elem;
 });
-frycAPI_expandPrototype(Array, "frycAPI_pushArr", function (elem) {
+frycAPI_expand_prototype(Array, "frycAPI_push_arr", function (elem) {
 	this.push(elem);
 	return this;
 });
-frycAPI_expandPrototype(Array, "frycAPI_numSort", function () {
+frycAPI_expand_prototype(Array, "frycAPI_num_sort", function () {
 	return this.sort((a, b) => a - b);
 });
-frycAPI_expandPrototype(Array, "frycAPI_numSortReverse", function () {
+frycAPI_expand_prototype(Array, "frycAPI_num_sort_reverse", function () {
 	return this.sort((a, b) => b - a);
 });
-frycAPI_expandPrototype(Array, "frycAPI_sortValuesSimple", function (getValue) {
-	return getValue ? this.sort(function (a, b) {
-		const a1 = getValue(a);
-		const b1 = getValue(b);
+frycAPI_expand_prototype(Array, "frycAPI_sort_values_simple", function (get_value) {
+	return get_value ? this.sort(function (a, b) {
+		const a1 = get_value(a);
+		const b1 = get_value(b);
 		if (a1 < b1) return -1;
 		if (a1 > b1) return 1;
 		return 0;
@@ -169,252 +169,252 @@ frycAPI_expandPrototype(Array, "frycAPI_sortValuesSimple", function (getValue) {
 		return 0;
 	});
 });
-frycAPI_expandPrototype(Array, "frycAPI_sortValuesSimpleReverse", function (getValue = a => a) {
+frycAPI_expand_prototype(Array, "frycAPI_sort_values_simple_reverse", function (get_value = a => a) {
 	return this.sort((a, b) => {
-		const a1 = getValue(a);
-		const b1 = getValue(b);
+		const a1 = get_value(a);
+		const b1 = get_value(b);
 		if (a1 < b1) return 1;
 		if (a1 > b1) return -1;
 		return 0;
 	});
 });
-frycAPI_expandPrototype(Array, "frycAPI_sortValues", function (...getValues) {
+frycAPI_expand_prototype(Array, "frycAPI_sort_values", function (...get_values) {
 	return this.sort((a, b) => {
-		for (const getValue of getValues) {
-			const a1 = getValue(a);
-			const b1 = getValue(b);
+		for (const get_value of get_values) {
+			const a1 = get_value(a);
+			const b1 = get_value(b);
 			if (a1 < b1) return -1;
 			if (a1 > b1) return 1;
 		}
 		return 0;
 	});
 });
-frycAPI_expandPrototype(Array, "frycAPI_sortValuesReversible", function (getValuesAndOrders) {
+frycAPI_expand_prototype(Array, "frycAPI_sort_values_reversible", function (get_values_and_orders) {
 	return this.sort((a, b) => {
-		for (const [getValue, reverse] of getValuesAndOrders) {
-			const a1 = getValue(a);
-			const b1 = getValue(b);
+		for (const [get_value, reverse] of get_values_and_orders) {
+			const a1 = get_value(a);
+			const b1 = get_value(b);
 			if (a1 < b1) return reverse ?  1 : -1;
 			if (a1 > b1) return reverse ? -1 :  1;
 		}
 		return 0;
 	});
 });
-frycAPI_expandPrototype(Array, "frycAPI_run", function (...args) {
+frycAPI_expand_prototype(Array, "frycAPI_run", function (...args) {
 	this.forEach(fun => fun(...args));
 });
-frycAPI_expandPrototype(Array, "frycAPI_runReturn", function (...args) {
+frycAPI_expand_prototype(Array, "frycAPI_run_return", function (...args) {
 	return this.map(fun => fun(...args));
 });
-frycAPI_expandPrototype(Array, "min", function (getter = a => a) {
+frycAPI_expand_prototype(Array, "min", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
 	let val = getter(this[0]);
 	for (let i = 1; i < len; i++) {
-		const newVal = getter(this[i]);
-		if (val > newVal) {
-			val = newVal;
+		const new_val = getter(this[i]);
+		if (val > new_val) {
+			val = new_val;
 		}
 	}
 	return val;
 });
-frycAPI_expandPrototype(Array, "max", function (getter = a => a) {
+frycAPI_expand_prototype(Array, "max", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
 	let val = getter(this[0]);
 	for (let i = 1; i < len; i++) {
-		const newVal = getter(this[i]);
-		if (val < newVal) {
-			val = newVal;
+		const new_val = getter(this[i]);
+		if (val < new_val) {
+			val = new_val;
 		}
 	}
 	return val;
 });
-frycAPI_expandPrototype(Array, "minElem", function (getter = a => a) {
+frycAPI_expand_prototype(Array, "min_elem", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
 	let el = this[0];
 	let val = getter(el);
 	for (let i = 1; i < len; i++) {
-		const newEl = this[i];
-		const newVal = getter(newEl);
-		if (val > newVal) {
-			val = newVal;
-			el = newEl;
+		const new_el = this[i];
+		const new_val = getter(new_el);
+		if (val > new_val) {
+			val = new_val;
+			el = new_el;
 		}
 	}
 	return el;
 });
-frycAPI_expandPrototype(Array, "maxElem", function (getter = a => a) {
+frycAPI_expand_prototype(Array, "max_elem", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
 	let el = this[0];
 	let val = getter(el);
 	for (let i = 1; i < len; i++) {
-		const newEl = this[i];
-		const newVal = getter(newEl);
-		if (val < newVal) {
-			val = newVal;
-			el = newEl;
+		const new_el = this[i];
+		const new_val = getter(new_el);
+		if (val < new_val) {
+			val = new_val;
+			el = new_el;
 		}
 	}
 	return el;
 });
-frycAPI_expandPrototype(Array, "last", function () {
+frycAPI_expand_prototype(Array, "last", function () {
 	return this[this.length - 1];
 }, true, true, true, !frycAPI_host("steamcommunity.com"));
 
-frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListener", function (listenerType, callback) {
-	this.addEventListener(listenerType, callback);
+frycAPI_expand_prototype(EventTarget, "frycAPI_add_event_listener", function (listener_type, callback) {
+	this.addEventListener(listener_type, callback);
 	return this;
 });
-frycAPI_expandPrototype(EventTarget, "frycAPI_addEventListenerFun", function (listenerType, callback) {
-	this.addEventListener(listenerType, callback);
+frycAPI_expand_prototype(EventTarget, "frycAPI_add_event_listener_fun", function (listener_type, callback) {
+	this.addEventListener(listener_type, callback);
 	return callback;
 });
 
-frycAPI_expandPrototype(DOMTokenList, "notContains", function (daClass) { // i.e. Element's classList is a DOMTokenList
-	return !this.contains(daClass);
+frycAPI_expand_prototype(DOMTokenList, "not_contains", function (da_class) { // i.e. Element's classList is a DOMTokenList
+	return !this.contains(da_class);
 });
 
-frycAPI_expandPrototype(Node, "frycAPI_isText", function () {
+frycAPI_expand_prototype(Node, "frycAPI_is_text", function () {
 	return this.nodeType === Node.TEXT_NODE;
 }, true);
-frycAPI_expandPrototype(Node, "frycAPI_insertAfter", function (newNode) {
-	if (frycAPI.isString(newNode)) {
-		newNode = frycAPI.elemFromHTML(newNode);
+frycAPI_expand_prototype(Node, "frycAPI_insert_after", function (new_node) {
+	if (frycAPI.is_string(new_node)) {
+		new_node = frycAPI.elem_from_html(new_node);
 	}
 	if (this.nextSibling !== null) {
-		this.parentNode.insertBefore(newNode, this.nextSibling);
+		this.parentNode.insertBefore(new_node, this.nextSibling);
 	} else {
-		this.parentNode.appendChild(newNode);
+		this.parentNode.appendChild(new_node);
 	}
-	return newNode;
+	return new_node;
 });
 
-frycAPI_expandPrototype(Element, "frycAPI_addClass", function (...classNames) {
-	this.classList.add(...classNames);
+frycAPI_expand_prototype(Element, "frycAPI_add_class", function (...class_names) {
+	this.classList.add(...class_names);
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_removeClass", function (...classNames) {
-	this.classList.remove(...classNames);
+frycAPI_expand_prototype(Element, "frycAPI_remove_class", function (...class_names) {
+	this.classList.remove(...class_names);
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_toggleClass", function (className, force) {
-	this.classList.toggle(className, force);
+frycAPI_expand_prototype(Element, "frycAPI_toggle_class", function (class_name, force) {
+	this.classList.toggle(class_name, force);
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_setAttribute", function (attName, attValue) {
-	this.setAttribute(attName, attValue);
+frycAPI_expand_prototype(Element, "frycAPI_set_attribute", function (att_name, att_value) {
+	this.setAttribute(att_name, att_value);
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_removeAttribute", function (attName) {
-	this.removeAttribute(attName);
+frycAPI_expand_prototype(Element, "frycAPI_remove_attribute", function (att_name) {
+	this.removeAttribute(att_name);
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_setAttributeBulk", function (...args) {
+frycAPI_expand_prototype(Element, "frycAPI_set_attribute_bulk", function (...args) {
 	if (args.length % 2 !== 0) throw new Error("Arguments' length must be even.");
 	const max = args.length;
-	let attName, attValue;
+	let att_name, att_value;
 	for (let i = 1; i < max; i += 2) {
-		attName = args[i - 1];
-		attValue = args[i];
-		this.setAttribute(attName, attValue);
+		att_name = args[i - 1];
+		att_value = args[i];
+		this.setAttribute(att_name, att_value);
 	}
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_setObjKey", function (keyName, keyValue) {
-	this[keyName] = keyValue;
+frycAPI_expand_prototype(Element, "frycAPI_set_obj_key", function (key_name, key_value) {
+	this[key_name] = key_value;
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_setInnerHTML", function (newInnerHTML) {
-	this.innerHTML = frycAPI.createHTML(newInnerHTML);
+frycAPI_expand_prototype(Element, "frycAPI_set_inner_html", function (new_inner_html) {
+	this.innerHTML = frycAPI.create_html(new_inner_html);
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_setInnerText", function (newInnerText) {
-	this.innerText = newInnerText;
+frycAPI_expand_prototype(Element, "frycAPI_set_inner_text", function (new_inner_text) {
+	this.innerText = new_inner_text;
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_insertAdjacentElement", function (where, elem) {
+frycAPI_expand_prototype(Element, "frycAPI_insert_adjacent_element", function (where, elem) {
 	this.insertAdjacentElement(where, elem);
 	return this;
 });
-frycAPI_expandPrototype(Element, "frycAPI_shuffleChildren", function () {
+frycAPI_expand_prototype(Element, "frycAPI_shuffle_children", function () {
 	const me = this;
-	Array.from(me.children).frycAPI_shuffle().forEach(function (daElem) {
-		me.appendChild(daElem);
+	Array.from(me.children).frycAPI_shuffle().forEach(function (da_elem) {
+		me.appendChild(da_elem);
 	});
 	return me;
 });
-frycAPI_expandPrototype(Element, "frycAPI_sortChildrenSimple", function (getValue = a => a.innerText) {
+frycAPI_expand_prototype(Element, "frycAPI_sort_children_simple", function (get_value = a => a.innerText) {
 	const me = this;
-	const elemArr = Array.from(me.children);
-	elemArr.frycAPI_sortValuesSimple(getValue);
-	elemArr.forEach(function (daElem) {
-		me.appendChild(daElem);
+	const elem_arr = Array.from(me.children);
+	elem_arr.frycAPI_sort_values_simple(get_value);
+	elem_arr.forEach(function (da_elem) {
+		me.appendChild(da_elem);
 	});
 });
-frycAPI_expandPrototype(Element, "frycAPI_sortChildrenSimpleReverse", function (getValue = a => a.innerText) {
+frycAPI_expand_prototype(Element, "frycAPI_sort_children_simple_reverse", function (get_value = a => a.innerText) {
 	const me = this;
-	const elemArr = Array.from(me.children);
-	elemArr.frycAPI_sortValuesSimpleReverse(getValue);
-	elemArr.forEach(function (daElem) {
-		me.appendChild(daElem);
+	const elem_arr = Array.from(me.children);
+	elem_arr.frycAPI_sort_values_simple_reverse(get_value);
+	elem_arr.forEach(function (da_elem) {
+		me.appendChild(da_elem);
 	});
 });
-frycAPI_expandPrototype(Element, "frycAPI_sortChildren", function (...getValues) {
+frycAPI_expand_prototype(Element, "frycAPI_sort_children", function (...get_values) {
 	const me = this;
-	const elemArr = Array.from(me.children);
-	if (!getValues.length) {
-		getValues = [elem => elem.innerText];
+	const elem_arr = Array.from(me.children);
+	if (!get_values.length) {
+		get_values = [elem => elem.innerText];
 	}
-	elemArr.frycAPI_sortValues(...getValues);
-	elemArr.forEach(function (daElem) {
-		me.appendChild(daElem);
+	elem_arr.frycAPI_sort_values(...get_values);
+	elem_arr.forEach(function (da_elem) {
+		me.appendChild(da_elem);
 	});
 });
-frycAPI_expandPrototype(Element, "frycAPI_sortChildrenReversible", function (getValuesAndOrders = [[elem => elem.innerText, false]]) {
+frycAPI_expand_prototype(Element, "frycAPI_sort_children_reversible", function (get_values_and_orders = [[elem => elem.innerText, false]]) {
 	const me = this;
-	const elemArr = Array.from(me.children);
-	elemArr.frycAPI_sortValuesReversible(getValuesAndOrders);
-	elemArr.forEach(function (daElem) {
-		me.appendChild(daElem);
+	const elem_arr = Array.from(me.children);
+	elem_arr.frycAPI_sort_values_reversible(get_values_and_orders);
+	elem_arr.forEach(function (da_elem) {
+		me.appendChild(da_elem);
 	});
 });
-frycAPI_expandPrototype(Element, "frycAPI_sortChildrenControl", function (sortFun = frycAPI_innerTextCompare) {
+frycAPI_expand_prototype(Element, "frycAPI_sort_children_control", function (sort_fun = frycAPI_inner_text_compare) {
 	const me = this;
-	const elemArr = Array.from(me.children);
-	if (!getValues.length) {
-		getValues = [elem => elem.innerText];
+	const elem_arr = Array.from(me.children);
+	if (!get_values.length) {
+		get_values = [elem => elem.innerText];
 	}
-	elemArr.sort(sortFun);
-	elemArr.forEach(function (daElem) {
-		me.appendChild(daElem);
+	elem_arr.sort(sort_fun);
+	elem_arr.forEach(function (da_elem) {
+		me.appendChild(da_elem);
 	});
 });
-frycAPI_expandPrototype(Element, "frycAPI_getFirstTextNode", function () {
+frycAPI_expand_prototype(Element, "frycAPI_get_first_text_node", function () {
 	return [...this.childNodes].find(child => child.nodeType === Node.TEXT_NODE);
 });
-frycAPI_expandPrototype(Element, "frycAPI_getFirstTextNodeContent", function () {
-	const text = this.frycAPI_getFirstTextNode();
+frycAPI_expand_prototype(Element, "frycAPI_get_first_text_node_content", function () {
+	const text = this.frycAPI_get_first_text_node();
 	return text && text.textContent.trim();
 });
-frycAPI_expandPrototype(Element, "frycAPI_removeChildren", function () {
+frycAPI_expand_prototype(Element, "frycAPI_remove_children", function () {
 	while (this.firstChild) this.removeChild(this.lastChild);
 });
-frycAPI_expandPrototype(Element, "frycAPI_appendHTML", function (htmlString) { // tylko jeżeli root zawiera pojedynczy element
-	return this.appendChild(frycAPI.elemFromHTML(htmlString));
+frycAPI_expand_prototype(Element, "frycAPI_append_html", function (html_string) { // tylko jeżeli root zawiera pojedynczy element
+	return this.appendChild(frycAPI.elem_from_html(html_string));
 });
-frycAPI_expandPrototype(Element, "frycAPI_insertHTML", function (position, htmlString) { // tylko jeżeli root zawiera pojedynczy element
-	return this.insertAdjacentElement(position, frycAPI.elemFromHTML(htmlString));
+frycAPI_expand_prototype(Element, "frycAPI_insert_html", function (position, html_string) { // tylko jeżeli root zawiera pojedynczy element
+	return this.insertAdjacentElement(position, frycAPI.elem_from_html(html_string));
 });
-frycAPI_expandPrototype(Element, "frycAPI_qSelNull", function (selector) {
+frycAPI_expand_prototype(Element, "frycAPI_q_sel_null", function (selector) {
 	return this.querySelector(selector) === null;
 });
-frycAPI_expandPrototype(Element, "frycAPI_qSelOk", function (selector) {
+frycAPI_expand_prototype(Element, "frycAPI_q_sel_ok", function (selector) {
 	return this.querySelector(selector) !== null;
 });
-frycAPI_expandPrototype(Element, "frycAPI_qSelList", function (list, root = document) {
+frycAPI_expand_prototype(Element, "frycAPI_q_sel_list", function (list, root = document) {
 	if (this instanceof Element) root = this;
 	let elem;
 	for (const query of list) {
@@ -423,97 +423,97 @@ frycAPI_expandPrototype(Element, "frycAPI_qSelList", function (list, root = docu
 	}
 	return null;
 });
-frycAPI_expandPrototype(Element, "frycAPI_hasClass", function (klasa) {
+frycAPI_expand_prototype(Element, "frycAPI_has_class", function (klasa) {
 	return this.classList.contains(klasa);
 });
-frycAPI_expandPrototype(Element, "frycAPI_hasNotClass", function (klasa) {
+frycAPI_expand_prototype(Element, "frycAPI_has_not_class", function (klasa) {
 	return !this.classList.contains(klasa);
 });
-frycAPI_expandPrototype(Element, "frycAPI_childIndex", function () {
+frycAPI_expand_prototype(Element, "frycAPI_child_index", function () {
 	let me = this, i = 0;
 	while ((me = me.previousElementSibling) !== null) i++;
 	return i;
 }, true);
-frycAPI_expandPrototype(Element, "frycAPI_elemByClass", function (klasa) {
+frycAPI_expand_prototype(Element, "frycAPI_elem_by_class", function (klasa) {
 	return this.getElementsByClassName(klasa)[0];
 });
-frycAPI_expandPrototype(Element, "frycAPI_elemByTag", function (tag) {
+frycAPI_expand_prototype(Element, "frycAPI_elem_by_tag", function (tag) {
 	return this.getElementsByTagName(tag)[0];
 });
-frycAPI_expandPrototype(Element, "frycAPI_hasScroll", function () {
+frycAPI_expand_prototype(Element, "frycAPI_has_scroll", function () {
 	return this.scrollHeight > this.clientHeight;
 }, true);
-frycAPI_expandPrototype(Element, "prevEl", function () {
+frycAPI_expand_prototype(Element, "prev_el", function () {
 	return this.previousElementSibling;
 }, true);
-frycAPI_expandPrototype(Element, "nextEl", function () {
+frycAPI_expand_prototype(Element, "next_el", function () {
 	return this.nextElementSibling;
 }, true);
-frycAPI_expandPrototype(Element, "firstEl", function () {
+frycAPI_expand_prototype(Element, "first_el", function () {
 	return this.firstElementChild;
 }, true);
-frycAPI_expandPrototype(Element, "lastEl", function () {
+frycAPI_expand_prototype(Element, "last_el", function () {
 	return this.lastElementChild;
 }, true);
-frycAPI_expandPrototype(Element, "notMatches", function (selectors) {
+frycAPI_expand_prototype(Element, "not_matches", function (selectors) {
 	return !this.matches(selectors);
 });
-frycAPI_expandPrototype(Element, "nthParent", function (n = 1) {
+frycAPI_expand_prototype(Element, "nth_parent", function (n = 1) {
 	let temp = this.parentElement;
 	for (let i = 2; i <= n && temp?.parentElement; i++) {
 		temp = temp.parentElement;
 	}
 	return temp;
 });
-// frycAPI_expandPrototype(Element, "isInDocument", function () {
+// frycAPI_expand_prototype(Element, "isInDocument", function () {
 // 	let parElem = this.parentElement;
 // 	while (parElem && parElem !== document.documentElement) {
 // 		parElem = parElem.parentElement;
 // 	}
 // 	return parElem === document.documentElement;
 // }, true);
-frycAPI_expandPrototype(Element, "isDescendantOf", function (elem = document.documentElement) {
-	let parElem = this.parentElement;
-	while (parElem && parElem !== elem) {
-		parElem = parElem.parentElement;
+frycAPI_expand_prototype(Element, "is_descendant_of", function (elem = document.documentElement) {
+	let par_elem = this.parentElement;
+	while (par_elem && par_elem !== elem) {
+		par_elem = par_elem.parentElement;
 	}
-	return parElem === elem;
+	return par_elem === elem;
 });
-frycAPI_expandPrototype(Element, "bgImgUrl", function () {
+frycAPI_expand_prototype(Element, "bg_img_url", function () {
 	return getComputedStyle(this).backgroundImage.match(/url\("?([^)"]+)"?\)/i)?.[1];
 }, true);
 
-frycAPI_expandPrototype(Number, "frycAPI_add", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_add", function (num) {
 	return this + num;
 });
-frycAPI_expandPrototype(Number, "frycAPI_sub", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_sub", function (num) {
 	return this - num;
 });
-frycAPI_expandPrototype(Number, "frycAPI_mult", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_mult", function (num) {
 	return this * num;
 });
-frycAPI_expandPrototype(Number, "frycAPI_div", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_div", function (num) {
 	return this / num;
 });
-frycAPI_expandPrototype(Number, "frycAPI_pow", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_pow", function (num) {
 	return this ** num;
 });
-frycAPI_expandPrototype(Number, "frycAPI_minus", function () {
+frycAPI_expand_prototype(Number, "frycAPI_minus", function () {
 	return -this;
 });
-frycAPI_expandPrototype(Number, "frycAPI_gt", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_gt", function (num) {
 	return this > num;
 });
-frycAPI_expandPrototype(Number, "frycAPI_ge", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_ge", function (num) {
 	return this >= num;
 });
-frycAPI_expandPrototype(Number, "frycAPI_lt", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_lt", function (num) {
 	return this < num;
 });
-frycAPI_expandPrototype(Number, "frycAPI_le", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_le", function (num) {
 	return this <= num;
 });
-frycAPI_expandPrototype(Number, "hex", function (num) {
+frycAPI_expand_prototype(Number, "hex", function (num) {
 	return this.toString(16).padStart(2, "0");
 }, true);
 
@@ -536,10 +536,10 @@ frycAPI_expandPrototype(Number, "hex", function (num) {
 	"toSpliced",
 	"with",
 ].forEach(str => {
-	frycAPI_expandPrototype(NodeList, str, Array.prototype[str]);
-	frycAPI_expandPrototype(HTMLCollection, str, Array.prototype[str]);
+	frycAPI_expand_prototype(NodeList, str, Array.prototype[str]);
+	frycAPI_expand_prototype(HTMLCollection, str, Array.prototype[str]);
 });
-frycAPI_expandPrototype(HTMLCollection, "forEach", Array.prototype.forEach);
+frycAPI_expand_prototype(HTMLCollection, "forEach", Array.prototype.forEach);
 
 /* This might not be usefull
 [
@@ -554,12 +554,12 @@ frycAPI_expandPrototype(HTMLCollection, "forEach", Array.prototype.forEach);
 	const fun = function (...params) {
 		return Array.prototype[str].call(Array.from(this), params);
 	};
-	frycAPI_expandPrototype(NodeList, str, fun);
-	frycAPI_expandPrototype(HTMLCollection, str, fun);
+	frycAPI_expand_prototype(NodeList, str, fun);
+	frycAPI_expand_prototype(HTMLCollection, str, fun);
 });
 */
 
-// frycAPI_expandPrototype(Template, "frycAPI_name", function () {
+// frycAPI_expand_prototype(Template, "frycAPI_name", function () {
 // });
 
-// window.addEventListener("load", () => frycAPI.downloadTxt(JSON.stringify(jsSnippets), "expandPrototypeSnippets.json"));
+// window.addEventListener("load", () => frycAPI.download_txt(JSON.stringify(jsSnippets), "expandPrototypeSnippets.json"));

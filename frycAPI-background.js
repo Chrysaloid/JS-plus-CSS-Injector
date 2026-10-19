@@ -73,13 +73,13 @@ case "removeStyle": return chrome.scripting.removeCSS((await getVar("injectedSty
 */
 // #endregion
 
-function CSSInjection(data = {}, sender) {
+function css_injection(data = {}, sender) {
 	return {
 		css: data.style,
 		target: { tabId: sender.tab.id, allFrames: data.allFrames },
 	};
 }
-function blobToBase64(blob) {
+function blob_to_base64(blob) {
 	const reader = new FileReader();
 	reader.readAsDataURL(blob);
 	return new Promise(resolve => {
@@ -88,31 +88,31 @@ function blobToBase64(blob) {
 		};
 	});
 }
-function onTabClosed(tabId, callback) {
-	const listener = closedTabId => {
-		if (closedTabId !== tabId) return;
+function on_tab_closed(tab_id, callback) {
+	const listener = closed_tab_id => {
+		if (closed_tab_id !== tab_id) return;
 		chrome.tabs.onRemoved.removeListener(listener);
 		callback();
 	};
 
 	chrome.tabs.onRemoved.addListener(listener);
 }
-async function runOnPage(tabId, daFunc, args = []) {
+async function run_on_page(tab_id, da_func, args = []) {
 	const [{ result }] = await chrome.scripting.executeScript({
 		world: "MAIN",
-		target: { tabId },
-		func: daFunc,
+		target: { tabId: tab_id },
+		func: da_func,
 		args: args,
 	});
 	return result;
-} // const out = await runOnPage(sender.tab.id, () => {});
+} // const out = await run_on_page(sender.tab.id, () => {});
 
-let spotifyAuthorizationResolve, spotifyAuthorizationReject;
-const spotifyAuthorization = new Promise((resolve, reject) => {
-	spotifyAuthorizationResolve = resolve;
-	spotifyAuthorizationReject = reject;
+let spotify_authorization_resolve, spotify_authorization_reject;
+const spotify_authorization = new Promise((resolve, reject) => {
+	spotify_authorization_resolve = resolve;
+	spotify_authorization_reject = reject;
 });
-function catchSpotifyRequest(details) {
+function catch_spotify_request(details) {
 	if (details.method !== "GET") return;
 
 	const authorization = details.requestHeaders?.find(
@@ -121,20 +121,20 @@ function catchSpotifyRequest(details) {
 
 	if (!authorization) return;
 
-	chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest);
-	spotifyAuthorizationResolve(authorization);
+	chrome.webRequest.onBeforeSendHeaders.removeListener(catch_spotify_request);
+	spotify_authorization_resolve(authorization);
 }
 
-chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, sendResp) { //* Main background logic
+chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, send_resp) { //* Main background logic
 	// log(name);
 	// log(data);
 
 	(async () => { switch (name) { // eslint-disable-line brace-style
 		case "closeTab": return void chrome.tabs.remove(sender.tab.id);
 		case "downloadPDF": {
-			chrome.downloads.download({ url: data.url }).then(downloadId => {
+			chrome.downloads.download({ url: data.url }).then(download_id => {
 				// log(downloadId);
-				if (data.czyZamknąć) {
+				if (data.czy_zamknąć) {
 					chrome.tabs.remove(sender.tab.id);
 				} else {
 					chrome.tabs.goBack(sender.tab.id);
@@ -145,29 +145,29 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 		case "unblockImagesOnThisTab": return chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [RULE_ID_BASE + sender.tab.id] });
 		case "downloadURL": return void chrome.downloads.download(data);
 		case "downloadNotify": return new Promise(resolve => {
-			let theId;
-			function onChanged({ id, state }) {
-				if (id === theId && state?.current !== "in_progress") { // state.current === "interrupted" || state.current === "complete"
-					chrome.downloads.onChanged.removeListener(onChanged);
+			let the_id;
+			function on_changed({ id, state }) {
+				if (id === the_id && state?.current !== "in_progress") { // state.current === "interrupted" || state.current === "complete"
+					chrome.downloads.onChanged.removeListener(on_changed);
 					resolve();
 				}
 			}
-			chrome.downloads.onChanged.addListener(onChanged);
-			chrome.downloads.download(data).then(id => { theId = id });
+			chrome.downloads.onChanged.addListener(on_changed);
+			chrome.downloads.download(data).then(id => { the_id = id });
 		});
-		case "getImgAsDataUrl": return fetch(data).then(res => res.blob()).then(async blob => "data:" + blob.type + ";" + (await blobToBase64(blob)));
-		case "injectStyle": return sender.tab ? Promise.all([chrome.scripting.removeCSS(CSSInjection(data, sender)), chrome.scripting.insertCSS(CSSInjection(data, sender))]) : 0; // deduplicating injections
-		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(CSSInjection(data, sender)) : 0;
+		case "getImgAsDataUrl": return fetch(data).then(res => res.blob()).then(async blob => "data:" + blob.type + ";" + (await blob_to_base64(blob)));
+		case "injectStyle": return sender.tab ? Promise.all([chrome.scripting.removeCSS(css_injection(data, sender)), chrome.scripting.insertCSS(css_injection(data, sender))]) : 0; // deduplicating injections
+		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(css_injection(data, sender)) : 0;
 		case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
 			const obj = result[data.UUID];
 			if (obj) {
-				let objChanged = false;
+				let obj_changed = false;
 				for (const [key, value] of Object.entries(data.obj)) {
 					// hasOwnProperty is necessary to catch possibility of defining a new key with value undefined
-					if (obj[key] !== value || !obj.hasOwnProperty(key)) objChanged = true;
+					if (obj[key] !== value || !obj.hasOwnProperty(key)) obj_changed = true;
 					obj[key] = value;
 				}
-				if (objChanged) chrome.storage.sync.set({ [data.UUID]: obj });
+				if (obj_changed) chrome.storage.sync.set({ [data.UUID]: obj });
 			} else {
 				chrome.storage.sync.set({ [data.UUID]: data.obj });
 			}
@@ -175,61 +175,61 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 		case "getStorage": return chrome.storage.sync.get(data.UUID).then(result => {
 			const obj = result[data.UUID];
 			if (obj) {
-				const newObj = {};
+				const new_obj = {};
 				for (const key of data.keys) {
-					newObj[key] = obj[key];
+					new_obj[key] = obj[key];
 				}
-				return newObj;
+				return new_obj;
 			} else {
 				return {};
 			}
 		});
 		case "removeStorage": return chrome.storage.sync.remove(data);
 		case "storageUsed": return chrome.storage.sync.getBytesInUse(null);
-		case "storageUsedPerc": return chrome.storage.sync.getBytesInUse(null).then(bytesInUse => {
-			return (bytesInUse / chrome.storage.sync.QUOTA_BYTES * 100).toFixed(3) + " %";
+		case "storageUsedPerc": return chrome.storage.sync.getBytesInUse(null).then(bytes_in_use => {
+			return (bytes_in_use / chrome.storage.sync.QUOTA_BYTES * 100).toFixed(3) + " %";
 		});
 		case "catchSpotifyRequest": {
-			chrome.webRequest.onBeforeSendHeaders.addListener(catchSpotifyRequest, { urls: ["https://api.spotify.com/*"], tabId: sender.tab.id }, ["requestHeaders"]);
-			onTabClosed(sender.tab.id, () => {
-				chrome.webRequest.onBeforeSendHeaders.removeListener(catchSpotifyRequest);
-				spotifyAuthorizationReject();
+			chrome.webRequest.onBeforeSendHeaders.addListener(catch_spotify_request, { urls: ["https://api.spotify.com/*"], tabId: sender.tab.id }, ["requestHeaders"]);
+			on_tab_closed(sender.tab.id, () => {
+				chrome.webRequest.onBeforeSendHeaders.removeListener(catch_spotify_request);
+				spotify_authorization_reject();
 			});
 			return;
 		};
-		case "getSpotifyAuthorization": return spotifyAuthorization;
-		case "connectCdpBridge": return connectBridge();
+		case "getSpotifyAuthorization": return spotify_authorization;
+		case "connectCdpBridge": return connect_bridge();
 		case "test": {
 			log(data);
 			return data;
 		};
 		default: throw new Error(`There is no event with name "${name}". Received data: ${data}`);
-	}})().then(dataOut => { // eslint-disable-line brace-style
-		sendResp({ error: false, data: dataOut });
+	}})().then(data_out => { // eslint-disable-line brace-style
+		send_resp({ error: false, data: data_out });
 	}).catch(err => {
-		sendResp({ error: true, errObj: { message: err.message, stack: err.stack } });
+		send_resp({ error: true, err_obj: { message: err.message, stack: err.stack } });
 	});
-	return true; // Necessary if we want to send a response using sendResp
+	return true; // Necessary if we want to send a response using send_resp
 });
 
 // #region //* PDF handling
-function findHeader(headers, headerStr) {
-	return headers.find(header => header.name.toLowerCase() === headerStr);
+function find_header(headers, header_str) {
+	return headers.find(header => header.name.toLowerCase() === header_str);
 }
 chrome.webRequest.onHeadersReceived.addListener(details => {
 	// This method breaks when server marks quickly repeated requests as a bot behavior
 	if (details.type !== "main_frame") return; // only intercept PDFs that will be view as an entire page
-	if (!findHeader(details.responseHeaders, "content-type")?.value.toLowerCase().includes("application/pdf")) return; // request is not for PDF
-	if (findHeader(details.responseHeaders, "content-disposition")?.value.toLowerCase().includes("attachment")) return; // requested PDF will be downloaded so don't download it again
+	if (!find_header(details.responseHeaders, "content-type")?.value.toLowerCase().includes("application/pdf")) return; // request is not for PDF
+	if (find_header(details.responseHeaders, "content-disposition")?.value.toLowerCase().includes("attachment")) return; // requested PDF will be downloaded so don't download it again
 	// log(details);
 	chrome.downloads.download({ url: details.url, conflictAction: "overwrite" });
-	chrome.tabs.onUpdated.addListener(function tabsOnUpdated(tabId, changeInfo, tab) { // addlistener to close the tab or go back
+	chrome.tabs.onUpdated.addListener(function tabs_on_updated(tab_id, change_info, tab) { // addlistener to close the tab or go back
 		// log(changeInfo);
-		if (changeInfo.status === "loading") {
-			chrome.tabs.goBack(tabId).then(null, () => { // if going back is not possible the promise gets rejected and that means that the PDF was opened in new tab so close the tab
-				chrome.tabs.remove(tabId);
+		if (change_info.status === "loading") {
+			chrome.tabs.goBack(tab_id).then(null, () => { // if going back is not possible the promise gets rejected and that means that the PDF was opened in new tab so close the tab
+				chrome.tabs.remove(tab_id);
 			});
-			chrome.tabs.onUpdated.removeListener(tabsOnUpdated);
+			chrome.tabs.onUpdated.removeListener(tabs_on_updated);
 		}
 	});
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);

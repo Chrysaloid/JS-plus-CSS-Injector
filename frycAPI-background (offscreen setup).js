@@ -3,15 +3,15 @@
 const log = console.log;
 
 let creating; // A global promise to avoid concurrency issues
-async function setupOffscreenDocument(path) {
+async function setup_offscreen_document(path) {
 	// Check all windows controlled by the service worker to see if one of them is the offscreen document with the given path
-	const offscreenUrl = chrome.runtime.getURL(path);
-	const existingContexts = await chrome.runtime.getContexts({
+	const offscreen_url = chrome.runtime.getURL(path);
+	const existing_contexts = await chrome.runtime.getContexts({
 		contextTypes: ["OFFSCREEN_DOCUMENT"],
-		documentUrls: [offscreenUrl],
+		documentUrls: [offscreen_url],
 	});
 
-	if (existingContexts.length) return; // OK. Document exist
+	if (existing_contexts.length) return; // OK. Document exist
 
 	// Create offscreen document
 	if (creating) {
@@ -26,4 +26,4 @@ async function setupOffscreenDocument(path) {
 		creating = null; // eslint-disable-line require-atomic-updates
 	}
 }
-setupOffscreenDocument("Offscreen.html");
+setup_offscreen_document("Offscreen.html");
