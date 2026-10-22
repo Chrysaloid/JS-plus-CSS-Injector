@@ -3,3 +3,4 @@ frycAPI - attempt to fix IFs.js
 resources/e621.json
 resources/Spotify-API*.js
 **/*.lnk
+claude_bridge_secret.txt

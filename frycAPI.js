@@ -2216,9 +2216,12 @@ var frycAPI = { // eslint-disable-line no-var
 	unblock_images_on_this_tab() {
 		return frycAPI.send_event_to_background("unblockImagesOnThisTab");
 	}, // await frycAPI.unblock_images_on_this_tab();
-	connect_claude_bridge() { // Connects the extension to chrome_bridge.py, so Claude can inspect pages. Rejects when the server is not running
+	connect_claude_bridge() { // Connects the extension to chrome_bridge.py, so Claude can inspect pages. Rejects when the server is not running or refuses the secret
 		return frycAPI.send_event_to_background("connectCdpBridge");
 	}, // await frycAPI.connect_claude_bridge();
+	toggle_claude_bridge() { // Like connect_claude_bridge, but when already connected disconnects instead and detaches every tab
+		return frycAPI.send_event_to_background("toggleCdpBridge");
+	}, // await frycAPI.toggle_claude_bridge();
 	get_avatar_replacement_css_on_github(user_id, image_url) {
 		return /*css*/`
 			img:is([alt="Avatar for ${user_id}"],[alt="@${user_id}"],[alt="${user_id}"],[alt="View ${user_id}'s full-sized avatar"]),
@@ -2507,7 +2510,7 @@ if (1) { //* Global functions
 			(name = "Connect claude bridge", type = frycAPI_Normal) => {
 				const f = new type({ name });
 				f.callback = async function (obj) {
-					f.name = await frycAPI.connect_claude_bridge();
+					f.name = await frycAPI.toggle_claude_bridge(); // A second click disconnects
 				};
 				return f;
 			},

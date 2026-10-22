@@ -1,11 +1,13 @@
 "use strict";
 //* CDP bridge - lets Claude Workbench\chrome_bridge_client.py drive this browser through chrome.debugger.
 //* Imported by frycAPI-background.js, so `log` is already defined. Needs the "debugger" permission.
-//* Connects only when frycAPI.connect_claude_bridge() asks, never by itself.
+//* Connects only when frycAPI.connect_claude_bridge() or frycAPI.toggle_claude_bridge() asks, never by itself,
+//* sending the secret from claude_bridge_secret.txt (gitignored), without which chrome_bridge.py refuses it.
 //* The module docstring of chrome_bridge_client.py is the documentation.
 
-const CDP_BRIDGE_URL     = "ws://127.0.0.1:9333/ext?app=chrome"; // chrome_bridge.py keys connections by app; manual_chrome_bridge.js brings the others
-const CDP_VERSION        = "1.3";
+const CDP_BRIDGE_URL         = "ws://127.0.0.1:9333/ext?app=chrome"; // chrome_bridge.py keys connections by app; manual_chrome_bridge.js brings the others
+const CDP_BRIDGE_SECRET_FILE = "claude_bridge_secret.txt"; // In this extension's folder, read at every connect; chrome_bridge.py reads the same file
+const CDP_VERSION            = "1.3";
 const CDP_EVENT_MAX_SIZE = 65536; // Characters of a forwarded event's params before it is replaced by a note
 
 let bridge_socket = null;
@@ -179,30 +181,15 @@ async function handle_bridge_command({ command, ...data }) {
 }
 let bridge_connecting = null; // The promise of an attempt in flight, so a double trigger shares it
 
-function connect_bridge() { // Resolves to a status string, rejects when the server cannot be reached
-	if (bridge_socket?.readyState === WebSocket.OPEN) return Promise.resolve("already connected to " + CDP_BRIDGE_URL);
-	if (bridge_connecting) return bridge_connecting;
-
-	const socket = new WebSocket(CDP_BRIDGE_URL);
+async function read_bridge_secret() {
+	const resp = await fetch(chrome.runtime.getURL(CDP_BRIDGE_SECRET_FILE), { cache: "no-store" }).catch(() => null);
+	const secret = resp?.ok ? (await resp.text()).trim() : "";
+	if (!secret) throw new Error(`${CDP_BRIDGE_SECRET_FILE} is missing or empty in the extension's folder - chrome_bridge.py refuses the connection without it`);
+	return secret;
+}
+async function open_bridge_socket() {
+	const socket = new WebSocket(`${CDP_BRIDGE_URL}&secret=${encodeURIComponent(await read_bridge_secret())}`);
 	bridge_socket = socket;
-	bridge_connecting = new Promise((resolve, reject) => {
-		socket.onopen = () => {
-			bridge_connecting = null;
-			bridge_send({ type: "hello", userAgent: navigator.userAgent, via: "JS + CSS Injector extension" });
-			log("CDP bridge connected to " + CDP_BRIDGE_URL);
-			resolve("connected to " + CDP_BRIDGE_URL);
-		};
-		socket.onerror = () => {}; // onclose follows and does the reporting
-		socket.onclose = () => {
-			if (bridge_socket === socket) bridge_socket = null;
-			if (bridge_connecting) {
-				bridge_connecting = null;
-				reject(new Error(`cannot reach the bridge server at ${CDP_BRIDGE_URL} - is chrome_bridge.py running?`));
-			} else {
-				log("CDP bridge disconnected");
-			}
-		};
-	});
 	socket.onmessage = async event => {
 		let message;
 		try {
@@ -218,5 +205,37 @@ function connect_bridge() { // Resolves to a status string, rejects when the ser
 			bridge_send({ id: message.id, ok: false, error: err.message, stack: err.stack });
 		}
 	};
+	await new Promise((resolve, reject) => {
+		let opened = false;
+		socket.onopen = () => {
+			opened = true;
+			resolve();
+		};
+		socket.onerror = () => {}; // onclose follows and does the reporting
+		socket.onclose = () => {
+			if (bridge_socket === socket) bridge_socket = null;
+			if (opened) return void log("CDP bridge disconnected");
+			// A refused secret is a 403 before the upgrade, which a WebSocket cannot tell apart from no server at all
+			reject(new Error(`the bridge server at ${CDP_BRIDGE_URL} did not accept the connection - is chrome_bridge.py running? If it is, its tab says why it refused`));
+		};
+	});
+	bridge_send({ type: "hello", userAgent: navigator.userAgent, via: "JS + CSS Injector extension" });
+	log("CDP bridge connected to " + CDP_BRIDGE_URL);
+	return "connected to " + CDP_BRIDGE_URL;
+}
+function connect_bridge() { // Resolves to a status string, rejects when there is no secret or the server does not accept the connection
+	if (bridge_socket?.readyState === WebSocket.OPEN) return Promise.resolve("already connected to " + CDP_BRIDGE_URL);
+	bridge_connecting ??= open_bridge_socket().finally(() => { bridge_connecting = null; });
 	return bridge_connecting;
+}
+async function disconnect_bridge() { // Resolves to a status string. Detaches every tab too, so Claude is cut off and no debugging infobar is left
+	const socket = bridge_socket;
+	bridge_socket = null;
+	socket?.close();
+	for (const tab_id of attached_tabs) await chrome.debugger.detach({ tabId: tab_id }).catch(() => {});
+	attached_tabs.clear();
+	return "disconnected from " + CDP_BRIDGE_URL;
+}
+function toggle_bridge() { // The "Connect claude bridge" menu entry: a click while connected disconnects
+	return bridge_socket?.readyState === WebSocket.OPEN ? disconnect_bridge() : connect_bridge();
 }
