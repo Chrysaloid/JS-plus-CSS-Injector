@@ -2344,9 +2344,9 @@ frycAPI.date_opts_no_time = { print_date: frycAPI.get_date_formatter({ year: "nu
 try {
 	if (!frycAPI_host("teams.microsoft.com", "vscode.dev") && window.trustedTypes?.createPolicy) {
 		frycAPI.escape_html_policy = trustedTypes.createPolicy("safeInnerHtml", {
-			create_html: str => str,
+			createHTML: str => str,
 		});
-		frycAPI.create_html = str => frycAPI.escape_html_policy.create_html(str);
+		frycAPI.create_html = str => frycAPI.escape_html_policy.createHTML(str);
 	} else {
 		throw new Error("Wystąpił błąd");
 	}
@@ -8268,10 +8268,14 @@ else if (1 && frycAPI_host("translate.google.com", "translate.google.pl")) {
 			kbd, kbd * {
 				font-family: "Source Code Fryc", monospace !important;
 			}
-		`, { elevated: true, allFrames: true, inject_end_condition: frycAPI.path.startsWith("/docs") ? () => {
+		`, {
+			elevated: true,
+			allFrames: true,
+			inject_end_condition: frycAPI.path.startsWith("/docs") ? () => {
 			// return frycAPI.iframe_has_real_document(frycAPI.q_sel(".lyt_frame")); // with this style breaks on first link click so we have to keep it disabled to constantly apply the style
 			// loguj("Test");
-		} : null });
+			} : null,
+		});
 
 		frycAPI.on_load_setter(() => {
 			// const t1 = performance.now();
