@@ -5702,11 +5702,11 @@ else if (1 && frycAPI_host("jsongrid.com")) {
 		frycAPI.create_mut_obs(() => {
 			// loguj("MutObs");
 			frycAPI.set_default_date(`div:has(span[email="noreply-apps-scripts-notifications@google.com"]:not([translate])) :is(table ~ table, table:only-of-type) tr > td:is(:first-child, :last-child)`, opts);
-			// Links set inline to `color: rgb(3, 15, 173) !important` - no stylesheet can beat an inline !important (Dark Reader's own rule loses too, contrast 1.25), so rewrite the inline value
-			frycAPI.for_each(`div.adn:has(span[email="newsletter@portal.xyz.pl"]:not([translate])) div.a3s a[style]`, a => {
-				if (a.style.color === "rgb(3, 15, 173)" && a.style.getPropertyPriority("color") === "important") {
-					a.style.setProperty("color", "rgb(71 84 255)", "important");
-				}
+			// Links set inline to e.g. `color: rgb(3, 15, 173) !important` - no stylesheet can beat an inline !important (Dark Reader's own rule loses too, contrast 1.25), so rewrite the inline value of every link still dark after Dark Reader (whose observer runs before this one)
+			const is_dark = (r, g, b) => (r + g + b) / (255 * 3) < 0.5;
+			frycAPI.for_each(`div.adn:has(span[email="newsletter@portal.xyz.pl"]:not([translate])) div.a3s a`, a => {
+				const [r, g, b] = getComputedStyle(a).color.match(/[\d.]+/g).map(Number);
+				if (is_dark(r, g, b)) a.style.setProperty("color", "rgb(71 84 255)", "important");
 			});
 		});
 	});
