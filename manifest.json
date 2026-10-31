@@ -57,6 +57,12 @@
 				"id": "upgrade-http-to-https",
 				"enabled": false,
 				"path": "upgrade-http-to-https.json"
+			},
+			{
+				"//": "YouTube's Connection-Allowlist-Report-Only header logs every chrome-extension:// load (frycAPI.js included) as 'Unsafe attempt to load URL ... Domains, protocols and ports must match.' and reports it to YouTube; the load itself goes through",
+				"id": "strip-connection-allowlist",
+				"enabled": true,
+				"path": "Strip-connection-allowlist.json"
 			}
 		]
 	},

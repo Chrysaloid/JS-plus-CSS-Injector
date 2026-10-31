@@ -1,0 +1,19 @@
+[
+	{
+		"id": 1,
+		"priority": 1,
+		"condition": {
+			"resourceTypes": ["main_frame", "sub_frame"],
+			"requestDomains": ["youtube.com"]
+		},
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "remove",
+					"header": "connection-allowlist-report-only"
+				}
+			]
+		}
+	}
+]
