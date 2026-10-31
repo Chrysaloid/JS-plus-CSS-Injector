@@ -88,6 +88,44 @@ function blob_to_base64(blob) {
 		};
 	});
 }
+//* Public addresses only, for fetches made on behalf of a web page
+// Every website can message this worker (externally_connectable <all_urls>, and frycAPI.id is a
+// page global), and a fetch from here ignores CORS and Local Network Access and carries cookies.
+// Unchecked, getImgAsDataUrl let any site read http://127.0.0.1/ - mc-http-server, all of G:\ -
+// or the router, or the user's logged-in mail. A host NAME that resolves to a private address
+// cannot be caught here; mc-http-server refuses foreign Host headers for that reason.
+function is_local_ipv4([a, b]) {
+	return a === 0 || a === 10 || a === 127 || a >= 224
+		|| a === 25                                // Hamachi
+		|| (a === 100 && b >= 64 && b <= 127)      // CGNAT
+		|| (a === 169 && b === 254)
+		|| (a === 172 && b >= 16 && b <= 31)
+		|| (a === 192 && (b === 168 || b === 0))
+		|| (a === 198 && (b === 18 || b === 19));
+}
+function is_local_host(hostname) {
+	const host = hostname.toLowerCase().replace(/\.$/, "");
+	if (host.startsWith("[")) { // URL serializes every IPv6 literal fully compressed, IPv4-mapped ones in hex
+		const first = parseInt(host.slice(1).split(":")[0] || "0", 16);
+		return !(first >= 0x2000 && first <= 0x3fff) || first === 0x2002; // only global unicast, minus 6to4
+	}
+	const v4 = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(host); // URL has already turned 127.1, 0x7f.1, 2130706433 into this
+	if (v4) return is_local_ipv4(v4.slice(1).map(Number));
+	return !host.includes(".") || /(^|\.)(localhost|local|lan|home|internal|intranet|corp|home\.arpa)$/.test(host);
+}
+function assert_public_url(url) {
+	if (!["http:", "https:"].includes(url.protocol) || is_local_host(url.hostname)) {
+		throw new Error(`Refused to fetch a non-public address: ${url.href}`);
+	}
+}
+async function fetch_public_for_page(url_str, sender) {
+	const url = new URL(url_str);
+	assert_public_url(url);
+	// Cookies only for the page's own origin, which the page could fetch with them anyway
+	const res = await fetch(url, { credentials: url.origin === sender.origin ? "include" : "omit" });
+	assert_public_url(new URL(res.url)); // a public address may redirect into the LAN; the request went, the bytes stay here
+	return res;
+}
 function on_tab_closed(tab_id, callback) {
 	const listener = closed_tab_id => {
 		if (closed_tab_id !== tab_id) return;
@@ -155,7 +193,7 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 			chrome.downloads.onChanged.addListener(on_changed);
 			chrome.downloads.download(data).then(id => { the_id = id });
 		});
-		case "getImgAsDataUrl": return fetch(data).then(res => res.blob()).then(async blob => "data:" + blob.type + ";" + (await blob_to_base64(blob)));
+		case "getImgAsDataUrl": return fetch_public_for_page(data, sender).then(res => res.blob()).then(blob_to_base64); // blob_to_base64 already returns the whole data: URL
 		case "injectStyle": return sender.tab ? Promise.all([chrome.scripting.removeCSS(css_injection(data, sender)), chrome.scripting.insertCSS(css_injection(data, sender))]) : 0; // deduplicating injections
 		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(css_injection(data, sender)) : 0;
 		case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
