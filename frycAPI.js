@@ -465,8 +465,8 @@ class frycAPI_Mutation_observer extends MutationObserver {
 }
 class frycAPI_Cache { // A folder on G:\ named in CACHES in frycAPI-background.js, read through the background from mc-http-server
 	// The background decides which sites may read which cache, so a page script - which shares this world - can read
-	// no more than frycAPI can. Files arrive as bytes, not URLs: no site's CSP admits http://127.0.0.1, and e621's
-	// admits neither blob: nor, for media, data:
+	// no more than frycAPI can. Files arrive as bytes, not URLs: no site's CSP admits http://127.0.0.1. GitHub's
+	// admits data: and blob:; e621's neither for video, so Strip-e621-post-CSP.json removes it on post pages
 	name;
 	folder = null; // "G:/.../", known once the background has answered for this cache
 	constructor(name) {
@@ -502,6 +502,9 @@ class frycAPI_Cache { // A folder on G:\ named in CACHES in frycAPI-background.j
 	}
 	async get_data_url(file) {
 		return frycAPI.blob_to_base64(await this.read_blob(file)); // eslint-disable-line no-use-before-define
+	}
+	async get_blob_url(file) { // Lighter than a data: URL for a big file, but only where the site's CSP admits blob:
+		return URL.createObjectURL(await this.read_blob(file));
 	}
 }
 function loguj(...tekst) {
@@ -11620,11 +11623,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			}
 			frycAPI_Cache.find(pairs).then(async hit => {
 				if (!hit) return;
-				if (!hit.type.startsWith("image/")) { // e621's CSP media-src admits neither blob: nor data:
-					console.info(`Cached copy not shown, e621's CSP blocks local video: ${hit.cache.get_folder()}${hit.file}`);
-					return;
-				}
-				const url = await hit.cache.get_data_url(hit.file);
+				const url = await hit.cache.get_blob_url(hit.file); // post pages have no CSP, see Strip-e621-post-CSP.json
+				console.info(`Showing the cached copy: ${hit.cache.get_folder()}${hit.file}`);
 				const t2 = performance.now(); frycAPI.perf(t1, t2);
 				frycAPI.create_mut_obs(() => {
 					const image = document.getElementById("image");
@@ -11632,7 +11632,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					image.removeAttribute("poster");
 					image.src = url;
 					frycAPI.create_mut_obs(() => {
-						if (image.src !== url) image.src = url; // setting a multi-MB data: URL again would only fire this observer again
+						if (image.src !== url) image.src = url; // setting it again would only fire this observer again
 					}, { elem: image, options: { childList: false, subtree: false, attributes: true, attributeFilter: ["src"] } });
 					document.title = "Cached - " + document.title;
 					return true;

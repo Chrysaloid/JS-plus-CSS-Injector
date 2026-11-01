@@ -63,6 +63,12 @@
 				"id": "strip-connection-allowlist",
 				"enabled": true,
 				"path": "Strip-connection-allowlist.json"
+			},
+			{
+				"//": "e621's CSP admits neither blob: nor data: for video, so frycAPI_Cache could not show a cached one. Editing it instead is impossible: DNR can only set a fixed value, and its script-src carries a fresh nonce per response. So it goes, on single post pages only",
+				"id": "strip-e621-post-csp",
+				"enabled": true,
+				"path": "Strip-e621-post-CSP.json"
 			}
 		]
 	},

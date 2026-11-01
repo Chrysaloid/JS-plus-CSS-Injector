@@ -1,0 +1,19 @@
+[
+	{
+		"id": 1,
+		"priority": 1,
+		"condition": {
+			"resourceTypes": ["main_frame"],
+			"regexFilter": "^https://(e621|e926)\\.net/posts/\\d+([?#].*)?$"
+		},
+		"action": {
+			"type": "modifyHeaders",
+			"responseHeaders": [
+				{
+					"operation": "remove",
+					"header": "content-security-policy"
+				}
+			]
+		}
+	}
+]
