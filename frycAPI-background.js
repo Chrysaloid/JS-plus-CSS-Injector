@@ -224,8 +224,9 @@ function assert_e621_sender(sender) {
 async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder: "G:/.../", size } of the best copy, or null
 	assert_e621_sender(sender);
 	if (typeof md5 !== "string" || !(/^[0-9a-f]{32}$/).test(md5)) throw new Error(`Not an MD5: ${JSON.stringify(md5)}`);
+	const file_regex = e621_file_regex(md5);
 	const query = new URLSearchParams({
-		search: `G:\\ regex:"${e621_file_regex(md5)}"`,
+		search: `G:\\ regex:"${file_regex}"`,
 		json: 1,
 		path_column: 1,
 		size_column: 1,
@@ -234,7 +235,7 @@ async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder
 	const res = await fetch(EVERYTHING_SERVER + "?" + query, { credentials: "omit" }).catch(() => {
 		throw new Error(`Everything's HTTP server is not answering at ${EVERYTHING_SERVER}`);
 	});
-	const file = new RegExp(e621_file_regex(md5));
+	const file = new RegExp(file_regex);
 	const candidates = (await res.json()).results
 	.filter(item => item.type === "file" && item.path.startsWith("G:\\") && file.test(item.name))
 	.map(item => {
@@ -242,7 +243,13 @@ async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder
 		const in_edit = item.path.toLowerCase().split("\\").includes("edit");
 		return { item, rank: [timestamp ? 1 : 0, in_edit ? 1 : 0, E621_SUFFIXES.indexOf(suffix), E621_EXTENSIONS.indexOf(ext)] };
 	});
-	const by_rank = (a, b) => a.rank.reduce((diff, value, i) => diff || value - b.rank[i], 0) || a.item.path.localeCompare(b.item.path);
+	const by_rank = (a, b) => {
+		for (let i = 0; i < a.rank.length; i++) {
+			const diff = a.rank[i] - b.rank[i];
+			if (diff) return diff;
+		}
+		return a.item.path.localeCompare(b.item.path);
+	};
 	const best = candidates.sort(by_rank)[0]?.item;
 	if (!best) return null;
 	const folder = best.path.replaceAll("\\", "/") + "/";
