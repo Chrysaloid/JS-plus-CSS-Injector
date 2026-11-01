@@ -69,6 +69,12 @@
 				"id": "strip-e621-post-csp",
 				"enabled": true,
 				"path": "Strip-e621-post-CSP.json"
+			},
+			{
+				"//": "mc-http-server serves a downloaded post (/api/md5/<md5>) only to e621 and e926 pages, which it tells by the Referer - and e621's Referrer-Policy: same-origin sends none. Chrome matches initiatorDomains by the real initiator, so these put back exactly the origin a page cannot fake",
+				"id": "e621-md5-referer",
+				"enabled": true,
+				"path": "E621-md5-referer.json"
 			}
 		]
 	},

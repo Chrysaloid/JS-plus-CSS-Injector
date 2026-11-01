@@ -1,0 +1,40 @@
+[
+	{
+		"id": 1,
+		"priority": 1,
+		"condition": {
+			"urlFilter": "|http://127.0.0.1/api/md5/",
+			"initiatorDomains": ["e621.net"],
+			"resourceTypes": ["image", "media"]
+		},
+		"action": {
+			"type": "modifyHeaders",
+			"requestHeaders": [
+				{
+					"operation": "set",
+					"header": "referer",
+					"value": "https://e621.net/"
+				}
+			]
+		}
+	},
+	{
+		"id": 2,
+		"priority": 1,
+		"condition": {
+			"urlFilter": "|http://127.0.0.1/api/md5/",
+			"initiatorDomains": ["e926.net"],
+			"resourceTypes": ["image", "media"]
+		},
+		"action": {
+			"type": "modifyHeaders",
+			"requestHeaders": [
+				{
+					"operation": "set",
+					"header": "referer",
+					"value": "https://e926.net/"
+				}
+			]
+		}
+	}
+]

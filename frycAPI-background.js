@@ -196,27 +196,13 @@ function cache_read({ cache, file, start = 0 }, sender) {
 	return read_chunk(cache_file_url({ cache, file }, sender), start);
 }
 
-//* e621 and e926: their downloaded posts, found by MD5 anywhere on G:\ through Everything
-// Everything's HTTP server (voidtools; localhost:9191, no login, file download off, its own log off) answers
-// "where is this post's file" in one query, where frycAPI_Cache took 308 HEAD requests per post page - one per
-// suffix x folder x extension - each a line in mc-http-server's logs. The file itself the page loads from a
-// one-time mc-http-server URL (e621Grant): measured 2026-11-01, a 27 MB PNG was ready in ~150 ms against ~650 ms
-// as base64 chunks through messages, and a 54 MB video showed its first frame in 26 ms against ~1.1 s. The page
-// sends only the MD5, so it can name no file of its own choosing; it gets back the path of the post's copy.
-//
-// What counts as a post's copy, best first - checked against every name on G:\ holding 32 hex digits, 2026-11-01:
-//   1. "<md5><suffix>.<ext>", by E621_SUFFIXES, then E621_EXTENSIONS; a copy under a folder named Edit after all
-//      others - those hold my edits under the original name.
-//   2. Only when there is no 1: "<number> <md5>.<ext>", the readchan app's "<post time in µs> <original name>" -
-//      usually the very file I downloaded through readchan, whose original name was the post's MD5.
-// A bare MD5 anywhere in a name would also find my edits ("<md5> edit.png", "<md5>-cut.png") and ~49 000 caches.
-const EVERYTHING_SERVER = "http://127.0.0.1:9191/";
+//* e621 and e926: their downloaded posts, found by MD5 anywhere on G:\ by mc-http-server
+// A post page loads its downloaded copy straight from mc-http-server's /api/md5/<md5>, which finds it through
+// Everything and streams it, for e621 and e926 pages only - see there for which copies count. This asks the
+// same route with HEAD, for the Download button, which shows the folder of the copy. Measured 2026-11-01 with
+// the file loaded from mc-http-server directly: a 27 MB PNG was ready in ~150 ms against ~650 ms as base64
+// chunks through messages, and a 54 MB video showed its first frame in 26 ms against ~1.1 s.
 const E621_SITES = ["e621.net", "e926.net"];
-const E621_SUFFIXES = ["", " Just Interesting", " Alternate", " doc1"];              // in order of preference
-const E621_EXTENSIONS = ["png", "jpg", "webm", "mp4", "jpeg", "gif", "webp"];         // likewise, after the suffix
-function e621_file_regex(md5) { // groups: timestamp prefix, md5, suffix, extension
-	return `^([0-9]+ )?(${md5})(${E621_SUFFIXES.join("|")})\\.(${E621_EXTENSIONS.join("|")})$`;
-}
 function assert_e621_sender(sender) {
 	const host = sender.origin ? new URL(sender.origin).hostname : null;
 	if (!E621_SITES.includes(host)) throw new Error(`Downloaded e621 posts are not readable from ${host}`);
@@ -224,49 +210,13 @@ function assert_e621_sender(sender) {
 async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder: "G:/.../", size } of the best copy, or null
 	assert_e621_sender(sender);
 	if (typeof md5 !== "string" || !(/^[0-9a-f]{32}$/).test(md5)) throw new Error(`Not an MD5: ${JSON.stringify(md5)}`);
-	const file_regex = e621_file_regex(md5);
-	const query = new URLSearchParams({
-		search: `G:\\ regex:"${file_regex}"`,
-		json: 1,
-		path_column: 1,
-		size_column: 1,
-		count: 100,
+	const res = await fetch(CACHE_SERVER + "api/md5/" + md5, { method: "HEAD", credentials: "omit", cache: "no-store" }).catch(() => {
+		throw new Error(`mc-http-server is not answering at ${CACHE_SERVER}`);
 	});
-	const res = await fetch(EVERYTHING_SERVER + "?" + query, { credentials: "omit" }).catch(() => {
-		throw new Error(`Everything's HTTP server is not answering at ${EVERYTHING_SERVER}`);
-	});
-	const file = new RegExp(file_regex);
-	const candidates = (await res.json()).results
-	.filter(item => item.type === "file" && item.path.startsWith("G:\\") && file.test(item.name))
-	.map(item => {
-		const [, timestamp, , suffix, ext] = file.exec(item.name);
-		const in_edit = item.path.toLowerCase().split("\\").includes("edit");
-		return { item, rank: [timestamp ? 1 : 0, in_edit ? 1 : 0, E621_SUFFIXES.indexOf(suffix), E621_EXTENSIONS.indexOf(ext)] };
-	});
-	const by_rank = (a, b) => {
-		for (let i = 0; i < a.rank.length; i++) {
-			const diff = a.rank[i] - b.rank[i];
-			if (diff) return diff;
-		}
-		return a.item.path.localeCompare(b.item.path);
-	};
-	const best = candidates.sort(by_rank)[0]?.item;
-	if (!best) return null;
-	const folder = best.path.replaceAll("\\", "/") + "/";
-	return { path: folder + best.name, folder, size: Number(best.size) };
-}
-async function e621_grant(md5, sender) { // -> e621_find's answer plus `url`, a one-time http://127.0.0.1/api/granted/... URL the page loads directly, so a video streams and seeks; or null
-	const hit = await e621_find(md5, sender);
-	if (!hit) return null;
-	const res = await fetch(CACHE_SERVER + "api/grant", {
-		method: "POST",
-		credentials: "omit",
-		cache: "no-store",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ path: hit.path }),
-	});
-	if (!res.ok) throw new Error(`mc-http-server refused a grant for ${hit.path}: ${res.status} ${(await res.text()).trim()}`);
-	return { ...hit, url: new URL((await res.json()).url, CACHE_SERVER).href };
+	if (res.status === 404) return null;
+	if (!res.ok) throw new Error(`mc-http-server answered ${res.status} ${res.statusText} for the post ${md5}`);
+	const file_path = decodeURIComponent(res.headers.get("X-Local-Path")).replaceAll("\\", "/");
+	return { path: file_path, folder: file_path.replace(/[^/]*$/, ""), size: Number(res.headers.get("Content-Length")) };
 }
 function on_tab_closed(tab_id, callback) {
 	const listener = closed_tab_id => {
@@ -339,7 +289,6 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 		case "cacheFind": return cache_find(data, sender);
 		case "cacheRead": return cache_read(data, sender);
 		case "e621Find": return e621_find(data, sender);
-		case "e621Grant": return e621_grant(data, sender);
 		case "injectStyle": return sender.tab ? Promise.all([chrome.scripting.removeCSS(css_injection(data, sender)), chrome.scripting.insertCSS(css_injection(data, sender))]) : 0; // deduplicating injections
 		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(css_injection(data, sender)) : 0;
 		case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
@@ -424,8 +373,8 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 // The page's HTML points <img>/<video> at static1 before frycAPI can know there is a local copy, so a tab opening
 // a post blocks static1's full-size files from the start - originals and samples (/data/[sample/]xx/yy/<md5>...),
 // not the /data/preview/ or /data/crop/ thumbnails of other posts ("p" and "r" are no hex digits) - and frycAPI
-// lifts the block (unblockImagesOnThisTab) as soon as Everything says there is no local copy, or anything on the
-// way fails. Any other e621 page in the tab lifts it too. No [0-9a-f]{32} for the MD5 and case-sensitive: with
+// lifts the block (unblockImagesOnThisTab) as soon as the local copy from mc-http-server fails to load, for want
+// of one or for anything else. Any other e621 page in the tab lifts it too. No [0-9a-f]{32} for the MD5 and case-sensitive: with
 // both, Chrome skipped the rule as over the 2 KB a compiled DNR regex may take.
 const E621_POST_PAGE = /^\/posts\/\d+\/?$/;
 const E621_FULL_SIZE = "^https://static1\\.e(621|926)\\.net/data/(sample/)?[0-9a-f][0-9a-f]/[0-9a-f][0-9a-f]/";

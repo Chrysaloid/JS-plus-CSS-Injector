@@ -466,7 +466,7 @@ class frycAPI_Mutation_observer extends MutationObserver {
 class frycAPI_Cache { // A folder on G:\ named in CACHES in frycAPI-background.js, read through the background from mc-http-server
 	// The background decides which sites may read which cache, so a page script - which shares this world - can read
 	// no more than frycAPI can. Files arrive as bytes, not URLs: no site's CSP admits http://127.0.0.1. e621 and
-	// e926 do not use this - their downloaded posts are found by Everything, see e621_find in frycAPI-background.js
+	// e926 do not use this - their downloaded posts come from mc-http-server's /api/md5/, see the e621 section
 	name;
 	folder = null; // "G:/.../", known once find() has answered for this cache
 	constructor(name) {
@@ -10839,7 +10839,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	const POOL_TILE_DESC = `section.posts-container article`;
 
 	const path_name = frycAPI.path;
-	// A downloaded copy of a post's file anywhere on G:\, found by Everything (see e621_find in frycAPI-background.js)
+	// A downloaded copy of a post's file anywhere on G:\, found by mc-http-server (see e621_find in frycAPI-background.js)
 	const find_downloaded = md5 => frycAPI.send_event_to_background("e621Find", md5); // -> { path, folder, size } or null
 
 	frycAPI.inject_style_on_load(/*css*/`
@@ -11612,31 +11612,50 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		frycAPI.create_mut_obs(() => {
 			const og_image = document.querySelector(`head meta[property="og:image"]`);
 			if (!og_image) return;
-			const orig_src = og_image.getAttribute("content");
-			const [MD5, ext] = new URL(orig_src).pathname.split("/").pop().split(".");
+			const MD5 = new URL(og_image.getAttribute("content")).pathname.split("/").pop().split(".")[0];
+			// mc-http-server streams the best copy on G:\, or answers 404 - which copies count, and in which order, see
+			// /api/md5/ in mc-http-server.js. It answers only e621 and e926, by the Referer E621-md5-referer.json puts
+			// back, and with no CORS headers, so a page can show the file but not read it. Post pages have no CSP, see
+			// Strip-e621-post-CSP.json
+			const url = `http://127.0.0.1/api/md5/${MD5}`;
 			const t1 = performance.now();
-			// The best copy on G:\ and a one-time http://127.0.0.1 URL to it, or null - which copies count, and in which
-			// order, see e621_find in frycAPI-background.js. Post pages have no CSP, see Strip-e621-post-CSP.json
-			frycAPI.send_event_to_background("e621Grant", MD5).then(async hit => {
-				if (!hit) return show_remote();
-				const url = hit.url;
-				console.info(`Showing the downloaded copy: ${hit.path}`);
-				const t2 = performance.now(); frycAPI.perf(t1, t2);
-				frycAPI.create_mut_obs(() => {
-					const image = document.getElementById("image");
-					if (!image) return;
-					// An image sits in a <picture> whose <source srcset> (static1's webp sample) wins over the <img>'s
-					// src, so those go - again whenever e621 puts them back, e.g. switching between sample and original
-					const holder = image.parentElement;
-					image.removeAttribute("poster");
-					frycAPI.create_mut_obs(() => { // runs at once, then on every change e621 makes
-						if (holder.tagName === "PICTURE") holder.querySelectorAll(":scope > source").forEach(source => source.remove());
-						if (image.getAttribute("src") !== url) image.src = url;
-					}, { elem: holder, options: { childList: true, subtree: true, attributes: true, attributeFilter: ["src", "srcset"] } });
+			frycAPI.create_mut_obs(() => {
+				const image = document.getElementById("image");
+				if (!image) return;
+				// An image sits in a <picture> whose <source srcset> (static1's webp sample) wins over the <img>'s
+				// src, so those go - again whenever e621 puts them back, e.g. switching between sample and original.
+				// e621's own markup is kept for the fallback
+				const holder = image.parentElement;
+				const own = {
+					src: image.getAttribute("src"),
+					poster: image.getAttribute("poster"),
+					sources: holder.tagName === "PICTURE" ? [...holder.querySelectorAll(":scope > source")] : [],
+				};
+				let failed = false;
+				const outcome = new AbortController(); // whichever comes first, load or error, removes both listeners
+				image.addEventListener(image.tagName === "VIDEO" ? "loadeddata" : "load", () => {
+					outcome.abort();
+					const t2 = performance.now(); frycAPI.perf(t1, t2);
 					document.title = "Cached - " + document.title;
-					return true;
-				}, { elem: document.documentElement });
-			}).catch(show_remote); // Everything or mc-http-server not answering: e621's own copy after all
+					find_downloaded(MD5).then(hit => console.info(`Showing the downloaded copy: ${hit?.path}`));
+				}, { signal: outcome.signal });
+				image.addEventListener("error", () => { // no copy (404), mc-http-server or Everything down, Local Network Access denied, ...
+					outcome.abort(); // the fallback's own load is not the local copy's
+					failed = true;
+					if (own.src === null) image.removeAttribute("src");
+					else image.setAttribute("src", own.src);
+					if (own.poster !== null) image.setAttribute("poster", own.poster);
+					holder.prepend(...own.sources);
+					show_remote();
+				}, { signal: outcome.signal });
+				image.removeAttribute("poster");
+				frycAPI.create_mut_obs(() => { // runs at once, then on every change e621 makes
+					if (failed) return true;
+					if (holder.tagName === "PICTURE") holder.querySelectorAll(":scope > source").forEach(source => source.remove());
+					if (image.getAttribute("src") !== url) image.src = url;
+				}, { elem: holder, options: { childList: true, subtree: true, attributes: true, attributeFilter: ["src", "srcset"] } });
+				return true;
+			}, { elem: document.documentElement });
 			return true;
 		}, { elem: document.documentElement });
 	} else if (path_name.startsWith("/posts")) {
