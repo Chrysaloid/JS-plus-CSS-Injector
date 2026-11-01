@@ -11245,9 +11245,11 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			// #endregion
 
 			// #region //* Add download button
-			const file_url = frycAPI.q_sel(`#post-options a[href^="https://static"`).href;
-			const filename = file_url.split("/").pop();
+			const static_link = frycAPI.q_sel(`#post-options a[href^="https://static"`);
 			const edit_button = frycAPI.q_sel(".ptbr-edit");
+			if (!static_link || !edit_button) return; // logged out: no link to the file, and no Edit button to copy
+			const file_url = static_link.href;
+			const filename = file_url.split("/").pop();
 			const fullscreen_button = frycAPI.q_sel(".ptbr-fullscreen");
 			const download_butt = edit_button.cloneNode(1);
 			const real_button = download_butt.children[0];
