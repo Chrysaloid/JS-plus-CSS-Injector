@@ -465,10 +465,10 @@ class frycAPI_Mutation_observer extends MutationObserver {
 }
 class frycAPI_Cache { // A folder on G:\ named in CACHES in frycAPI-background.js, read through the background from mc-http-server
 	// The background decides which sites may read which cache, so a page script - which shares this world - can read
-	// no more than frycAPI can. Files arrive as bytes, not URLs: no site's CSP admits http://127.0.0.1. GitHub's
-	// admits data: and blob:; e621's neither for video, so Strip-e621-post-CSP.json removes it on post pages
+	// no more than frycAPI can. Files arrive as bytes, not URLs: no site's CSP admits http://127.0.0.1. e621 and
+	// e926 do not use this - their downloaded posts are found by Everything, see e621_find in frycAPI-background.js
 	name;
-	folder = null; // "G:/.../", known once the background has answered for this cache
+	folder = null; // "G:/.../", known once find() has answered for this cache
 	constructor(name) {
 		this.name = name;
 	}
@@ -483,19 +483,8 @@ class frycAPI_Cache { // A folder on G:\ named in CACHES in frycAPI-background.j
 	async file_exists(file) {
 		return (await frycAPI_Cache.find([[this, file]])) !== null;
 	}
-	async read_blob(file) { // In chunks, since one message holds at most 64 MiB of JSON
-		const parts = [];
-		let size = Infinity, type = "";
-		for (let start = 0; start < size;) {
-			const chunk = await frycAPI.send_event_to_background("cacheRead", { cache: this.name, file, start }); // eslint-disable-line no-use-before-define
-			({ size, type } = chunk);
-			this.folder = chunk.folder;
-			const bytes = Uint8Array.fromBase64(chunk.data);
-			if (!bytes.length) break;
-			parts.push(bytes);
-			start += bytes.length;
-		}
-		return new Blob(parts, { type });
+	read_blob(file) {
+		return frycAPI.read_local_blob("cacheRead", { cache: this.name, file }); // eslint-disable-line no-use-before-define
 	}
 	async read_text(file) {
 		return (await this.read_blob(file)).text();
@@ -1602,6 +1591,19 @@ var frycAPI = { // eslint-disable-line no-var
 			};
 		});
 	}, // .then(frycAPI.blob_to_base64)
+	async read_local_blob(event_name, data) { // A file the background reads off mc-http-server ("cacheRead", "e621Read"), in chunks, since one message holds at most 64 MiB of JSON
+		const parts = [];
+		let size = Infinity, type = "";
+		for (let start = 0; start < size;) {
+			const chunk = await frycAPI.send_event_to_background(event_name, { ...data, start });
+			({ size, type } = chunk);
+			const bytes = Uint8Array.fromBase64(chunk.data);
+			if (!bytes.length) break;
+			parts.push(bytes);
+			start += bytes.length;
+		}
+		return new Blob(parts, { type });
+	}, // await frycAPI.read_local_blob("cacheRead", { cache: "arts", file: "x.png" })
 	time_12_to_24(str) { // str = "3:32 PM";
 		const data = new Date("May 3 2001 " + str);
 		return `${data.getHours().toString().padStart(2, "0")}:${data.getMinutes().toString().padStart(2, "0")}`;
@@ -10837,20 +10839,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	const POOL_TILE_DESC = `section.posts-container article`;
 
 	const path_name = frycAPI.path;
-	const caches = [
-		new frycAPI_Cache("arts"),
-		new frycAPI_Cache("arts_mine"),
-
-		new frycAPI_Cache("e621_1"),
-		new frycAPI_Cache("e621_2"),
-		new frycAPI_Cache("e621_3"),
-		new frycAPI_Cache("e621_4"),
-		new frycAPI_Cache("e621_5"),
-		new frycAPI_Cache("e621_6"),
-		new frycAPI_Cache("e621_7"),
-		new frycAPI_Cache("e621_8"),
-		new frycAPI_Cache("e621_9"),
-	];
+	// A downloaded copy of a post's file anywhere on G:\, found by Everything (see e621_find in frycAPI-background.js)
+	const find_downloaded = md5 => frycAPI.send_event_to_background("e621Find", md5); // -> { path, folder, size } or null
 
 	frycAPI.inject_style_on_load(/*css*/`
 		*:not(i) {
@@ -11268,13 +11258,13 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			real_button.innerText = "Download";
 			real_button.addEventListener("click", e => {
 				(async () => {
-					const hit = await frycAPI_Cache.find(caches.map(cache => [cache, filename]));
+					const hit = await find_downloaded(filename.split(".")[0]);
 					if (hit) {
-						real_button.setAttribute("title", `To folder: ${hit.cache.get_folder()}`);
+						real_button.setAttribute("title", `To folder: ${hit.folder}`);
 						return;
 					}
-					await frycAPI.download_notify(file_url);
-					real_button.setAttribute("title", `To folder: ${caches[0].get_folder()}`);
+					const saved_as = await frycAPI.download_notify(file_url);
+					if (saved_as) real_button.setAttribute("title", `To folder: ${saved_as.replaceAll("\\", "/").replace(/[^/]*$/, "")}`);
 				})()
 				.then(() => {
 					real_button.innerText = "Downloaded ✅";
@@ -11605,26 +11595,16 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		// 	og_image ??= document.querySelector(`head meta[property="og:image"]`)?.lóg;
 		// }, { elem: document.documentElement });
 
-		const POSSIBLE_EXTS = ["png", "jpg", "webm", "mp4", "jpeg", "gif", "webp"];
-		const POSSIBLE_ENDINGS = ["", " Just Interesting", " Alternate", " doc1"];
 		frycAPI.create_mut_obs(() => {
 			const og_image = document.querySelector(`head meta[property="og:image"]`);
 			if (!og_image) return;
 			const orig_src = og_image.getAttribute("content");
 			const [MD5, ext] = new URL(orig_src).pathname.split("/").pop().split(".");
-			const pairs = [];
 			const t1 = performance.now();
-			for (const ending of POSSIBLE_ENDINGS) {
-				for (const cache of caches) {
-					for (const pos_ext of POSSIBLE_EXTS) {
-						pairs.push([cache, `${MD5}${ending}.${pos_ext}`]);
-					}
-				}
-			}
-			frycAPI_Cache.find(pairs).then(async hit => {
+			find_downloaded(MD5).then(async hit => { // the suffixes and extensions it accepts, in order of preference, are E621_SUFFIXES and E621_EXTENSIONS
 				if (!hit) return;
-				const url = await hit.cache.get_blob_url(hit.file); // post pages have no CSP, see Strip-e621-post-CSP.json
-				console.info(`Showing the cached copy: ${hit.cache.get_folder()}${hit.file}`);
+				const url = URL.createObjectURL(await frycAPI.read_local_blob("e621Read", { path: hit.path })); // post pages have no CSP, see Strip-e621-post-CSP.json
+				console.info(`Showing the cached copy: ${hit.path}`);
 				const t2 = performance.now(); frycAPI.perf(t1, t2);
 				frycAPI.create_mut_obs(() => {
 					const image = document.getElementById("image");

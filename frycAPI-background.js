@@ -134,19 +134,8 @@ async function fetch_public_for_page(url_str, sender) {
 // which let every website read the whole drive and made Chrome start slowly.
 const CACHE_SERVER = "http://127.0.0.1/";
 const CACHE_CHUNK_BYTES = 16 * 1024 * 1024; // one message holds at most 64 MiB of JSON, and base64 grows this by a third
-const E621 = ["e621.net", "e926.net"];
 const CACHES = {
-	arts         : { sites: [...E621, "github.com", "gist.github.com"], folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9EaXNjb3JkIEFSVHMv" },
-	arts_mine    : { sites: E621, folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9EaXNjb3JkIEFSVHMvTWluZUZvbGRlci8=" },
-	e621_1       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS8=" },
-	e621_2       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9KdXN0IEludGVyZXN0aW5nLw==" },
-	e621_3       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9QaW5raWUncyBEaW5nZG9uZy8=" },
-	e621_4       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9GdW5ueS8=" },
-	e621_5       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9VbmV4cGVjdGVkIHRyZWFzdXJlcy8=" },
-	e621_6       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9FbWJlci8=" },
-	e621_7       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9SUCBOaWV3b2xuaWNhLw==" },
-	e621_8       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9lNjIxRG93bmxvYWRlci9HZW5lcmFsIFNlYXJjaGVzL29yZGVyX3Njb3JlIC1hbmltYXRlZCByYXRpbmdfcyBwcmluY2Vzc19jZWxlc3RpYV8obWxwKSBzY29yZV9fPTYzLw==" },
-	e621_9       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9lNjIxRG93bmxvYWRlci9HZW5lcmFsIFNlYXJjaGVzL3ByaW5jZXNzX2x1bmFfKG1scCkgb3JkZXJfc2NvcmUgLXR5cGVfd2VibSByYXRpbmdfc2FmZSAtY292ZXIgc2NvcmVfXz03MC8=" },
+	arts         : { sites: ["github.com", "gist.github.com"], folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9EaXNjb3JkIEFSVHMv" },
 	mechabellum  : { sites: ["wiki.mbxmas.com"], folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9JY29ucy9NZWNoYWJlbGx1bS8=" },
 	forge_precons: { sites: ["archidekt.com"], folder: "TWFnaWMgdGhlIEdhdGhlcmluZy9Gb3JnZS9yZXMvcXVlc3QvcHJlY29ucy8=" },
 };
@@ -178,17 +167,19 @@ async function cache_find(queries, sender) { // [{ cache, file }, ...] -> the in
 		type: index === -1 ? null : responses[index].headers.get("Content-Type"),
 	};
 }
-async function cache_read({ cache, file, start = 0 }, sender) { // One chunk from `start` on, base64, plus the whole file's size
-	const res = await fetch(cache_file_url({ cache, file }, sender), {
+async function read_chunk(url, start) { // One chunk of a file on mc-http-server from `start` on, base64, plus the whole file's size
+	const res = await fetch(url, {
 		credentials: "omit",
+		// Chrome's cache would add If-Range with mc-http-server's weak ETag to every chunk after the first, and a
+		// weak ETag can never satisfy If-Range - so each such chunk came back as the whole file
+		cache: "no-store",
 		headers: { Range: `bytes=${start}-${start + CACHE_CHUNK_BYTES - 1}` },
 	});
-	const folder = cache_folder(cache);
 	const type = res.headers.get("Content-Type") ?? "";
 	if (res.status === 416) { // start is at or past the end: an empty file, or a file that shrank between chunks
-		return { data: "", size: Number(res.headers.get("Content-Range")?.split("/")[1] ?? 0), type, folder };
+		return { data: "", size: Number(res.headers.get("Content-Range")?.split("/")[1] ?? 0), type };
 	}
-	if (!res.ok) throw new Error(`${res.status} ${res.statusText} for "${file}" in cache "${cache}"`);
+	if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${decodeURIComponent(url)}`);
 	let bytes = new Uint8Array(await res.arrayBuffer());
 	let size;
 	if (res.status === 206) {
@@ -197,7 +188,58 @@ async function cache_read({ cache, file, start = 0 }, sender) { // One chunk fro
 		size = bytes.length;
 		bytes = bytes.subarray(start, start + CACHE_CHUNK_BYTES);
 	}
-	return { data: bytes.toBase64(), size, type, folder };
+	return { data: bytes.toBase64(), size, type };
+}
+function cache_read({ cache, file, start = 0 }, sender) {
+	return read_chunk(cache_file_url({ cache, file }, sender), start);
+}
+
+//* e621 and e926: their downloaded posts, found by MD5 anywhere on G:\ through Everything
+// Everything's HTTP server (voidtools; localhost:9191, no login, file download off, its own log off) answers
+// "where is this post's file" in one query, where frycAPI_Cache took 308 HEAD requests per post page - one per
+// suffix x folder x extension - each a line in mc-http-server's logs. The bytes still come from
+// mc-http-server, a request or two per post actually found. These sites may read only files named like a
+// post's file, so the drive's index stays here: the page gets back the one path it asked for, or nothing.
+const EVERYTHING_SERVER = "http://127.0.0.1:9191/";
+const E621_SITES = ["e621.net", "e926.net"];
+const E621_SUFFIXES = ["", " Just Interesting", " Alternate", " doc1"];              // in order of preference
+const E621_EXTENSIONS = ["png", "jpg", "webm", "mp4", "jpeg", "gif", "webp"];         // likewise, after the suffix
+const E621_FILE = new RegExp(`^([0-9a-f]{32})(${E621_SUFFIXES.join("|")})\\.(${E621_EXTENSIONS.join("|")})$`);
+function assert_e621_sender(sender) {
+	const host = sender.origin ? new URL(sender.origin).hostname : null;
+	if (!E621_SITES.includes(host)) throw new Error(`Downloaded e621 posts are not readable from ${host}`);
+}
+async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder: "G:/.../", size } of the preferred copy, or null
+	assert_e621_sender(sender);
+	if (typeof md5 !== "string" || !(/^[0-9a-f]{32}$/).test(md5)) throw new Error(`Not an MD5: ${JSON.stringify(md5)}`);
+	const query = new URLSearchParams({
+		search: `regex:"${E621_FILE.source.replace("[0-9a-f]{32}", md5)}"`,
+		json: 1,
+		path_column: 1,
+		size_column: 1,
+		count: 100,
+	});
+	const res = await fetch(EVERYTHING_SERVER + "?" + query, { credentials: "omit" }).catch(() => {
+		throw new Error(`Everything's HTTP server is not answering at ${EVERYTHING_SERVER}`);
+	});
+	const rank = name => {
+		const [, , suffix, ext] = E621_FILE.exec(name);
+		return E621_SUFFIXES.indexOf(suffix) * E621_EXTENSIONS.length + E621_EXTENSIONS.indexOf(ext);
+	};
+	const [best] = (await res.json()).results
+	.filter(item => item.type === "file" && item.path.startsWith("G:\\") && E621_FILE.test(item.name))
+	.sort((a, b) => rank(a.name) - rank(b.name) || a.path.localeCompare(b.path));
+	if (!best) return null;
+	const folder = best.path.replaceAll("\\", "/") + "/";
+	return { path: folder + best.name, folder, size: Number(best.size) };
+}
+async function e621_read({ path, start = 0 }, sender) { // `path` as e621_find returned it
+	assert_e621_sender(sender);
+	const parts = typeof path === "string" && path.startsWith("G:/") ? path.slice(3).split("/") : [];
+	if (!E621_FILE.test(parts.at(-1) ?? "") || parts.some(part => !part || part === "." || part === ".." || (/[\\:*?"<>|\x00-\x1f]/).test(part))) {
+		throw new Error(`Not the path of a downloaded e621 post: ${JSON.stringify(path)}`);
+	}
+	return read_chunk(CACHE_SERVER + parts.map(encodeURIComponent).join("/"), start);
 }
 function on_tab_closed(tab_id, callback) {
 	const listener = closed_tab_id => {
@@ -255,12 +297,12 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 		};
 		case "unblockImagesOnThisTab": return chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [RULE_ID_BASE + sender.tab.id] });
 		case "downloadURL": return void chrome.downloads.download(data);
-		case "downloadNotify": return new Promise(resolve => {
+		case "downloadNotify": return new Promise(resolve => { // resolves with the full path of the downloaded file
 			let the_id;
 			function on_changed({ id, state }) {
-				if (id === the_id && state?.current !== "in_progress") { // state.current === "interrupted" || state.current === "complete"
+				if (id === the_id && state && state.current !== "in_progress") { // state.current === "interrupted" || state.current === "complete"
 					chrome.downloads.onChanged.removeListener(on_changed);
-					resolve();
+					chrome.downloads.search({ id }).then(([item]) => resolve(item?.filename));
 				}
 			}
 			chrome.downloads.onChanged.addListener(on_changed);
@@ -269,6 +311,8 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 		case "getImgAsDataUrl": return fetch_public_for_page(data, sender).then(res => res.blob()).then(blob_to_base64); // blob_to_base64 already returns the whole data: URL
 		case "cacheFind": return cache_find(data, sender);
 		case "cacheRead": return cache_read(data, sender);
+		case "e621Find": return e621_find(data, sender);
+		case "e621Read": return e621_read(data, sender);
 		case "injectStyle": return sender.tab ? Promise.all([chrome.scripting.removeCSS(css_injection(data, sender)), chrome.scripting.insertCSS(css_injection(data, sender))]) : 0; // deduplicating injections
 		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(css_injection(data, sender)) : 0;
 		case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
