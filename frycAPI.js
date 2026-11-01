@@ -11637,7 +11637,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 					outcome.abort();
 					const t2 = performance.now(); frycAPI.perf(t1, t2);
 					document.title = "Cached - " + document.title;
-					find_downloaded(MD5).then(hit => console.info(`Showing the downloaded copy: ${hit?.path}`));
+					console.info(`Showing the downloaded copy of ${MD5}`); // which file it is, mc-http-server's log says
 				}, { signal: outcome.signal });
 				image.addEventListener("error", () => { // no copy (404), mc-http-server or Everything down, Local Network Access denied, ...
 					outcome.abort(); // the fallback's own load is not the local copy's
