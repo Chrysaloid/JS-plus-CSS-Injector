@@ -409,27 +409,30 @@ chrome.webRequest.onHeadersReceived.addListener(details => {
 }, { urls: ["<all_urls>"] }, ["responseHeaders"]);
 // #endregion
 
-// const INTERESTING_REQUEST_DOMAINS = ["static1.e621.net", "static1.e926.net"];
-// const INTERESTING_DOMAINS = ["e621.net", "e926.net"];
-// chrome.webNavigation.onBeforeNavigate.addListener(async details => {
-// 	log("Before navigate:", details);
-// 	const ruleId = RULE_ID_BASE + details.tabId;
-// 	await chrome.declarativeNetRequest.updateSessionRules({
-// 		removeRuleIds: [ruleId],
-// 		addRules: [{
-// 			id: ruleId,
-// 			priority: 1,
-// 			condition: {
-// 				requestDomains: INTERESTING_REQUEST_DOMAINS,
-// 				resourceTypes: ["image", "media"],
-// 				tabIds: [details.tabId],
-// 			},
-// 			action: { type: "block" },
-// 		}],
-// 	});
-// }, {
-// 	url: INTERESTING_DOMAINS.map(s => ({ hostEquals: s, pathContains: "/posts/" })),
-// });
+// #region //* e621/e926 post pages: no download from static1 for a post that is already on G:\
+// The page's HTML points <img>/<video> at static1 before frycAPI can know there is a local copy, so a tab opening
+// a post blocks static1's full-size files from the start - originals and samples (/data/[sample/]xx/yy/<md5>...),
+// not the /data/preview/ or /data/crop/ thumbnails of other posts ("p" and "r" are no hex digits) - and frycAPI
+// lifts the block (unblockImagesOnThisTab) as soon as Everything says there is no local copy, or anything on the
+// way fails. Any other e621 page in the tab lifts it too. No [0-9a-f]{32} for the MD5 and case-sensitive: with
+// both, Chrome skipped the rule as over the 2 KB a compiled DNR regex may take.
+const E621_POST_PAGE = /^\/posts\/\d+\/?$/;
+const E621_FULL_SIZE = "^https://static1\\.e(621|926)\\.net/data/(sample/)?[0-9a-f][0-9a-f]/[0-9a-f][0-9a-f]/";
+chrome.webNavigation.onBeforeNavigate.addListener(({ tabId, frameId, url }) => {
+	if (frameId !== 0) return;
+	const rule_id = RULE_ID_BASE + tabId;
+	chrome.declarativeNetRequest.updateSessionRules({
+		removeRuleIds: [rule_id],
+		addRules: E621_POST_PAGE.test(new URL(url).pathname) ? [{
+			id: rule_id,
+			priority: 1,
+			condition: { regexFilter: E621_FULL_SIZE, isUrlFilterCaseSensitive: true, resourceTypes: ["image", "media"], tabIds: [tabId] },
+			action: { type: "block" },
+		}] : [],
+	}).catch(err => console.error("Blocking static1 for an e621 post page failed:", err)); // Chrome skips an invalid rule silently otherwise
+}, { url: E621_SITES.map(site => ({ hostSuffix: site })) });
+chrome.tabs.onRemoved.addListener(tab_id => chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [RULE_ID_BASE + tab_id] }));
+// #endregion
 
 /* // For the future if we needed to add repetative declarativeNetRequest rules. It has to be done iside onInstalled
 chrome.runtime.onInstalled.addListener(() => {

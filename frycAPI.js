@@ -11597,6 +11597,18 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 		// 	og_image ??= document.querySelector(`head meta[property="og:image"]`)?.lóg;
 		// }, { elem: document.documentElement });
 
+		// The background blocks static1's full-size files in this tab until we know there is no local copy (see
+		// E621_FULL_SIZE in frycAPI-background.js). The load that block already failed is started again
+		const show_remote = () => frycAPI.unblock_images_on_this_tab().then(() => frycAPI.create_mut_obs(() => {
+			const image = document.getElementById("image");
+			if (!image) return;
+			if (image.tagName === "VIDEO") image.load();
+			else image.src = image.src; // eslint-disable-line no-self-assign
+			return true;
+		}, { elem: document.documentElement }));
+		document.addEventListener("DOMContentLoaded", () => {
+			if (!document.querySelector(`head meta[property="og:image"]`)) show_remote(); // nothing to look up
+		});
 		frycAPI.create_mut_obs(() => {
 			const og_image = document.querySelector(`head meta[property="og:image"]`);
 			if (!og_image) return;
@@ -11604,24 +11616,25 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			const [MD5, ext] = new URL(orig_src).pathname.split("/").pop().split(".");
 			const t1 = performance.now();
 			find_downloaded(MD5).then(async hit => { // the suffixes and extensions it accepts, in order of preference, are E621_SUFFIXES and E621_EXTENSIONS
-				if (!hit) return;
+				if (!hit) return show_remote();
 				const url = await frycAPI.send_event_to_background("e621Grant", hit.path); // one-time http://127.0.0.1 URL; post pages have no CSP, see Strip-e621-post-CSP.json
 				console.info(`Showing the cached copy: ${hit.path}`);
 				const t2 = performance.now(); frycAPI.perf(t1, t2);
 				frycAPI.create_mut_obs(() => {
 					const image = document.getElementById("image");
-					if (!image?.currentSrc) return;
+					if (!image) return;
+					// An image sits in a <picture> whose <source srcset> (static1's webp sample) wins over the <img>'s
+					// src, so those go - again whenever e621 puts them back, e.g. switching between sample and original
+					const holder = image.parentElement;
 					image.removeAttribute("poster");
-					image.src = url;
-					frycAPI.create_mut_obs(() => {
-						if (image.src !== url) image.src = url; // setting it again would only fire this observer again
-					}, { elem: image, options: { childList: false, subtree: false, attributes: true, attributeFilter: ["src"] } });
+					frycAPI.create_mut_obs(() => { // runs at once, then on every change e621 makes
+						if (holder.tagName === "PICTURE") holder.querySelectorAll(":scope > source").forEach(source => source.remove());
+						if (image.getAttribute("src") !== url) image.src = url;
+					}, { elem: holder, options: { childList: true, subtree: true, attributes: true, attributeFilter: ["src", "srcset"] } });
 					document.title = "Cached - " + document.title;
 					return true;
 				}, { elem: document.documentElement });
-			}).catch(() => {}).finally(() => {
-				// frycAPI.unblock_images_on_this_tab();
-			});
+			}).catch(show_remote); // Everything or mc-http-server not answering: e621's own copy after all
 			return true;
 		}, { elem: document.documentElement });
 	} else if (path_name.startsWith("/posts")) {
