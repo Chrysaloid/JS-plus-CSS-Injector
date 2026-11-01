@@ -133,7 +133,9 @@ async function fetch_public_for_page(url_str, sender) {
 // entries. This replaced a second extension loaded from G:\ with web_accessible_resources "*" for <all_urls>,
 // which let every website read the whole drive and made Chrome start slowly.
 const CACHE_SERVER = "http://127.0.0.1/";
-const CACHE_CHUNK_BYTES = 16 * 1024 * 1024; // one message holds at most 64 MiB of JSON, and base64 grows this by a third
+// As big as a message allows, so nearly every file is one message and one mc-http-server request: a message holds at
+// most 64 MiB of JSON, and base64 makes 45 MiB into 60 MiB
+const CACHE_CHUNK_BYTES = 45 * 1024 * 1024;
 const CACHES = {
 	arts         : { sites: ["github.com", "gist.github.com"], folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9EaXNjb3JkIEFSVHMv" },
 	mechabellum  : { sites: ["wiki.mbxmas.com"], folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9JY29ucy9NZWNoYWJlbGx1bS8=" },
