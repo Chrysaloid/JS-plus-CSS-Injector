@@ -243,11 +243,13 @@ async function main(frycAPI0) {
 		});
 	});
 
-	async function wait_for_special_keys(e) {
+	async function wait_for_special_keys(e) { // Folder paths on G:\ in the clipboard (one per line, as Explorer's "Copy as path" gives them) -> CACHES entries for frycAPI-background.js
 		if (e.code === "F4" && e.altKey && e.ctrlKey && e.shiftKey) {
 			const clip = await navigator.clipboard.readText();
-			navigator.clipboard.writeText(clip.split("\n").map(s => s.trim()).filter(s => s).map(s => {
-				return `const ${s.split("/").pop().replaceAll(/[^a-zA-Z0-9_]/g, "")} = new frycAPI_Cache("${btoa_utf8(s)}");`;
+			navigator.clipboard.writeText(clip.split("\n").map(s => s.trim().replace(/^"(.*)"$/, "$1")).filter(s => s).map(s => {
+				const folder = s.replaceAll("\\", "/").replace(/^(G:|chrome-extension:\/\/[a-p]{32})\//i, "").replace(/\/?$/, "/");
+				const name = folder.split("/").at(-2).toLowerCase().replaceAll(/[^a-z0-9_]/g, "_");
+				return `${name}: { sites: [], folder: "${btoa_utf8(folder)}" },`;
 			}).join("\n"));
 			// document.removeEventListener("keydown", wait_for_special_keys);
 			// loguj("Test");

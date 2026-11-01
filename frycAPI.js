@@ -463,27 +463,45 @@ class frycAPI_Mutation_observer extends MutationObserver {
 		return this;
 	}
 }
-class frycAPI_Cache {
-	path;
-	constructor(cache_id) {
-		this.path = frycAPI.atob_utf8(cache_id); // eslint-disable-line no-use-before-define
+class frycAPI_Cache { // A folder on G:\ named in CACHES in frycAPI-background.js, read through the background from mc-http-server
+	// The background decides which sites may read which cache, so a page script - which shares this world - can read
+	// no more than frycAPI can. Files arrive as bytes, not URLs: no site's CSP admits http://127.0.0.1, and e621's
+	// admits neither blob: nor, for media, data:
+	name;
+	folder = null; // "G:/.../", known once the background has answered for this cache
+	constructor(name) {
+		this.name = name;
 	}
 	get_folder() {
-		return this.path.replace(/chrome-extension:\/\/.+?\//, "G:/");
+		return this.folder;
 	}
-	get_file_url(name) {
-		return this.path + name;
+	static async find(pairs) { // [[cache, file], ...] -> { cache, file, size, type } of the first pair in list order whose file exists, or null
+		const { index, folders, size, type } = await frycAPI.send_event_to_background("cacheFind", pairs.map(([cache, file]) => ({ cache: cache.name, file }))); // eslint-disable-line no-use-before-define
+		for (const [cache] of pairs) cache.folder = folders[cache.name];
+		return index === -1 ? null : { cache: pairs[index][0], file: pairs[index][1], size, type };
 	}
-	async file_exists(name) {
-		try {
-			const response = await fetch(this.get_file_url(name), { method: "HEAD" });
-			return response.ok;
-		} catch {
-			return false;
+	async file_exists(file) {
+		return (await frycAPI_Cache.find([[this, file]])) !== null;
+	}
+	async read_blob(file) { // In chunks, since one message holds at most 64 MiB of JSON
+		const parts = [];
+		let size = Infinity, type = "";
+		for (let start = 0; start < size;) {
+			const chunk = await frycAPI.send_event_to_background("cacheRead", { cache: this.name, file, start }); // eslint-disable-line no-use-before-define
+			({ size, type } = chunk);
+			this.folder = chunk.folder;
+			const bytes = Uint8Array.fromBase64(chunk.data);
+			if (!bytes.length) break;
+			parts.push(bytes);
+			start += bytes.length;
 		}
+		return new Blob(parts, { type });
 	}
-	file_exists_promise(name) {
-		return fetch(this.get_file_url(name), { method: "HEAD" });
+	async read_text(file) {
+		return (await this.read_blob(file)).text();
+	}
+	async get_data_url(file) {
+		return frycAPI.blob_to_base64(await this.read_blob(file)); // eslint-disable-line no-use-before-define
 	}
 }
 function loguj(...tekst) {
@@ -10817,18 +10835,18 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 
 	const path_name = frycAPI.path;
 	const caches = [
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvRGlzY29yZCBBUlRzLw=="),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvRGlzY29yZCBBUlRzL01pbmVGb2xkZXIv"),
+		new frycAPI_Cache("arts"),
+		new frycAPI_Cache("arts_mine"),
 
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUv"),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvSnVzdCBJbnRlcmVzdGluZy8="),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvUGlua2llJ3MgRGluZ2Rvbmcv"),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvRnVubnkv"),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvVW5leHBlY3RlZCB0cmVhc3VyZXMv"),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvRW1iZXIv"),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvUlAgTmlld29sbmljYS8="),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvZTYyMURvd25sb2FkZXIvR2VuZXJhbCBTZWFyY2hlcy9vcmRlcl9zY29yZSAtYW5pbWF0ZWQgcmF0aW5nX3MgcHJpbmNlc3NfY2VsZXN0aWFfKG1scCkgc2NvcmVfXz02My8="),
-		new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoLyFQb2RyxJljem55L05ldmVyIG1pbmQvY29uZmlnIGZpbGVzLyFkb2MxL01pbmUvZTYyMURvd25sb2FkZXIvR2VuZXJhbCBTZWFyY2hlcy9wcmluY2Vzc19sdW5hXyhtbHApIG9yZGVyX3Njb3JlIC10eXBlX3dlYm0gcmF0aW5nX3NhZmUgLWNvdmVyIHNjb3JlX189NzAv"),
+		new frycAPI_Cache("e621_1"),
+		new frycAPI_Cache("e621_2"),
+		new frycAPI_Cache("e621_3"),
+		new frycAPI_Cache("e621_4"),
+		new frycAPI_Cache("e621_5"),
+		new frycAPI_Cache("e621_6"),
+		new frycAPI_Cache("e621_7"),
+		new frycAPI_Cache("e621_8"),
+		new frycAPI_Cache("e621_9"),
 	];
 
 	frycAPI.inject_style_on_load(/*css*/`
@@ -11247,11 +11265,10 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			real_button.innerText = "Download";
 			real_button.addEventListener("click", e => {
 				(async () => {
-					for (const cache of caches) {
-						if (await cache.file_exists(filename)) {
-							real_button.setAttribute("title", `To folder: ${cache.get_folder()}`);
-							return;
-						}
+					const hit = await frycAPI_Cache.find(caches.map(cache => [cache, filename]));
+					if (hit) {
+						real_button.setAttribute("title", `To folder: ${hit.cache.get_folder()}`);
+						return;
 					}
 					await frycAPI.download_notify(file_url);
 					real_button.setAttribute("title", `To folder: ${caches[0].get_folder()}`);
@@ -11592,26 +11609,30 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			if (!og_image) return;
 			const orig_src = og_image.getAttribute("content");
 			const [MD5, ext] = new URL(orig_src).pathname.split("/").pop().split(".");
-			const checks = [];
+			const pairs = [];
 			const t1 = performance.now();
 			for (const ending of POSSIBLE_ENDINGS) {
 				for (const cache of caches) {
 					for (const pos_ext of POSSIBLE_EXTS) {
-						const filename = `${MD5}${ending}.${pos_ext}`;
-						checks.push(cache.file_exists_promise(filename));
+						pairs.push([cache, `${MD5}${ending}.${pos_ext}`]);
 					}
 				}
 			}
-			Promise.any(checks).then(response => {
-				if (!response.ok) return;
+			frycAPI_Cache.find(pairs).then(async hit => {
+				if (!hit) return;
+				if (!hit.type.startsWith("image/")) { // e621's CSP media-src admits neither blob: nor data:
+					console.info(`Cached copy not shown, e621's CSP blocks local video: ${hit.cache.get_folder()}${hit.file}`);
+					return;
+				}
+				const url = await hit.cache.get_data_url(hit.file);
 				const t2 = performance.now(); frycAPI.perf(t1, t2);
 				frycAPI.create_mut_obs(() => {
 					const image = document.getElementById("image");
 					if (!image?.currentSrc) return;
 					image.removeAttribute("poster");
-					image.src = response.url;
+					image.src = url;
 					frycAPI.create_mut_obs(() => {
-						image.src = response.url;
+						if (image.src !== url) image.src = url; // setting a multi-MB data: URL again would only fire this observer again
 					}, { elem: image, options: { childList: false, subtree: false, attributes: true, attributeFilter: ["src"] } });
 					document.title = "Cached - " + document.title;
 					return true;
@@ -11973,7 +11994,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	`);
 } else if (frycAPI_host("github.com", "gist.github.com")) {
 	frycAPI.line = frycAPI.get_line_number();
-	const arts = new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvRGlzY29yZCBBUlRzLw==");
+	const arts = new frycAPI_Cache("arts");
+	arts.get_data_url("Nick dragon profile.png").then(url => frycAPI.inject_style(frycAPI.get_avatar_replacement_css_on_github("Michal-Roman0", url)));
 	frycAPI.inject_style_on_load(/*css*/`
 		* {
 			tab-size: 3 !important;
@@ -12033,7 +12055,6 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 				transparent calc(100% - var(--off-set))
 			);
 		}
-		${frycAPI.get_avatar_replacement_css_on_github("Michal-Roman0", arts.get_file_url("Nick dragon profile.png"))}
 		/* Indentation lines attempt
 		.react-file-line.html-div {
 			--initial-color: hsl(0, 0%, 30%);
@@ -13920,13 +13941,15 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 		}
 	`);
 
-	const mechabellum = new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL0JpYmxpb3Rla2kgV2luZG93cy9PYnJhenkvSWNvbnMvTWVjaGFiZWxsdW0v");
+	const mechabellum = new frycAPI_Cache("mechabellum");
+	const dps_badge = mechabellum.get_data_url("badge_red.webp");
 
 	frycAPI.on_load_setter(function () {
 		const panel = frycAPI.q_sel(`.bevel-panel-content.stats-panel`);
 		if (!panel) return;
 		const dps_row = panel.appendChild(panel.last_el.cloneNode(1));
-		dps_row.querySelector(`img`).frycAPI_set_attribute_bulk("src", mechabellum.get_file_url("badge_red.webp"), "alt", "DPS");
+		const dps_img = dps_row.querySelector(`img`).frycAPI_set_attribute_bulk("src", "", "alt", "DPS");
+		dps_badge.then(url => dps_img.setAttribute("src", url));
 		dps_row.querySelector(`.stat-label`).innerText = "DPS";
 		dps_row.querySelector(`.stat-value`).innerText = (parseFloat(panel.querySelector(`[alt="ATK"] ~ .stat-value`).innerText) / parseFloat(panel.querySelector(`[alt="Attack Interval"] ~ .stat-value`).innerText)).toFixed(1);
 	});
@@ -14195,7 +14218,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 	frycAPI.on_load_setter(function () {
 	});
 
-	const precons = new frycAPI_Cache("Y2hyb21lLWV4dGVuc2lvbjovL29wa2Rib21kZnBmam5mZmxrYmthamRsYWxha2VrYWFoL01hZ2ljIHRoZSBHYXRoZXJpbmcvRm9yZ2UvcmVzL3F1ZXN0L3ByZWNvbnMv");
+	const precons = new frycAPI_Cache("forge_precons");
 
 	frycAPI.create_manual_functions("Archidekt", {
 		func_arr: [
@@ -14210,7 +14233,7 @@ else if (1 && frycAPI_host("knucklecracker.com")) {
 					f.state = deck_name;
 					const result = f.func_group.func_arr[f.num + 1];
 					if (await precons.file_exists(deck_name + ".dck")) {
-						const deck_content = (await frycAPI.read_file(precons.get_file_url(deck_name + ".dck"), "txt")).toLowerCase();
+						const deck_content = (await precons.read_text(deck_name + ".dck")).toLowerCase();
 						let local_cards = deck_content.extract_after("[commander]");
 						local_cards ||= deck_content.extract_after("[main]");
 						local_cards = local_cards

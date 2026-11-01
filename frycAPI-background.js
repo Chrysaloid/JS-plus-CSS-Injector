@@ -95,13 +95,13 @@ function blob_to_base64(blob) {
 // or the router, or the user's logged-in mail. A host NAME that resolves to a private address
 // cannot be caught here; mc-http-server refuses foreign Host headers for that reason.
 function is_local_ipv4([a, b]) {
-	return a === 0 || a === 10 || a === 127 || a >= 224
-		|| a === 25                                // Hamachi
-		|| (a === 100 && b >= 64 && b <= 127)      // CGNAT
-		|| (a === 169 && b === 254)
-		|| (a === 172 && b >= 16 && b <= 31)
-		|| (a === 192 && (b === 168 || b === 0))
-		|| (a === 198 && (b === 18 || b === 19));
+	return a === 0 || a === 10 || a === 127 || a >= 224 ||
+		a === 25 ||                                // Hamachi
+		(a === 100 && b >= 64 && b <= 127) ||      // CGNAT
+		(a === 169 && b === 254) ||
+		(a === 172 && b >= 16 && b <= 31) ||
+		(a === 192 && (b === 168 || b === 0)) ||
+		(a === 198 && (b === 18 || b === 19));
 }
 function is_local_host(hostname) {
 	const host = hostname.toLowerCase().replace(/\.$/, "");
@@ -109,9 +109,9 @@ function is_local_host(hostname) {
 		const first = parseInt(host.slice(1).split(":")[0] || "0", 16);
 		return !(first >= 0x2000 && first <= 0x3fff) || first === 0x2002; // only global unicast, minus 6to4
 	}
-	const v4 = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(host); // URL has already turned 127.1, 0x7f.1, 2130706433 into this
+	const v4 = (/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/).exec(host); // URL has already turned 127.1, 0x7f.1, 2130706433 into this
 	if (v4) return is_local_ipv4(v4.slice(1).map(Number));
-	return !host.includes(".") || /(^|\.)(localhost|local|lan|home|internal|intranet|corp|home\.arpa)$/.test(host);
+	return !host.includes(".") || (/(^|\.)(localhost|local|lan|home|internal|intranet|corp|home\.arpa)$/).test(host);
 }
 function assert_public_url(url) {
 	if (!["http:", "https:"].includes(url.protocol) || is_local_host(url.hostname)) {
@@ -125,6 +125,79 @@ async function fetch_public_for_page(url_str, sender) {
 	const res = await fetch(url, { credentials: url.origin === sender.origin ? "include" : "omit" });
 	assert_public_url(new URL(res.url)); // a public address may redirect into the LAN; the request went, the bytes stay here
 	return res;
+}
+//* frycAPI_Cache: folders on G:\, read through mc-http-server, each only from the sites listed for it
+// The page names a cache and a file; the folder never comes from the page, so a page script, which shares
+// frycAPI's world, reaches nothing frycAPI does not. `folder` is the path under G:\ in base64 - kept out of
+// plain sight in the public repo, nothing more. Ctrl+Alt+Shift+F4 in the popup turns copied folder paths into
+// entries. This replaced a second extension loaded from G:\ with web_accessible_resources "*" for <all_urls>,
+// which let every website read the whole drive and made Chrome start slowly.
+const CACHE_SERVER = "http://127.0.0.1/";
+const CACHE_CHUNK_BYTES = 16 * 1024 * 1024; // one message holds at most 64 MiB of JSON, and base64 grows this by a third
+const E621 = ["e621.net", "e926.net"];
+const CACHES = {
+	arts         : { sites: [...E621, "github.com", "gist.github.com"], folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9EaXNjb3JkIEFSVHMv" },
+	arts_mine    : { sites: E621, folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9EaXNjb3JkIEFSVHMvTWluZUZvbGRlci8=" },
+	e621_1       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS8=" },
+	e621_2       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9KdXN0IEludGVyZXN0aW5nLw==" },
+	e621_3       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9QaW5raWUncyBEaW5nZG9uZy8=" },
+	e621_4       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9GdW5ueS8=" },
+	e621_5       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9VbmV4cGVjdGVkIHRyZWFzdXJlcy8=" },
+	e621_6       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9FbWJlci8=" },
+	e621_7       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9SUCBOaWV3b2xuaWNhLw==" },
+	e621_8       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9lNjIxRG93bmxvYWRlci9HZW5lcmFsIFNlYXJjaGVzL29yZGVyX3Njb3JlIC1hbmltYXRlZCByYXRpbmdfcyBwcmluY2Vzc19jZWxlc3RpYV8obWxwKSBzY29yZV9fPTYzLw==" },
+	e621_9       : { sites: E621, folder: "IVBvZHLEmWN6bnkvTmV2ZXIgbWluZC9jb25maWcgZmlsZXMvIWRvYzEvTWluZS9lNjIxRG93bmxvYWRlci9HZW5lcmFsIFNlYXJjaGVzL3ByaW5jZXNzX2x1bmFfKG1scCkgb3JkZXJfc2NvcmUgLXR5cGVfd2VibSByYXRpbmdfc2FmZSAtY292ZXIgc2NvcmVfXz03MC8=" },
+	mechabellum  : { sites: ["wiki.mbxmas.com"], folder: "QmlibGlvdGVraSBXaW5kb3dzL09icmF6eS9JY29ucy9NZWNoYWJlbGx1bS8=" },
+	forge_precons: { sites: ["archidekt.com"], folder: "TWFnaWMgdGhlIEdhdGhlcmluZy9Gb3JnZS9yZXMvcXVlc3QvcHJlY29ucy8=" },
+};
+for (const cache of Object.values(CACHES)) {
+	cache.path = new TextDecoder().decode(Uint8Array.fromBase64(cache.folder)); // "Biblioteki Windows/Obrazy/.../", always ending in "/"
+}
+function cache_file_url({ cache: name, file }, sender) {
+	const cache = Object.hasOwn(CACHES, name) ? CACHES[name] : null;
+	if (!cache) throw new Error(`There is no cache named "${name}"`);
+	const host = sender.origin ? new URL(sender.origin).hostname : null;
+	if (!cache.sites.includes(host)) throw new Error(`Cache "${name}" is not readable from ${host}`);
+	if (typeof file !== "string" || !file || file === "." || file === ".." || file.length > 255 || (/[\\/:*?"<>|\x00-\x1f]/).test(file)) {
+		throw new Error(`Not a plain file name: ${JSON.stringify(file)}`);
+	}
+	return CACHE_SERVER + cache.path.split("/").map(encodeURIComponent).join("/") + encodeURIComponent(file);
+}
+function cache_folder(name) {
+	return "G:/" + CACHES[name].path;
+}
+async function cache_find(queries, sender) { // [{ cache, file }, ...] -> the index of the first that exists (-1 if none) and every queried cache's folder
+	const urls = queries.map(query => cache_file_url(query, sender)); // all checked before anything is fetched
+	const responses = await Promise.all(urls.map(url => fetch(url, { method: "HEAD", credentials: "omit" }).catch(() => undefined)));
+	if (responses.length && responses.every(res => res === undefined)) throw new Error(`mc-http-server is not answering at ${CACHE_SERVER}`);
+	const index = responses.findIndex(res => res?.ok);
+	return {
+		index,
+		folders: Object.fromEntries(queries.map(({ cache }) => [cache, cache_folder(cache)])),
+		size: index === -1 ? null : Number(responses[index].headers.get("Content-Length")),
+		type: index === -1 ? null : responses[index].headers.get("Content-Type"),
+	};
+}
+async function cache_read({ cache, file, start = 0 }, sender) { // One chunk from `start` on, base64, plus the whole file's size
+	const res = await fetch(cache_file_url({ cache, file }, sender), {
+		credentials: "omit",
+		headers: { Range: `bytes=${start}-${start + CACHE_CHUNK_BYTES - 1}` },
+	});
+	const folder = cache_folder(cache);
+	const type = res.headers.get("Content-Type") ?? "";
+	if (res.status === 416) { // start is at or past the end: an empty file, or a file that shrank between chunks
+		return { data: "", size: Number(res.headers.get("Content-Range")?.split("/")[1] ?? 0), type, folder };
+	}
+	if (!res.ok) throw new Error(`${res.status} ${res.statusText} for "${file}" in cache "${cache}"`);
+	let bytes = new Uint8Array(await res.arrayBuffer());
+	let size;
+	if (res.status === 206) {
+		size = Number(res.headers.get("Content-Range").split("/")[1]);
+	} else { // the server sent the whole file regardless
+		size = bytes.length;
+		bytes = bytes.subarray(start, start + CACHE_CHUNK_BYTES);
+	}
+	return { data: bytes.toBase64(), size, type, folder };
 }
 function on_tab_closed(tab_id, callback) {
 	const listener = closed_tab_id => {
@@ -194,6 +267,8 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 			chrome.downloads.download(data).then(id => { the_id = id });
 		});
 		case "getImgAsDataUrl": return fetch_public_for_page(data, sender).then(res => res.blob()).then(blob_to_base64); // blob_to_base64 already returns the whole data: URL
+		case "cacheFind": return cache_find(data, sender);
+		case "cacheRead": return cache_read(data, sender);
 		case "injectStyle": return sender.tab ? Promise.all([chrome.scripting.removeCSS(css_injection(data, sender)), chrome.scripting.insertCSS(css_injection(data, sender))]) : 0; // deduplicating injections
 		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(css_injection(data, sender)) : 0;
 		case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {
