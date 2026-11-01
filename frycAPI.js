@@ -10839,8 +10839,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	const POOL_TILE_DESC = `section.posts-container article`;
 
 	const path_name = frycAPI.path;
-	// A downloaded copy of a post's file anywhere on G:\, found by Everything - not counting readchan's timestamped
-	// copies, which are other versions of the picture (see e621_find in frycAPI-background.js)
+	// A downloaded copy of a post's file anywhere on G:\, found by Everything (see e621_find in frycAPI-background.js)
 	const find_downloaded = md5 => frycAPI.send_event_to_background("e621Find", md5); // -> { path, folder, size } or null
 
 	frycAPI.inject_style_on_load(/*css*/`

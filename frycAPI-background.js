@@ -207,9 +207,8 @@ function cache_read({ cache, file, start = 0 }, sender) {
 // What counts as a post's copy, best first - checked against every name on G:\ holding 32 hex digits, 2026-11-01:
 //   1. "<md5><suffix>.<ext>", by E621_SUFFIXES, then E621_EXTENSIONS; a copy under a folder named Edit after all
 //      others - those hold my edits under the original name.
-//   2. Only for showing it, and only when there is no 1: "<number> <md5>.<ext>", the readchan app's
-//      "<post time in µs> <original name>", whose original name was often the post's MD5. They are other versions of
-//      the picture - both with a post-named twin differed in size - so the download button ignores them.
+//   2. Only when there is no 1: "<number> <md5>.<ext>", the readchan app's "<post time in µs> <original name>" -
+//      usually the very file I downloaded through readchan, whose original name was the post's MD5.
 // A bare MD5 anywhere in a name would also find my edits ("<md5> edit.png", "<md5>-cut.png") and ~49 000 caches.
 const EVERYTHING_SERVER = "http://127.0.0.1:9191/";
 const E621_SITES = ["e621.net", "e926.net"];
@@ -222,7 +221,7 @@ function assert_e621_sender(sender) {
 	const host = sender.origin ? new URL(sender.origin).hostname : null;
 	if (!E621_SITES.includes(host)) throw new Error(`Downloaded e621 posts are not readable from ${host}`);
 }
-async function e621_find(md5, sender, last_resort = false) { // -> { path: "G:/.../<md5>.png", folder: "G:/.../", size } of the best copy, or null
+async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder: "G:/.../", size } of the best copy, or null
 	assert_e621_sender(sender);
 	if (typeof md5 !== "string" || !(/^[0-9a-f]{32}$/).test(md5)) throw new Error(`Not an MD5: ${JSON.stringify(md5)}`);
 	const query = new URLSearchParams({
@@ -242,8 +241,7 @@ async function e621_find(md5, sender, last_resort = false) { // -> { path: "G:/.
 		const [, timestamp, , suffix, ext] = file.exec(item.name);
 		const in_edit = item.path.toLowerCase().split("\\").includes("edit");
 		return { item, rank: [timestamp ? 1 : 0, in_edit ? 1 : 0, E621_SUFFIXES.indexOf(suffix), E621_EXTENSIONS.indexOf(ext)] };
-	})
-	.filter(({ rank }) => last_resort || rank[0] === 0);
+	});
 	const by_rank = (a, b) => a.rank.reduce((diff, value, i) => diff || value - b.rank[i], 0) || a.item.path.localeCompare(b.item.path);
 	const best = candidates.sort(by_rank)[0]?.item;
 	if (!best) return null;
@@ -251,7 +249,7 @@ async function e621_find(md5, sender, last_resort = false) { // -> { path: "G:/.
 	return { path: folder + best.name, folder, size: Number(best.size) };
 }
 async function e621_grant(md5, sender) { // -> e621_find's answer plus `url`, a one-time http://127.0.0.1/api/granted/... URL the page loads directly, so a video streams and seeks; or null
-	const hit = await e621_find(md5, sender, true);
+	const hit = await e621_find(md5, sender);
 	if (!hit) return null;
 	const res = await fetch(CACHE_SERVER + "api/grant", {
 		method: "POST",
