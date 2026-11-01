@@ -199,9 +199,11 @@ function cache_read({ cache, file, start = 0 }, sender) {
 //* e621 and e926: their downloaded posts, found by MD5 anywhere on G:\ through Everything
 // Everything's HTTP server (voidtools; localhost:9191, no login, file download off, its own log off) answers
 // "where is this post's file" in one query, where frycAPI_Cache took 308 HEAD requests per post page - one per
-// suffix x folder x extension - each a line in mc-http-server's logs. The bytes still come from
-// mc-http-server, a request or two per post actually found. These sites may read only files named like a
-// post's file, so the drive's index stays here: the page gets back the one path it asked for, or nothing.
+// suffix x folder x extension - each a line in mc-http-server's logs. The file itself the page loads from a
+// one-time mc-http-server URL (e621Grant): measured 2026-11-01, a 27 MB PNG was ready in ~150 ms against ~650 ms
+// as base64 chunks through messages, and a 54 MB video showed its first frame in 26 ms against ~1.1 s. These
+// sites may get only files named like a post's file, so the drive's index stays here: the page gets back the one
+// path it asked for, or nothing.
 const EVERYTHING_SERVER = "http://127.0.0.1:9191/";
 const E621_SITES = ["e621.net", "e926.net"];
 const E621_SUFFIXES = ["", " Just Interesting", " Alternate", " doc1"];              // in order of preference
@@ -235,13 +237,25 @@ async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder
 	const folder = best.path.replaceAll("\\", "/") + "/";
 	return { path: folder + best.name, folder, size: Number(best.size) };
 }
-async function e621_read({ path, start = 0 }, sender) { // `path` as e621_find returned it
+function e621_path_parts(path, sender) { // `path` as e621_find returned it -> its parts under G:\, or throws
 	assert_e621_sender(sender);
 	const parts = typeof path === "string" && path.startsWith("G:/") ? path.slice(3).split("/") : [];
 	if (!E621_FILE.test(parts.at(-1) ?? "") || parts.some(part => !part || part === "." || part === ".." || (/[\\:*?"<>|\x00-\x1f]/).test(part))) {
 		throw new Error(`Not the path of a downloaded e621 post: ${JSON.stringify(path)}`);
 	}
-	return read_chunk(CACHE_SERVER + parts.map(encodeURIComponent).join("/"), start);
+	return parts;
+}
+async function e621_grant(path, sender) { // -> a one-time http://127.0.0.1/api/granted/... URL the page loads directly, so a video streams and seeks
+	e621_path_parts(path, sender);
+	const res = await fetch(CACHE_SERVER + "api/grant", {
+		method: "POST",
+		credentials: "omit",
+		cache: "no-store",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ path }),
+	});
+	if (!res.ok) throw new Error(`mc-http-server refused a grant for ${path}: ${res.status} ${(await res.text()).trim()}`);
+	return new URL((await res.json()).url, CACHE_SERVER).href;
 }
 function on_tab_closed(tab_id, callback) {
 	const listener = closed_tab_id => {
@@ -314,7 +328,7 @@ chrome.runtime.onMessageExternal.addListener(function ({ name, data }, sender, s
 		case "cacheFind": return cache_find(data, sender);
 		case "cacheRead": return cache_read(data, sender);
 		case "e621Find": return e621_find(data, sender);
-		case "e621Read": return e621_read(data, sender);
+		case "e621Grant": return e621_grant(data, sender);
 		case "injectStyle": return sender.tab ? Promise.all([chrome.scripting.removeCSS(css_injection(data, sender)), chrome.scripting.insertCSS(css_injection(data, sender))]) : 0; // deduplicating injections
 		case "removeStyle": return sender.tab ? chrome.scripting.removeCSS(css_injection(data, sender)) : 0;
 		case "setStorage": return chrome.storage.sync.get(data.UUID).then(result => {

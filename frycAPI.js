@@ -1591,7 +1591,7 @@ var frycAPI = { // eslint-disable-line no-var
 			};
 		});
 	}, // .then(frycAPI.blob_to_base64)
-	async read_local_blob(event_name, data) { // A file the background reads off mc-http-server ("cacheRead", "e621Read"), in chunks, since one message holds at most 64 MiB of JSON
+	async read_local_blob(event_name, data) { // A file the background reads off mc-http-server (so far "cacheRead"), in chunks, since one message holds at most 64 MiB of JSON
 		const parts = [];
 		let size = Infinity, type = "";
 		for (let start = 0; start < size;) {
@@ -11605,7 +11605,7 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			const t1 = performance.now();
 			find_downloaded(MD5).then(async hit => { // the suffixes and extensions it accepts, in order of preference, are E621_SUFFIXES and E621_EXTENSIONS
 				if (!hit) return;
-				const url = URL.createObjectURL(await frycAPI.read_local_blob("e621Read", { path: hit.path })); // post pages have no CSP, see Strip-e621-post-CSP.json
+				const url = await frycAPI.send_event_to_background("e621Grant", hit.path); // one-time http://127.0.0.1 URL; post pages have no CSP, see Strip-e621-post-CSP.json
 				console.info(`Showing the cached copy: ${hit.path}`);
 				const t2 = performance.now(); frycAPI.perf(t1, t2);
 				frycAPI.create_mut_obs(() => {
