@@ -201,23 +201,32 @@ function cache_read({ cache, file, start = 0 }, sender) {
 // "where is this post's file" in one query, where frycAPI_Cache took 308 HEAD requests per post page - one per
 // suffix x folder x extension - each a line in mc-http-server's logs. The file itself the page loads from a
 // one-time mc-http-server URL (e621Grant): measured 2026-11-01, a 27 MB PNG was ready in ~150 ms against ~650 ms
-// as base64 chunks through messages, and a 54 MB video showed its first frame in 26 ms against ~1.1 s. These
-// sites may get only files named like a post's file, so the drive's index stays here: the page gets back the one
-// path it asked for, or nothing.
+// as base64 chunks through messages, and a 54 MB video showed its first frame in 26 ms against ~1.1 s. The page
+// sends only the MD5, so it can name no file of its own choosing; it gets back the path of the post's copy.
+//
+// What counts as a post's copy, best first - checked against every name on G:\ holding 32 hex digits, 2026-11-01:
+//   1. "<md5><suffix>.<ext>", by E621_SUFFIXES, then E621_EXTENSIONS; a copy under a folder named Edit after all
+//      others - those hold my edits under the original name.
+//   2. Only for showing it, and only when there is no 1: "<number> <md5>.<ext>", the readchan app's
+//      "<post time in µs> <original name>", whose original name was often the post's MD5. They are other versions of
+//      the picture - both with a post-named twin differed in size - so the download button ignores them.
+// A bare MD5 anywhere in a name would also find my edits ("<md5> edit.png", "<md5>-cut.png") and ~49 000 caches.
 const EVERYTHING_SERVER = "http://127.0.0.1:9191/";
 const E621_SITES = ["e621.net", "e926.net"];
 const E621_SUFFIXES = ["", " Just Interesting", " Alternate", " doc1"];              // in order of preference
 const E621_EXTENSIONS = ["png", "jpg", "webm", "mp4", "jpeg", "gif", "webp"];         // likewise, after the suffix
-const E621_FILE = new RegExp(`^([0-9a-f]{32})(${E621_SUFFIXES.join("|")})\\.(${E621_EXTENSIONS.join("|")})$`);
+function e621_file_regex(md5) { // groups: timestamp prefix, md5, suffix, extension
+	return `^([0-9]+ )?(${md5})(${E621_SUFFIXES.join("|")})\\.(${E621_EXTENSIONS.join("|")})$`;
+}
 function assert_e621_sender(sender) {
 	const host = sender.origin ? new URL(sender.origin).hostname : null;
 	if (!E621_SITES.includes(host)) throw new Error(`Downloaded e621 posts are not readable from ${host}`);
 }
-async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder: "G:/.../", size } of the preferred copy, or null
+async function e621_find(md5, sender, last_resort = false) { // -> { path: "G:/.../<md5>.png", folder: "G:/.../", size } of the best copy, or null
 	assert_e621_sender(sender);
 	if (typeof md5 !== "string" || !(/^[0-9a-f]{32}$/).test(md5)) throw new Error(`Not an MD5: ${JSON.stringify(md5)}`);
 	const query = new URLSearchParams({
-		search: `regex:"${E621_FILE.source.replace("[0-9a-f]{32}", md5)}"`,
+		search: `G:\\ regex:"${e621_file_regex(md5)}"`,
 		json: 1,
 		path_column: 1,
 		size_column: 1,
@@ -226,36 +235,33 @@ async function e621_find(md5, sender) { // -> { path: "G:/.../<md5>.png", folder
 	const res = await fetch(EVERYTHING_SERVER + "?" + query, { credentials: "omit" }).catch(() => {
 		throw new Error(`Everything's HTTP server is not answering at ${EVERYTHING_SERVER}`);
 	});
-	const rank = name => {
-		const [, , suffix, ext] = E621_FILE.exec(name);
-		return E621_SUFFIXES.indexOf(suffix) * E621_EXTENSIONS.length + E621_EXTENSIONS.indexOf(ext);
-	};
-	const [best] = (await res.json()).results
-	.filter(item => item.type === "file" && item.path.startsWith("G:\\") && E621_FILE.test(item.name))
-	.sort((a, b) => rank(a.name) - rank(b.name) || a.path.localeCompare(b.path));
+	const file = new RegExp(e621_file_regex(md5));
+	const candidates = (await res.json()).results
+	.filter(item => item.type === "file" && item.path.startsWith("G:\\") && file.test(item.name))
+	.map(item => {
+		const [, timestamp, , suffix, ext] = file.exec(item.name);
+		const in_edit = item.path.toLowerCase().split("\\").includes("edit");
+		return { item, rank: [timestamp ? 1 : 0, in_edit ? 1 : 0, E621_SUFFIXES.indexOf(suffix), E621_EXTENSIONS.indexOf(ext)] };
+	})
+	.filter(({ rank }) => last_resort || rank[0] === 0);
+	const by_rank = (a, b) => a.rank.reduce((diff, value, i) => diff || value - b.rank[i], 0) || a.item.path.localeCompare(b.item.path);
+	const best = candidates.sort(by_rank)[0]?.item;
 	if (!best) return null;
 	const folder = best.path.replaceAll("\\", "/") + "/";
 	return { path: folder + best.name, folder, size: Number(best.size) };
 }
-function e621_path_parts(path, sender) { // `path` as e621_find returned it -> its parts under G:\, or throws
-	assert_e621_sender(sender);
-	const parts = typeof path === "string" && path.startsWith("G:/") ? path.slice(3).split("/") : [];
-	if (!E621_FILE.test(parts.at(-1) ?? "") || parts.some(part => !part || part === "." || part === ".." || (/[\\:*?"<>|\x00-\x1f]/).test(part))) {
-		throw new Error(`Not the path of a downloaded e621 post: ${JSON.stringify(path)}`);
-	}
-	return parts;
-}
-async function e621_grant(path, sender) { // -> a one-time http://127.0.0.1/api/granted/... URL the page loads directly, so a video streams and seeks
-	e621_path_parts(path, sender);
+async function e621_grant(md5, sender) { // -> e621_find's answer plus `url`, a one-time http://127.0.0.1/api/granted/... URL the page loads directly, so a video streams and seeks; or null
+	const hit = await e621_find(md5, sender, true);
+	if (!hit) return null;
 	const res = await fetch(CACHE_SERVER + "api/grant", {
 		method: "POST",
 		credentials: "omit",
 		cache: "no-store",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ path }),
+		body: JSON.stringify({ path: hit.path }),
 	});
-	if (!res.ok) throw new Error(`mc-http-server refused a grant for ${path}: ${res.status} ${(await res.text()).trim()}`);
-	return new URL((await res.json()).url, CACHE_SERVER).href;
+	if (!res.ok) throw new Error(`mc-http-server refused a grant for ${hit.path}: ${res.status} ${(await res.text()).trim()}`);
+	return { ...hit, url: new URL((await res.json()).url, CACHE_SERVER).href };
 }
 function on_tab_closed(tab_id, callback) {
 	const listener = closed_tab_id => {

@@ -10839,7 +10839,8 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 	const POOL_TILE_DESC = `section.posts-container article`;
 
 	const path_name = frycAPI.path;
-	// A downloaded copy of a post's file anywhere on G:\, found by Everything (see e621_find in frycAPI-background.js)
+	// A downloaded copy of a post's file anywhere on G:\, found by Everything - not counting readchan's timestamped
+	// copies, which are other versions of the picture (see e621_find in frycAPI-background.js)
 	const find_downloaded = md5 => frycAPI.send_event_to_background("e621Find", md5); // -> { path, folder, size } or null
 
 	frycAPI.inject_style_on_load(/*css*/`
@@ -11615,10 +11616,12 @@ else if (frycAPI_host("www.fakrosno.pl")) {
 			const orig_src = og_image.getAttribute("content");
 			const [MD5, ext] = new URL(orig_src).pathname.split("/").pop().split(".");
 			const t1 = performance.now();
-			find_downloaded(MD5).then(async hit => { // the suffixes and extensions it accepts, in order of preference, are E621_SUFFIXES and E621_EXTENSIONS
+			// The best copy on G:\ and a one-time http://127.0.0.1 URL to it, or null - which copies count, and in which
+			// order, see e621_find in frycAPI-background.js. Post pages have no CSP, see Strip-e621-post-CSP.json
+			frycAPI.send_event_to_background("e621Grant", MD5).then(async hit => {
 				if (!hit) return show_remote();
-				const url = await frycAPI.send_event_to_background("e621Grant", hit.path); // one-time http://127.0.0.1 URL; post pages have no CSP, see Strip-e621-post-CSP.json
-				console.info(`Showing the cached copy: ${hit.path}`);
+				const url = hit.url;
+				console.info(`Showing the downloaded copy: ${hit.path}`);
 				const t2 = performance.now(); frycAPI.perf(t1, t2);
 				frycAPI.create_mut_obs(() => {
 					const image = document.getElementById("image");
