@@ -217,7 +217,7 @@ frycAPI_expand_prototype(Array, "min", function (getter = a => a) {
 		}
 	}
 	return val;
-});
+}, false, false, false, !frycAPI_host("www.moxgate.com"));
 frycAPI_expand_prototype(Array, "max", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
@@ -229,7 +229,7 @@ frycAPI_expand_prototype(Array, "max", function (getter = a => a) {
 		}
 	}
 	return val;
-});
+}, false, false, false, !frycAPI_host("www.moxgate.com"));
 frycAPI_expand_prototype(Array, "min_elem", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
@@ -244,7 +244,7 @@ frycAPI_expand_prototype(Array, "min_elem", function (getter = a => a) {
 		}
 	}
 	return el;
-});
+}, false, false, false, !frycAPI_host("www.moxgate.com"));
 frycAPI_expand_prototype(Array, "max_elem", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
@@ -259,7 +259,7 @@ frycAPI_expand_prototype(Array, "max_elem", function (getter = a => a) {
 		}
 	}
 	return el;
-});
+}, false, false, false, !frycAPI_host("www.moxgate.com"));
 frycAPI_expand_prototype(Array, "last", function () {
 	return this[this.length - 1];
 }, true, true, true, !frycAPI_host("steamcommunity.com"));
