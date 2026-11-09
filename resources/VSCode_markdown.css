@@ -1,10 +1,25 @@
 /* custom css START */
-p {
-	margin-bottom: 10px;
-}
+/*
+My Markdown style for VS Code, and the one place to change it: patch_vscode_files.py injects this file into the preview
+(markdown-language-features/media/markdown.css) and, followed by VSCode_markdown_editor.css, into the Markdown Editor
+(markdown-editor-out/editor.css). The variables below serve both; the rules after them are the preview's.
+The three --markdown-* variables are the ones both read for their font; set here on <body>, they override
+markdown.preview.fontFamily, fontSize and lineHeight, which the preview puts on <html>.
+*/
 body {
+	--markdown-font-family: 'IBM Plex Sans Condensed', -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+	--markdown-font-size: 16px;
+	--markdown-line-height: 1.4;
+	--my_markdown_max_width: 800px; /* Of the text column, padding not included */
+	--my_markdown_paragraph_spacing: 10px;
+}
+/* The preview: only its <body> has the class vscode-body */
+body.vscode-body {
 	/* color: green; */
-	max-width: 800px;
+	max-width: var(--my_markdown_max_width);
 	margin: 0 auto;
+}
+.vscode-body p {
+	margin-bottom: var(--my_markdown_paragraph_spacing);
 }
 /* custom css END */
