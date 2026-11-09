@@ -394,6 +394,41 @@ chrome.webNavigation.onBeforeNavigate.addListener(({ tabId, frameId, url }) => {
 chrome.tabs.onRemoved.addListener(tab_id => chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [RULE_ID_BASE + tab_id] }));
 // #endregion
 
+// #region //* Reusing a local dev server's tab: <url>#reuse_tab
+// A launcher that opens <url>#reuse_tab in the default browser (WashPoint's my_scripts/_main_launcher.ps1, once its dev
+// server listens) does not want another tab: the tab already on the same port of a local address - the most recently used
+// one, also when it shows Chrome's error page after the server went down - is reloaded on <url>'s origin with the path it
+// had, brought to the front, and the new tab closes. With no such tab the new one stays, without the marker. Fragments are
+// invisible to webNavigation's URL filters, so the marker is checked here.
+const REUSE_TAB_MARKER = "#reuse_tab";
+const LOCAL_HOST = /^(?:localhost|127\.\d+\.\d+\.\d+|\[::1\]|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)$/;
+function same_local_server(url, wanted) {
+	let parsed;
+	try {
+		parsed = new URL(url);
+	} catch {
+		return false;
+	}
+	return parsed.protocol === wanted.protocol && parsed.port === wanted.port && LOCAL_HOST.test(parsed.hostname);
+}
+async function reuse_tab(new_tab_id, url) {
+	const wanted = new URL(url.slice(0, -REUSE_TAB_MARKER.length));
+	const candidates = (await chrome.tabs.query({})).filter(tab => tab.id !== new_tab_id && same_local_server(tab.url, wanted));
+	if (!candidates.length) return void await chrome.tabs.update(new_tab_id, { url: wanted.href });
+	const existing = candidates.sort((first, second) => (second.lastAccessed ?? 0) - (first.lastAccessed ?? 0))[0];
+	const old_url = new URL(existing.url);
+	const reused = new URL(old_url.pathname + old_url.search + old_url.hash, wanted.origin).href;
+	await chrome.tabs.remove(new_tab_id);
+	if (reused === existing.url) await chrome.tabs.reload(existing.id);
+	await chrome.tabs.update(existing.id, reused === existing.url ? { active: true } : { url: reused, active: true });
+	await chrome.windows.update(existing.windowId, { focused: true });
+}
+chrome.webNavigation.onBeforeNavigate.addListener(({ tabId, frameId, url }) => {
+	if (frameId !== 0 || !url.endsWith(REUSE_TAB_MARKER)) return;
+	reuse_tab(tabId, url).catch(err => console.error("Reusing a tab for", url, "failed:", err));
+});
+// #endregion
+
 /* // For the future if we needed to add repetative declarativeNetRequest rules. It has to be done iside onInstalled
 chrome.runtime.onInstalled.addListener(() => {
 	chrome.declarativeNetRequest.getDynamicRules().then(oldRules => {
