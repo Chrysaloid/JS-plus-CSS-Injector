@@ -84,7 +84,7 @@ frycAPI_expand_prototype(String, "frycAPI_includes_any", function (...str_list) 
 	return false;
 });
 
-const frycAPI_object_condition = !(frycAPI_host("www.youtube.com", "www.desmos.com", "studio.youtube.com") || frycAPI_host_includes("googlesource.com"));
+const frycAPI_object_condition = !(frycAPI_host("www.youtube.com", "www.desmos.com", "studio.youtube.com", "music.youtube.com") || frycAPI_host_includes("googlesource.com"));
 frycAPI_expand_prototype(Object, "lóg", function () {
 	console.log(this);
 	return this;
