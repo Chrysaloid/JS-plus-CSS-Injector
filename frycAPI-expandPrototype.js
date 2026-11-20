@@ -206,7 +206,9 @@ frycAPI_expand_prototype(Array, "frycAPI_run", function (...args) {
 frycAPI_expand_prototype(Array, "frycAPI_run_return", function (...args) {
 	return this.map(fun => fun(...args));
 });
-frycAPI_expand_prototype(Array, "min", function (getter = a => a) {
+// Not "min"/"max": colorjs.io reads `range.min ?? 0` on plain [min, max] arrays, and a function there
+// breaks every page that bundles it (e.g. the Inkeep widget on zod.dev: No color space found with id = "oklch")
+frycAPI_expand_prototype(Array, "frycAPI_min", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
 	let val = getter(this[0]);
@@ -218,7 +220,7 @@ frycAPI_expand_prototype(Array, "min", function (getter = a => a) {
 	}
 	return val;
 }, false, false, false, !frycAPI_host("www.moxgate.com"));
-frycAPI_expand_prototype(Array, "max", function (getter = a => a) {
+frycAPI_expand_prototype(Array, "frycAPI_max", function (getter = a => a) {
 	const len = this.length;
 	if (!len) return null;
 	let val = getter(this[0]);
