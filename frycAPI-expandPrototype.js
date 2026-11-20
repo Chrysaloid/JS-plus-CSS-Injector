@@ -128,8 +128,8 @@ frycAPI_expand_prototype(String, "extract_after", function (sub_str = "\x00") {
 	"toSorted",
 	"toSpliced",
 	"with",
-].forEach(str => {
-	frycAPI_expand_prototype(String, str, Array.prototype[str]);
+].forEach(str => { // Prefixed: a string with its own .map/.forEach looks like an array to libraries that duck-type
+	frycAPI_expand_prototype(String, `frycAPI_${str}`, Array.prototype[str]);
 });
 
 frycAPI_expand_prototype(Array, "frycAPI_shuffle", function () {
@@ -262,9 +262,9 @@ frycAPI_expand_prototype(Array, "max_elem", function (getter = a => a) {
 	}
 	return el;
 }, false, false, false, !frycAPI_host("www.moxgate.com"));
-frycAPI_expand_prototype(Array, "last", function () {
+frycAPI_expand_prototype(Array, "frycAPI_last", function () {
 	return this[this.length - 1];
-}, true, true, true, !frycAPI_host("steamcommunity.com"));
+}, true, true, true);
 
 frycAPI_expand_prototype(EventTarget, "frycAPI_add_event_listener", function (listener_type, callback) {
 	this.addEventListener(listener_type, callback);
@@ -512,7 +512,7 @@ frycAPI_expand_prototype(Number, "frycAPI_lt", function (num) {
 frycAPI_expand_prototype(Number, "frycAPI_le", function (num) {
 	return this <= num;
 });
-frycAPI_expand_prototype(Number, "hex", function (num) {
+frycAPI_expand_prototype(Number, "frycAPI_hex", function (num) {
 	return this.toString(16).padStart(2, "0");
 }, true);
 

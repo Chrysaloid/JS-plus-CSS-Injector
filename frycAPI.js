@@ -1949,7 +1949,7 @@ var frycAPI = { // eslint-disable-line no-var
 		const vowels = "aąeęioóuy-";
 		str = str.split(" ").map(word => word.trim()).filter(word => word.length).map(word => {
 			const word_lower = word.toLowerCase();
-			const pos_of_first_vowel = Math.min(...vowels.map(l => {
+			const pos_of_first_vowel = Math.min(...vowels.frycAPI_map(l => {
 				const idx = word_lower.indexOf(l);
 				return idx !== -1 ? idx : Infinity;
 			}));
@@ -1959,7 +1959,7 @@ var frycAPI = { // eslint-disable-line no-var
 			};
 		});
 		let out = "";
-		consonants.forEach(c => {
+		consonants.frycAPI_forEach(c => {
 			out += str.map(obj => (obj.case ? c.toUpperCase() : c) + obj.word).join(" ") + "\n";
 		});
 		loguj(out);
@@ -2140,7 +2140,7 @@ var frycAPI = { // eslint-disable-line no-var
 			lightness /= 100;
 			for (let i = 0; i < num_colors; i++) {
 				const [r, g, b] = frycAPI.hsl_to_rgb(i / num_colors, saturation, lightness);
-				color_arr.push(`#${r.hex}${g.hex}${b.hex}`);
+				color_arr.push(`#${r.frycAPI_hex}${g.frycAPI_hex}${b.frycAPI_hex}`);
 			}
 		} else {
 			throw new Error(`Invalid return_format: ${return_format}`);
@@ -2219,7 +2219,7 @@ var frycAPI = { // eslint-disable-line no-var
 		return [r, g, b];
 	}, // const [r, g, b] = frycAPI.hex_to_rgb("#123456");
 	rgb_to_hex(r, g, b) {
-		return `#${r.hex}${g.hex}${b.hex}`;
+		return `#${r.frycAPI_hex}${g.frycAPI_hex}${b.frycAPI_hex}`;
 	}, // const hex = frycAPI.rgb_to_hex(1, 2, 3);
 	get_good_text_color(background_color, color_format = "hex") { // see https://math.hws.edu/graphicsbook/demos/c2/rgb-hsv.html for good example usage
 		let r, g, b;
@@ -4654,7 +4654,7 @@ if (1 && frycAPI_host("192.168.0.1", "192.168.1.1")) {
 		if (!container?.is_descendant_of(document.body)) return; // case of container removal
 		if (!document.body.classList.contains("table-of-prompts")) return;
 		const new_prompts = get_all_prompts();
-		if (last_prompts.length === new_prompts.length && last_prompts.last.prompt === new_prompts.last.prompt) return;
+		if (last_prompts.length === new_prompts.length && last_prompts.frycAPI_last.prompt === new_prompts.frycAPI_last.prompt) return;
 		last_prompts = new_prompts;
 
 		prompt_elems.forEach(el => el.remove());
